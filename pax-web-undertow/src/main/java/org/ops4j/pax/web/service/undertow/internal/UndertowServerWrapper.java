@@ -1100,18 +1100,22 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 				// check pending removals
 				List<ElementModel<?, ?>> toRemove = delayedRemovals.get(contextPath);
 				DeploymentManager manager = getDeploymentManager(contextPath);
-				if (toRemove != null && manager != null) {
+				if (toRemove != null) {
 					for (Iterator<ElementModel<?, ?>> iterator = toRemove.iterator(); iterator.hasNext(); ) {
 						ElementModel<?, ?> model = iterator.next();
 						if (model instanceof ServletModel) {
 							removeServletModel(contextPath, ((ServletModel) model), null);
 						} else if (model instanceof EventListenerModel) {
-							DeploymentInfo deploymentInfo = manager.getDeployment().getDeploymentInfo();
-							Deployment deployment = manager.getDeployment();
-							stopUndertowContext(contextPath, manager, deploymentInfo, false);
-
-							removeEventListenerModel(deploymentInfo, (EventListenerModel) model,
-									((EventListenerModel) model).getResolvedListener());
+							if (manager != null) {
+								DeploymentInfo deploymentInfo = manager.getDeployment().getDeploymentInfo();
+								Deployment deployment = manager.getDeployment();
+								stopUndertowContext(contextPath, manager, deploymentInfo, false);
+								removeEventListenerModel(deploymentInfo, (EventListenerModel) model,
+										((EventListenerModel) model).getResolvedListener());
+							} else if (deploymentInfos.containsKey(contextPath)) {
+								removeEventListenerModel(deploymentInfos.get(contextPath), (EventListenerModel) model,
+										((EventListenerModel) model).getResolvedListener());
+							}
 						}
 						iterator.remove();
 					}
@@ -1131,6 +1135,11 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 		String contextPath = model.getContextPath();
 
 		if (change.getKind() == OpCode.ADD) {
+			if (deploymentInfos.containsKey(contextPath)) {
+				// quiet return, because of how ServletContextModels for WABs are created.
+				return;
+			}
+
 			LOG.info("Creating new Undertow context for {}", model);
 
 			// meta info about "servlet context deployment"
@@ -1208,6 +1217,13 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 			rankedListeners.put(contextPath, new TreeMap<>());
 			orderedListeners.put(contextPath, new ArrayList<>());
 		} else if (change.getKind() == OpCode.DELETE) {
+			OsgiContextModel highestRankedModel = Utils.getHighestRankedModel(osgiContextModels.get(contextPath));
+			if (highestRankedModel != null) {
+				// there are still OsgiContextModel(s) for given ServletContextModel, so maybe after uninstallation
+				// of a WAB, HttpService-based web apps have to stay running?
+				return;
+			}
+
 			orderedListeners.remove(contextPath);
 			rankedListeners.remove(contextPath);
 
@@ -1297,6 +1313,8 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 			osgiContextModels.add(osgiModel);
 		}
 
+		boolean hasStopped = false;
+
 		if (change.getKind() == OpCode.DELETE) {
 			LOG.info("Removing {} from {}", osgiModel, contextPath);
 
@@ -1309,10 +1327,13 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 			PaxWebOuterHandlerWrapper wrapper = wrappingHandlers.get(contextPath);
 			if (wrapper != null) {
 				OsgiServletContext currentHighestRankedContext = wrapper.getDefaultServletContext();
-				if (currentHighestRankedContext == removedOsgiServletContext) {
+				if (currentHighestRankedContext == removedOsgiServletContext || pendingTransaction(contextPath)) {
 					// we have to stop the context - it'll be started later
 					DeploymentManager manager = getDeploymentManager(contextPath);
-					stopUndertowContext(contextPath, manager, null, false);
+					if (manager != null) {
+						stopUndertowContext(contextPath, manager, null, false);
+						hasStopped = true;
+					}
 					if (wrappingHandlers.containsKey(contextPath)) {
 						wrappingHandlers.get(contextPath).setDefaultServletContext(null);
 					}
@@ -1345,6 +1366,16 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 					}
 				});
 
+				if (!hasStopped) {
+					// we have to stop the context - because its OsgiContextModel has changed, so we may
+					// have to reconfigure e.g., virtual hosts
+					DeploymentManager manager = getDeploymentManager(contextPath);
+					if (manager != null) {
+						stopUndertowContext(contextPath, manager, null, false);
+						hasStopped = true;
+					}
+				}
+
 				// and the highest ranked context should be registered as OSGi service (if it wasn't registered)
 				highestRankedContext.register();
 			}
@@ -1355,6 +1386,14 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 					if (((PaxWebServletInfo) defaultServlet).is404()) {
 						((PaxWebServletInfo) defaultServlet).setOsgiContextModel(highestRankedModel);
 					}
+				}
+			}
+
+			if (hasStopped) {
+				if (pendingTransaction(contextPath)) {
+					change.registerBatchCompletedAction(new ContextStartChange(OpCode.MODIFY, contextPath));
+				} else {
+					ensureServletContextStarted(contextPath);
 				}
 			}
 		} else {
@@ -1641,24 +1680,26 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 		DeploymentInfo deploymentInfo = deployment == null ? deploymentInfos.get(contextPath)
 				: deployment.getDeploymentInfo();
 
-		if (change != null && !change.isDynamic()) {
+		if (change == null || !change.isDynamic()) {
 			stopUndertowContext(contextPath, manager, deploymentInfo, false);
 		}
 
 		// but we can reuse the deployment info - this is the only object from which we can remove
 		// servlets
-		deploymentInfo.getServlets().remove(model.getName());
-		if (Arrays.asList(model.getUrlPatterns()).contains("/")) {
-			// we need to replace "/" servlet
-			PaxWebServletInfo defaultServletInfo = new PaxWebServletInfo("default", default404Servlet, true);
-			deploymentInfo.addServlet(defaultServletInfo.addMapping("/"));
+		if (deploymentInfo != null) {
+			deploymentInfo.getServlets().remove(model.getName());
+			if (Arrays.asList(model.getUrlPatterns()).contains("/")) {
+				// we need to replace "/" servlet
+				PaxWebServletInfo defaultServletInfo = new PaxWebServletInfo("default", default404Servlet, true);
+				deploymentInfo.addServlet(defaultServletInfo.addMapping("/"));
+			}
 		}
 
 		// are there any error page declarations in the model?
 		// we'll be redeploying the deployment info, so we don't have to change error pages
 		// in existing (the one being undeployed) deployment
 		ErrorPageModel epm = model.getErrorPageModel();
-		if (epm != null) {
+		if (epm != null && deploymentInfo != null) {
 			String location = epm.getLocation();
 			FlexibleErrorPages currentState = errorPages.computeIfAbsent(contextPath, cp -> new FlexibleErrorPages());
 			for (String ex : epm.getExceptionClassNames()) {
@@ -1693,7 +1734,7 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 					.forEach((e, l) -> deploymentInfo.addErrorPage(new ErrorPage(location, e)));
 		}
 
-		if (change != null && !change.isDynamic()) {
+		if (change == null || !change.isDynamic()) {
 			ensureServletContextStarted(contextPath);
 		}
 	}

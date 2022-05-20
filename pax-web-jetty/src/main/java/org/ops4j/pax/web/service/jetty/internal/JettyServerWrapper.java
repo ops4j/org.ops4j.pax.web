@@ -748,6 +748,11 @@ class JettyServerWrapper implements BatchVisitor {
 		String contextPath = model.getContextPath();
 
 		if (change.getKind() == OpCode.ADD) {
+			if (contextHandlers.containsKey(contextPath)) {
+				// quiet return, because of how ServletContextModels for WABs are created.
+				return;
+			}
+
 			LOG.info("Creating new Jetty context for {}", model);
 
 			PaxWebServletContextHandler sch = new PaxWebServletContextHandler(null, contextPath, configuration);
@@ -824,6 +829,13 @@ class JettyServerWrapper implements BatchVisitor {
 
 			// do NOT start the context here - only after registering first "active" web element
 		} else if (change.getKind() == OpCode.DELETE) {
+			OsgiContextModel highestRankedModel = Utils.getHighestRankedModel(osgiContextModels.get(contextPath));
+			if (highestRankedModel != null) {
+				// there are still OsgiContextModel(s) for given ServletContextModel, so maybe after uninstallation
+				// of a WAB, HttpService-based web apps have to stay running?
+				return;
+			}
+
 			dynamicRegistrations.remove(contextPath);
 			initializers.remove(contextPath);
 			osgiContextModels.remove(contextPath);
@@ -859,7 +871,7 @@ class JettyServerWrapper implements BatchVisitor {
 		ServletContextModel servletContextModel = change.getServletContextModel();
 
 		String contextPath = osgiModel.getContextPath();
-		ServletContextHandler sch = contextHandlers.get(contextPath);
+		PaxWebServletContextHandler sch = contextHandlers.get(contextPath);
 
 		if (sch == null) {
 			// by optimizing the process and assuming that removal of last OsgiContextModel for a context
@@ -920,6 +932,8 @@ class JettyServerWrapper implements BatchVisitor {
 			osgiContextModels.get(contextPath).add(osgiModel);
 		}
 
+		boolean hasStopped = false;
+
 		if (change.getKind() == OpCode.DELETE) {
 			LOG.info("Removing {} from {}", osgiModel, sch);
 
@@ -930,17 +944,20 @@ class JettyServerWrapper implements BatchVisitor {
 			removedOsgiServletContext.releaseWebContainerContext();
 
 			OsgiServletContext currentHighestRankedContext = ((PaxWebServletHandler) sch.getServletHandler()).getDefaultServletContext();
-			if (currentHighestRankedContext == removedOsgiServletContext) {
+			if (currentHighestRankedContext == removedOsgiServletContext || pendingTransaction(contextPath)) {
 				// we have to stop the context - it'll be started later
-				LOG.info("Stopping Jetty context \"{}\"", contextPath);
-				try {
-					sch.stop();
-					// clear the OSGi context + model - it'll be calculated to next higher ranked ones few lines later
-					((PaxWebServletHandler) sch.getServletHandler()).setDefaultOsgiContextModel(null, null);
-					((PaxWebServletHandler) sch.getServletHandler()).setDefaultServletContext(null);
-				} catch (Exception e) {
-					LOG.warn("Error stopping Jetty context \"{}\": {}", contextPath, e.getMessage(), e);
+				if (sch.isStarted()) {
+					LOG.info("Stopping Jetty context \"{}\"", contextPath);
+					try {
+						sch.stop();
+						hasStopped = true;
+					} catch (Exception e) {
+						LOG.warn("Error stopping Jetty context \"{}\": {}", contextPath, e.getMessage(), e);
+					}
 				}
+				// clear the OSGi context + model - it'll be calculated to next higher ranked ones few lines later
+				((PaxWebServletHandler) sch.getServletHandler()).setDefaultOsgiContextModel(null, null);
+				((PaxWebServletHandler) sch.getServletHandler()).setDefaultServletContext(null);
 			}
 		}
 
@@ -962,8 +979,28 @@ class JettyServerWrapper implements BatchVisitor {
 					}
 				});
 
+				if (!hasStopped && sch.isStarted()) {
+					// we have to stop the context - because its OsgiContextModel has changed, so we may
+					// have to reconfigure e.g., virtual hosts
+					LOG.info("Stopping Jetty context \"{}\"", contextPath);
+					try {
+						sch.stop();
+						hasStopped = true;
+					} catch (Exception e) {
+						LOG.warn("Error stopping Jetty context \"{}\": {}", contextPath, e.getMessage(), e);
+					}
+				}
+
 				// and the highest ranked context should be registered as OSGi service (if it wasn't registered)
 				highestRankedContext.register();
+			}
+
+			if (hasStopped) {
+				if (pendingTransaction(contextPath)) {
+					change.registerBatchCompletedAction(new ContextStartChange(OpCode.MODIFY, contextPath));
+				} else {
+					ensureServletContextStarted(sch);
+				}
 			}
 		} else {
 			((PaxWebServletHandler) sch.getServletHandler()).setDefaultOsgiContextModel(null, null);
@@ -1657,7 +1694,7 @@ class JettyServerWrapper implements BatchVisitor {
 				OsgiServletContext osgiServletContext = osgiServletContexts.get(context);
 				ServletContextHandler servletContextHandler = contextHandlers.get(context.getContextPath());
 
-				if (osgiServletContext == null) {
+				if (osgiServletContext == null || servletContextHandler == null) {
 					// may happen when cleaning things out
 					return;
 				}
@@ -1687,22 +1724,25 @@ class JettyServerWrapper implements BatchVisitor {
 				LOG.info("Reconfiguration of welcome files for all resource servlets in context \"{}\"", context);
 
 				// reconfigure welcome files in resource servlets without reinitialization (Pax Web 8 change)
-				for (ServletHolder sh : servletContextHandler.getServletHandler().getServlets()) {
-					PaxWebServletHolder pwsh = (PaxWebServletHolder) sh;
-					// reconfigure the servlet ONLY if its holder uses given OsgiContextModel
-					if (pwsh.getServletModel() != null && pwsh.getServletModel().isResourceServlet()
-							&& context == pwsh.getOsgiContextModel()) {
-						try {
-							Servlet servlet = sh.getServlet();
-							if (servlet instanceof JettyResourceServlet) {
-								((JettyResourceServlet) servlet).setWelcomeFiles(newWelcomeFiles);
-								((JettyResourceServlet) servlet).setWelcomeFilesRedirect(model.isRedirect());
-							} else if (servlet instanceof OsgiInitializedServlet) {
-								((JettyResourceServlet) ((OsgiInitializedServlet) servlet).getDelegate()).setWelcomeFiles(newWelcomeFiles);
-								((JettyResourceServlet) ((OsgiInitializedServlet) servlet).getDelegate()).setWelcomeFilesRedirect(model.isRedirect());
+				if (servletContextHandler.getServletHandler() != null
+						&& servletContextHandler.getServletHandler().getServlets() != null) {
+					for (ServletHolder sh : servletContextHandler.getServletHandler().getServlets()) {
+						PaxWebServletHolder pwsh = (PaxWebServletHolder) sh;
+						// reconfigure the servlet ONLY if its holder uses given OsgiContextModel
+						if (pwsh.getServletModel() != null && pwsh.getServletModel().isResourceServlet()
+								&& context == pwsh.getOsgiContextModel()) {
+							try {
+								Servlet servlet = sh.getServlet();
+								if (servlet instanceof JettyResourceServlet) {
+									((JettyResourceServlet) servlet).setWelcomeFiles(newWelcomeFiles);
+									((JettyResourceServlet) servlet).setWelcomeFilesRedirect(model.isRedirect());
+								} else if (servlet instanceof OsgiInitializedServlet) {
+									((JettyResourceServlet) ((OsgiInitializedServlet) servlet).getDelegate()).setWelcomeFiles(newWelcomeFiles);
+									((JettyResourceServlet) ((OsgiInitializedServlet) servlet).getDelegate()).setWelcomeFilesRedirect(model.isRedirect());
+								}
+							} catch (Exception e) {
+								LOG.warn("Problem reconfiguring welcome files in servlet {}", sh, e);
 							}
-						} catch (Exception e) {
-							LOG.warn("Problem reconfiguring welcome files in servlet {}", sh, e);
 						}
 					}
 				}

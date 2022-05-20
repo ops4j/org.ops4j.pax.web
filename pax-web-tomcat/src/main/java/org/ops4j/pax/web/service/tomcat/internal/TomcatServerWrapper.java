@@ -754,6 +754,11 @@ class TomcatServerWrapper implements BatchVisitor {
 		String contextPath = model.getContextPath();
 
 		if (change.getKind() == OpCode.ADD) {
+			if (contextHandlers.containsKey(contextPath)) {
+				// quiet return, because of how ServletContextModels for WABs are created.
+				return;
+			}
+
 			LOG.info("Creating new Tomcat context for {}", model);
 
 //							Context ctx = new HttpServiceContext(getHost(), accessControllerContext);
@@ -828,6 +833,13 @@ class TomcatServerWrapper implements BatchVisitor {
 			initializers.put(contextPath, new TreeSet<>());
 			dynamicRegistrations.put(contextPath, new DynamicRegistrations());
 		} else if (change.getKind() == OpCode.DELETE) {
+			OsgiContextModel highestRankedModel = Utils.getHighestRankedModel(osgiContextModels.get(contextPath));
+			if (highestRankedModel != null) {
+				// there are still OsgiContextModel(s) for given ServletContextModel, so maybe after uninstallation
+				// of a WAB, HttpService-based web apps have to stay running?
+				return;
+			}
+
 			dynamicRegistrations.remove(contextPath);
 			initializers.remove(contextPath);
 			osgiContextModels.remove(contextPath);
@@ -916,6 +928,8 @@ class TomcatServerWrapper implements BatchVisitor {
 			configurationListeners.put(osgiModel, new OsgiContextConfiguration(osgiModel, configuration, tomcatFactory));
 		}
 
+		boolean hasStopped = false;
+
 		if (change.getKind() == OpCode.DELETE) {
 			LOG.info("Removing {} from {}", osgiModel, realContext);
 
@@ -926,19 +940,22 @@ class TomcatServerWrapper implements BatchVisitor {
 			removedOsgiServletContext.releaseWebContainerContext();
 
 			OsgiServletContext currentHighestRankedContext = realContext.getDefaultServletContext();
-			if (currentHighestRankedContext == removedOsgiServletContext) {
+			if (currentHighestRankedContext == removedOsgiServletContext || pendingTransaction(contextPath)) {
 				// we have to stop the context - it'll be started later
-				LOG.info("Stopping Tomcat context \"{}\"", contextPath);
-				try {
-					if (realContext.isStarted()) {
-						realContext.stop();
+				if (realContext.isStarted()) {
+					LOG.info("Stopping Tomcat context \"{}\"", contextPath);
+					try {
+						if (realContext.isStarted()) {
+							realContext.stop();
+							hasStopped = true;
+						}
+					} catch (Exception e) {
+						LOG.warn("Error stopping Tomcat context \"{}\": {}", contextPath, e.getMessage(), e);
 					}
-					// clear the OSGi context + model - it'll be calculated to next higher ranked ones few lines later
-					realContext.setDefaultOsgiContextModel(null, null);
-					realContext.setDefaultServletContext(null);
-				} catch (Exception e) {
-					LOG.warn("Error stopping Tomcat context \"{}\": {}", contextPath, e.getMessage(), e);
 				}
+				// clear the OSGi context + model - it'll be calculated to next higher ranked ones few lines later
+				realContext.setDefaultOsgiContextModel(null, null);
+				realContext.setDefaultServletContext(null);
 			}
 
 			configurationListeners.remove(osgiModel);
@@ -962,8 +979,30 @@ class TomcatServerWrapper implements BatchVisitor {
 					}
 				});
 
+				if (!hasStopped && realContext.isStarted()) {
+					// we have to stop the context - because its OsgiContextModel has changed, so we may
+					// have to reconfigure e.g., virtual hosts
+					LOG.info("Stopping Tomcat context \"{}\"", contextPath);
+					try {
+						if (realContext.isStarted()) {
+							realContext.stop();
+							hasStopped = true;
+						}
+					} catch (Exception e) {
+						LOG.warn("Error stopping Tomcat context \"{}\": {}", contextPath, e.getMessage(), e);
+					}
+				}
+
 				// and the highest ranked context should be registered as OSGi service (if it wasn't registered)
 				highestRankedContext.register();
+			}
+
+			if (hasStopped) {
+				if (pendingTransaction(contextPath)) {
+					change.registerBatchCompletedAction(new ContextStartChange(OpCode.MODIFY, contextPath));
+				} else {
+					ensureServletContextStarted(realContext);
+				}
 			}
 		} else {
 			realContext.setDefaultOsgiContextModel(null, null);
@@ -1504,7 +1543,7 @@ class TomcatServerWrapper implements BatchVisitor {
 				OsgiServletContext osgiServletContext = osgiServletContexts.get(context);
 				PaxWebStandardContext realContext = contextHandlers.get(context.getContextPath());
 
-				if (osgiServletContext == null) {
+				if (osgiServletContext == null || realContext == null) {
 					// may happen when cleaning things out
 					return;
 				}

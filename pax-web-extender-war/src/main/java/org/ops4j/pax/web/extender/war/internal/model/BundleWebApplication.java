@@ -94,6 +94,7 @@ import org.ops4j.pax.web.service.spi.model.views.WebAppWebContainerView;
 import org.ops4j.pax.web.service.spi.servlet.DefaultSessionCookieConfig;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContextClassLoader;
 import org.ops4j.pax.web.service.spi.task.Batch;
+import org.ops4j.pax.web.service.spi.task.Change;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.service.spi.util.WebContainerManager;
 import org.ops4j.pax.web.utils.ClassPathUtil;
@@ -791,6 +792,17 @@ public class BundleWebApplication {
 			// 2. free the context
 			releaseContext(view, true);
 			extenderContext.sendWebEvent(new WebApplicationEvent(WebApplicationEvent.State.UNDEPLOYED, bundle, contextPath, null));
+
+			Batch toSchedule = new Batch("After undeployment of \"" + this.contextPath + "\"");
+			for (Change c : uninstall.getOperations()) {
+				if (c.getBatchCompletedAction() != null) {
+					toSchedule.getOperations().add(c.getBatchCompletedAction());
+				}
+			}
+			if (!toSchedule.getOperations().isEmpty()) {
+				LOG.info("Scheduling {}", toSchedule);
+				view.sendBatch(toSchedule);
+			}
 		} catch (Exception e) {
 			// 128.3.8 Stopping the Web Application Bundle: Any failure during undeploying should be logged but must
 			// not stop the cleaning up of resources and notification of (other) listeners as well as handling any
