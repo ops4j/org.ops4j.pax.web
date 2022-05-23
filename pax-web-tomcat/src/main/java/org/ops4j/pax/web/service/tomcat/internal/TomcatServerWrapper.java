@@ -86,6 +86,7 @@ import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.LoginConfigModel;
+import org.ops4j.pax.web.service.spi.model.elements.SecurityConfigurationModel;
 import org.ops4j.pax.web.service.spi.model.elements.SecurityConstraintModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.elements.WebSocketModel;
@@ -238,6 +239,8 @@ class TomcatServerWrapper implements BatchVisitor {
 	 * reviewed in order to propagate session attribute events per {@link OsgiContextModel}.
 	 */
 	private final List<EventListenerModel> sessionListenerModels = new ArrayList<>();
+
+	private final Map<String, TreeMap<OsgiContextModel, SecurityConfigurationModel>> contextSecurityConstraints = new HashMap<>();
 
 	TomcatServerWrapper(Configuration config, TomcatFactory tomcatFactory,
 			Bundle paxWebTomcatBundle, ClassLoader classLoader) {
@@ -925,7 +928,7 @@ class TomcatServerWrapper implements BatchVisitor {
 			osgiServletContexts.put(osgiModel, osgiContext);
 			osgiContextModels.get(contextPath).add(osgiModel);
 
-			configurationListeners.put(osgiModel, new OsgiContextConfiguration(osgiModel, configuration, tomcatFactory));
+			configurationListeners.put(osgiModel, new OsgiContextConfiguration(osgiModel, configuration, tomcatFactory, contextSecurityConstraints));
 		}
 
 		boolean hasStopped = false;
@@ -1926,21 +1929,31 @@ class TomcatServerWrapper implements BatchVisitor {
 		LoginConfigModel loginConfigModel = change.getLoginConfigModel();
 		List<String> securityRoles = change.getSecurityRoles();
 		List<SecurityConstraintModel> securityConstraints = change.getSecurityConstraints();
+		OsgiContextModel ocm = change.getOsgiContextModel();
 		if (change.getKind() == OpCode.ADD) {
-			LOG.info("Adding security configuration to {}", change.getOsgiContextModel());
+			LOG.info("Adding security configuration to {}", ocm);
 			// just operate on the same OsgiContextModel that comes with the change
 			// even if it's not highest ranked
-			change.getOsgiContextModel().getSecurityConfiguration().setLoginConfig(loginConfigModel);
-			change.getOsgiContextModel().getSecurityConfiguration().getSecurityRoles().addAll(securityRoles);
-			change.getOsgiContextModel().getSecurityConfiguration().getSecurityConstraints().addAll(securityConstraints);
+			ocm.getSecurityConfiguration().setLoginConfig(loginConfigModel);
+			ocm.getSecurityConfiguration().getSecurityRoles().addAll(securityRoles);
+			ocm.getSecurityConfiguration().getSecurityConstraints().addAll(securityConstraints);
+
+			// https://github.com/ops4j/org.ops4j.pax.web/issues/1720 - but actually let's contribute these constraints
+			// to a global pool of per-physical-context constraints.
+			// Roles/constraints are additive, but login configuration is ranked-based - taken from highest-ranked
+			// context only
+			contextSecurityConstraints.computeIfAbsent(ocm.getContextPath(), c -> new TreeMap<>())
+					.put(ocm, ocm.getSecurityConfiguration());
 		} else {
-			LOG.info("Removing security configuration from {}", change.getOsgiContextModel());
-			change.getOsgiContextModel().getSecurityConfiguration().setLoginConfig(null);
-			securityRoles.forEach(change.getOsgiContextModel().getSecurityConfiguration().getSecurityRoles()::remove);
+			LOG.info("Removing security configuration from {}", ocm);
+			ocm.getSecurityConfiguration().setLoginConfig(null);
+			securityRoles.forEach(ocm.getSecurityConfiguration().getSecurityRoles()::remove);
 			securityConstraints.forEach(sc -> {
-				change.getOsgiContextModel().getSecurityConfiguration().getSecurityConstraints()
+				ocm.getSecurityConfiguration().getSecurityConstraints()
 						.removeIf(scm -> scm.getName().equals(sc.getName()));
 			});
+			TreeMap<OsgiContextModel, SecurityConfigurationModel> constraints = contextSecurityConstraints.get(ocm.getContextPath());
+			constraints.remove(ocm);
 		}
 	}
 

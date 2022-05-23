@@ -383,6 +383,8 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 	 */
 	private final List<EventListenerModel> sessionListenerModels = new ArrayList<>();
 
+	private final Map<String, TreeMap<OsgiContextModel, SecurityConfigurationModel>> contextSecurityConstraints = new HashMap<>();
+
 	UndertowServerWrapper(Configuration config, UndertowFactory undertowFactory,
 			Bundle paxWebUndertowBundle, ClassLoader classLoader) {
 		this.configuration = config;
@@ -2515,21 +2517,31 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 		LoginConfigModel loginConfigModel = change.getLoginConfigModel();
 		List<String> securityRoles = change.getSecurityRoles();
 		List<SecurityConstraintModel> securityConstraints = change.getSecurityConstraints();
+		OsgiContextModel ocm = change.getOsgiContextModel();
 		if (change.getKind() == OpCode.ADD) {
-			LOG.info("Adding security configuration to {}", change.getOsgiContextModel());
+			LOG.info("Adding security configuration to {}", ocm);
 			// just operate on the same OsgiContextModel that comes with the change
 			// even if it's not highest ranked
-			change.getOsgiContextModel().getSecurityConfiguration().setLoginConfig(loginConfigModel);
-			change.getOsgiContextModel().getSecurityConfiguration().getSecurityRoles().addAll(securityRoles);
-			change.getOsgiContextModel().getSecurityConfiguration().getSecurityConstraints().addAll(securityConstraints);
+			ocm.getSecurityConfiguration().setLoginConfig(loginConfigModel);
+			ocm.getSecurityConfiguration().getSecurityRoles().addAll(securityRoles);
+			ocm.getSecurityConfiguration().getSecurityConstraints().addAll(securityConstraints);
+
+			// https://github.com/ops4j/org.ops4j.pax.web/issues/1720 - but actually let's contribute these constraints
+			// to a global pool of per-physical-context constraints.
+			// Roles/constraints are additive, but login configuration is ranked-based - taken from highest-ranked
+			// context only
+			contextSecurityConstraints.computeIfAbsent(ocm.getContextPath(), c -> new TreeMap<>())
+					.put(ocm, ocm.getSecurityConfiguration());
 		} else {
-			LOG.info("Removing security configuration from {}", change.getOsgiContextModel());
-			change.getOsgiContextModel().getSecurityConfiguration().setLoginConfig(null);
-			securityRoles.forEach(change.getOsgiContextModel().getSecurityConfiguration().getSecurityRoles()::remove);
+			LOG.info("Removing security configuration from {}", ocm);
+			ocm.getSecurityConfiguration().setLoginConfig(null);
+			securityRoles.forEach(ocm.getSecurityConfiguration().getSecurityRoles()::remove);
 			securityConstraints.forEach(sc -> {
-				change.getOsgiContextModel().getSecurityConfiguration().getSecurityConstraints()
+				ocm.getSecurityConfiguration().getSecurityConstraints()
 						.removeIf(scm -> scm.getName().equals(sc.getName()));
 			});
+			TreeMap<OsgiContextModel, SecurityConfigurationModel> constraints = contextSecurityConstraints.get(ocm.getContextPath());
+			constraints.remove(ocm);
 		}
 	}
 
@@ -2708,9 +2720,14 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 				}
 			}
 
-			// alter security configuration
-			SecurityConfigurationModel security = highestRanked.getSecurityConfiguration();
-			LoginConfigModel lc = security.getLoginConfig();
+			// security configuration - from all relevant OsgiContextModels
+			TreeMap<OsgiContextModel, SecurityConfigurationModel> allSecConfigs = contextSecurityConstraints.get(contextPath);
+			SecurityConfigurationModel securityConfig = null;
+			if (allSecConfigs != null && allSecConfigs.size() > 0) {
+				securityConfig = allSecConfigs.values().iterator().next();
+			}
+			LoginConfigModel lc = securityConfig != null ? securityConfig.getLoginConfig() : null;
+
 			if (lc == null) {
 				deployment.setLoginConfig(null);
 			} else {
@@ -2723,9 +2740,7 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 				}
 
 				ServletExtension customAuthenticator = getAuthenticator(authMethod.toUpperCase());
-				if (customAuthenticator == null) {
-					LOG.warn("Can't find Undertow Authenticator for auth method {}", authMethod.toUpperCase());
-				} else {
+				if (customAuthenticator != null) {
 					LOG.debug("Setting custom Undertow authenticator {}", customAuthenticator);
 					deployment.getServletExtensions().add(customAuthenticator);
 				}
@@ -2735,10 +2750,25 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 			}
 
 			deployment.getSecurityRoles().clear();
-			deployment.addSecurityRoles(security.getSecurityRoles());
-
 			deployment.getSecurityConstraints().clear();
-			for (SecurityConstraintModel constraintModel : security.getSecurityConstraints()) {
+
+			// roles and constraints are not taken only from the highest ranked OsgiContextModel - they're
+			// taken from all the OCMs for given context path - on order of OCM rank
+			// it's up to user to take care of the conflicts, because simple rank-ordering will add higher-ranked
+			// rules first - the container may decide to override or reject the lower ranked later.
+
+			List<SecurityConstraintModel> allConstraints = new ArrayList<>();
+			Set<String> allRoles = new LinkedHashSet<>();
+			if (allSecConfigs != null) {
+				allSecConfigs.values().forEach(sc -> {
+					allConstraints.addAll(sc.getSecurityConstraints());
+					allRoles.addAll(sc.getSecurityRoles());
+				});
+			}
+
+			deployment.addSecurityRoles(allRoles);
+
+			for (SecurityConstraintModel constraintModel : allConstraints) {
 				SecurityConstraint constraint = new SecurityConstraint();
 				if (constraintModel.isAuthRolesSet()) {
 					constraint.setEmptyRoleSemantic(SecurityInfo.EmptyRoleSemantic.AUTHENTICATE);

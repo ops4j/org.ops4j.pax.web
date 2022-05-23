@@ -491,6 +491,14 @@
 			<groupId>org.ops4j.pax.web.samples</groupId>
 			<artifactId>wc-helloworld</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>hs-1</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>hs-2</artifactId>
+		</dependency>
 
 		<!-- pax-web whiteboard samples -->
 

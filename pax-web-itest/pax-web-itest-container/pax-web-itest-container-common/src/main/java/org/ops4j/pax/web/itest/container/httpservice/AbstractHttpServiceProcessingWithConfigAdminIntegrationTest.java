@@ -98,12 +98,6 @@ public abstract class AbstractHttpServiceProcessingWithConfigAdminIntegrationTes
 		props.put("security.constraint.1.roles", "role-manager, content-administrator");
 	}
 
-	/**
-	 * Due to incomplete configuration, Undertow returns HTTP 401, while Jetty and Tomcat - 403.
-	 * I'll investigate later...
-	 *
-	 * @throws Exception
-	 */
 	protected void performSecurityAssertion() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
 				.withReturnCode(401)

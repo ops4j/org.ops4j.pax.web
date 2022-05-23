@@ -20,8 +20,12 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.ServiceLoader;
+import java.util.Set;
+import java.util.TreeMap;
 
 import org.apache.catalina.Authenticator;
 import org.apache.catalina.Lifecycle;
@@ -67,10 +71,14 @@ public class OsgiContextConfiguration implements LifecycleListener {
 
 	private final Configuration configuration;
 
-	public OsgiContextConfiguration(OsgiContextModel osgiContextModel, Configuration configuration, TomcatFactory tomcatFactory) {
+	private final Map<String, TreeMap<OsgiContextModel, SecurityConfigurationModel>> contextSecurityConstraints;
+
+	public OsgiContextConfiguration(OsgiContextModel osgiContextModel, Configuration configuration,
+			TomcatFactory tomcatFactory, Map<String, TreeMap<OsgiContextModel, SecurityConfigurationModel>> contextSecurityConstraints) {
 		this.osgiContextModel = osgiContextModel;
 		this.tomcatFactory = tomcatFactory;
 		this.configuration = configuration;
+		this.contextSecurityConstraints = contextSecurityConstraints;
 	}
 
 	public Valve getAuthenticationValve() {
@@ -85,14 +93,19 @@ public class OsgiContextConfiguration implements LifecycleListener {
 			LoginConfig lc;
 			boolean noAuth = false;
 
-			if (osgiContextModel.getSecurityConfiguration().getLoginConfig() == null) {
+			// security configuration - from all relevant OsgiContextModels
+			TreeMap<OsgiContextModel, SecurityConfigurationModel> allSecConfigs = contextSecurityConstraints.get(osgiContextModel.getContextPath());
+			SecurityConfigurationModel securityConfig = null;
+			if (allSecConfigs != null && allSecConfigs.size() > 0) {
+				securityConfig = allSecConfigs.values().iterator().next();
+			}
+			LoginConfigModel loginConfig = securityConfig != null ? securityConfig.getLoginConfig() : null;
+
+			if (loginConfig == null) {
 				authenticationValve = null;
 				lc = new LoginConfig("NONE", null, null, null);
 				noAuth = true;
 			} else {
-				SecurityConfigurationModel securityConfig = osgiContextModel.getSecurityConfiguration();
-				LoginConfigModel loginConfig = securityConfig.getLoginConfig();
-
 				// see org.apache.catalina.startup.ContextConfig.authenticatorConfig()
 
 				lc = new LoginConfig(loginConfig.getAuthMethod(), loginConfig.getRealmName(),
@@ -192,14 +205,31 @@ public class OsgiContextConfiguration implements LifecycleListener {
 
 			// alter security configuration
 			context.setLoginConfig(lc);
+			for (SecurityConstraint constr : context.findConstraints()) {
+				context.removeConstraint(constr);
+			}
+			for (String role : context.findSecurityRoles()) {
+				context.removeSecurityRole(role);
+			}
 
 			// security constraints
 			if (!noAuth) {
-				SecurityConfigurationModel security = osgiContextModel.getSecurityConfiguration();
-				boolean allAuthenticatedUsersIsAppRole = security.getSecurityRoles()
+				// roles and constraints are not taken only from the highest ranked OsgiContextModel - they're
+				// taken from all the OCMs for given context path - on order of OCM rank
+				// it's up to user to take care of the conflicts, because simple rank-ordering will add higher-ranked
+				// rules first - the container may decide to override or reject the lower ranked later.
+
+				List<SecurityConstraintModel> allConstraints = new ArrayList<>();
+				Set<String> allRoles = new LinkedHashSet<>();
+				allSecConfigs.values().forEach(sec -> {
+					allConstraints.addAll(sec.getSecurityConstraints());
+					allRoles.addAll(sec.getSecurityRoles());
+				});
+
+				boolean allAuthenticatedUsersIsAppRole = allRoles
 						.contains(SecurityConstraint.ROLE_ALL_AUTHENTICATED_USERS);
 
-				for (SecurityConstraintModel scm : security.getSecurityConstraints()) {
+				for (SecurityConstraintModel scm : allConstraints) {
 					SecurityConstraint constraint = new SecurityConstraint();
 					constraint.setDisplayName(scm.getName());
 					constraint.setUserConstraint(scm.getTransportGuarantee().name());
@@ -235,7 +265,7 @@ public class OsgiContextConfiguration implements LifecycleListener {
 					context.addConstraint(constraint);
 				}
 
-				for (String role : security.getSecurityRoles()) {
+				for (String role : allRoles) {
 					context.addSecurityRole(role);
 				}
 

@@ -243,6 +243,8 @@ class JettyServerWrapper implements BatchVisitor {
 
 	private final Set<PriorityValue<HttpConfiguration.Customizer>> registeredCustomizers = new TreeSet<>(JettyServerControllerFactory.priorityComparator);
 
+	private final Map<String, TreeMap<OsgiContextModel, SecurityConfigurationModel>> contextSecurityConstraints = new HashMap<>();
+
 	JettyServerWrapper(Configuration config, JettyFactory jettyFactory,
 			Bundle paxWebJettyBundle, ClassLoader classLoader) {
 		this.configuration = config;
@@ -2055,21 +2057,31 @@ class JettyServerWrapper implements BatchVisitor {
 		LoginConfigModel loginConfigModel = change.getLoginConfigModel();
 		List<String> securityRoles = change.getSecurityRoles();
 		List<SecurityConstraintModel> securityConstraints = change.getSecurityConstraints();
+		OsgiContextModel ocm = change.getOsgiContextModel();
 		if (change.getKind() == OpCode.ADD) {
-			LOG.info("Adding security configuration to {}", change.getOsgiContextModel());
+			LOG.info("Adding security configuration to {}", ocm);
 			// just operate on the same OsgiContextModel that comes with the change
 			// even if it's not highest ranked
-			change.getOsgiContextModel().getSecurityConfiguration().setLoginConfig(loginConfigModel);
-			change.getOsgiContextModel().getSecurityConfiguration().getSecurityRoles().addAll(securityRoles);
-			change.getOsgiContextModel().getSecurityConfiguration().getSecurityConstraints().addAll(securityConstraints);
+			ocm.getSecurityConfiguration().setLoginConfig(loginConfigModel);
+			ocm.getSecurityConfiguration().getSecurityRoles().addAll(securityRoles);
+			ocm.getSecurityConfiguration().getSecurityConstraints().addAll(securityConstraints);
+
+			// https://github.com/ops4j/org.ops4j.pax.web/issues/1720 - but actually let's contribute these constraints
+			// to a global pool of per-physical-context constraints.
+			// Roles/constraints are additive, but login configuration is ranked-based - taken from highest-ranked
+			// context only
+			contextSecurityConstraints.computeIfAbsent(ocm.getContextPath(), c -> new TreeMap<>())
+					.put(ocm, ocm.getSecurityConfiguration());
 		} else {
-			LOG.info("Removing security configuration from {}", change.getOsgiContextModel());
-			change.getOsgiContextModel().getSecurityConfiguration().setLoginConfig(null);
-			securityRoles.forEach(change.getOsgiContextModel().getSecurityConfiguration().getSecurityRoles()::remove);
+			LOG.info("Removing security configuration from {}", ocm);
+			ocm.getSecurityConfiguration().setLoginConfig(null);
+			securityRoles.forEach(ocm.getSecurityConfiguration().getSecurityRoles()::remove);
 			securityConstraints.forEach(sc -> {
-				change.getOsgiContextModel().getSecurityConfiguration().getSecurityConstraints()
+				ocm.getSecurityConfiguration().getSecurityConstraints()
 						.removeIf(scm -> scm.getName().equals(sc.getName()));
 			});
+			TreeMap<OsgiContextModel, SecurityConfigurationModel> constraints = contextSecurityConstraints.get(ocm.getContextPath());
+			constraints.remove(ocm);
 		}
 	}
 
@@ -2154,9 +2166,13 @@ class JettyServerWrapper implements BatchVisitor {
 				}
 			}
 
-			// security configuration - as with sessions, it's taken from OsgiContextModel
-			SecurityConfigurationModel securityConfig = highestRanked.getSecurityConfiguration();
-			LoginConfigModel loginConfig = securityConfig.getLoginConfig();
+			// security configuration - from all relevant OsgiContextModels
+			TreeMap<OsgiContextModel, SecurityConfigurationModel> allSecConfigs = contextSecurityConstraints.get(contextPath);
+			SecurityConfigurationModel securityConfig = null;
+			if (allSecConfigs != null && allSecConfigs.size() > 0) {
+				securityConfig = allSecConfigs.values().iterator().next();
+			}
+			LoginConfigModel loginConfig = securityConfig != null ? securityConfig.getLoginConfig() : null;
 			if (loginConfig == null) {
 				sch.setSecurityHandler(new ConstraintSecurityHandler());
 			} else {
@@ -2207,11 +2223,20 @@ class JettyServerWrapper implements BatchVisitor {
 						}
 				}
 
-				for (String role : securityConfig.getSecurityRoles()) {
-					securityHandler.addRole(role);
-				}
+				// roles and constraints are not taken only from the highest ranked OsgiContextModel - they're
+				// taken from all the OCMs for given context path - on order of OCM rank
+				// it's up to user to take care of the conflicts, because simple rank-ordering will add higher-ranked
+				// rules first - the container may decide to override or reject the lower ranked later.
 
-				ensureSecurityConstraintsConfigured(securityHandler, securityConfig.getSecurityConstraints());
+				List<SecurityConstraintModel> allConstraints = new ArrayList<>();
+				allSecConfigs.values().forEach(sc -> {
+					allConstraints.addAll(sc.getSecurityConstraints());
+					for (String role : sc.getSecurityRoles()) {
+						securityHandler.addRole(role);
+					}
+				});
+
+				ensureSecurityConstraintsConfigured(securityHandler, allConstraints);
 			}
 
 			// taking virtual host / connector configuration from OsgiContextModel
