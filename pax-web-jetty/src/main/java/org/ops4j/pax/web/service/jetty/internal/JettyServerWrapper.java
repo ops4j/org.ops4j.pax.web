@@ -2167,10 +2167,15 @@ class JettyServerWrapper implements BatchVisitor {
 			}
 
 			// security configuration - from all relevant OsgiContextModels
-			TreeMap<OsgiContextModel, SecurityConfigurationModel> allSecConfigs = contextSecurityConstraints.get(contextPath);
+			Map<OsgiContextModel, SecurityConfigurationModel> allSecConfigs = contextSecurityConstraints.get(contextPath);
 			SecurityConfigurationModel securityConfig = null;
 			if (allSecConfigs != null && allSecConfigs.size() > 0) {
 				securityConfig = allSecConfigs.values().iterator().next();
+			}
+			if (securityConfig == null) {
+				// no context processing available - just use highest-ranked model
+				securityConfig = highestRanked.getSecurityConfiguration();
+				allSecConfigs = Collections.singletonMap(highestRanked, securityConfig);
 			}
 			LoginConfigModel loginConfig = securityConfig != null ? securityConfig.getLoginConfig() : null;
 			if (loginConfig == null) {

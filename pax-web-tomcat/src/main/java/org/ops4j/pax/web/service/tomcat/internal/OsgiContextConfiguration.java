@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -94,10 +95,15 @@ public class OsgiContextConfiguration implements LifecycleListener {
 			boolean noAuth = false;
 
 			// security configuration - from all relevant OsgiContextModels
-			TreeMap<OsgiContextModel, SecurityConfigurationModel> allSecConfigs = contextSecurityConstraints.get(osgiContextModel.getContextPath());
+			Map<OsgiContextModel, SecurityConfigurationModel> allSecConfigs = contextSecurityConstraints.get(osgiContextModel.getContextPath());
 			SecurityConfigurationModel securityConfig = null;
 			if (allSecConfigs != null && allSecConfigs.size() > 0) {
 				securityConfig = allSecConfigs.values().iterator().next();
+			}
+			if (securityConfig == null) {
+				// no context processing available - just use highest-ranked model
+				securityConfig = osgiContextModel.getSecurityConfiguration();
+				allSecConfigs = Collections.singletonMap(osgiContextModel, securityConfig);
 			}
 			LoginConfigModel loginConfig = securityConfig != null ? securityConfig.getLoginConfig() : null;
 
