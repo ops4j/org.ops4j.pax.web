@@ -322,7 +322,7 @@ public class OsgiContextConfiguration implements LifecycleListener {
 			try {
 				for (URL url : osgiContextModel.getServerSpecificDescriptors()) {
 					String path = url.getPath();
-					if (path.equals("/META-INF/context.xml")) {
+					if (path.endsWith("/META-INF/context.xml")) {
 						LOG.info("Processing context specific {} for {}", url, osgiContextModel.getContextPath());
 
 						Digester digester = tomcatFactory.createContextDigester();
