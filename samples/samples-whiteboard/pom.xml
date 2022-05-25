@@ -43,6 +43,7 @@
 		<module>whiteboard-scopes</module>
 		<module>whiteboard-extended</module>
 		<module>whiteboard-ds-jaxrs</module>
+		<module>whiteboard-1</module>
 	</modules>
 
 </project>

@@ -76,6 +76,7 @@ public class HttpContextProcessing implements ManagedServiceFactory {
 	private static final String KEY_CONTEXT_ID = "context.id";
 	private static final String KEY_BUNDLE_SN = "bundle.symbolicName";
 	private static final String KEY_WEB_FRAGMENT = "context.webFragment";
+	private static final String KEY_WHITEBOARD = "whiteboard";
 	private static final String PREFIX_CONTEXT_PARAM = "context.param.";
 	private static final String PREFIX_LOGIN_CONFIG = "login.config.";
 	private static final String PREFIX_SECURITY = "security.";
@@ -161,6 +162,7 @@ public class HttpContextProcessing implements ManagedServiceFactory {
 		private Bundle bundle;
 		private Version version;
 		private String contextId;
+		private boolean whiteboard;
 
 		// transient values for current configuration
 		private final Map<String, String> contextParams = new LinkedHashMap<>();
@@ -218,6 +220,7 @@ public class HttpContextProcessing implements ManagedServiceFactory {
 				if (contextId == null) {
 					contextId = PaxWebConstants.DEFAULT_CONTEXT_NAME;
 				}
+				whiteboard = "true".equalsIgnoreCase(properties.get(KEY_WHITEBOARD));
 
 				if (bundleTracker == null) {
 					bundleTracker = new BundleTracker<>(serviceContext, Bundle.ACTIVE, this);
@@ -565,9 +568,14 @@ public class HttpContextProcessing implements ManagedServiceFactory {
 				return null;
 			}
 
-			OsgiContextModel osgiContextModel = view.getContextModel(bundle, contextId);
+			OsgiContextModel osgiContextModel = whiteboard ? view.getContextModel(null, contextId)
+					: view.getContextModel(bundle, contextId);
 			if (osgiContextModel == null) {
-				LOG.warn("Can't find OsgiContextModel with name \"{}\" for bundle {}", contextId, bundle);
+				if (whiteboard) {
+					LOG.warn("Can't find whiteboard OsgiContextModel with name \"{}\"", contextId);
+				} else {
+					LOG.warn("Can't find OsgiContextModel with name \"{}\" for bundle {}", contextId, bundle);
+				}
 				return null;
 			}
 
@@ -622,6 +630,10 @@ public class HttpContextProcessing implements ManagedServiceFactory {
 			}
 
 			BundleContext context = currentBundle.getBundleContext();
+			if (context == null) {
+				LOG.debug("Bundle context for {} bundle is no longer valid", symbolicName);
+				return null;
+			}
 			try {
 				ServiceReference<WebContainer> sr = context.getServiceReference(WebContainer.class);
 				if (sr == null) {

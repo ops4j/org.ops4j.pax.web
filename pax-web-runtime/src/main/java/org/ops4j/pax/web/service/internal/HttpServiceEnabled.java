@@ -60,6 +60,7 @@ import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.ServiceModel;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
+import org.ops4j.pax.web.service.spi.model.elements.SecurityConfigurationModel;
 import org.ops4j.pax.web.service.spi.model.info.ServletInfo;
 import org.ops4j.pax.web.service.spi.model.info.WebApplicationInfo;
 import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel;
@@ -89,6 +90,7 @@ import org.ops4j.pax.web.service.spi.task.ErrorPageModelChange;
 import org.ops4j.pax.web.service.spi.task.EventListenerModelChange;
 import org.ops4j.pax.web.service.spi.task.FilterModelChange;
 import org.ops4j.pax.web.service.spi.task.OpCode;
+import org.ops4j.pax.web.service.spi.task.SecurityConfigChange;
 import org.ops4j.pax.web.service.spi.task.ServletModelChange;
 import org.ops4j.pax.web.service.spi.task.TransactionStateChange;
 import org.ops4j.pax.web.service.spi.task.WelcomeFileModelChange;
@@ -179,7 +181,9 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 				contexts.add(ocm.getContextPath());
 			}
 		}
-		b.removeFilterModels(new ArrayList<>(serviceModel.getFilterModels()));
+		if (!serviceModel.getFilterModels().isEmpty()) {
+			b.removeFilterModels(new ArrayList<>(serviceModel.getFilterModels()));
+		}
 		// servlets
 		Map<ServletModel, Boolean> servlets = new HashMap<>();
 		for (ServletModel sm : serviceModel.getServletModels()) {
@@ -188,28 +192,36 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 				contexts.add(ocm.getContextPath());
 			}
 		}
-		b.removeServletModels(servlets);
+		if (!servlets.isEmpty()) {
+			b.removeServletModels(servlets);
+		}
 		// event listeners
 		for (EventListenerModel elm : serviceModel.getEventListenerModels()) {
 			for (OsgiContextModel ocm : elm.getContextModels()) {
 				contexts.add(ocm.getContextPath());
 			}
 		}
-		b.removeEventListenerModels(new ArrayList<>(serviceModel.getEventListenerModels()));
+		if (!serviceModel.getEventListenerModels().isEmpty()) {
+			b.removeEventListenerModels(new ArrayList<>(serviceModel.getEventListenerModels()));
+		}
 		// error pages
 		for (ErrorPageModel epm : serviceModel.getErrorPageModels()) {
 			for (OsgiContextModel ocm : epm.getContextModels()) {
 				contexts.add(ocm.getContextPath());
 			}
 		}
-		b.removeErrorPageModels(new ArrayList<>(serviceModel.getErrorPageModels()));
+		if (!serviceModel.getErrorPageModels().isEmpty()) {
+			b.removeErrorPageModels(new ArrayList<>(serviceModel.getErrorPageModels()));
+		}
 		// SCIs
 		for (ContainerInitializerModel cim : serviceModel.getContainerInitializerModels()) {
 			for (OsgiContextModel ocm : cim.getContextModels()) {
 				contexts.add(ocm.getContextPath());
 			}
 		}
-		b.removeContainerInitializerModels(new ArrayList<>(serviceModel.getContainerInitializerModels()));
+		if (!serviceModel.getContainerInitializerModels().isEmpty()) {
+			b.removeContainerInitializerModels(new ArrayList<>(serviceModel.getContainerInitializerModels()));
+		}
 		// web sockets
 		Map<WebSocketModel, Boolean> webSockets = new HashMap<>();
 		for (WebSocketModel wsm : serviceModel.getWebSocketModels()) {
@@ -218,7 +230,9 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 				contexts.add(ocm.getContextPath());
 			}
 		}
-		b.removeWebSocketModels(webSockets);
+		if (!webSockets.isEmpty()) {
+			b.removeWebSocketModels(webSockets);
+		}
 		// welcome pages
 		for (WelcomeFileModel wfm : serviceModel.getWelcomeFileModels()) {
 			for (OsgiContextModel ocm : wfm.getContextModels()) {
@@ -231,6 +245,15 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 			if (ocm.hasDirectHttpContextInstance()) {
 				b.disassociateOsgiContextModel(ocm.getDirectHttpContextInstance(), ocm);
 				b.removeOsgiContextModel(ocm);
+				contexts.add(ocm.getContextPath());
+			}
+			SecurityConfigurationModel scm = ocm.getSecurityConfiguration();
+			if (scm != null) {
+				if (scm.getLoginConfig() != null || !scm.getSecurityConstraints().isEmpty()
+						|| !scm.getSecurityRoles().isEmpty()) {
+					b.getOperations().add(new SecurityConfigChange(OpCode.DELETE, ocm, scm.getLoginConfig(),
+							scm.getSecurityConstraints(), new ArrayList<>(scm.getSecurityRoles())));
+				}
 			}
 		}
 

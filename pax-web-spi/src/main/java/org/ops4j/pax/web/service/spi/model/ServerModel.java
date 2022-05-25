@@ -65,6 +65,7 @@ import org.ops4j.pax.web.service.spi.model.elements.ElementModel;
 import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
+import org.ops4j.pax.web.service.spi.model.elements.SecurityConfigurationModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.elements.WebSocketModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
@@ -77,6 +78,8 @@ import org.ops4j.pax.web.service.spi.task.Batch;
 import org.ops4j.pax.web.service.spi.task.BatchVisitor;
 import org.ops4j.pax.web.service.spi.task.ClearDynamicRegistrationsChange;
 import org.ops4j.pax.web.service.spi.task.ContainerInitializerModelChange;
+import org.ops4j.pax.web.service.spi.task.ContextStartChange;
+import org.ops4j.pax.web.service.spi.task.ContextStopChange;
 import org.ops4j.pax.web.service.spi.task.ErrorPageModelChange;
 import org.ops4j.pax.web.service.spi.task.ErrorPageStateChange;
 import org.ops4j.pax.web.service.spi.task.EventListenerModelChange;
@@ -84,6 +87,7 @@ import org.ops4j.pax.web.service.spi.task.FilterModelChange;
 import org.ops4j.pax.web.service.spi.task.FilterStateChange;
 import org.ops4j.pax.web.service.spi.task.OpCode;
 import org.ops4j.pax.web.service.spi.task.OsgiContextModelChange;
+import org.ops4j.pax.web.service.spi.task.SecurityConfigChange;
 import org.ops4j.pax.web.service.spi.task.ServletContextModelChange;
 import org.ops4j.pax.web.service.spi.task.ServletModelChange;
 import org.ops4j.pax.web.service.spi.task.WebSocketModelChange;
@@ -302,10 +306,12 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 
 	/**
 	 * This set contains all the {@link OsgiContextModel} instances coming from Whiteboard, which are NOT used
-	 * to override HttpService-related contexts. The only reason to keep them is to have a full picture for
-	 * {@link RuntimeDTO} needs.
+	 * to override HttpService-related contexts. The reason to keep them is to have a full picture for
+	 * {@link RuntimeDTO} needs and for HttpContext processing, where we can can add security constraints
+	 * to Whiteboard-registered servlets/contexts/...
+	 * The key of the map is the name of the contexts and they're ordered by ranking.
 	 */
-	private final Set<OsgiContextModel> whiteboardContexts = new HashSet<>();
+	private final Map<String, TreeSet<OsgiContextModel>> whiteboardContexts = new HashMap<>();
 
 	/*
 	 * Whiteboard web elements are also registered into target container through an instance of
@@ -786,7 +792,7 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 			}
 		} else {
 			// treat it as normal Whiteboard context, which we only need to remember for DTO purposes
-			whiteboardContexts.add(contextModel);
+			whiteboardContexts.computeIfAbsent(contextModel.getName(), n -> new TreeSet<>()).add(contextModel);
 		}
 	}
 
@@ -828,11 +834,27 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 			}
 		} else {
 			// treat it as normal Whiteboard context, which we only need to remember for DTO purposes
-			whiteboardContexts.remove(contextModel);
+			TreeSet<OsgiContextModel> models = whiteboardContexts.get(contextModel.getName());
+			if (models != null) {
+				models.remove(contextModel);
+				if (models.isEmpty()) {
+					whiteboardContexts.remove(contextModel.getName());
+				}
+			}
 		}
 
 		// always remove
 		batch.removeOsgiContextModel(contextModel);
+		SecurityConfigurationModel scm = contextModel.getSecurityConfiguration();
+		if (scm != null) {
+			if (scm.getLoginConfig() != null || !scm.getSecurityConstraints().isEmpty()
+					|| !scm.getSecurityRoles().isEmpty()) {
+				batch.getOperations().add(0, new ContextStopChange(OpCode.MODIFY, contextModel));
+				batch.getOperations().add(new SecurityConfigChange(OpCode.DELETE, contextModel, scm.getLoginConfig(),
+						scm.getSecurityConstraints(), new ArrayList<>(scm.getSecurityRoles())));
+				batch.getOperations().add(new ContextStartChange(OpCode.MODIFY, contextModel));
+			}
+		}
 	}
 
 	/**
@@ -1107,11 +1129,20 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 	 * @return
 	 */
 	public OsgiContextModel getContextModel(String name, Bundle ownerBundle) {
+		OsgiContextModel model;
 		if (ownerBundle == null) {
-			return getHighestRankedModel(sharedContexts.get(name));
+			model = getHighestRankedModel(sharedContexts.get(name));
+			if (model == null) {
+				// maybe it's a whitboard model?
+				TreeSet<OsgiContextModel> models = whiteboardContexts.get(name);
+				if (!models.isEmpty()) {
+					model = models.first();
+				}
+			}
 		} else {
-			return getHighestRankedModel(bundleContexts.get(ContextKey.with(name, ownerBundle)));
+			model = getHighestRankedModel(bundleContexts.get(ContextKey.with(name, ownerBundle)));
 		}
+		return model;
 	}
 
 	/**
@@ -3112,7 +3143,7 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 			});
 			// OsgiContextModels from Whiteboard (excluding ones with direct context instance) - failed and non-failed
 			// they're not kept at ServerModel level at all
-			whiteboardContexts.forEach(ocm -> {
+			whiteboardContexts.values().stream().flatMap(Collection::stream).forEach(ocm -> {
 				if (ocm.getDtoFailureCode() >= 0) {
 					failedScDTOs.add(ocm.toFailedDTO(ocm.getDtoFailureCode()));
 				} else {
@@ -3494,7 +3525,7 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 			});
 		});
 		// 3. Whiteboard contexts
-		whiteboardContexts.forEach(ocm -> {
+		whiteboardContexts.values().stream().flatMap(Collection::stream).forEach(ocm -> {
 			webapps.add(new WebApplicationInfo(ocm));
 		});
 
@@ -3562,7 +3593,7 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 	}
 
 	public Set<OsgiContextModel> getWhiteboardContexts() {
-		return whiteboardContexts;
+		return whiteboardContexts.values().stream().flatMap(Collection::stream).collect(Collectors.toSet());
 	}
 
 	public Set<ElementModel<?, ?>> getFailedWhiteboardElements() {

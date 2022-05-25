@@ -33,9 +33,10 @@ public class DoubleHttpServiceProcessingIntegrationTest extends AbstractDoubleHt
 	public Option[] configure() {
 		Option[] serverOptions = combine(baseConfigure(), paxWebTomcat());
 		Option[] configOptions = combine(serverOptions, configAdmin());
+		Option[] extenderOptions = combine(configOptions, paxWebExtenderWhiteboard());
 		MavenArtifactProvisionOption auth = mavenBundle("org.ops4j.pax.web.samples", "auth-config-fragment-tomcat")
 				.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1).noStart();
-		return combine(configOptions, auth);
+		return combine(extenderOptions, auth);
 	}
 
 }
