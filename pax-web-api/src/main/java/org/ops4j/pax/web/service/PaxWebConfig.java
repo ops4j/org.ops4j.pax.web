@@ -54,6 +54,11 @@ public interface PaxWebConfig {
 	 */
 	String PID_CFG_SERVER_CONFIGURATION_FILES = "org.ops4j.pax.web.config.files";
 
+	/**
+	 * Option to specify single global context configuration file (only Jetty and Tomcat).
+	 */
+	String PID_CFG_CONTEXT_CONFIGURATION_FILE = "org.ops4j.pax.web.context.file";
+
 	// 102.9 Configuration Properties - the below two properties are not specified in any interface/class
 
 	/**

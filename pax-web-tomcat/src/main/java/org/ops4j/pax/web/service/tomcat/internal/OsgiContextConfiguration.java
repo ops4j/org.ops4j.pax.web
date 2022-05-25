@@ -17,6 +17,7 @@ package org.ops4j.pax.web.service.tomcat.internal;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -320,23 +321,38 @@ public class OsgiContextConfiguration implements LifecycleListener {
 			ClassLoader tccl = Thread.currentThread().getContextClassLoader();
 			Thread.currentThread().setContextClassLoader(osgiContextModel.getClassLoader());
 			try {
+				List<URL> contextConfigs = new ArrayList<>();
+				if (configuration.server().getContextConfigurationFile() != null) {
+					LOG.info("Found global Tomcat context configuration file: {}", configuration.server().getContextConfigurationFile());
+					contextConfigs.add(configuration.server().getContextConfigurationFile().toURI().toURL());
+				}
 				for (URL url : osgiContextModel.getServerSpecificDescriptors()) {
 					String path = url.getPath();
 					if (path.endsWith("/META-INF/context.xml")) {
-						LOG.info("Processing context specific {} for {}", url, osgiContextModel.getContextPath());
-
-						Digester digester = tomcatFactory.createContextDigester();
-						digester.setClassLoader(osgiContextModel.getClassLoader());
-						digester.push(context.getParent());
-						digester.push(context);
-
-						try (InputStream is = url.openStream()) {
-							digester.parse(is);
-						} catch (IOException | SAXException e) {
-							LOG.warn("Problem parsing {}: {}", url, e.getMessage(), e);
-						}
+						contextConfigs.add(url);
 					}
 				}
+				for (URL url : contextConfigs) {
+					String path = url.getPath();
+					LOG.info("Processing context specific {} for {}", url, osgiContextModel.getContextPath());
+
+					Digester digester = tomcatFactory.createContextDigester();
+					if (osgiContextModel.getClassLoader() != null) {
+						digester.setClassLoader(osgiContextModel.getClassLoader());
+					} else {
+						digester.setClassLoader(tccl);
+					}
+					digester.push(context.getParent());
+					digester.push(context);
+
+					try (InputStream is = url.openStream()) {
+						digester.parse(is);
+					} catch (IOException | SAXException e) {
+						LOG.warn("Problem parsing {}: {}", url, e.getMessage(), e);
+					}
+				}
+			} catch (MalformedURLException e) {
+				LOG.warn("Can't process context configuration file: {}", e.getMessage(), e);
 			} finally {
 				Thread.currentThread().setContextClassLoader(tccl);
 			}

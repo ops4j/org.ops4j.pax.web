@@ -238,6 +238,7 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 		private final File tmpDir;
 		private final String[] listeningAddresses;
 		private final File[] externalConfigurations;
+		private final File externalContextConfiguration;
 
 		private final int eventDispatcherThreadCount;
 
@@ -303,6 +304,15 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 				}
 				this.externalConfigurations = fileLocations;
 			}
+			String contextConfig = resolveStringProperty(PaxWebConfig.PID_CFG_CONTEXT_CONFIGURATION_FILE);
+			if (contextConfig != null && !"".equals(contextConfig.trim())) {
+				externalContextConfiguration = new File(contextConfig);
+				if (!externalContextConfiguration.isFile()) {
+					throw new IllegalArgumentException("Global context configuration " + contextConfig + " is not available");
+				}
+			} else {
+				externalContextConfiguration = null;
+			}
 			Integer eventDispatcherThreadCount = resolveIntegerProperty(PaxWebConfig.PID_CFG_EVENT_DISPATCHER_THREAD_COUNT);
 			this.eventDispatcherThreadCount = eventDispatcherThreadCount == null ? 1 : eventDispatcherThreadCount;
 
@@ -330,6 +340,11 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 		@Override
 		public File[] getConfigurationFiles() {
 			return externalConfigurations;
+		}
+
+		@Override
+		public File getContextConfigurationFile() {
+			return externalContextConfiguration;
 		}
 
 		@Override

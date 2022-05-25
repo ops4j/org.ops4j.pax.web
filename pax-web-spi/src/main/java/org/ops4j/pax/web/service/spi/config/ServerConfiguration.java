@@ -36,9 +36,19 @@ public interface ServerConfiguration {
 	 * using only PID configuration.
 	 *
 	 * @since Pax Web 8
-	 * @return configuration directory
+	 * @return configuration directories/files
 	 */
 	File[] getConfigurationFiles();
+
+	/**
+	 * Returns the file to read external server context configuration from. It's handled only for Jetty
+	 * (etc/jetty-web.xml) and Tomcat (etc/tomcat-context.xml). This configuration applies to all contexts. For
+	 * example Tomcat reads such configuration from {@code $CATALINA_HOME/conf/context.xml}
+	 *
+	 * @since Pax Web 8
+	 * @return global context configuration file
+	 */
+	File getContextConfigurationFile();
 
 	/**
 	 * Get a TCP port to use for HTTP protocol. Uses {@link PaxWebConfig#PID_CFG_HTTP_PORT}

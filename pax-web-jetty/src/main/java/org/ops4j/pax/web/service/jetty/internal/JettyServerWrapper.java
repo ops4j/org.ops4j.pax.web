@@ -2315,7 +2315,18 @@ class JettyServerWrapper implements BatchVisitor {
 			ClassLoader tccl = Thread.currentThread().getContextClassLoader();
 			Thread.currentThread().setContextClassLoader(sch.getClassLoader());
 			try {
+				List<URL> contextConfigs = new ArrayList<>();
+				if (configuration.server().getContextConfigurationFile() != null) {
+					LOG.info("Found global Jetty context configuration file: {}", configuration.server().getContextConfigurationFile());
+					contextConfigs.add(configuration.server().getContextConfigurationFile().toURI().toURL());
+				}
 				for (URL url : highestRanked.getServerSpecificDescriptors()) {
+					String path = url.getPath();
+					if (path.startsWith("/WEB-INF/") && path.endsWith(".xml") && path.contains("jetty")) {
+						contextConfigs.add(url);
+					}
+				}
+				for (URL url : contextConfigs) {
 					String path = url.getPath();
 					if (path.startsWith("/WEB-INF/") && path.endsWith(".xml") && path.contains("jetty")) {
 						XmlConfiguration cfg = new XmlConfiguration(Resource.newResource(url));

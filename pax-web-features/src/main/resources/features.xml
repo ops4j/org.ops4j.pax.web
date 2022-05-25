@@ -178,12 +178,18 @@ org.osgi.service.http.secure.enabled = false
 
 # external Jetty configuration file where Jetty-specific beans may be declared
 #org.ops4j.pax.web.config.file = ${karaf.etc}/jetty.xml
+# optional Jetty context configuration file applied to all web contexts
+# see https://www.eclipse.org/jetty/documentation/jetty-9/index.html#using-basic-descriptor-files
+#org.ops4j.pax.web.context.file = ${karaf.etc}/jetty-web.xml
 
 # this is a root directory for all the context-specific directories managed by Pax Web
 javax.servlet.context.tempdir = ${karaf.data}/pax-web/tmp
 		</config>
 		<configfile finalname="${karaf.etc}/jetty.xml">
 			mvn:org.ops4j.pax.web/pax-web-features/${project.version}/xml/config-jetty
+		</configfile>
+		<configfile finalname="${karaf.etc}/jetty-web.xml">
+			mvn:org.ops4j.pax.web/pax-web-features/${project.version}/xml/context-jetty
 		</configfile>
 	</feature>
 
@@ -242,12 +248,18 @@ org.osgi.service.http.secure.enabled = false
 
 # external Tomcat configuration file where Tomcat-specific beans may be declared
 #org.ops4j.pax.web.config.file = ${karaf.etc}/tomcat-server.xml
+# optional Tomcat context configuration file applied to all web contexts
+# see https://tomcat.apache.org/tomcat-9.0-doc/config/context.html
+#org.ops4j.pax.web.context.file = ${karaf.etc}/tomcat-context.xml
 
 # this is a root directory for all the context-specific directories managed by Pax Web
 javax.servlet.context.tempdir = ${karaf.data}/pax-web/tmp
 		</config>
 		<configfile finalname="${karaf.etc}/tomcat-server.xml">
 			mvn:org.ops4j.pax.web/pax-web-features/${project.version}/xml/config-tomcat
+		</configfile>
+		<configfile finalname="${karaf.etc}/tomcat-context.xml">
+			mvn:org.ops4j.pax.web/pax-web-features/${project.version}/xml/context-tomcat
 		</configfile>
 	</feature>
 

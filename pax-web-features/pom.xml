@@ -146,9 +146,19 @@
 									<classifier>config-jetty</classifier>
 								</artifact>
 								<artifact>
+									<file>${project.build.outputDirectory}/jetty-web.xml</file>
+									<type>xml</type>
+									<classifier>context-jetty</classifier>
+								</artifact>
+								<artifact>
 									<file>${project.build.outputDirectory}/tomcat-server.xml</file>
 									<type>xml</type>
 									<classifier>config-tomcat</classifier>
+								</artifact>
+								<artifact>
+									<file>${project.build.outputDirectory}/tomcat-context.xml</file>
+									<type>xml</type>
+									<classifier>context-tomcat</classifier>
 								</artifact>
 								<artifact>
 									<file>${project.build.outputDirectory}/undertow.xml</file>
