@@ -878,6 +878,9 @@ class TomcatServerWrapper implements BatchVisitor {
 		PaxWebStandardContext realContext = contextHandlers.get(contextPath);
 
 		if (realContext == null) {
+			if (change.getKind() == OpCode.DELETE) {
+				return;
+			}
 			visitServletContextModelChange(new ServletContextModelChange(OpCode.ADD, new ServletContextModel(contextPath)));
 			realContext = contextHandlers.get(contextPath);
 		}
@@ -937,10 +940,15 @@ class TomcatServerWrapper implements BatchVisitor {
 			LOG.info("Removing {} from {}", osgiModel, realContext);
 
 			OsgiServletContext removedOsgiServletContext = osgiServletContexts.remove(osgiModel);
-			osgiContextModels.get(contextPath).remove(osgiModel);
+			TreeSet<OsgiContextModel> models = osgiContextModels.get(contextPath);
+			if (models != null) {
+				models.remove(osgiModel);
+			}
 
-			removedOsgiServletContext.unregister();
-			removedOsgiServletContext.releaseWebContainerContext();
+			if (removedOsgiServletContext != null) {
+				removedOsgiServletContext.unregister();
+				removedOsgiServletContext.releaseWebContainerContext();
+			}
 
 			OsgiServletContext currentHighestRankedContext = realContext.getDefaultServletContext();
 			if (currentHighestRankedContext == removedOsgiServletContext || pendingTransaction(contextPath)) {

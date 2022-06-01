@@ -202,7 +202,7 @@ public class WhiteboardShowcase implements Action {
 					// check the context path (with a bit of hacking)
 					if (runtime instanceof ServerModel) {
 						ServerModel model = (ServerModel) runtime;
-						Set<OsgiContextModel> contexts = new HashSet<>(model.getWhiteboardContexts());
+						Set<OsgiContextModel> contexts = new HashSet<>(model.getAllWhiteboardContexts());
 						String contextPath = "/";
 						try {
 							Field fBundleContexts = model.getClass().getDeclaredField("bundleContexts");

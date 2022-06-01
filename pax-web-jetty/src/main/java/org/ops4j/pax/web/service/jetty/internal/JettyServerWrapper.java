@@ -876,6 +876,9 @@ class JettyServerWrapper implements BatchVisitor {
 		PaxWebServletContextHandler sch = contextHandlers.get(contextPath);
 
 		if (sch == null) {
+			if (change.getKind() == OpCode.DELETE) {
+				return;
+			}
 			// by optimizing the process and assuming that removal of last OsgiContextModel for a context
 			// means full removal of the context, let's recreated the ServletContext now
 //				throw new IllegalStateException(ocm + " refers to unknown ServletContext for path " + contextPath);
@@ -940,10 +943,15 @@ class JettyServerWrapper implements BatchVisitor {
 			LOG.info("Removing {} from {}", osgiModel, sch);
 
 			OsgiServletContext removedOsgiServletContext = osgiServletContexts.remove(osgiModel);
-			osgiContextModels.get(contextPath).remove(osgiModel);
+			TreeSet<OsgiContextModel> models = osgiContextModels.get(contextPath);
+			if (models != null) {
+				models.remove(osgiModel);
+			}
 
-			removedOsgiServletContext.unregister();
-			removedOsgiServletContext.releaseWebContainerContext();
+			if (removedOsgiServletContext != null) {
+				removedOsgiServletContext.unregister();
+				removedOsgiServletContext.releaseWebContainerContext();
+			}
 
 			OsgiServletContext currentHighestRankedContext = ((PaxWebServletHandler) sch.getServletHandler()).getDefaultServletContext();
 			if (currentHighestRankedContext == removedOsgiServletContext || pendingTransaction(contextPath)) {
@@ -1696,7 +1704,7 @@ class JettyServerWrapper implements BatchVisitor {
 				OsgiServletContext osgiServletContext = osgiServletContexts.get(context);
 				ServletContextHandler servletContextHandler = contextHandlers.get(context.getContextPath());
 
-				if (osgiServletContext == null || servletContextHandler == null) {
+				if (osgiServletContext == null) {
 					// may happen when cleaning things out
 					return;
 				}
@@ -1726,7 +1734,7 @@ class JettyServerWrapper implements BatchVisitor {
 				LOG.info("Reconfiguration of welcome files for all resource servlets in context \"{}\"", context);
 
 				// reconfigure welcome files in resource servlets without reinitialization (Pax Web 8 change)
-				if (servletContextHandler.getServletHandler() != null
+				if (servletContextHandler != null && servletContextHandler.getServletHandler() != null
 						&& servletContextHandler.getServletHandler().getServlets() != null) {
 					for (ServletHolder sh : servletContextHandler.getServletHandler().getServlets()) {
 						PaxWebServletHolder pwsh = (PaxWebServletHolder) sh;

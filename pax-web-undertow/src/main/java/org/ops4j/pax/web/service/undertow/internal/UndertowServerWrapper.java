@@ -1322,10 +1322,15 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 			LOG.info("Removing {} from {}", osgiModel, contextPath);
 
 			OsgiServletContext removedOsgiServletContext = osgiServletContexts.remove(osgiModel);
-			osgiContextModels.get(contextPath).remove(osgiModel);
+			TreeSet<OsgiContextModel> models = osgiContextModels.get(contextPath);
+			if (models != null) {
+				models.remove(osgiModel);
+			}
 
-			removedOsgiServletContext.unregister();
-			removedOsgiServletContext.releaseWebContainerContext();
+			if (removedOsgiServletContext != null) {
+				removedOsgiServletContext.unregister();
+				removedOsgiServletContext.releaseWebContainerContext();
+			}
 
 			PaxWebOuterHandlerWrapper wrapper = wrappingHandlers.get(contextPath);
 			if (wrapper != null) {

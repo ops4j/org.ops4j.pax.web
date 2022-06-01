@@ -650,6 +650,9 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 		try {
 			return run(task, asynchronous);
 		} catch (Exception e) {
+			if (asynchronous) {
+				LOG.error(e.getMessage(), e);
+			}
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
@@ -3592,8 +3595,22 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 		return httpServiceRuntimeDTO;
 	}
 
-	public Set<OsgiContextModel> getWhiteboardContexts() {
+	public Set<OsgiContextModel> getAllWhiteboardContexts() {
 		return whiteboardContexts.values().stream().flatMap(Collection::stream).collect(Collectors.toSet());
+	}
+
+	public void addWhiteboardContext(OsgiContextModel ocm) {
+		whiteboardContexts.computeIfAbsent(ocm.getContextPath(), cp -> new TreeSet<>()).add(ocm);
+	}
+
+	public void removeWhiteboardContext(OsgiContextModel ocm) {
+		TreeSet<OsgiContextModel> models = whiteboardContexts.get(ocm.getContextPath());
+		if (models != null) {
+			models.remove(ocm);
+			if (models.isEmpty()) {
+				whiteboardContexts.remove(ocm.getContextPath());
+			}
+		}
 	}
 
 	public Set<ElementModel<?, ?>> getFailedWhiteboardElements() {

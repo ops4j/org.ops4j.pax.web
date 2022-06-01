@@ -2338,7 +2338,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		@Override
 		public void failedDTOInformation(OsgiContextModel webContext) {
 			serverModel.runSilently(() -> {
-				serverModel.getWhiteboardContexts().add(webContext);
+				serverModel.addWhiteboardContext(webContext);
 				return null;
 			}, webContext.isAsynchronusRegistration());
 		}
@@ -2354,7 +2354,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		@Override
 		public void clearFailedDTOInformation(OsgiContextModel webContext) {
 			serverModel.runSilently(() -> {
-				serverModel.getWhiteboardContexts().remove(webContext);
+				serverModel.removeWhiteboardContext(webContext);
 				return null;
 			}, true);
 		}
