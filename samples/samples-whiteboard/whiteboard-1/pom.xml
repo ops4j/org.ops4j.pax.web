@@ -31,7 +31,7 @@
 	<artifactId>whiteboard-1</artifactId>
 	<packaging>bundle</packaging>
 
-	<name>OPS4J Pax Web Whiteboard Samples - Whiteboard 1 servlet</name>
+	<name>OPS4J Pax Web Whiteboard Samples - Whiteboard 1</name>
 
 	<build>
 		<plugins>
