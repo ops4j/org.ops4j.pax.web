@@ -1077,7 +1077,7 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 	 */
 	public ServerEvent.Address[] getAddresses(boolean useLocalPort) {
 		if (listeners.size() == 0) {
-			return null;
+			return new ServerEvent.Address[0];
 		}
 		final List<ServerEvent.Address> result = new ArrayList<>(listeners.size());
 		listeners.values().forEach(ac -> result.add(new ServerEvent.Address(ac.getAddress(), ac.isSecure())));

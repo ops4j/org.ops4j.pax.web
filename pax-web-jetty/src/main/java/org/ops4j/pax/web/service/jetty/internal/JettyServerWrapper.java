@@ -674,7 +674,7 @@ class JettyServerWrapper implements BatchVisitor {
 	 */
 	public ServerEvent.Address[] getAddresses(boolean useLocalPort) {
 		if (server == null || server.getConnectors() == null || server.getConnectors().length == 0) {
-			return null;
+			return new ServerEvent.Address[0];
 		}
 		final List<ServerEvent.Address> result = new ArrayList<>(server.getConnectors().length);
 		for (Connector connector : server.getConnectors()) {

@@ -689,7 +689,7 @@ class TomcatServerWrapper implements BatchVisitor {
 	public ServerEvent.Address[] getAddresses(boolean useLocalPort) {
 		Service service = server.findService(TOMCAT_CATALINA_NAME);
 		if (service == null) {
-			return null;
+			return new ServerEvent.Address[0];
 		}
 		Connector[] currentConnectors = service.findConnectors();
 		if (currentConnectors == null) {
