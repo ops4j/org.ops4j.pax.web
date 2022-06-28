@@ -699,6 +699,7 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 		setProperty(properties, PaxWebConfig.PID_CFG_SESSION_COOKIE_HTTP_ONLY, sess.getSessionCookieHttpOnly());
 		setProperty(properties, PaxWebConfig.PID_CFG_SESSION_COOKIE_SECURE, sess.getSessionCookieSecure());
 		setProperty(properties, PaxWebConfig.PID_CFG_SESSION_COOKIE_MAX_AGE, sess.getSessionCookieMaxAge());
+		setProperty(properties, PaxWebConfig.PID_CFG_SESSION_COOKIE_SAME_SITE, sess.getSessionCookieSameSite());
 		setProperty(properties, PaxWebConfig.PID_CFG_SESSION_URL, sess.getSessionUrlPathParameter());
 		setProperty(properties, PaxWebConfig.PID_CFG_SESSION_WORKER_NAME, sess.getSessionWorkerName());
 		setProperty(properties, PaxWebConfig.PID_CFG_SESSION_STORE_DIRECTORY, sess.getSessionStoreDirectoryLocation());

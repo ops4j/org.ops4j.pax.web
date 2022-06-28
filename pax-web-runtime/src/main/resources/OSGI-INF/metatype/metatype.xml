@@ -186,6 +186,8 @@
 				name="Session cookie secure" />
 		<AD id="org.ops4j.pax.web.session.cookie.maxAge" type="Integer" default="-1"
 				name="Session cookie max age" />
+		<AD id="org.ops4j.pax.web.session.cookie.sameSite" type="String" default="unset"
+				name="Session cookie SameSite attribute (unset, none, lax, strict)" />
 		<!-- path parameter name - configured only in Jetty -->
 		<AD id="org.ops4j.pax.web.session.url" type="String" default="jsessionid"
 				name="Session path parameter name for URL rewrite" />

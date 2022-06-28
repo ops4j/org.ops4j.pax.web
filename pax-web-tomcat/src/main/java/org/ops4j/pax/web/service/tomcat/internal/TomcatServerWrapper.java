@@ -74,6 +74,8 @@ import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
 import org.apache.tomcat.util.descriptor.web.WebXml;
 import org.apache.tomcat.util.descriptor.web.WebXmlParser;
 import org.apache.tomcat.util.digester.Digester;
+import org.apache.tomcat.util.http.Rfc6265CookieProcessor;
+import org.apache.tomcat.util.http.SameSiteCookies;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.config.LogConfiguration;
 import org.ops4j.pax.web.service.spi.config.SessionConfiguration;
@@ -815,6 +817,16 @@ class TomcatServerWrapper implements BatchVisitor {
 			// false, because that configures the behavior to be the same in Jetty, Tomcat and Undertow
 			context.setSessionCookiePathUsesTrailingSlash(false);
 			context.setValidateClientProvidedNewSessionId(true);
+			// #1727 - SameSite attribute handling - only from configuration (unset, none, lax, strict)
+			Rfc6265CookieProcessor cookieProcessor = new Rfc6265CookieProcessor();
+			String sameSiteValue = sc.getSessionCookieSameSite();
+			if (sameSiteValue != null) {
+				// in Tomcat, "unset" is real value
+				cookieProcessor.setSameSiteCookies(sameSiteValue);
+			} else {
+				cookieProcessor.setSameSiteCookies(SameSiteCookies.UNSET.getValue());
+			}
+			context.setCookieProcessor(cookieProcessor);
 
 			StandardManager manager = new PaxWebSessionManager();
 			manager.setSessionIdGenerator(new PaxWebSessionIdGenerator());

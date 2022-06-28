@@ -79,6 +79,12 @@ public interface SessionConfiguration {
 	 */
 	Integer getSessionCookieMaxAge();
 
+	/**
+	 * No equivalent in {@code web.xml}. {@code SameSite} attribute for session cookie.
+	 * @return
+	 */
+	String getSessionCookieSameSite();
+
 	// --- configuration that's not related to web.xml or javax.servlet.SessionCookieConfig
 
 	/**

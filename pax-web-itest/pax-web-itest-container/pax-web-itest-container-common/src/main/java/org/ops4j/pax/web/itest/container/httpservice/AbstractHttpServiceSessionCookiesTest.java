@@ -15,7 +15,6 @@
  */
 package org.ops4j.pax.web.itest.container.httpservice;
 
-import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import javax.inject.Inject;
@@ -24,16 +23,14 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
+import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
 import org.ops4j.pax.web.service.PaxWebConfig;
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.service.cm.ConfigurationAdmin;
-import org.osgi.util.tracker.ServiceTracker;
 
-import static org.junit.Assert.assertNotNull;
-
-public abstract class AbstractHttpServiceWithoutConnectorsIntegrationTest extends AbstractContainerTestBase {
+public abstract class AbstractHttpServiceSessionCookiesTest extends AbstractContainerTestBase {
 
 	private Bundle hsBundle;
 
@@ -46,26 +43,16 @@ public abstract class AbstractHttpServiceWithoutConnectorsIntegrationTest extend
 
 		Dictionary<String, Object> props = new Hashtable<>();
 
-		props.put(PaxWebConfig.PID_CFG_HTTP_ENABLED, "false");
+		props.put(PaxWebConfig.PID_CFG_LISTENING_ADDRESSES, "127.0.0.1");
+		props.put(PaxWebConfig.PID_CFG_HTTP_PORT, "8182");
+		props.put(PaxWebConfig.PID_CFG_SESSION_COOKIE_SAME_SITE, "lax");
 
 		configureAndWaitForServletWithMapping("/alt-images/*", () -> {
 			hsBundle = installAndStartBundle(sampleURI("hs-helloworld"));
 			Dictionary<String, Object> current = config.getProperties();
-			if (current == null || !"false".equals(current.get(PaxWebConfig.PID_CFG_HTTP_ENABLED))) {
-				configureAndWait(() -> {
-					try {
-						config.update(props);
-					} catch (IOException e) {
-						throw new RuntimeException(e);
-					}
-				}, list -> {
-					try {
-						Thread.sleep(300);
-					} catch (InterruptedException e) {
-						Thread.currentThread().interrupt();
-						throw new RuntimeException(e);
-					}
-					return true;
+			if (current == null || !"8182".equals(current.get(PaxWebConfig.PID_CFG_HTTP_PORT))) {
+				configureAndWaitForListener(8182, () -> {
+					config.update(props);
 				});
 			}
 		});
@@ -80,10 +67,14 @@ public abstract class AbstractHttpServiceWithoutConnectorsIntegrationTest extend
 	}
 
 	@Test
-	public void testServiceAvailable() throws Exception {
-		ServiceTracker<?, ?> tracker = new ServiceTracker<>(context, "org.ops4j.pax.web.service.spi.ServerControllerFactory", null);
-		tracker.open();
-		assertNotNull(tracker.waitForService(5000));
+	public void testSubPath() throws Exception {
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'Hello World'",
+						resp -> resp.contains("Hello World"))
+				.withResponseHeaderAssertion("SameSite attribute should be set in JSESSIONID cookie",
+						headers -> headers.anyMatch(e
+								-> e.getKey().equals("Set-Cookie") && e.getValue().contains("SameSite=Lax")))
+				.doGETandExecuteTest("http://127.0.0.1:8182/helloworld/hs");
 	}
 
 }

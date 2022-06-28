@@ -415,6 +415,8 @@ public interface PaxWebConfig {
 	String PID_CFG_SESSION_COOKIE_SECURE = "org.ops4j.pax.web.session.cookie.secure";
 	/** Integer property that specifies max age of session cookie */
 	String PID_CFG_SESSION_COOKIE_MAX_AGE = "org.ops4j.pax.web.session.cookie.maxAge";
+	/** String property that specifies {@code SameSite} attribute of session cookie */
+	String PID_CFG_SESSION_COOKIE_SAME_SITE = "org.ops4j.pax.web.session.cookie.sameSite";
 
 	/** For Jetty, we can specify the URL path parameter for session URL rewriting. Defauts to {@code jsessionid}. */
 	String PID_CFG_SESSION_URL = "org.ops4j.pax.web.session.url";

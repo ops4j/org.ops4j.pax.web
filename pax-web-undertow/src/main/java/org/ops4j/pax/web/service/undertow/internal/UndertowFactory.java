@@ -51,10 +51,12 @@ import io.undertow.protocols.ssl.UndertowXnioSsl;
 import io.undertow.server.DefaultByteBufferPool;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.OpenListener;
+import io.undertow.server.handlers.CookieSameSiteMode;
 import io.undertow.server.handlers.DisallowedMethodsHandler;
 import io.undertow.server.handlers.PeerNameResolvingHandler;
 import io.undertow.server.handlers.ProxyPeerAddressHandler;
 import io.undertow.server.handlers.SSLHeaderHandler;
+import io.undertow.server.handlers.SameSiteCookieHandler;
 import io.undertow.server.protocol.http.AlpnOpenListener;
 import io.undertow.server.protocol.http.HttpOpenListener;
 import io.undertow.server.protocol.http2.Http2OpenListener;
@@ -519,6 +521,20 @@ public class UndertowFactory {
 			listener.getDisallowedMethods().stream().map(HttpString::tryFromString).forEach(disallowedMethods::add);
 			handler = new DisallowedMethodsHandler(handler, disallowedMethods);
 		}
+		// https://github.com/ops4j/org.ops4j.pax.web/issues/1727 - SameSite attribute
+		String sameSiteValue = config.session().getSessionCookieSameSite();
+		if (sameSiteValue != null && !"unset".equalsIgnoreCase(sameSiteValue)) {
+			String mode = null;
+			if ("none".equalsIgnoreCase(sameSiteValue)) {
+				mode = CookieSameSiteMode.NONE.toString();
+			} else if ("lax".equalsIgnoreCase(sameSiteValue)) {
+				mode = CookieSameSiteMode.LAX.toString();
+			} else if ("strict".equalsIgnoreCase(sameSiteValue)) {
+				mode = CookieSameSiteMode.STRICT.toString();
+			}
+			handler = new SameSiteCookieHandler(handler, mode, config.session().getSessionCookieName());
+		}
+
 		if (listener.isCertificateForwarding()) {
 			// org.wildfly.extension.undertow.HttpListenerResourceDefinition#CERTIFICATE_FORWARDING
 			handler = new SSLHeaderHandler(handler);

@@ -820,6 +820,11 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 		}
 
 		@Override
+		public String getSessionCookieSameSite() {
+			return resolveStringProperty(PaxWebConfig.PID_CFG_SESSION_COOKIE_SAME_SITE);
+		}
+
+		@Override
 		public String getSessionUrlPathParameter() {
 			return sessionCookiePathName;
 		}

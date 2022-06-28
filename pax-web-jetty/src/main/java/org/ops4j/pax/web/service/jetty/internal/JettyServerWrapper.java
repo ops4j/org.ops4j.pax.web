@@ -46,6 +46,7 @@ import javax.servlet.SessionCookieConfig;
 import javax.servlet.annotation.ServletSecurity;
 import javax.servlet.http.HttpSessionAttributeListener;
 
+import org.eclipse.jetty.http.HttpCookie;
 import org.eclipse.jetty.http.MimeTypes;
 import org.eclipse.jetty.http.PreEncodedHttpField;
 import org.eclipse.jetty.jmx.MBeanContainer;
@@ -807,6 +808,19 @@ class JettyServerWrapper implements BatchVisitor {
 				sessions.getSessionCookieConfig().setHttpOnly(defaultSessionCookieConfig.isHttpOnly());
 				sessions.getSessionCookieConfig().setSecure(defaultSessionCookieConfig.isSecure());
 				sessions.getSessionCookieConfig().setComment(defaultSessionCookieConfig.getComment());
+
+				// #1727 - set comment first, because later Jetty can use it to (re)configure same site attribute
+				String sameSiteValue = sc.getSessionCookieSameSite();
+				if (sameSiteValue != null && !"unset".equalsIgnoreCase(sameSiteValue)) {
+					if ("none".equalsIgnoreCase(sameSiteValue)) {
+						sessions.setSameSite(HttpCookie.SameSite.NONE);
+					} else if ("lax".equalsIgnoreCase(sameSiteValue)) {
+						sessions.setSameSite(HttpCookie.SameSite.LAX);
+					} else if ("strict".equalsIgnoreCase(sameSiteValue)) {
+						sessions.setSameSite(HttpCookie.SameSite.STRICT);
+					}
+				}
+
 				if (sc.getSessionUrlPathParameter() != null) {
 					sessions.setSessionIdPathParameterName(sc.getSessionUrlPathParameter());
 				}
@@ -2166,7 +2180,20 @@ class JettyServerWrapper implements BatchVisitor {
 					sessionHandler.getSessionCookieConfig().setMaxAge(scc.getMaxAge());
 					sessionHandler.getSessionCookieConfig().setHttpOnly(scc.isHttpOnly());
 					sessionHandler.getSessionCookieConfig().setSecure(scc.isSecure());
-					sessionHandler.getSessionCookieConfig().setComment(scc.getComment());
+
+					// #1727 - set comment first, because later Jetty can use it to (re)configure same site attribute
+					String comment = scc.getComment();
+					sessionHandler.getSessionCookieConfig().setComment(comment);
+					String sameSiteValue = configuration.session().getSessionCookieSameSite();
+					if (sameSiteValue != null && !"unset".equalsIgnoreCase(sameSiteValue)) {
+						if ("none".equalsIgnoreCase(sameSiteValue)) {
+							sessionHandler.setSameSite(HttpCookie.SameSite.NONE);
+						} else if ("lax".equalsIgnoreCase(sameSiteValue)) {
+							sessionHandler.setSameSite(HttpCookie.SameSite.LAX);
+						} else if ("strict".equalsIgnoreCase(sameSiteValue)) {
+							sessionHandler.setSameSite(HttpCookie.SameSite.STRICT);
+						}
+					}
 
 					if (sessionConfig.getTrackingModes().size() > 0) {
 						sessionHandler.setSessionTrackingModes(sessionConfig.getTrackingModes());

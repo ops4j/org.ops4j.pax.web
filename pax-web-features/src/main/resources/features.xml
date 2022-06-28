@@ -182,6 +182,9 @@ org.osgi.service.http.secure.enabled = false
 # see https://www.eclipse.org/jetty/documentation/jetty-9/index.html#using-basic-descriptor-files
 #org.ops4j.pax.web.context.file = ${karaf.etc}/jetty-web.xml
 
+# SameSite attribute configuration for session cookie (possible values: none, lax, strict)
+#org.ops4j.pax.web.session.cookie.sameSite = strict
+
 # this is a root directory for all the context-specific directories managed by Pax Web
 javax.servlet.context.tempdir = ${karaf.data}/pax-web/tmp
 		</config>
@@ -251,6 +254,9 @@ org.osgi.service.http.secure.enabled = false
 # optional Tomcat context configuration file applied to all web contexts
 # see https://tomcat.apache.org/tomcat-9.0-doc/config/context.html
 #org.ops4j.pax.web.context.file = ${karaf.etc}/tomcat-context.xml
+
+# SameSite attribute configuration for session cookie (possible values: none, lax, strict)
+#org.ops4j.pax.web.session.cookie.sameSite = strict
 
 # this is a root directory for all the context-specific directories managed by Pax Web
 javax.servlet.context.tempdir = ${karaf.data}/pax-web/tmp
@@ -324,6 +330,9 @@ org.osgi.service.http.secure.enabled = false
 
 # external Undertow configuration file where Undertow-specific beans may be declared
 #org.ops4j.pax.web.config.file = ${karaf.etc}/undertow.xml
+
+# SameSite attribute configuration for session cookie (possible values: none, lax, strict)
+#org.ops4j.pax.web.session.cookie.sameSite = strict
 
 # this is a root directory for all the context-specific directories managed by Pax Web
 javax.servlet.context.tempdir = ${karaf.data}/pax-web/tmp
