@@ -92,9 +92,6 @@ public class OsgiContextConfiguration implements LifecycleListener {
 		if (event.getType().equals(Lifecycle.CONFIGURE_START_EVENT)) {
 //		if (event.getLifecycle().getState() == LifecycleState.STARTING_PREP) {
 
-			LoginConfig lc;
-			boolean noAuth = false;
-
 			// security configuration - from all relevant OsgiContextModels
 			Map<OsgiContextModel, SecurityConfigurationModel> allSecConfigs = contextSecurityConstraints.get(osgiContextModel.getContextPath());
 			SecurityConfigurationModel securityConfig = null;
@@ -107,64 +104,6 @@ public class OsgiContextConfiguration implements LifecycleListener {
 				allSecConfigs = Collections.singletonMap(osgiContextModel, securityConfig);
 			}
 			LoginConfigModel loginConfig = securityConfig != null ? securityConfig.getLoginConfig() : null;
-
-			if (loginConfig == null) {
-				authenticationValve = null;
-				lc = new LoginConfig("NONE", null, null, null);
-				noAuth = true;
-			} else {
-				// see org.apache.catalina.startup.ContextConfig.authenticatorConfig()
-
-				lc = new LoginConfig(loginConfig.getAuthMethod(), loginConfig.getRealmName(),
-						loginConfig.getFormLoginPage(), loginConfig.getFormErrorPage());
-
-				// determine the Authenticator valve
-				// Tomcat does it using /org/apache/catalina/startup/Authenticators.properties
-				Authenticator authenticator = null;
-				switch (loginConfig.getAuthMethod().toUpperCase()) {
-					case "BASIC":
-						authenticator = new BasicAuthenticator();
-						if (lc.getRealmName() == null) {
-							lc.setRealmName("default");
-						}
-						break;
-					case "DIGEST":
-						DigestAuthenticator digestAuthenticator = new DigestAuthenticator();
-						digestAuthenticator.setNonceValidity(configuration.security().getDigestAuthMaxNonceAge());
-						authenticator = digestAuthenticator;
-						if (lc.getRealmName() == null) {
-							lc.setRealmName("default");
-						}
-						break;
-					case "CLIENT-CERT":
-					case "CLIENT_CERT":
-						authenticator = new SSLAuthenticator();
-						break;
-					case "FORM":
-						authenticator = new FormAuthenticator();
-						break;
-					case "SPNEGO":
-						authenticator = new SpnegoAuthenticator();
-						break;
-					case "NONE":
-						authenticator = new NonLoginAuthenticator();
-						break;
-					default:
-						Authenticator customAuthenticator = getAuthenticator(loginConfig.getAuthMethod().toUpperCase());
-						if (customAuthenticator == null) {
-							LOG.warn("Can't find Tomcat Authenticator for auth method {}", loginConfig.getAuthMethod().toUpperCase());
-						} else {
-							LOG.debug("Setting custom Tomcat authenticator {}", customAuthenticator);
-							authenticator = customAuthenticator;
-						}
-				}
-
-				authenticationValve = (Valve) authenticator;
-			}
-
-			if (authenticationValve == null) {
-				noAuth = true;
-			}
 
 			PaxWebStandardContext context = (PaxWebStandardContext) event.getSource();
 			// org.apache.catalina.startup.ContextConfig.configureStart() is called during CONFIGURE_START_EVENT
@@ -208,75 +147,6 @@ public class OsgiContextConfiguration implements LifecycleListener {
 						context.getServletContext().setSessionTrackingModes(sc.getTrackingModes());
 					}
 				}
-			}
-
-			// alter security configuration
-			context.setLoginConfig(lc);
-			for (SecurityConstraint constr : context.findConstraints()) {
-				context.removeConstraint(constr);
-			}
-			for (String role : context.findSecurityRoles()) {
-				context.removeSecurityRole(role);
-			}
-
-			// security constraints
-			if (!noAuth) {
-				// roles and constraints are not taken only from the highest ranked OsgiContextModel - they're
-				// taken from all the OCMs for given context path - on order of OCM rank
-				// it's up to user to take care of the conflicts, because simple rank-ordering will add higher-ranked
-				// rules first - the container may decide to override or reject the lower ranked later.
-
-				List<SecurityConstraintModel> allConstraints = new ArrayList<>();
-				Set<String> allRoles = new LinkedHashSet<>();
-				allSecConfigs.values().forEach(sec -> {
-					allConstraints.addAll(sec.getSecurityConstraints());
-					allRoles.addAll(sec.getSecurityRoles());
-				});
-
-				boolean allAuthenticatedUsersIsAppRole = allRoles
-						.contains(SecurityConstraint.ROLE_ALL_AUTHENTICATED_USERS);
-
-				for (SecurityConstraintModel scm : allConstraints) {
-					SecurityConstraint constraint = new SecurityConstraint();
-					constraint.setDisplayName(scm.getName());
-					constraint.setUserConstraint(scm.getTransportGuarantee().name());
-
-					constraint.setAuthConstraint(scm.isAuthRolesSet());
-					for (String role : scm.getAuthRoles()) {
-						constraint.addAuthRole(role);
-					}
-
-					// <web-resource-collection> elements
-					for (SecurityConstraintModel.WebResourceCollection col : scm.getWebResourceCollections()) {
-						SecurityCollection wrc = new SecurityCollection();
-						wrc.setName(col.getName());
-						boolean methodSet = false;
-						for (String method : col.getMethods()) {
-							wrc.addMethod(method);
-							methodSet = true;
-						}
-						if (!methodSet) {
-							for (String method : col.getOmittedMethods()) {
-								wrc.addOmittedMethod(method);
-							}
-						}
-						for (String pattern : col.getPatterns()) {
-							wrc.addPattern(pattern);
-						}
-						constraint.addCollection(wrc);
-					}
-
-					if (allAuthenticatedUsersIsAppRole) {
-						constraint.treatAllAuthenticatedUsersAsApplicationRole();
-					}
-					context.addConstraint(constraint);
-				}
-
-				for (String role : allRoles) {
-					context.addSecurityRole(role);
-				}
-
-				context.getPipeline().addValve(authenticationValve);
 			}
 
 			// taking virtual host / connector configuration from OsgiContextModel - see
@@ -355,6 +225,147 @@ public class OsgiContextConfiguration implements LifecycleListener {
 				LOG.warn("Can't process context configuration file: {}", e.getMessage(), e);
 			} finally {
 				Thread.currentThread().setContextClassLoader(tccl);
+			}
+
+			LoginConfig lc;
+			boolean noAuth = false;
+
+			if (loginConfig == null) {
+				authenticationValve = null;
+				lc = new LoginConfig("NONE", null, null, null);
+				noAuth = true;
+			} else {
+				// see org.apache.catalina.startup.ContextConfig.authenticatorConfig()
+
+				lc = new LoginConfig(loginConfig.getAuthMethod(), loginConfig.getRealmName(),
+						loginConfig.getFormLoginPage(), loginConfig.getFormErrorPage());
+
+				// Has an authenticator been configured already?
+				authenticationValve = (Valve) context.getAuthenticator();
+				if (authenticationValve == null) {
+
+					// determine the Authenticator valve
+					// Tomcat does it using /org/apache/catalina/startup/Authenticators.properties
+					Authenticator authenticator = null;
+					switch (loginConfig.getAuthMethod().toUpperCase()) {
+					case "BASIC":
+						authenticator = new BasicAuthenticator();
+						if (lc.getRealmName() == null) {
+							lc.setRealmName("default");
+						}
+						break;
+					case "DIGEST":
+						DigestAuthenticator digestAuthenticator = new DigestAuthenticator();
+						digestAuthenticator.setNonceValidity(configuration.security().getDigestAuthMaxNonceAge());
+						authenticator = digestAuthenticator;
+						if (lc.getRealmName() == null) {
+							lc.setRealmName("default");
+						}
+						break;
+					case "CLIENT-CERT":
+					case "CLIENT_CERT":
+						authenticator = new SSLAuthenticator();
+						break;
+					case "FORM":
+						authenticator = new FormAuthenticator();
+						break;
+					case "SPNEGO":
+						authenticator = new SpnegoAuthenticator();
+						break;
+					case "NONE":
+						authenticator = new NonLoginAuthenticator();
+						break;
+					default:
+						Authenticator customAuthenticator = getAuthenticator(loginConfig.getAuthMethod().toUpperCase());
+						if (customAuthenticator == null) {
+							LOG.warn("Can't find Tomcat Authenticator for auth method {}",
+									loginConfig.getAuthMethod().toUpperCase());
+						} else {
+							LOG.debug("Setting custom Tomcat authenticator {}", customAuthenticator);
+							authenticator = customAuthenticator;
+						}
+					}
+
+					authenticationValve = (Valve) authenticator;
+
+					if (authenticationValve != null) {
+						context.getPipeline().addValve(authenticationValve);
+					}
+				}
+			}
+
+			if (authenticationValve == null) {
+				noAuth = true;
+			}
+
+			// alter security configuration
+			context.setLoginConfig(lc);
+			for (SecurityConstraint constr : context.findConstraints()) {
+				context.removeConstraint(constr);
+			}
+			for (String role : context.findSecurityRoles()) {
+				context.removeSecurityRole(role);
+			}
+
+			// security constraints
+			if (!noAuth) {
+				// roles and constraints are not taken only from the highest ranked
+				// OsgiContextModel - they're
+				// taken from all the OCMs for given context path - on order of OCM rank
+				// it's up to user to take care of the conflicts, because simple rank-ordering
+				// will add higher-ranked
+				// rules first - the container may decide to override or reject the lower ranked
+				// later.
+
+				List<SecurityConstraintModel> allConstraints = new ArrayList<>();
+				Set<String> allRoles = new LinkedHashSet<>();
+				allSecConfigs.values().forEach(sec -> {
+					allConstraints.addAll(sec.getSecurityConstraints());
+					allRoles.addAll(sec.getSecurityRoles());
+				});
+
+				boolean allAuthenticatedUsersIsAppRole = allRoles
+						.contains(SecurityConstraint.ROLE_ALL_AUTHENTICATED_USERS);
+
+				for (SecurityConstraintModel scm : allConstraints) {
+					SecurityConstraint constraint = new SecurityConstraint();
+					constraint.setDisplayName(scm.getName());
+					constraint.setUserConstraint(scm.getTransportGuarantee().name());
+
+					constraint.setAuthConstraint(scm.isAuthRolesSet());
+					for (String role : scm.getAuthRoles()) {
+						constraint.addAuthRole(role);
+					}
+
+					// <web-resource-collection> elements
+					for (SecurityConstraintModel.WebResourceCollection col : scm.getWebResourceCollections()) {
+						SecurityCollection wrc = new SecurityCollection();
+						wrc.setName(col.getName());
+						boolean methodSet = false;
+						for (String method : col.getMethods()) {
+							wrc.addMethod(method);
+							methodSet = true;
+						}
+						if (!methodSet) {
+							for (String method : col.getOmittedMethods()) {
+								wrc.addOmittedMethod(method);
+							}
+						}
+						for (String pattern : col.getPatterns()) {
+							wrc.addPattern(pattern);
+						}
+						constraint.addCollection(wrc);
+					}
+
+					if (allAuthenticatedUsersIsAppRole) {
+						constraint.treatAllAuthenticatedUsersAsApplicationRole();
+					}
+					context.addConstraint(constraint);
+				}
+
+				for (String role : allRoles) {
+					context.addSecurityRole(role);
+				}
 			}
 
 			context.setConfigured(true);
