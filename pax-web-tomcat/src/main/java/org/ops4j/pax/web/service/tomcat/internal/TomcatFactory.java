@@ -248,12 +248,11 @@ public class TomcatFactory {
 
 		// --- server truststore for client validation
 
-		protocol.setTruststoreFile(secc.getTruststore());
-
-		if (secc.getTruststore() != null) {
-			if (secc.getTruststorePassword() == null) {
-				throw new IllegalArgumentException("Missing server truststore password.");
-			}
+		String sslTruststore = secc.getTruststore();
+		if (sslTruststore != null) {
+			protocol.setTruststoreFile(sslTruststore);
+		}
+		if (secc.getTruststorePassword() != null) {
 			protocol.setTruststorePass(secc.getTruststorePassword());
 		}
 		if (secc.getTruststoreType() != null) {

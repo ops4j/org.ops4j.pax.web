@@ -297,12 +297,11 @@ class JettyFactory {
 
 		// --- server truststore for client validation
 
-		sslContextFactory.setTrustStorePath(secc.getTruststore());
-
-		if (secc.getTruststore() != null) {
-			if (secc.getTruststorePassword() == null) {
-				throw new IllegalArgumentException("Missing server truststore password.");
-			}
+		String sslTruststore = secc.getTruststore();
+		if (sslTruststore != null) {
+			sslContextFactory.setTrustStorePath(sslTruststore);
+		}
+		if (secc.getTruststorePassword() != null) {
 			sslContextFactory.setTrustStorePassword(secc.getTruststorePassword());
 		}
 		if (secc.getTruststoreType() != null) {
