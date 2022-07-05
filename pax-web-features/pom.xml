@@ -79,7 +79,7 @@
 						</goals>
 						<configuration>
 							<descriptors>
-<!--								<descriptor>mvn:org.apache.karaf.features/standard/${dependency.org.apache.karaf}/xml/features</descriptor>-->
+								<descriptor>mvn:org.apache.karaf.features/standard/${dependency.org.apache.karaf}/xml/features</descriptor>
 								<descriptor>file:${project.build.directory}/classes/features.xml</descriptor>
 							</descriptors>
 							<blacklistedDescriptors>

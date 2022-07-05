@@ -385,10 +385,7 @@ javax.servlet.context.tempdir = ${karaf.data}/pax-web/tmp
 
 	<feature name="pax-web-karaf" description="Pax Web Karaf integration" version="${project.version}">
 		<feature>pax-web-core</feature>
-
-		<!-- We need one bundle from Karaf, not entire "shell" feature - we don't want to accidentally include Karaf's Pax Web features -->
-		<bundle dependency="true">mvn:org.apache.karaf.shell/org.apache.karaf.shell.core/${dependency.org.apache.karaf}</bundle>
-		<bundle dependency="true">mvn:org.jline/jline/${dependency.org.jline}</bundle>
+		<feature>shell</feature>
 
 		<bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-deployer/${project.version}</bundle>
 
