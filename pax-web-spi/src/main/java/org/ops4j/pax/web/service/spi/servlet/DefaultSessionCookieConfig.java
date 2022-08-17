@@ -19,7 +19,7 @@ import javax.servlet.SessionCookieConfig;
 
 public class DefaultSessionCookieConfig implements SessionCookieConfig {
 
-	private String name = "JSESSIONID";
+	private String name;
 	private String domain;
 	private String path;
 	private String comment;

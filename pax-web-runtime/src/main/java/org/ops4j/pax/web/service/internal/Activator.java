@@ -412,6 +412,7 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 
 		this.configuration = dictionary;
 		boolean hadSCF = this.serverControllerFactory != null;
+		ServerControllerFactory previousServerControllerFactory = this.serverControllerFactory;
 		this.serverControllerFactory = controllerFactory;
 
 		cleanUpHttpServiceRegistrations();
@@ -425,6 +426,9 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 				serverController.stop();
 			} catch (Exception e) {
 				LOG.error("Problem stopping server controller: " + e.getMessage(), e);
+			}
+			if (previousServerControllerFactory != null) {
+				previousServerControllerFactory.releaseServerController(serverController, serverController.getConfiguration());
 			}
 			serverController = null;
 		}

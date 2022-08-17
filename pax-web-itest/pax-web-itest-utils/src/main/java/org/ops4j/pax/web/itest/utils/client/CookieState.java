@@ -27,7 +27,7 @@ public class CookieState {
 
 	private final CookieStore cookieStore = new BasicCookieStore();
 
-	CookieStore getCookieStore() {
+	public CookieStore getCookieStore() {
 		return cookieStore;
 	}
 
