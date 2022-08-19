@@ -231,7 +231,7 @@ public class WarExtenderContext implements WebContainerListener, ReportViewPlugi
 		List<String> skippedJarsList;
 		if (skippedJars != null) {
 			skippedJarsList = new ArrayList<>();
-			for (String pattern : skippedJars.split("\\s*,\\s")) {
+			for (String pattern : skippedJars.split("\\s*,\\s*")) {
 				if ("default".equals(pattern)) {
 					skippedJarsList.addAll(WarExtenderContext.DEFAULT_IGNORED_LIBRARIES);
 				} else {
@@ -246,7 +246,7 @@ public class WarExtenderContext implements WebContainerListener, ReportViewPlugi
 		List<String> scannedJarsList;
 		if (scannedJars != null) {
 			scannedJarsList = new ArrayList<>();
-			Collections.addAll(scannedJarsList, scannedJars.split("\\s*,\\s"));
+			Collections.addAll(scannedJarsList, scannedJars.split("\\s*,\\s*"));
 		} else {
 			scannedJarsList = Collections.emptyList();
 		}
