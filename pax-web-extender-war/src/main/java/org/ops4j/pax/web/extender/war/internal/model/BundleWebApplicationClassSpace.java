@@ -364,6 +364,7 @@ public class BundleWebApplicationClassSpace {
 			bundles.add(undertowWebSocketBundle);
 		}
 
+		Set<Bundle> reached = new HashSet<>();
 		while (bundles.size() > 0) {
 			// org.apache.tomcat.util.scan.StandardJarScanner.processURLs() - Tomcat traverses CL hierarchy
 			// and collects non-filtered (see conf/catalina.properties:
@@ -379,7 +380,8 @@ public class BundleWebApplicationClassSpace {
 			Set<Bundle> reachable = new HashSet<>();
 			ClassPathUtil.getBundlesInClassSpace(scannedBundle, reachable);
 			for (Bundle rb : reachable) {
-				if (!processedBundles.contains(rb) && !Utils.isFragment(rb)) {
+				if (!reached.contains(rb) && !processedBundles.contains(rb) && !Utils.isFragment(rb)) {
+					reached.add(rb);
 					bundles.add(rb);
 				}
 			}
