@@ -44,6 +44,7 @@
 		<module>whiteboard-extended</module>
 		<module>whiteboard-ds-jaxrs</module>
 		<module>whiteboard-1</module>
+		<module>whiteboard-annotated</module>
 	</modules>
 
 </project>
