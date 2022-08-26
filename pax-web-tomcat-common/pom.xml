@@ -43,6 +43,10 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
+						<DynamicImport-Package>
+							javax.servlet.jsp,
+							javax.servlet.jsp.*
+						</DynamicImport-Package>
 						<Import-Package>
 							<!-- ranges indicate Servlet API 3.1+ (JavaEE 7+) -->
 							javax.servlet;version="[3.1,5)",
@@ -53,9 +57,9 @@
 							org.ops4j.pax.web.service;version="${pax-web.osgi.version}",
 
 							<!-- from pax-web-jsp -->
-							javax.servlet.jsp;version="2.3";resolution:=optional,
-							javax.servlet.jsp.el;version="2.3";resolution:=optional,
-							javax.servlet.jsp.tagext;version="2.3";resolution:=optional,
+<!--							javax.servlet.jsp;version="2.3";resolution:=optional,-->
+<!--							javax.servlet.jsp.el;version="2.3";resolution:=optional,-->
+<!--							javax.servlet.jsp.tagext;version="2.3";resolution:=optional,-->
 
 							<!-- from pax-logging-api -->
 							org.apache.juli.logging,
