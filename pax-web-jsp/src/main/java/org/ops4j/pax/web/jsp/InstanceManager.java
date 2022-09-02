@@ -47,20 +47,20 @@ public class InstanceManager implements org.apache.tomcat.InstanceManager {
 	@Override
 	public Object newInstance(String className) throws IllegalAccessException,
 			InvocationTargetException, InstantiationException,
-			ClassNotFoundException {
+			ClassNotFoundException, NoSuchMethodException {
 		ClassLoader classLoader = Thread.currentThread()
 				.getContextClassLoader();
 		Class<?> clazz = loadClassMaybePrivileged(className, classLoader);
-		return newInstance(clazz.newInstance(), clazz);
+		return newInstance(clazz.getConstructor().newInstance(), clazz);
 	}
 
 	@Override
 	public Object newInstance(final String className,
 							  final ClassLoader classLoader) throws IllegalAccessException,
 			InvocationTargetException, InstantiationException,
-			ClassNotFoundException {
+			ClassNotFoundException, NoSuchMethodException {
 		Class<?> clazz = classLoader.loadClass(className);
-		return newInstance(clazz.newInstance(), clazz);
+		return newInstance(clazz.getConstructor().newInstance(), clazz);
 	}
 
 	@Override
@@ -75,7 +75,7 @@ public class InstanceManager implements org.apache.tomcat.InstanceManager {
 		Object instance;
 		try {
 			instance = newInstance(clazz.getName());
-		} catch (ClassNotFoundException e) {
+		} catch (ClassNotFoundException | NoSuchMethodException e) {
 			throw new InstantiationException("can't create object for class "
 					+ clazz);
 		}
@@ -125,7 +125,7 @@ public class InstanceManager implements org.apache.tomcat.InstanceManager {
 			if (entry.getType() == AnnotationCacheEntryType.PRE_DESTROY) {
 				Method preDestroy = getMethod(clazz, entry);
 				synchronized (preDestroy) {
-					boolean accessibility = preDestroy.isAccessible();
+					boolean accessibility = preDestroy.canAccess(instance);
 					preDestroy.setAccessible(true);
 					preDestroy.invoke(instance);
 					preDestroy.setAccessible(accessibility);

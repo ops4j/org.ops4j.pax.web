@@ -466,10 +466,10 @@ public class EmbeddedJettyTest {
 		// Jetty calls context.getServletContext().setExtendedListenerTypes(true) when starting SCIs (which are wrapped
 		// in ServletContextListeners...) ONLY
 		// If a ServletContextListener wants to add another ServletContextListener (like
-		// org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer.configure())
+		// org.eclipse.jetty.websocket.javax.server.config.JavaxWebSocketServletContainerInitializer.configure())
 
 		// SCI that adds a ServletContextListener which tries to add ServletContextListener
-		handler1.addBean(new ServletContextHandler.Initializer(handler1, new ServletContainerInitializer() {
+		handler1.addServletContainerInitializer(new ServletContainerInitializer() {
 			@Override
 			public void onStartup(Set<Class<?>> c, ServletContext ctx) throws ServletException {
 				// ServletContextListener added from SCI - this is real "programmatic listener"
@@ -487,7 +487,7 @@ public class EmbeddedJettyTest {
 					}
 				});
 			}
-		}));
+		});
 
 		// ServletContextListener added "from web.xml"
 		handler1.addEventListener(new ServletContextListener() {
@@ -496,7 +496,7 @@ public class EmbeddedJettyTest {
 				// ServletContextListener added from a listener - not possible:
 				//     java.lang.IllegalArgumentException: Inappropriate listener class org.ops4j.pax.web.service.jetty.internal.EmbeddedJettyTest$7$1
 				// however we can set org.eclipse.jetty.server.handler.ContextHandler.Context._extendedListenerTypes to true
-				// just as org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer.configure()
+				// just as org.eclipse.jetty.websocket.javax.server.config.JavaxWebSocketServletContainerInitializer.configure()
 				// do it
 //				sce.getServletContext().addListener(new ServletContextListener() {
 //					@Override

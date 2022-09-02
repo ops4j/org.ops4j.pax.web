@@ -41,12 +41,6 @@ public class WarExtendedIntegrationTest extends AbstractContainerTestBase {
 
 	@Configuration
 	public Option[] configure() {
-		// PAXWEB-1084 - websocket jars publish (in META-INF/services sense)
-		// org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer
-		// class which, since jetty 9.2.21 adds by default websocket support to each HttpServiceContext
-		// all the below bundles are required to activate
-		// org.eclipse.jetty.websocket:javax-websocket-server-impl so it configures HttpServiceContexts
-
 		Option[] serverOptions = combine(baseConfigure(), paxWebJetty());
 		Option[] jspOptions = combine(serverOptions, paxWebJsp());
 		Option[] wsOptions = combine(jspOptions, jettyWebSockets());

@@ -1183,7 +1183,7 @@ class JettyServerWrapper implements BatchVisitor {
 				ServletMapping mapping = new ServletMapping();
 				mapping.setServletName(model.getName());
 				mapping.setPathSpecs(model.getUrlPatterns());
-				mapping.setDefault(model.isOverridable());
+				mapping.setFromDefaultDescriptor(model.isOverridable());
 
 				boolean isDefaultResourceServlet = model.isResourceServlet();
 				for (String pattern : model.getUrlPatterns()) {
@@ -1573,7 +1573,7 @@ class JettyServerWrapper implements BatchVisitor {
 				sch.getServletHandler().setFilterMappings(new FilterMapping[0]);
 
 				for (PaxWebFilterHolder fh : newFilterHolders) {
-					if ("Jetty_WebSocketUpgradeFilter".equals(fh.getName())) {
+					if ("org.eclipse.jetty.websocket.servlet.WebSocketUpgradeFilter".equals(fh.getName())) {
 						sch.getServletContext().removeAttribute("org.eclipse.jetty.websocket.server.WebSocketUpgradeFilter");
 					}
 					sch.getServletHandler().addFilter(fh);

@@ -513,7 +513,7 @@ public class Utils {
 		}
 		Bundle[] bundles = new Bundle[] { null, null };
 		for (Bundle b : ctx.getBundles()) {
-			if ("org.eclipse.jetty.websocket.javax.websocket.server".equals(b.getSymbolicName())) {
+			if ("org.eclipse.jetty.websocket.javax.server".equals(b.getSymbolicName())) {
 				return b;
 			}
 		}

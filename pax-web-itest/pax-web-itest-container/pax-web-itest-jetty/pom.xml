@@ -62,11 +62,6 @@
 			<artifactId>pax-web-jetty-bundle</artifactId>
 			<scope>runtime</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-compatibility-servlet31</artifactId>
-			<scope>test</scope>
-		</dependency>
 
 		<!-- OPS4J dependencies -->
 
@@ -100,8 +95,7 @@
 
 		<dependency>
 			<!--
-				Can't be transtive dependency from pax-web-itest-container-common, because it has to be "runtime"
-				scoped, so it's not added to maven-failsafe-plugin classpath (duplicate SLF4J binding)
+				Can't be transtive dependency from pax-web-itest-container-common, because it has to be "runtime" scoped
 			-->
 			<groupId>jakarta.el</groupId>
 			<artifactId>jakarta.el-api</artifactId>
@@ -124,6 +118,14 @@
 			<groupId>org.apache.myfaces.core</groupId>
 			<artifactId>myfaces-api</artifactId>
 			<scope>runtime</scope>
+		</dependency>
+
+		<!-- Logging -->
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<scope>test</scope>
 		</dependency>
 
 		<!-- Jetty -->
@@ -175,12 +177,12 @@
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-continuation</artifactId>
+			<artifactId>jetty-client</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-client</artifactId>
+			<artifactId>jetty-alpn-client</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
@@ -194,23 +196,28 @@
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.eclipse.jetty.websocket</groupId>
-			<artifactId>websocket-api</artifactId>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-webapp</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty.websocket</groupId>
-			<artifactId>websocket-common</artifactId>
+			<artifactId>websocket-jetty-api</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty.websocket</groupId>
-			<artifactId>websocket-client</artifactId>
+			<artifactId>websocket-core-common</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty.websocket</groupId>
-			<artifactId>websocket-server</artifactId>
+			<artifactId>websocket-core-client</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty.websocket</groupId>
+			<artifactId>websocket-core-server</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
@@ -220,12 +227,17 @@
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty.websocket</groupId>
-			<artifactId>javax-websocket-client-impl</artifactId>
+			<artifactId>websocket-javax-common</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty.websocket</groupId>
-			<artifactId>javax-websocket-server-impl</artifactId>
+			<artifactId>websocket-javax-client</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty.websocket</groupId>
+			<artifactId>websocket-javax-server</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 
@@ -250,19 +262,11 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<!-- JDK8 -->
 			<groupId>org.eclipse.jetty.alpn</groupId>
 			<artifactId>alpn-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<!-- JDK8 -->
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-alpn-openjdk8-server</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<!-- JDK9+ -->
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-alpn-java-server</artifactId>
 			<scope>provided</scope>

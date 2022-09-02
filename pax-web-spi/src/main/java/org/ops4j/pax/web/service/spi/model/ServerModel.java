@@ -15,6 +15,7 @@
  */
 package org.ops4j.pax.web.service.spi.model;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -2406,8 +2407,9 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 		ServletContainerInitializer sci;
 		try {
 			jspSCIClass = (Class<? extends ServletContainerInitializer>) paxWebJsp.loadClass(PaxWebConstants.DEFAULT_JSP_SCI_CLASS);
-			sci = jspSCIClass.newInstance();
-		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+			sci = jspSCIClass.getConstructor().newInstance();
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException |
+				 InvocationTargetException e) {
 			throw new IllegalStateException("Can't create JSP SCI " + PaxWebConstants.DEFAULT_JSP_SCI_CLASS
 					+ " using bundle " + paxWebJsp);
 		}

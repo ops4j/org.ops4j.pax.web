@@ -197,17 +197,17 @@
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-alpn-openjdk8-server</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-alpn-java-server</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty.websocket</groupId>
-			<artifactId>javax-websocket-server-impl</artifactId>
+			<artifactId>websocket-javax-common</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty.websocket</groupId>
+			<artifactId>websocket-javax-server</artifactId>
 			<scope>test</scope>
 		</dependency>
 

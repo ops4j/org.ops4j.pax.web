@@ -1,3 +1,18 @@
+/*
+ * Copyright 2022 OPS4J.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 //
 // ========================================================================
 // Copyright (c) 1995-2022 Mort Bay Consulting Pty Ltd and others.
@@ -30,12 +45,14 @@ import org.eclipse.jetty.http.HttpContent;
 import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.http.MimeTypes;
 import org.eclipse.jetty.http.PreEncodedHttpField;
+import org.eclipse.jetty.http.pathmap.MatchedResource;
 import org.eclipse.jetty.server.CachedContentFactory;
 import org.eclipse.jetty.server.ResourceContentFactory;
 import org.eclipse.jetty.server.ResourceService;
 import org.eclipse.jetty.server.ResourceService.WelcomeFactory;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.ResourceHandler;
+import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.util.URIUtil;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.resource.ResourceFactory;
@@ -119,7 +136,10 @@ import org.slf4j.LoggerFactory;
  *  encodingHeaderCacheSize
  *                    Max entries in a cache of ACCEPT-ENCODING headers.
  * </pre>
+ *
+ * <p>Pax Web 8: I had to copy this servlet from Jetty code to change some fields from private to protected.</p>
  */
+// CHECKSTYLE:OFF
 public class DefaultServlet extends HttpServlet implements ResourceFactory, WelcomeFactory
 {
     public static final String CONTEXT_INIT = "org.eclipse.jetty.servlet.Default.";
@@ -128,7 +148,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory, Welc
 
     private static final long serialVersionUID = 4930458713846881193L;
 
-    private final ResourceService _resourceService;
+    protected final ResourceService _resourceService;
     private ServletContext _servletContext;
     private ContextHandler _contextHandler;
 
@@ -136,10 +156,10 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory, Welc
     private boolean _welcomeExactServlets = false;
 
     private Resource _resourceBase;
-    private CachedContentFactory _cache;
+    protected CachedContentFactory _cache;
 
     private MimeTypes _mimeTypes;
-    private String[] _welcomes;
+    protected String[] _welcomes;
     private Resource _stylesheet;
     private boolean _useFileMappedBuffer = false;
     private String _relativeResourceBase;
@@ -506,8 +526,8 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory, Welc
 
             if ((_welcomeServlets || _welcomeExactServlets) && welcomeServlet == null)
             {
-                ServletHandler.MappedServlet entry = _servletHandler.getMappedServlet(welcomeInContext);
-                if (entry != null && entry.getServletHolder().getServletInstance() != this &&
+                MatchedResource<ServletHandler.MappedServlet> entry = _servletHandler.getMatchedServlet(welcomeInContext);
+                if (entry != null && entry.getResource().getServletHolder().getServletInstance() != this &&
                     (_welcomeServlets || (_welcomeExactServlets && entry.getPathSpec().getDeclaration().equals(welcomeInContext))))
                     welcomeServlet = welcomeInContext;
             }
@@ -515,3 +535,4 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory, Welc
         return welcomeServlet;
     }
 }
+// CHECKSTYLE:ON

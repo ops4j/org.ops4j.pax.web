@@ -145,7 +145,7 @@ public class PaxWebServletHolder extends ServletHolder {
 		return osgiContextModel;
 	}
 
-	public ServletContext getServletContext() {
+	public ServletContext getOsgiServletContext() {
 		return servletContext;
 	}
 
@@ -274,7 +274,7 @@ public class PaxWebServletHolder extends ServletHolder {
 	 * @throws InvocationTargetException
 	 */
 	@Override
-	protected Servlet newInstance() throws ServletException, IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
+	protected Servlet newInstance() throws Exception {
 		// no need to do anything special, but we have a Bundle reference, so we could use it if needed
 		return new OsgiInitializedServlet(super.newInstance(), servletContext);
 	}

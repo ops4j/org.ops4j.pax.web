@@ -112,7 +112,7 @@ public class PaxWebFilterInfo extends FilterInfo {
 					}
 				} else if (model.getFilterClass() != null) {
 					try {
-						instance = model.getFilterClass().newInstance();
+						instance = model.getFilterClass().getConstructor().newInstance();
 					} catch (Exception e) {
 						InstantiationException instantiationException = new InstantiationException(e.getMessage());
 						instantiationException.initCause(e);

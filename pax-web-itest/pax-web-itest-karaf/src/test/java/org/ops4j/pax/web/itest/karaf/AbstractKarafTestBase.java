@@ -17,6 +17,7 @@ package org.ops4j.pax.web.itest.karaf;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import javax.inject.Inject;
 
 import org.apache.karaf.features.BootFinished;
@@ -111,6 +112,13 @@ public class AbstractKarafTestBase extends AbstractControlledTestBase {
 			};
 		}
 
+		String featureProcessing = null;
+		try {
+			featureProcessing = new File("target/test-classes/org.apache.karaf.features.xml").toURI().toURL().toString();
+		} catch (MalformedURLException e) {
+			throw new RuntimeException(e);
+		}
+
 		Option[] options = new Option[] {
 				karafDistributionConfiguration().frameworkUrl(karafDistribution)
 						.unpackDirectory(new File("target/paxexam/unpack/"))
@@ -158,6 +166,8 @@ public class AbstractKarafTestBase extends AbstractControlledTestBase {
 
 				editConfigurationFilePut("etc/org.ops4j.pax.url.mvn.cfg", "org.ops4j.pax.url.mvn.useFallbackRepositories", "false"),
 				editConfigurationFilePut("etc/org.ops4j.pax.url.mvn.cfg", "org.ops4j.pax.url.mvn.repositories", "https://repo1.maven.org/maven2@id=central"),
+
+				editConfigurationFilePut("etc/org.apache.karaf.features.cfg", "featureProcessing", featureProcessing),
 
 				editConfigurationFilePut("etc/users.properties", "karaf", "karaf,_g_:admingroup"),
 				editConfigurationFilePut("etc/users.properties", "_g_:admingroup", "group,admin,manager,viewer,systembundles,ssh"),

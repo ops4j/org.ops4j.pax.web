@@ -35,9 +35,8 @@ import org.junit.Test;
 import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 import org.ops4j.pax.web.itest.utils.web.SimpleWebSocket;
 import org.ops4j.pax.web.service.PaxWebConstants;
-import org.ops4j.pax.web.service.spi.model.events.EventListenerEventData;
-import org.ops4j.pax.web.service.spi.model.events.FilterEventData;
 import org.ops4j.pax.web.service.spi.model.events.WebElementEvent;
+import org.ops4j.pax.web.service.spi.model.events.WebSocketEventData;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.wiring.BundleWiring;
 import org.slf4j.Logger;
@@ -68,9 +67,8 @@ public abstract class AbstractWebSocketWhiteBoardIntegrationTest extends Abstrac
 		configureAndWait(() -> {
 			context.registerService(Object.class.getName(), simpleWebSocket, filter);
 		}, events -> events.stream()
-				// Tomcat and Undertow - a filter, Jetty - a listener
 				.anyMatch(ev -> ev.getType() == WebElementEvent.State.DEPLOYED
-						&& (ev.getData() instanceof FilterEventData || ev.getData() instanceof EventListenerEventData)));
+						&& (ev.getData() instanceof WebSocketEventData)));
 
 		WebSocketContainer cc = getWebSocketContainer();
 		URI uri = new URI("ws://127.0.0.1:8181/simple");

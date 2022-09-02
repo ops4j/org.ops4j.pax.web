@@ -88,7 +88,7 @@
 								<descriptor>mvn:org.ops4j.pax.web/pax-web-features</descriptor>
 							</blacklistedDescriptors>
 							<distribution>org.apache.karaf.features:framework</distribution>
-							<javase>1.8</javase>
+							<javase>11</javase>
 							<framework>
 								<feature>framework</feature>
 							</framework>
@@ -100,8 +100,7 @@
 								<feature>pax-web-jetty-websockets</feature>
 								<feature>pax-web-jetty-extras</feature>
 								<feature>pax-web-jetty-http2</feature>
-<!--								<feature>pax-web-jetty-http2-jdk8</feature>-->
-<!--								<feature>pax-web-jetty-http2-jdk9</feature>-->
+								<feature>pax-web-jetty-http2-jdk9</feature>
 								<feature>pax-web-http-jetty</feature>
 								<feature>pax-web-tomcat</feature>
 								<feature>pax-web-tomcat-websockets</feature>
@@ -189,10 +188,6 @@
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-compatibility-el2</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-compatibility-servlet31</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>

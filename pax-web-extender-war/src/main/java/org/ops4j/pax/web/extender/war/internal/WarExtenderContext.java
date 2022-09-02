@@ -197,6 +197,7 @@ public class WarExtenderContext implements WebContainerListener, ReportViewPlugi
 				"tagsoup-*.jar",
 				"tools.jar",
 				"websocket-api.jar",
+				"websocket-jetty-api.jar",
 				"wsdl4j*.jar",
 				"xercesImpl.jar",
 				"xml-apis.jar",

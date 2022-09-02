@@ -15,6 +15,7 @@
  */
 package org.ops4j.pax.web.service.spi.servlet;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.EventListener;
 import java.util.HashMap;
@@ -274,11 +275,12 @@ public class DynamicRegistrations {
 			@SuppressWarnings("unchecked")
 			Class<? extends EventListener> filterClass = (Class<? extends EventListener>) osgiContextModel.getOwnerBundle().loadClass(className);
 
-			EventListenerModel model = new EventListenerModel(filterClass.newInstance());
+			EventListenerModel model = new EventListenerModel(filterClass.getConstructor().newInstance());
 			model.addContextModel(osgiContextModel);
 
 			register(context, new DynamicEventListenerRegistration(model, osgiContextModel));
-		} catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
+		} catch (ClassNotFoundException | IllegalAccessException | InstantiationException | NoSuchMethodException |
+				 InvocationTargetException e) {
 			throw new IllegalArgumentException("Can't load event listener class using bundle " + osgiContextModel.getOwnerBundle(), e);
 		}
 	}
@@ -294,11 +296,11 @@ public class DynamicRegistrations {
 	public void addListener(OsgiServletContext context, Class<? extends EventListener> listenerClass) {
 		OsgiContextModel osgiContextModel = context.getOsgiContextModel();
 		try {
-			EventListenerModel model = new EventListenerModel(listenerClass.newInstance());
+			EventListenerModel model = new EventListenerModel(listenerClass.getConstructor().newInstance());
 			model.addContextModel(osgiContextModel);
 
 			register(context, new DynamicEventListenerRegistration(model, osgiContextModel));
-		} catch (IllegalAccessException | InstantiationException e) {
+		} catch (IllegalAccessException | InstantiationException | NoSuchMethodException | InvocationTargetException e) {
 			throw new IllegalArgumentException("Can't instantiate event listener of class " + listenerClass, e);
 		}
 	}

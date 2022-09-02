@@ -223,13 +223,13 @@
 		<dependency.org.apache.felix.scr>2.1.30</dependency.org.apache.felix.scr>
 		<dependency.org.codehaus.mojo.animal-sniffer-annotations>1.20</dependency.org.codehaus.mojo.animal-sniffer-annotations>
 		<dependency.org.apache.felix.utils>1.11.8</dependency.org.apache.felix.utils>
-		<dependency.org.apache.felix.webconsole>4.7.2</dependency.org.apache.felix.webconsole>
+		<dependency.org.apache.felix.webconsole>4.8.2</dependency.org.apache.felix.webconsole>
 
 		<dependency.org.apache.geronimo.bundles.commons-discovery>0.4_1</dependency.org.apache.geronimo.bundles.commons-discovery>
 
 		<dependency.org.apache.httpcomponents.client5>5.1.2</dependency.org.apache.httpcomponents.client5>
 		<dependency.org.apache.httpcomponents.core5>5.1.3</dependency.org.apache.httpcomponents.core5>
-		<dependency.org.apache.karaf>4.3.7</dependency.org.apache.karaf>
+		<dependency.org.apache.karaf>4.4.1</dependency.org.apache.karaf>
 		<dependency.org.apache.logging.log4j>2.17.1</dependency.org.apache.logging.log4j>
 		<dependency.org.apache.myfaces>2.3.9</dependency.org.apache.myfaces>
 		<dependency.org.apache.myfaces.commons.facelets-examples20>1.0.2.1</dependency.org.apache.myfaces.commons.facelets-examples20>
@@ -250,8 +250,8 @@
 		<dependency.org.eclipse.jdt.ecj>3.26.0</dependency.org.eclipse.jdt.ecj>
 
 		<!-- Please keep Maven and OSGi version in sync -->
-		<dependency.org.eclipse.jetty>9.4.48.v20220622</dependency.org.eclipse.jetty>
-		<dependency.org.eclipse.jetty.osgi>9.4.46</dependency.org.eclipse.jetty.osgi>
+		<dependency.org.eclipse.jetty>10.0.11</dependency.org.eclipse.jetty>
+		<dependency.org.eclipse.jetty.osgi>10.0.11</dependency.org.eclipse.jetty.osgi>
 		<dependency.org.eclipse.jetty.alpn>1.1.3.v20160715</dependency.org.eclipse.jetty.alpn>
 		<dependency.org.eclipse.jetty.alpn.osgi>1.1.3</dependency.org.eclipse.jetty.alpn.osgi>
 
@@ -590,8 +590,10 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
+					<source>11</source>
+					<target>11</target>
+					<testSource>11</testSource>
+					<testTarget>11</testTarget>
 					<compilerArgs>-Xlint:deprecation</compilerArgs>
 				</configuration>
 			</plugin>
@@ -1719,6 +1721,10 @@
 						<groupId>org.apache.geronimo.specs</groupId>
 						<artifactId>geronimo-stax-api_1.2_spec</artifactId>
 					</exclusion>
+					<exclusion>
+						<groupId>org.eclipse.platform</groupId>
+						<artifactId>org.eclipse.osgi</artifactId>
+					</exclusion>
 				</exclusions>
 			</dependency>
 			<dependency>
@@ -1807,6 +1813,10 @@
 					<exclusion>
 						<groupId>com.sun.istack</groupId>
 						<artifactId>istack-commons-runtime</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.eclipse.platform</groupId>
+						<artifactId>org.eclipse.osgi</artifactId>
 					</exclusion>
 				</exclusions>
 			</dependency>
@@ -2194,11 +2204,6 @@
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-continuation</artifactId>
-				<version>${dependency.org.eclipse.jetty}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-deploy</artifactId>
 				<version>${dependency.org.eclipse.jetty}</version>
 			</dependency>
@@ -2312,7 +2317,6 @@
 			</dependency>
 
 			<dependency>
-				<!-- JDK8 only -->
 				<groupId>org.eclipse.jetty.alpn</groupId>
 				<artifactId>alpn-api</artifactId>
 				<version>${dependency.org.eclipse.jetty.alpn}</version>
@@ -2328,13 +2332,6 @@
 				<version>${dependency.org.eclipse.jetty}</version>
 			</dependency>
 			<dependency>
-				<!-- JDK8 only -->
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-alpn-openjdk8-server</artifactId>
-				<version>${dependency.org.eclipse.jetty}</version>
-			</dependency>
-			<dependency>
-				<!-- JDK9+ -->
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-alpn-java-server</artifactId>
 				<version>${dependency.org.eclipse.jetty}</version>
@@ -2368,22 +2365,22 @@
 
 			<dependency>
 				<groupId>org.eclipse.jetty.websocket</groupId>
-				<artifactId>websocket-api</artifactId>
+				<artifactId>websocket-jetty-api</artifactId>
 				<version>${dependency.org.eclipse.jetty}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty.websocket</groupId>
-				<artifactId>websocket-common</artifactId>
+				<artifactId>websocket-core-common</artifactId>
 				<version>${dependency.org.eclipse.jetty}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty.websocket</groupId>
-				<artifactId>websocket-server</artifactId>
+				<artifactId>websocket-core-server</artifactId>
 				<version>${dependency.org.eclipse.jetty}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty.websocket</groupId>
-				<artifactId>websocket-client</artifactId>
+				<artifactId>websocket-core-client</artifactId>
 				<version>${dependency.org.eclipse.jetty}</version>
 			</dependency>
 			<dependency>
@@ -2399,7 +2396,12 @@
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty.websocket</groupId>
-				<artifactId>javax-websocket-client-impl</artifactId>
+				<artifactId>websocket-javax-common</artifactId>
+				<version>${dependency.org.eclipse.jetty}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty.websocket</groupId>
+				<artifactId>websocket-javax-client</artifactId>
 				<version>${dependency.org.eclipse.jetty}</version>
 				<exclusions>
 					<exclusion>
@@ -2414,7 +2416,7 @@
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty.websocket</groupId>
-				<artifactId>javax-websocket-server-impl</artifactId>
+				<artifactId>websocket-javax-server</artifactId>
 				<version>${dependency.org.eclipse.jetty}</version>
 				<exclusions>
 					<exclusion>

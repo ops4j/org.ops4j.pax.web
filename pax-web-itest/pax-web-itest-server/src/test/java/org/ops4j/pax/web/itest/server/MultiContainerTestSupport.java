@@ -55,7 +55,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.felix.utils.extender.Extension;
 import org.apache.jasper.servlet.JspServlet;
 import org.apache.tomcat.websocket.server.WsSci;
-import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer;
+import org.eclipse.jetty.websocket.javax.server.config.JavaxWebSocketServletContainerInitializer;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -331,7 +331,7 @@ public class MultiContainerTestSupport {
 
 		if (enableWebSockets()) {
 			wsGenericBundle = mockBundle("org.ops4j.pax.web.pax-web-websocket", null, false);
-			wsJettyBundle = mockBundle("org.eclipse.jetty.websocket.javax.websocket.server", null, false);
+			wsJettyBundle = mockBundle("org.eclipse.jetty.websocket.javax.server", null, false);
 			wsTomcatBundle = mockBundle("org.ops4j.pax.web.pax-web-tomcat-websocket", null, false);
 			wsUndertowBundle = mockBundle("org.ops4j.pax.web.pax-web-undertow-websocket", null, false);
 
@@ -347,7 +347,7 @@ public class MultiContainerTestSupport {
 			when(wsGenericBundle.loadClass(anyString()))
 					.thenAnswer(i -> PaxWebWebSocketsServletContainerInitializer.class.getClassLoader().loadClass(i.getArgument(0, String.class)));
 			when(wsJettyBundle.loadClass(anyString()))
-					.thenAnswer(i -> WebSocketServerContainerInitializer.class.getClassLoader().loadClass(i.getArgument(0, String.class)));
+					.thenAnswer(i -> JavaxWebSocketServletContainerInitializer.class.getClassLoader().loadClass(i.getArgument(0, String.class)));
 			when(wsTomcatBundle.loadClass(anyString()))
 					.thenAnswer(i -> WsSci.class.getClassLoader().loadClass(i.getArgument(0, String.class)));
 			when(wsUndertowBundle.loadClass(anyString()))

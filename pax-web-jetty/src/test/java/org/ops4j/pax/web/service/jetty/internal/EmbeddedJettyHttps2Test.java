@@ -114,15 +114,6 @@ public class EmbeddedJettyHttps2Test {
 		HttpConfiguration config = new HttpConfiguration();
 		config.addCustomizer(new SecureRequestCustomizer());
 
-		// org.eclipse.jetty.alpn.server.ALPNServerConnectionFactory needs one service (java.util.ServiceLoader)
-		// implementing org.eclipse.jetty.io.ssl.ALPNProcessor.Server. Jetty provides two:
-		//  - org.eclipse.jetty.alpn.openjdk8.server.OpenJDK8ServerALPNProcessor (org.eclipse.jetty:jetty-alpn-openjdk8-server)
-		//  - org.eclipse.jetty.alpn.conscrypt.server.ConscryptServerALPNProcessor (org.eclipse.jetty:jetty-alpn-conscrypt-server)
-		// Before JDK 8u252, special boot-classpath library must be loaded:
-		//  - org.eclipse.jetty.alpn.ALPN from org.eclipse.jetty.alpn:alpn-api:1.1.3.v20160715
-		// JDK 8u252 adds javax.net.ssl.SSLEngine.setHandshakeApplicationProtocolSelector() method used by
-		// org.eclipse.jetty.alpn.openjdk8.server.OpenJDK8ServerALPNProcessor, so no need to add any boot-classpath entries
-
 		connector.addConnectionFactory(new SslConnectionFactory(sslContextFactory, "ALPN"));
 		ALPNServerConnectionFactory alpnConnectionFactory = new ALPNServerConnectionFactory();
 		// if no protocol can be negotiated, we'll force HTTP/1.1

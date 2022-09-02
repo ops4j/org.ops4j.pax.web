@@ -189,10 +189,6 @@
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-alpn-openjdk8-server</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-alpn-java-server</artifactId>
 		</dependency>
 		<dependency>
@@ -202,10 +198,6 @@
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-client</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-continuation</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
@@ -295,19 +287,19 @@
 
 		<dependency>
 			<groupId>org.eclipse.jetty.websocket</groupId>
-			<artifactId>websocket-api</artifactId>
+			<artifactId>websocket-jetty-api</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty.websocket</groupId>
-			<artifactId>websocket-client</artifactId>
+			<artifactId>websocket-core-client</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty.websocket</groupId>
-			<artifactId>websocket-common</artifactId>
+			<artifactId>websocket-core-common</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty.websocket</groupId>
-			<artifactId>websocket-server</artifactId>
+			<artifactId>websocket-core-server</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty.websocket</groupId>
@@ -315,11 +307,15 @@
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty.websocket</groupId>
-			<artifactId>javax-websocket-client-impl</artifactId>
+			<artifactId>websocket-javax-common</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty.websocket</groupId>
-			<artifactId>javax-websocket-server-impl</artifactId>
+			<artifactId>websocket-javax-client</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty.websocket</groupId>
+			<artifactId>websocket-javax-server</artifactId>
 		</dependency>
 
 	</dependencies>

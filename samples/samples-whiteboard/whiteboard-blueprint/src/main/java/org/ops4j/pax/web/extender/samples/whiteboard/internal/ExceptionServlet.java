@@ -40,7 +40,7 @@ public class ExceptionServlet extends HttpServlet {
 
 	private static final long serialVersionUID = -58844579506172515L;
 
-	private static final Set<Integer> VALID_ERROR_CODES = new HashSet<Integer>() {
+	private static final Set<Integer> VALID_ERROR_CODES = new HashSet<>() {
 		private static final long serialVersionUID = -5608318022683417716L;
 
 		{
@@ -90,7 +90,7 @@ public class ExceptionServlet extends HttpServlet {
 			try {
 				Class<?> exp = this.getClass().getClassLoader().loadClass(error.trim());
 				if (Throwable.class.isAssignableFrom(exp)) {
-					throw new ServletException("Rethrowing " + error, (Throwable) exp.newInstance());
+					throw new ServletException("Rethrowing " + error, (Throwable) exp.getConstructor().newInstance());
 				}
 			} catch (Exception ignored) {
 			}

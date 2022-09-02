@@ -20,6 +20,7 @@ import java.net.URL;
 import java.security.AccessControlContext;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.EventListener;
 import java.util.HashSet;
 import java.util.List;
@@ -39,7 +40,6 @@ import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.thread.ScheduledExecutorScheduler;
 import org.ops4j.pax.web.service.jetty.internal.web.RootBundleURLResource;
@@ -110,7 +110,7 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 		_scontext.setAttribute("org.eclipse.jetty.server.session.timer", executorScheduler);
 
 		// need to initialize the logger as super doStart is too late already
-		setLogger(Log.getLogger(getDisplayName() == null ? getContextPath() : getDisplayName()));
+		setLogger(LoggerFactory.getLogger(getDisplayName() == null ? getContextPath() : getDisplayName()));
 
 		// "128.3.5 Static Content" is the only place where protected directories are mentioned. We'll handle them
 		// at request processing stage and configure here
@@ -180,11 +180,11 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 	}
 
 	@Override
-	public void addEventListener(EventListener listener) {
+	public boolean addEventListener(EventListener listener) {
 		// called for example by
 		// org.eclipse.jetty.websocket.server.NativeWebSocketServletContainerInitializer.configure()
 		// so we should treat it as a listener added with rank=0
-		addEventListener(null, listener);
+		return addEventListener(null, listener);
 	}
 
 	/**
@@ -193,7 +193,7 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 	 * @param model
 	 * @param listener
 	 */
-	public void addEventListener(EventListenerModel model, EventListener listener) {
+	public boolean addEventListener(EventListenerModel model, EventListener listener) {
 		// we are not adding the listener to org.eclipse.jetty.server.handler.ContextHandler._eventListeners
 		// now - we'll add them just before the context is started, so we're sure that the order is correct.
 		// this is especially important for ServletContextListeners
@@ -212,6 +212,8 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 				super.addEventListener(listener);
 			}
 		}
+
+		return true;
 	}
 
 	@Override
@@ -221,8 +223,9 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 	}
 
 	@Override
-	public void removeEventListener(EventListener listener) {
+	public boolean removeEventListener(EventListener listener) {
 		removeEventListener(null, listener);
+		return super.removeEventListener(listener);
 	}
 
 	/**
@@ -318,8 +321,8 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 
 		// 2021-08-25: because we started keeping listeners ordered, we just need to clean all
 		// the listeners, which will be added back when the context is started
-		setEventListeners(new EventListener[0]);
-		getSessionHandler().clearEventListeners();
+		setEventListeners(Collections.emptyList());
+		getSessionHandler().getEventListeners().clear();
 
 		// remove the listeners without associated EventListenerModel from rankedListeners map
 		rankedListeners.entrySet().removeIf(e -> e.getKey().getRanklessPosition() >= 0);

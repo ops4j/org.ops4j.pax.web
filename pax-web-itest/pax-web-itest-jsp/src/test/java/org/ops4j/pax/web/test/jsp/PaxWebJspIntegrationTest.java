@@ -67,7 +67,7 @@ public class PaxWebJspIntegrationTest {
 		Class<?> jspFactoryClass = Class.forName("javax.servlet.jsp.JspFactory");
 		Method setDefaultFactory = jspFactoryClass.getDeclaredMethod("setDefaultFactory", jspFactoryClass);
 		Class<?> jspFactoryImplClass = Class.forName("org.apache.jasper.runtime.JspFactoryImpl");
-		setDefaultFactory.invoke(null, jspFactoryClass.cast(jspFactoryImplClass.newInstance()));
+		setDefaultFactory.invoke(null, jspFactoryClass.cast(jspFactoryImplClass.getConstructor().newInstance()));
 
 		scratchDir = new File("target", "jsp");
 		FileUtils.deleteDirectory(scratchDir);
@@ -103,7 +103,7 @@ public class PaxWebJspIntegrationTest {
 		// from pax-web-jsp
 //		ServletContainerInitializer sci = new JasperInitializer();
 		// this method won't cause IDE problems
-		ServletContainerInitializer sci = (ServletContainerInitializer) Class.forName("org.ops4j.pax.web.jsp.JasperInitializer").newInstance();
+		ServletContainerInitializer sci = (ServletContainerInitializer) Class.forName("org.ops4j.pax.web.jsp.JasperInitializer").getConstructor().newInstance();
 		sci.onStartup(null, context);
 
 		MockServletConfig config = new MockServletConfig(context, "jsp");

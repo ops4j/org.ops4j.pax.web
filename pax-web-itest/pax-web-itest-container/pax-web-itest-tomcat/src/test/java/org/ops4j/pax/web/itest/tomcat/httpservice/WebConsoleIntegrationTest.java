@@ -21,8 +21,6 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.container.httpservice.AbstractWebConsoleIntegrationTest;
 
-import static org.ops4j.pax.exam.Constants.START_LEVEL_TEST_BUNDLE;
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 
 @RunWith(PaxExam.class)
@@ -30,15 +28,7 @@ public class WebConsoleIntegrationTest extends AbstractWebConsoleIntegrationTest
 
 	@Configuration
 	public Option[] configure() {
-		return combine(baseConfigure(),
-				combine(configAdmin(),
-						combine(paxWebTomcat(),
-								// felix.webconsole needs servlet-api 3
-								mavenBundle("org.ops4j.pax.web", "pax-web-compatibility-servlet31")
-										.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1).noStart()
-						)
-				)
-		);
+		return combine(baseConfigure(), combine(configAdmin(), paxWebTomcat()));
 	}
 
 }

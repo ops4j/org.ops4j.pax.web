@@ -19,6 +19,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -859,10 +860,11 @@ public class BundleWebApplicationClassSpace {
 				if (name.length() > 0) {
 					try {
 						Class<?> sciClass = bundle.loadClass(name);
-						ServletContainerInitializer sci = (ServletContainerInitializer) sciClass.newInstance();
+						ServletContainerInitializer sci = (ServletContainerInitializer) sciClass.getConstructor().newInstance();
 						LOG.trace("      Loaded SCI {}", sci.getClass());
 						scis.add(sci);
-					} catch (ClassNotFoundException | ClassCastException | InstantiationException | IllegalAccessException e) {
+					} catch (ClassNotFoundException | ClassCastException | InstantiationException |
+							 IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
 						LOG.error("      Problem loading SCI class from {}: {}", url, e.getMessage(), e);
 					}
 				}

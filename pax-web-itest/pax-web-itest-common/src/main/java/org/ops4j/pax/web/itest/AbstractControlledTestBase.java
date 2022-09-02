@@ -285,8 +285,6 @@ public abstract class AbstractControlledTestBase {
 		return new Option[] {
 				mavenBundle("org.ops4j.pax.web", "pax-web-jetty")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.ops4j.pax.web", "pax-web-compatibility-servlet31")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1).noStart(),
 
 				mavenBundle().groupId("org.eclipse.jetty")
 						.artifactId("jetty-util").versionAsInProject(),
@@ -305,8 +303,6 @@ public abstract class AbstractControlledTestBase {
 						.artifactId("jetty-servlet").versionAsInProject(),
 				mavenBundle().groupId("org.eclipse.jetty")
 						.artifactId("jetty-security").versionAsInProject(),
-				mavenBundle().groupId("org.eclipse.jetty")
-						.artifactId("jetty-continuation").versionAsInProject(),
 				mavenBundle().groupId("org.eclipse.jetty")
 						.artifactId("jetty-jaas").versionAsInProject()
 		};
@@ -327,21 +323,12 @@ public abstract class AbstractControlledTestBase {
 				mavenBundle().groupId("org.eclipse.jetty")
 						.artifactId("jetty-alpn-server").versionAsInProject()
 		);
-		if (javaMajorVersion() >= 9) {
-			return combine(common,
-					mavenBundle().groupId("org.eclipse.jetty.alpn")
-							.artifactId("alpn-api").versionAsInProject(),
-					mavenBundle().groupId("org.eclipse.jetty")
-							.artifactId("jetty-alpn-java-server").versionAsInProject()
-			);
-		} else {
-			return combine(common,
-					mavenBundle().groupId("org.eclipse.jetty.alpn")
-							.artifactId("alpn-api").versionAsInProject(),
-					mavenBundle().groupId("org.eclipse.jetty")
-							.artifactId("jetty-alpn-openjdk8-server").versionAsInProject()
-			);
-		}
+		return combine(common,
+				mavenBundle().groupId("org.eclipse.jetty.alpn")
+						.artifactId("alpn-api").versionAsInProject(),
+				mavenBundle().groupId("org.eclipse.jetty")
+						.artifactId("jetty-alpn-java-server").versionAsInProject()
+		);
 	}
 
 	protected Option[] jettyWebSockets() {
@@ -350,18 +337,22 @@ public abstract class AbstractControlledTestBase {
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle().groupId("org.eclipse.jetty")
 						.artifactId("jetty-client").versionAsInProject(),
+				mavenBundle().groupId("org.eclipse.jetty")
+						.artifactId("jetty-alpn-client").versionAsInProject(),
 				mavenBundle().groupId("org.eclipse.jetty.websocket")
-						.artifactId("javax-websocket-client-impl").versionAsInProject(),
+						.artifactId("websocket-javax-common").versionAsInProject(),
 				mavenBundle().groupId("org.eclipse.jetty.websocket")
-						.artifactId("javax-websocket-server-impl").versionAsInProject(),
+						.artifactId("websocket-javax-client").versionAsInProject(),
 				mavenBundle().groupId("org.eclipse.jetty.websocket")
-						.artifactId("websocket-api").versionAsInProject(),
+						.artifactId("websocket-javax-server").versionAsInProject(),
 				mavenBundle().groupId("org.eclipse.jetty.websocket")
-						.artifactId("websocket-common").versionAsInProject(),
+						.artifactId("websocket-jetty-api").versionAsInProject(),
 				mavenBundle().groupId("org.eclipse.jetty.websocket")
-						.artifactId("websocket-client").versionAsInProject(),
+						.artifactId("websocket-core-common").versionAsInProject(),
 				mavenBundle().groupId("org.eclipse.jetty.websocket")
-						.artifactId("websocket-server").versionAsInProject(),
+						.artifactId("websocket-core-client").versionAsInProject(),
+				mavenBundle().groupId("org.eclipse.jetty.websocket")
+						.artifactId("websocket-core-server").versionAsInProject(),
 				mavenBundle().groupId("org.eclipse.jetty.websocket")
 						.artifactId("websocket-servlet").versionAsInProject(),
 				mavenBundle("org.ops4j.pax.web", "pax-web-websocket")

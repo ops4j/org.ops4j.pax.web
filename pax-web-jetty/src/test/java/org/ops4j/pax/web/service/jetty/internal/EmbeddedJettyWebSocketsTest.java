@@ -45,7 +45,7 @@ import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer;
+import org.eclipse.jetty.websocket.javax.server.config.JavaxWebSocketServletContainerInitializer;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,12 +78,9 @@ public class EmbeddedJettyWebSocketsTest {
 		Set<Class<?>> classes = new HashSet<>();
 		classes.add(MyServerApplicationConfig.class);
 		classes.add(MyAnnotatedEndpoint.class);
-		// org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer is from
-		// org.eclipse.jetty.websocket/javax-websocket-server-impl
-		sch.addBean(new ServletContextHandler.Initializer(sch, new WebSocketServerContainerInitializer(), classes));
-		// org.eclipse.jetty.websocket.server.NativeWebSocketServletContainerInitializer is from
-		// org.eclipse.jetty.websocket/websocket-server
-//		sch.addBean(new ServletContextHandler.Initializer(sch, new NativeWebSocketServletContainerInitializer(), classes));
+		// org.eclipse.jetty.websocket.javax.server.config.JavaxWebSocketServletContainerInitializer is from
+		// org.eclipse.jetty.websocket/websocket-javax-server
+		sch.addServletContainerInitializer(new JavaxWebSocketServletContainerInitializer(), classes.toArray(new Class[0]));
 
 		server.start();
 
@@ -107,9 +104,9 @@ public class EmbeddedJettyWebSocketsTest {
 		container.connectToServer(new MyClientEndpoint("c1"), config,
 				URI.create("ws://localhost:" + port + "/endpoint1"));
 
-		// org.eclipse.jetty.websocket.jsr356.server.ServerContainer
+		// org.eclipse.jetty.websocket.javax.server.internal.JavaxWebSocketServerContainer
 		ServerContainer sc = (ServerContainer) sch.getServletContext().getAttribute(ServerContainer.class.getName());
-		assertThat(sc.getClass().getName(), equalTo("org.eclipse.jetty.websocket.jsr356.server.ServerContainer"));
+		assertThat(sc.getClass().getName(), equalTo("org.eclipse.jetty.websocket.javax.server.internal.JavaxWebSocketServerContainer"));
 		sc.addEndpoint(MyAnnotatedEndpoint.class);
 
 		container.connectToServer(new MyClientEndpoint("c2"), config,

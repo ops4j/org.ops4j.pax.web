@@ -64,7 +64,7 @@ public class PaxWebFilterDef extends FilterDef {
 		Filter instance = null;
 		if (filterModel.getFilterClass() != null) {
 			try {
-				instance = filterModel.getFilterClass().newInstance();
+				instance = filterModel.getFilterClass().getConstructor().newInstance();
 			} catch (Exception e) {
 				throw new RuntimeException("Can't instantiate filter of class " + filterModel.getFilterClass());
 			}

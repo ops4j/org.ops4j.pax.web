@@ -24,6 +24,7 @@ import javax.faces.bean.SessionScoped;
 // According to "5.4 Managed Bean Annotations" of JSF 2.3 specification,javax.faces.bean package
 // is deprecated and the recommended annotations should be taken from CDI 1.2
 
+@SuppressWarnings("deprecation")
 @ManagedBean(name = "helloWorld")
 @SessionScoped
 public class HelloWorldController {

@@ -100,7 +100,8 @@
 							org.jboss.logging,
 
 							<!-- for Vaadin/SpringBoot WebSocket detection on Jetty -->
-							org.eclipse.jetty.websocket.jsr356.server.deploy;resolution:=optional,
+							org.eclipse.jetty.websocket.javax.server.config;resolution:=optional,
+
 							<!-- for Vaadin/SpringBoot WebSocket detection on Tomcat -->
 							org.apache.tomcat;resolution:=optional,
 							org.apache.tomcat.websocket.server;resolution:=optional,

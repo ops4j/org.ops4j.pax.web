@@ -15,6 +15,7 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -23,6 +24,7 @@ import javax.servlet.ServletContext;
 
 import org.eclipse.jetty.servlet.BaseHolder;
 import org.eclipse.jetty.servlet.FilterHolder;
+import org.ops4j.pax.web.service.jetty.internal.web.PaxWebWebSocketUpgradeFilter;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.servlet.OsgiInitializedFilter;
@@ -114,7 +116,6 @@ public class PaxWebFilterHolder extends FilterHolder {
 		setDisplayName(holder.getDisplayName());
 		setHeldClass(holder.getHeldClass());
 		setServletHandler(holder.getServletHandler());
-		setStopTimeout(holder.getStopTimeout());
 	}
 
 	@Override
@@ -153,15 +154,24 @@ public class PaxWebFilterHolder extends FilterHolder {
 
 		if (instance == null && getHeldClass() != null) {
 			// case of org.eclipse.jetty.websocket.server.WebSocketUpgradeFilter added by Jetty's SCI
+			Class<? extends Filter> heldClass = getHeldClass();
 			try {
-				instance = getHeldClass().newInstance();
+				Constructor<? extends Filter> ctr = heldClass.getConstructor();
+				instance = ctr.newInstance();
 			} catch (Exception e) {
-				throw new IllegalStateException("Can't instantiate Filter with class " + getHeldClass(), e);
+				throw new IllegalStateException("Can't instantiate Filter with class " + heldClass, e);
 			}
 		}
 
 		if (instance == null) {
 			filterModel.setDtoFailureCode(DTOConstants.FAILURE_REASON_SERVICE_NOT_GETTABLE);
+		}
+
+		if (instance != null && "org.eclipse.jetty.websocket.servlet.WebSocketUpgradeFilter".equals(instance.getClass().getName())) {
+			// very special handling - this filter (in org.eclipse.jetty.websocket.core.server.internal.CreatorNegotiator.negotiate())
+			// casts request's ServletContext to org.eclipse.jetty.server.handler.ContextHandler.Context
+			// it has changed when upgrading from Jetty 9 to Jetty 10
+			instance = new PaxWebWebSocketUpgradeFilter(instance);
 		}
 
 		return instance == null ? null

@@ -510,7 +510,7 @@ public class UnifiedJettyTest {
 		response = send(port, "/gateway/x?what=forward&where=/");
 		assertTrue(response.contains("req.context_path=\"\""));
 		assertTrue(response.contains("req.request_uri=\"/index.y\""));
-		assertTrue(response.contains("javax.servlet.forward.context_path=\"\""));
+		assertTrue(response.contains("javax.servlet.forward.context_path=\"/\""));
 		assertTrue(response.contains("javax.servlet.forward.request_uri=\"/gateway/x\""));
 		assertTrue(response.contains("javax.servlet.forward.servlet_path=\"/gateway\""));
 		assertTrue(response.contains("javax.servlet.forward.path_info=\"/x\""));
@@ -550,7 +550,7 @@ public class UnifiedJettyTest {
 		response = send(port, "/sub/");
 		assertTrue(response.contains("req.context_path=\"\""));
 		assertTrue(response.contains("req.request_uri=\"/sub/index.x\""));
-		assertTrue(response.contains("javax.servlet.forward.context_path=\"\""));
+		assertTrue(response.contains("javax.servlet.forward.context_path=\"/\""));
 		assertTrue(response.contains("javax.servlet.forward.request_uri=\"/sub/\""));
 		assertTrue(response.contains("javax.servlet.forward.servlet_path=\"/sub/\"")); // TOCHECK: why not "/"?
 		assertTrue(response.contains("javax.servlet.forward.path_info=\"null\""));
@@ -558,7 +558,7 @@ public class UnifiedJettyTest {
 		response = send(port, "/gateway/x?what=forward&where=/sub/");
 		assertTrue(response.contains("req.context_path=\"\""));
 		assertTrue(response.contains("req.request_uri=\"/sub/index.x\""));
-		assertTrue(response.contains("javax.servlet.forward.context_path=\"\""));
+		assertTrue(response.contains("javax.servlet.forward.context_path=\"/\""));
 		assertTrue(response.contains("javax.servlet.forward.request_uri=\"/gateway/x\""));
 		assertTrue(response.contains("javax.servlet.forward.servlet_path=\"/gateway\""));
 		assertTrue(response.contains("javax.servlet.forward.path_info=\"/x\""));

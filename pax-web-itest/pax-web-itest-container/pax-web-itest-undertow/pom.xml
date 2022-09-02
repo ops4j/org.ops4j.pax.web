@@ -82,12 +82,6 @@
 			<artifactId>pax-web-undertow-bundle</artifactId>
 			<scope>runtime</scope>
 		</dependency>
-		<dependency>
-			<!-- for felix.webconsole purpose -->
-			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-compatibility-servlet31</artifactId>
-			<scope>test</scope>
-		</dependency>
 
 		<!-- OPS4J dependencies -->
 

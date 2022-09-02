@@ -493,8 +493,7 @@ public class EmbeddedJettyHttp2Test {
 				0x00, 0x00, 0x00, 0x01 // stream identifier - arbitrary, should be taken from a sequence
 		});
 		HpackEncoder encoder = new HpackEncoder();
-		HttpFields fields = new HttpFields();
-		fields.add(new HostPortHttpField("127.0.0.1", 0));
+		HttpFields fields = HttpFields.from(new HostPortHttpField("127.0.0.1", 0));
 		MetaData md = new MetaData.Request("GET", "http", new HostPortHttpField("127.0.0.1", 0), "/test",
 				HttpVersion.HTTP_2, fields, 0L);
 //		MetaData md = new MetaData.Request("GET", HttpURI.createHttpURI("http", "127.0.0.1", connector.getLocalPort(), "/test", null, null, null),

@@ -37,6 +37,7 @@ import org.eclipse.jetty.server.ServletRequestHttpWrapper;
 import org.eclipse.jetty.server.ServletResponseHttpWrapper;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.FilterMapping;
+import org.eclipse.jetty.servlet.ListenerHolder;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.servlet.ServletMapping;
@@ -137,7 +138,7 @@ public class PaxWebServletHandler extends ServletHandler {
 		// our version of default, fallback servlet registration
 		if (getServletMapping("/") == null && isEnsureDefaultServlet()) {
 			addServletWithMapping(new PaxWebServletHolder("default", default404Servlet, true), "/");
-			getServletMapping("/").setDefault(true);
+			getServletMapping("/").setFromDefaultDescriptor(true);
 		}
 
 		super.doStart();
@@ -179,7 +180,23 @@ public class PaxWebServletHandler extends ServletHandler {
 			fc.destroy();
 		}
 
+		// Jetty 10+ keeps only "durable" servlets/filters/listeners. We're handling it a bit differently,
+		// so we have to preservet them (because there's no reflection-free access to
+		// org.eclipse.jetty.servlet.ServletHandler._durable field)
+
+		ServletHolder[] servlets = getServlets();
+		ServletMapping[] servletMappings = getServletMappings();
+		FilterHolder[] filters = getFilters();
+		FilterMapping[] filterMappings = getFilterMappings();
+		ListenerHolder[] listeners = getListeners();
+
 		super.doStop();
+
+		super.setServlets(servlets);
+		setServletMappings(servletMappings);
+		setFilters(filters);
+		setFilterMappings(filterMappings);
+		setListeners(listeners);
 	}
 
 	@Override
@@ -206,7 +223,7 @@ public class PaxWebServletHandler extends ServletHandler {
 
 	/**
 	 * Override the method from {@link org.eclipse.jetty.servlet.ServletContextHandler} just because
-	 * {@code org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer} adds
+	 * {@code org.eclipse.jetty.websocket.javax.server.config.JavaxWebSocketServletContainerInitializer} adds
 	 * {@link FilterHolder} directly, while we use {@link PaxWebFilterHolder} array.
 	 * @param holder
 	 * @param pathSpec
@@ -222,6 +239,18 @@ public class PaxWebServletHandler extends ServletHandler {
 		PaxWebFilterHolder paxWebFilterHolder = new PaxWebFilterHolder(holder, defaultServletContext);
 
 		super.addFilterWithMapping(paxWebFilterHolder, pathSpec, dispatches);
+	}
+
+	@Override
+	public void prependFilter(FilterHolder filter) {
+		if (filter instanceof PaxWebFilterHolder) {
+			super.prependFilter(filter);
+			return;
+		}
+
+		PaxWebFilterHolder paxWebFilterHolder = new PaxWebFilterHolder(filter, defaultServletContext);
+
+		super.prependFilter(paxWebFilterHolder);
 	}
 
 	/**
@@ -255,7 +284,7 @@ public class PaxWebServletHandler extends ServletHandler {
 
 		if (getServletMapping("/") == null && isEnsureDefaultServlet()) {
 			addServletWithMapping(new PaxWebServletHolder("default", default404Servlet, true), "/");
-			getServletMapping("/").setDefault(true);
+			getServletMapping("/").setFromDefaultDescriptor(true);
 		}
 	}
 
@@ -356,7 +385,7 @@ public class PaxWebServletHandler extends ServletHandler {
 		}
 		List<Preprocessor> preprocessorInstances = preprocessors.stream().map(PreprocessorFilterConfig::getInstance).collect(Collectors.toList());
 		if (!holder.is404()) {
-			return new OsgiFilterChain(new ArrayList<>(preprocessorInstances), holder.getServletContext(),
+			return new OsgiFilterChain(new ArrayList<>(preprocessorInstances), holder.getOsgiServletContext(),
 					holder.getWebContainerContext(), chain, osgiSessionsBridge);
 		} else {
 			return new OsgiFilterChain(new ArrayList<>(preprocessorInstances), defaultServletContext,
