@@ -1,35 +1,14 @@
-/*
- * Copyright 2020 OPS4J.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 //
-//  ========================================================================
-//  Copyright (c) 1995-2020 Mort Bay Consulting Pty Ltd and others.
-//  ------------------------------------------------------------------------
-//  All rights reserved. This program and the accompanying materials
-//  are made available under the terms of the Eclipse Public License v1.0
-//  and Apache License v2.0 which accompanies this distribution.
+// ========================================================================
+// Copyright (c) 1995-2022 Mort Bay Consulting Pty Ltd and others.
 //
-//      The Eclipse Public License is available at
-//      http://www.eclipse.org/legal/epl-v10.html
+// This program and the accompanying materials are made available under the
+// terms of the Eclipse Public License v. 2.0 which is available at
+// https://www.eclipse.org/legal/epl-2.0, or the Apache License, Version 2.0
+// which is available at https://www.apache.org/licenses/LICENSE-2.0.
 //
-//      The Apache License v2.0 is available at
-//      http://www.opensource.org/licenses/apache2.0.php
-//
-//  You may elect to redistribute this code under either of these licenses.
-//  ========================================================================
+// SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
+// ========================================================================
 //
 
 package org.ops4j.pax.web.service.jetty.internal.web;
@@ -37,6 +16,7 @@ package org.ops4j.pax.web.service.jetty.internal.web;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.StringTokenizer;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -50,22 +30,18 @@ import org.eclipse.jetty.http.HttpContent;
 import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.http.MimeTypes;
 import org.eclipse.jetty.http.PreEncodedHttpField;
-import org.eclipse.jetty.http.pathmap.MappedResource;
 import org.eclipse.jetty.server.CachedContentFactory;
 import org.eclipse.jetty.server.ResourceContentFactory;
 import org.eclipse.jetty.server.ResourceService;
 import org.eclipse.jetty.server.ResourceService.WelcomeFactory;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.ResourceHandler;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.URIUtil;
-import org.eclipse.jetty.util.log.Log;
-import org.eclipse.jetty.util.log.Logger;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.resource.ResourceFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-// CHECKSTYLE:OFF
 /**
  * The default servlet.
  * <p>
@@ -86,7 +62,7 @@ import org.eclipse.jetty.util.resource.ResourceFactory;
  *                    resources could be found. If false, then a welcome
  *                    file must exist on disk. If "exact", then exact
  *                    servlet matches are supported without an existing file.
- *                    Default is true.
+ *                    Default is false.
  *
  *                    This must be false if you want directory listings,
  *                    but have index.jsp in your welcome file list.
@@ -143,18 +119,16 @@ import org.eclipse.jetty.util.resource.ResourceFactory;
  *  encodingHeaderCacheSize
  *                    Max entries in a cache of ACCEPT-ENCODING headers.
  * </pre>
- *
- * <p>Pax Web 8: I had to copy this servlet from Jetty code to change some fields from private to protected.</p>
  */
 public class DefaultServlet extends HttpServlet implements ResourceFactory, WelcomeFactory
 {
     public static final String CONTEXT_INIT = "org.eclipse.jetty.servlet.Default.";
 
-    private static final Logger LOG = Log.getLogger(DefaultServlet.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DefaultServlet.class);
 
     private static final long serialVersionUID = 4930458713846881193L;
 
-    protected final ResourceService _resourceService;
+    private final ResourceService _resourceService;
     private ServletContext _servletContext;
     private ContextHandler _contextHandler;
 
@@ -162,10 +136,10 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory, Welc
     private boolean _welcomeExactServlets = false;
 
     private Resource _resourceBase;
-    protected CachedContentFactory _cache;
+    private CachedContentFactory _cache;
 
     private MimeTypes _mimeTypes;
-    protected String[] _welcomes;
+    private String[] _welcomes;
     private Resource _stylesheet;
     private boolean _useFileMappedBuffer = false;
     private String _relativeResourceBase;
@@ -197,7 +171,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory, Welc
         _resourceService.setAcceptRanges(getInitBoolean("acceptRanges", _resourceService.isAcceptRanges()));
         _resourceService.setDirAllowed(getInitBoolean("dirAllowed", _resourceService.isDirAllowed()));
         _resourceService.setRedirectWelcome(getInitBoolean("redirectWelcome", _resourceService.isRedirectWelcome()));
-        _resourceService.setPrecompressedFormats(parsePrecompressedFormats(getInitParameter("precompressed"), getInitBoolean("gzip", false)));
+        _resourceService.setPrecompressedFormats(parsePrecompressedFormats(getInitParameter("precompressed"), getInitBoolean("gzip"), _resourceService.getPrecompressedFormats()));
         _resourceService.setPathInfoOnly(getInitBoolean("pathInfoOnly", _resourceService.isPathInfoOnly()));
         _resourceService.setEtags(getInitBoolean("etags", _resourceService.isEtags()));
 
@@ -224,7 +198,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory, Welc
             }
             catch (Exception e)
             {
-                LOG.warn(Log.EXCEPTION, e);
+                LOG.warn("Unable to create resourceBase from {}", rb, e);
                 throw new UnavailableException(e.toString());
             }
         }
@@ -237,7 +211,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory, Welc
                 _stylesheet = Resource.newResource(css);
                 if (!_stylesheet.exists())
                 {
-                    LOG.warn("!" + css);
+                    LOG.warn("!{}", css);
                     _stylesheet = null;
                 }
             }
@@ -248,8 +222,10 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory, Welc
         }
         catch (Exception e)
         {
-            LOG.warn(e.toString());
-            LOG.debug(e);
+            if (LOG.isDebugEnabled())
+                LOG.warn("Unable to use stylesheet: {}", css, e);
+            else
+                LOG.warn("Unable to use stylesheet: {} - {}", css, e.toString());
         }
 
         int encodingHeaderCacheSize = getInitInt("encodingHeaderCacheSize", -1);
@@ -289,7 +265,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory, Welc
         }
         catch (Exception e)
         {
-            LOG.warn(Log.EXCEPTION, e);
+            LOG.warn("Unable to setup CachedContentFactory", e);
             throw new UnavailableException(e.toString());
         }
 
@@ -325,11 +301,15 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory, Welc
         _servletHandler = _contextHandler.getChildHandlerByClass(ServletHandler.class);
 
         if (LOG.isDebugEnabled())
-            LOG.debug("resource base = " + _resourceBase);
+            LOG.debug("resource base = {}", _resourceBase);
     }
 
-    private CompressedContentFormat[] parsePrecompressedFormats(String precompressed, boolean gzip)
+    private CompressedContentFormat[] parsePrecompressedFormats(String precompressed, Boolean gzip, CompressedContentFormat[] dft)
     {
+        if (precompressed == null && gzip == null)
+        {
+            return dft;
+        }
         List<CompressedContentFormat> ret = new ArrayList<>();
         if (precompressed != null && precompressed.indexOf('=') > 0)
         {
@@ -339,7 +319,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory, Welc
                 String encoding = setting[0].trim();
                 String extension = setting[1].trim();
                 ret.add(new CompressedContentFormat(encoding, extension));
-                if (gzip && !ret.contains(CompressedContentFormat.GZIP))
+                if (gzip == Boolean.TRUE && !ret.contains(CompressedContentFormat.GZIP))
                     ret.add(CompressedContentFormat.GZIP);
             }
         }
@@ -351,7 +331,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory, Welc
                 ret.add(CompressedContentFormat.GZIP);
             }
         }
-        else if (gzip)
+        else if (gzip == Boolean.TRUE)
         {
             // gzip handling is for backwards compatibility with older Jetty
             ret.add(CompressedContentFormat.GZIP);
@@ -392,16 +372,21 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory, Welc
         return value;
     }
 
-    private boolean getInitBoolean(String name, boolean dft)
+    private Boolean getInitBoolean(String name)
     {
         String value = getInitParameter(name);
         if (value == null || value.length() == 0)
-            return dft;
+            return null;
         return (value.startsWith("t") ||
             value.startsWith("T") ||
             value.startsWith("y") ||
             value.startsWith("Y") ||
             value.startsWith("1"));
+    }
+
+    private boolean getInitBoolean(String name, boolean dft)
+    {
+        return Optional.ofNullable(getInitBoolean(name)).orElse(dft);
     }
 
     private int getInitInt(String name, int dft)
@@ -448,11 +433,11 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory, Welc
             }
 
             if (LOG.isDebugEnabled())
-                LOG.debug("Resource " + pathInContext + "=" + r);
+                LOG.debug("Resource {}={}", pathInContext, r);
         }
         catch (IOException e)
         {
-            LOG.ignore(e);
+            LOG.trace("IGNORED", e);
         }
 
         if ((r == null || !r.exists()) && pathInContext.endsWith("/jetty-dir.css"))
@@ -483,9 +468,6 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory, Welc
         doGet(request, response);
     }
 
-    /* (non-Javadoc)
-     * @see javax.servlet.http.HttpServlet#doTrace(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
-     */
     @Override
     protected void doTrace(HttpServletRequest request, HttpServletResponse response)
         throws ServletException, IOException
@@ -500,9 +482,6 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory, Welc
         response.setHeader("Allow", "GET,HEAD,POST,OPTIONS");
     }
 
-    /*
-     * @see javax.servlet.Servlet#destroy()
-     */
     @Override
     public void destroy()
     {
@@ -527,8 +506,8 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory, Welc
 
             if ((_welcomeServlets || _welcomeExactServlets) && welcomeServlet == null)
             {
-                MappedResource<ServletHolder> entry = _servletHandler.getMappedServlet(welcomeInContext);
-                if (entry != null && entry.getResource().getServletInstance() != this &&
+                ServletHandler.MappedServlet entry = _servletHandler.getMappedServlet(welcomeInContext);
+                if (entry != null && entry.getServletHolder().getServletInstance() != this &&
                     (_welcomeServlets || (_welcomeExactServlets && entry.getPathSpec().getDeclaration().equals(welcomeInContext))))
                     welcomeServlet = welcomeInContext;
             }
@@ -536,4 +515,3 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory, Welc
         return welcomeServlet;
     }
 }
-// CHECKSTYLE:ON
