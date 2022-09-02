@@ -272,7 +272,7 @@
 		<dependency.org.jboss.xnio>3.8.6.Final</dependency.org.jboss.xnio>
 
 		<dependency.org.jline>3.21.0</dependency.org.jline>
-		<dependency.org.jsoup>1.14.3</dependency.org.jsoup>
+		<dependency.org.jsoup>1.15.3</dependency.org.jsoup>
 		<dependency.org.mockito>4.3.1</dependency.org.mockito>
 		<dependency.org.mortbay.jetty.alpn>8.1.13.v20181017</dependency.org.mortbay.jetty.alpn>
 
