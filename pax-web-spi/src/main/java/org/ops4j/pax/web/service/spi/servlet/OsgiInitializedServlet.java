@@ -24,6 +24,8 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
+import org.osgi.framework.wiring.BundleWiring;
+
 /**
  * {@link Servlet} wrapper that uses correct {@link ServletConfig} wrapper that returns correct wrapper
  * for {@link javax.servlet.ServletContext} related to given servlet. This servlet wrapper class should be used
@@ -32,36 +34,54 @@ import javax.servlet.ServletResponse;
 public class OsgiInitializedServlet implements Servlet {
 
 	private final Servlet servlet;
-	private final ServletContext servletContext;
+	private final OsgiScopedServletContext servletContext;
 
-	public OsgiInitializedServlet(Servlet servlet, ServletContext servletSpecificContext) {
+	public OsgiInitializedServlet(Servlet servlet, OsgiScopedServletContext servletSpecificContext) {
 		this.servlet = servlet;
 		this.servletContext = servletSpecificContext;
 	}
 
 	@Override
 	public void init(final ServletConfig config) throws ServletException {
-		servlet.init(new ServletConfig() {
-			@Override
-			public String getServletName() {
-				return config.getServletName();
+		ClassLoader tccl = Thread.currentThread().getContextClassLoader();
+		try {
+			ClassLoader newCl = null;
+			if (servletContext != null) {
+				newCl = servletContext.getClassLoader();
+				if (newCl == null && servletContext.getBundle() != null) {
+					BundleWiring wiring = servletContext.getBundle().adapt(BundleWiring.class);
+					if (wiring != null) {
+						newCl = wiring.getClassLoader();
+					}
+				}
 			}
+			if (newCl != null) {
+				Thread.currentThread().setContextClassLoader(newCl);
+			}
+			servlet.init(new ServletConfig() {
+				@Override
+				public String getServletName() {
+					return config.getServletName();
+				}
 
-			@Override
-			public ServletContext getServletContext() {
-				return OsgiInitializedServlet.this.servletContext;
-			}
+				@Override
+				public ServletContext getServletContext() {
+					return OsgiInitializedServlet.this.servletContext;
+				}
 
-			@Override
-			public String getInitParameter(String name) {
-				return config.getInitParameter(name);
-			}
+				@Override
+				public String getInitParameter(String name) {
+					return config.getInitParameter(name);
+				}
 
-			@Override
-			public Enumeration<String> getInitParameterNames() {
-				return config.getInitParameterNames();
-			}
-		});
+				@Override
+				public Enumeration<String> getInitParameterNames() {
+					return config.getInitParameterNames();
+				}
+			});
+		} finally {
+			Thread.currentThread().setContextClassLoader(tccl);
+		}
 	}
 
 	@Override

@@ -16,6 +16,8 @@
 package org.ops4j.pax.web.service.spi.servlet;
 
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.wiring.BundleWiring;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,11 +45,13 @@ public class OsgiInitializedFilter implements Filter {
 	public static final Logger LOG = LoggerFactory.getLogger(OsgiInitializedFilter.class);
 
 	private final Filter filter;
+	private final FilterModel filterModel;
 	private final ServletContext servletContext;
 	private Pattern[] filterPatterns = null;
 
 	public OsgiInitializedFilter(Filter filter, FilterModel model, ServletContext servletSpecificContext) {
 		this.filter = filter;
+		this.filterModel = model;
 		this.servletContext = servletSpecificContext;
 
 		if (model != null && model.getMappingsPerDispatcherTypes().size() == 1) {
@@ -78,27 +82,52 @@ public class OsgiInitializedFilter implements Filter {
 		if (filter == null) {
 			return;
 		}
-		filter.init(new FilterConfig() {
-			@Override
-			public String getFilterName() {
-				return config.getFilterName();
+		ClassLoader tccl = Thread.currentThread().getContextClassLoader();
+		try {
+			ClassLoader newCl = null;
+			if (servletContext != null) {
+				newCl = servletContext.getClassLoader();
+				if (newCl == null) {
+					Bundle bundle = null;
+					if (filterModel != null) {
+						bundle = filterModel.getRegisteringBundle();
+					}
+					if (bundle == null && servletContext instanceof OsgiScopedServletContext) {
+						bundle = ((OsgiScopedServletContext) servletContext).getBundle();
+					}
+					BundleWiring wiring = bundle == null ? null : bundle.adapt(BundleWiring.class);
+					if (wiring != null) {
+						newCl = wiring.getClassLoader();
+					}
+				}
 			}
+			if (newCl != null) {
+				Thread.currentThread().setContextClassLoader(newCl);
+			}
+			filter.init(new FilterConfig() {
+				@Override
+				public String getFilterName() {
+					return config.getFilterName();
+				}
 
-			@Override
-			public ServletContext getServletContext() {
-				return OsgiInitializedFilter.this.servletContext;
-			}
+				@Override
+				public ServletContext getServletContext() {
+					return OsgiInitializedFilter.this.servletContext;
+				}
 
-			@Override
-			public String getInitParameter(String name) {
-				return config.getInitParameter(name);
-			}
+				@Override
+				public String getInitParameter(String name) {
+					return config.getInitParameter(name);
+				}
 
-			@Override
-			public Enumeration<String> getInitParameterNames() {
-				return config.getInitParameterNames();
-			}
-		});
+				@Override
+				public Enumeration<String> getInitParameterNames() {
+					return config.getInitParameterNames();
+				}
+			});
+		} finally {
+			Thread.currentThread().setContextClassLoader(tccl);
+		}
 	}
 
 	@Override
