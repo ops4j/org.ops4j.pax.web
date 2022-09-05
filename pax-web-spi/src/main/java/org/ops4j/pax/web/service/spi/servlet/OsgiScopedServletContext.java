@@ -80,6 +80,10 @@ public class OsgiScopedServletContext implements ServletContext {
 		return webContainerContext;
 	}
 
+	public Bundle getBundle() {
+		return bundle;
+	}
+
 	/**
 	 * Everywhere the {@link OsgiScopedServletContext} is created, we have to call
 	 * {@link org.osgi.framework.BundleContext#ungetService(ServiceReference)} on the {@link WebContainerContext}

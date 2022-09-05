@@ -243,9 +243,7 @@ public class PaxWebStandardWrapper extends StandardWrapper {
 			throw new IllegalStateException("Can't load servlet for " + servletModel);
 		}
 
-		// no need to create OsgiInitializedServlet, because ServletConfig will be correct
-//		return new OsgiInitializedServlet(instance, servletContext);
-		return instance;
+		return new OsgiInitializedServlet(instance, servletContext);
 	}
 
 	@Override
