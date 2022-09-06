@@ -105,7 +105,7 @@ public class WhiteboardWelcomeFilesTest extends MultiContainerTestSupport {
 		assertThat(httpGET(port, "/x"), startsWith("HTTP/1.1 302"));
 		String response = httpGET(port, "/x/");
 		assertThat(response, startsWith("HTTP/1.1 302"));
-		extractHeaders(response).get("Location").endsWith("/x/file.txt");
+		assertTrue(extractHeaders(response).get("Location").endsWith("/x/file.txt"));
 		assertThat(httpGET(port, "/resources"), startsWith("HTTP/1.1 302"));
 		assertThat(httpGET(port, "/resources/"), startsWith("HTTP/1.1 302"));
 
@@ -202,7 +202,7 @@ public class WhiteboardWelcomeFilesTest extends MultiContainerTestSupport {
 		assertThat(httpGET(port, "/c/x"), startsWith("HTTP/1.1 302"));
 		String response = httpGET(port, "/c/x/");
 		assertThat(response, startsWith("HTTP/1.1 302"));
-		extractHeaders(response).get("Location").endsWith("/c/x/file.txt");
+		assertTrue(extractHeaders(response).get("Location").endsWith("/c/x/file.txt"));
 		assertThat(httpGET(port, "/c/resources"), startsWith("HTTP/1.1 302"));
 		assertThat(httpGET(port, "/c/resources/"), startsWith("HTTP/1.1 302"));
 
@@ -292,7 +292,7 @@ public class WhiteboardWelcomeFilesTest extends MultiContainerTestSupport {
 		assertThat(httpGET(port, "/c"), startsWith("HTTP/1.1 302"));
 		String response = httpGET(port, "/c/");
 		assertThat(response, startsWith("HTTP/1.1 302"));
-		extractHeaders(response).get("Location").endsWith("/c/file.txt");
+		assertTrue(extractHeaders(response).get("Location").endsWith("/c/file.txt"));
 
 		getWelcomeFileMappingCustomizer().removedService(mapping2Ref, wfmModel2);
 		assertThat(httpGET(port, "/c"), startsWith("HTTP/1.1 302"));
