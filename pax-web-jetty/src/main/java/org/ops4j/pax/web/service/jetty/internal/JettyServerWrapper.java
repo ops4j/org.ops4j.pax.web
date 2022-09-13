@@ -31,6 +31,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.servlet.ServletContainerInitializer;
 
+import org.eclipse.jetty.http.HttpCookie;
 import org.eclipse.jetty.security.Authenticator;
 import org.eclipse.jetty.security.SecurityHandler;
 import org.eclipse.jetty.security.authentication.BasicAuthenticator;
@@ -122,6 +123,7 @@ class JettyServerWrapper extends Server {
 	private String defaultRealmName;
 
 	private Boolean sessionCookieHttpOnly;
+	private String sessionCookieSameSite;
 
 	private Boolean sessionCookieSecure;
 
@@ -165,6 +167,7 @@ class JettyServerWrapper extends Server {
 
 	public void configureContext(final Map<String, Object> attributes, final Integer timeout, final String cookie,
 								 final String domain, final String path, final String url, final Boolean cookieHttpOnly,
+								 final String sessionCookieSameSite,
 								 final Boolean sessionCookieSecure, final String workerName, final Boolean lazy, final String directory,
 								 Integer maxAge, final Boolean showStacks) {
 		this.contextAttributes = attributes;
@@ -174,6 +177,7 @@ class JettyServerWrapper extends Server {
 		this.sessionPath = path;
 		this.sessionUrl = url;
 		this.sessionCookieHttpOnly = cookieHttpOnly;
+		this.sessionCookieSameSite = sessionCookieSameSite;
 		this.sessionCookieSecure = sessionCookieSecure;
 		this.sessionWorkerName = workerName;
 		lazyLoad = lazy;
@@ -337,9 +341,20 @@ class JettyServerWrapper extends Server {
 		if (maxAge == null) {
 			maxAge = -1;
 		}
+		String sameSiteValue = sessionCookieSameSite;
+		HttpCookie.SameSite sameSite = null;
+		if (sameSiteValue != null && !"unset".equalsIgnoreCase(sameSiteValue)) {
+			if ("none".equalsIgnoreCase(sameSiteValue)) {
+				sameSite = HttpCookie.SameSite.NONE;
+			} else if ("lax".equalsIgnoreCase(sameSiteValue)) {
+				sameSite = HttpCookie.SameSite.LAX;
+			} else if ("strict".equalsIgnoreCase(sameSiteValue)) {
+				sameSite = HttpCookie.SameSite.STRICT;
+			}
+		}
 		configureSessionManager(context, modelSessionTimeout, modelSessionCookie, modelSessionDomain, modelSessionPath,
 				modelSessionUrl, modelSessionCookieHttpOnly, modelSessionSecure, workerName, lazyLoad, storeDirectory,
-				maxAge);
+				maxAge, sameSite);
 
 		if (this.defaultAuthMethod != null && model.getAuthMethod() == null) {
 			model.setAuthMethod(this.defaultAuthMethod);
@@ -572,11 +587,12 @@ class JettyServerWrapper extends Server {
 	 * @param workerName     name appended to session id, used to assist session affinity
 	 *                       in a load balancer
 	 * @param maxAge         session cookie maxAge
+	 * @param sameSite
 	 */
 	private void configureSessionManager(final ServletContextHandler context, final Integer minutes,
 										 final String cookie, String domain, String path, final String url, final Boolean cookieHttpOnly,
 										 final Boolean secure, final String workerName, final Boolean lazy, final String directory,
-										 final int maxAge) {
+										 final int maxAge, HttpCookie.SameSite sameSite) {
 		LOG.debug("configureSessionManager for context [" + context + "] using - timeout:" + minutes + ", cookie:"
 				+ cookie + ", url:" + url + ", cookieHttpOnly:" + cookieHttpOnly + ", workerName:" + workerName
 				+ ", lazyLoad:" + lazy + ", storeDirectory: " + directory);
@@ -617,6 +633,9 @@ class JettyServerWrapper extends Server {
 			if (workerName != null && sessionHandler.getSessionIdManager() != null) {
 				((DefaultSessionIdManager) sessionHandler.getSessionIdManager()).setWorkerName(workerName);
 				LOG.debug("Worker name set to {} for context [{}]", workerName, context);
+			}
+			if (sameSite != null) {
+				sessionHandler.setSameSite(sameSite);
 			}
 		}
 	}

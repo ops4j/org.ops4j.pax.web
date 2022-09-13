@@ -155,6 +155,8 @@ public class EmbeddedTomcat extends Tomcat {
 
 	private Integer configurationSessionCookieMaxAge;
 
+	private String configurationSessionCookieSameSite;
+
 	private Boolean configurationSessionCookieHttpOnly;
 
 	private File configurationDir;
@@ -259,6 +261,7 @@ public class EmbeddedTomcat extends Tomcat {
 		configurationSessionCookieMaxAge = configuration.getSessionCookieMaxAge();
 		configurationSessionCookieHttpOnly = configuration
 				.getSessionCookieHttpOnly();
+		configurationSessionCookieSameSite = configuration.getSessionCookieSameSite();
 
 		// NCSA Logger --> AccessLogValve
 		if (configuration.isLogNCSAFormatEnabled()) {

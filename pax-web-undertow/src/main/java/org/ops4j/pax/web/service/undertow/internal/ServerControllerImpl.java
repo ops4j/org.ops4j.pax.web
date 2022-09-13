@@ -63,8 +63,10 @@ import javax.xml.parsers.SAXParserFactory;
 import io.undertow.UndertowOptions;
 import io.undertow.security.idm.Account;
 import io.undertow.security.idm.Credential;
+import io.undertow.server.handlers.CookieSameSiteMode;
 import io.undertow.server.handlers.DisallowedMethodsHandler;
 import io.undertow.server.handlers.ProxyPeerAddressHandler;
+import io.undertow.server.handlers.SameSiteCookieHandler;
 import io.undertow.server.handlers.resource.FileResourceManager;
 import io.undertow.server.handlers.resource.ResourceHandler;
 import io.undertow.servlet.api.ServletContainer;
@@ -751,6 +753,21 @@ public class ServerControllerImpl implements ServerController, ServerControllerE
             if (peerHostLookup) {
                 rootHandler = new PeerNameResolvingHandler(rootHandler);
             }
+
+            // https://github.com/ops4j/org.ops4j.pax.web/issues/1727 - SameSite attribute
+            String sameSiteValue = configuration.getSessionCookieSameSite();
+            if (sameSiteValue != null && !"unset".equalsIgnoreCase(sameSiteValue)) {
+                String mode = null;
+                if ("none".equalsIgnoreCase(sameSiteValue)) {
+                    mode = CookieSameSiteMode.NONE.toString();
+                } else if ("lax".equalsIgnoreCase(sameSiteValue)) {
+                    mode = CookieSameSiteMode.LAX.toString();
+                } else if ("strict".equalsIgnoreCase(sameSiteValue)) {
+                    mode = CookieSameSiteMode.STRICT.toString();
+                }
+                rootHandler = new SameSiteCookieHandler(rootHandler, mode, configuration.getSessionCookie());
+            }
+
             if (!disallowedMethods.isEmpty()) {
                 Set<HttpString> disallowedMethodNames = new HashSet<>();
                 for (String m : disallowedMethods) {

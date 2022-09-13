@@ -470,6 +470,7 @@ class ServerControllerImpl implements ServerController, ServerControllerEx {
 					configuration.getSessionPath(),
 					configuration.getSessionUrl(),
 					configuration.getSessionCookieHttpOnly(),
+					configuration.getSessionCookieSameSite(),
 					configuration.getSessionCookieSecure(),
 					configuration.getWorkerName(),
 					configuration.getSessionLazyLoad(),

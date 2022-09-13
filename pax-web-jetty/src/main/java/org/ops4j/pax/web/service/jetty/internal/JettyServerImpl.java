@@ -297,11 +297,12 @@ class JettyServerImpl implements JettyServer {
 								 final Integer sessionTimeout, final String sessionCookie,
 								 final String sessionDomain, final String sessionPath,
 								 final String sessionUrl, final Boolean sessionCookieHttpOnly,
+								 final String sessionCookieSameSite,
 								 final Boolean sessionCookieSecure, final String workerName,
 								 final Boolean lazyLoad, final String storeDirectory,
 								 final Integer maxAge, final Boolean showStacks) {
 		server.configureContext(attributes, sessionTimeout, sessionCookie,
-				sessionDomain, sessionPath, sessionUrl, sessionCookieHttpOnly,
+				sessionDomain, sessionPath, sessionUrl, sessionCookieHttpOnly, sessionCookieSameSite,
 				sessionCookieSecure, workerName, lazyLoad, storeDirectory, maxAge, showStacks);
 	}
 

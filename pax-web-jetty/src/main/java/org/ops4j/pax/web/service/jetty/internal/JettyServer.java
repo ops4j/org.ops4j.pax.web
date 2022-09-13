@@ -66,6 +66,7 @@ public interface JettyServer {
 	 *                              null or "none" no URL rewriting will be done.
 	 * @param sessionCookieHttpOnly if set, the session cookie is not available to client side
 	 *                              scripting.
+	 * @param sessionCookieSameSite
 	 * @param sessionCookieSecure   if set, the session cookie is only transfered over secure
 	 *                              transports (https).
 	 * @param sessionWorkerName     name appended to session id, used to assist session affinity
@@ -77,6 +78,7 @@ public interface JettyServer {
 	void configureContext(Map<String, Object> attributes,
 						  Integer sessionTimeout, String sessionCookie, String sessionDomain,
 						  String sessionPath, String sessionUrl, Boolean sessionCookieHttpOnly,
+						  String sessionCookieSameSite,
 						  Boolean sessionCookieSecure, String sessionWorkerName,
 						  Boolean lazyLoad, String storeDirectory,
 						  Integer maxAge, Boolean showStacks);

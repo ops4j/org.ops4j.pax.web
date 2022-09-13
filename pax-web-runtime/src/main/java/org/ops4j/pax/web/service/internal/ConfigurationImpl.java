@@ -458,6 +458,11 @@ public class ConfigurationImpl extends PropertyStore implements Configuration, C
 	}
 
 	@Override
+	public String getSessionCookieSameSite() {
+		return getResolvedStringProperty(PROPERTY_SESSION_COOKIE_SAME_SITE);
+	}
+
+	@Override
 	public Boolean getSessionLazyLoad() {
 		return getResolvedBooleanProperty(PROPERTY_SESSION_LAZY_LOAD);
 	}

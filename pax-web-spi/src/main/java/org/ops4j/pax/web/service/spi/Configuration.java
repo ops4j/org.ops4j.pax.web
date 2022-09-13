@@ -20,6 +20,8 @@ import java.io.File;
 import java.net.URL;
 import java.util.List;
 
+import static org.ops4j.pax.web.service.WebContainerConstants.PROPERTY_SESSION_COOKIE_SAME_SITE;
+
 public interface Configuration {
 
 	Boolean useNIO();
@@ -131,6 +133,8 @@ public interface Configuration {
 	Boolean getSessionCookieSecure();
 
 	Integer getSessionCookieMaxAge();
+
+	String getSessionCookieSameSite();
 
 	String getSessionStoreDirectory();
 
