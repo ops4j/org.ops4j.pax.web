@@ -23,7 +23,7 @@
 	<parent>
 		<groupId>org.ops4j.pax.web.samples</groupId>
 		<artifactId>jsf-resourcehandler</artifactId>
-		<version>8.0.8-SNAPSHOT</version>
+		<version>8.0.8</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
