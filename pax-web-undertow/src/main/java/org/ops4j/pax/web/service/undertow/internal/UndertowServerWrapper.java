@@ -1296,7 +1296,7 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 				loader.addBundle(Utils.getPaxWebJspBundle(paxWebUndertowBundle));
 				loader.addBundle(Utils.getPaxWebUndertowWebSocketBundle(paxWebUndertowBundle));
 				loader.addBundle(Utils.getUndertowWebSocketBundle(paxWebUndertowBundle));
-				loader.makeImmutable();
+//				loader.makeImmutable();
 				classLoader = loader;
 			} else if (classLoader == null) {
 				classLoader = this.classLoader;
@@ -1512,6 +1512,12 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 				// <servlet> - always associated with one of ServletModel's OsgiContextModels
 				OsgiServletContext context = osgiServletContexts.get(osgiContext);
 
+				// we have to ensure that the context's class loader knows about servlet's bundle
+				OsgiServletContext ctx = this.osgiServletContexts.get(osgiContext);
+				if (ctx != null && ctx.getClassLoader() instanceof OsgiServletContextClassLoader) {
+					((OsgiServletContextClassLoader) ctx.getClassLoader()).addBundle(model.getRegisteringBundle());
+				}
+
 				// new servlet info
 				ServletInfo info = new PaxWebServletInfo(model, osgiContext, context);
 
@@ -1692,6 +1698,13 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 			stopUndertowContext(contextPath, manager, deploymentInfo, false);
 		}
 
+		model.getContextModels().forEach(ocm -> {
+			OsgiServletContext ctx = this.osgiServletContexts.get(ocm);
+			if (ctx != null && ctx.getClassLoader() instanceof OsgiServletContextClassLoader) {
+				((OsgiServletContextClassLoader) ctx.getClassLoader()).removeBundle(model.getRegisteringBundle());
+			}
+		});
+
 		// but we can reuse the deployment info - this is the only object from which we can remove
 		// servlets
 		if (deploymentInfo != null) {
@@ -1863,6 +1876,14 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 			if (manager != null && manager.getState() == DeploymentManager.State.STARTED) {
 				for (PreprocessorFilterConfig fc : toInit) {
 					try {
+						if (fc.getModel() != null) {
+							fc.getModel().getContextModels().forEach(context -> {
+								OsgiServletContext ctx = this.osgiServletContexts.get(context);
+								if (ctx != null && ctx.getClassLoader() instanceof OsgiServletContextClassLoader) {
+									((OsgiServletContextClassLoader) ctx.getClassLoader()).addBundle(fc.getModel().getRegisteringBundle());
+								}
+							});
+						}
 						fc.getInstance().init(fc);
 						fc.setInitCalled(true);
 					} catch (ServletException ex) {
@@ -1872,6 +1893,14 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 				for (PreprocessorFilterConfig fc : toDestroy) {
 					fc.destroy();
 					fc.setInitCalled(false);
+					if (fc.getModel() != null) {
+						fc.getModel().getContextModels().forEach(context -> {
+							OsgiServletContext ctx = this.osgiServletContexts.get(context);
+							if (ctx != null && ctx.getClassLoader() instanceof OsgiServletContextClassLoader) {
+								((OsgiServletContextClassLoader) ctx.getClassLoader()).removeBundle(fc.getModel().getRegisteringBundle());
+							}
+						});
+					}
 				}
 			}
 		}
@@ -1897,6 +1926,29 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 				// it can happen when unregistering last filters (or rather setting the state with empty set of filters)
 				continue;
 			}
+
+			// remove filter models' bundles for existing filters and add the bundles for new filters
+			deploymentInfo.getFilters().values().forEach(fi -> {
+				if (fi instanceof PaxWebFilterInfo) {
+					FilterModel fm = ((PaxWebFilterInfo) fi).getFilterModel();
+					if (fm != null) {
+						fm.getContextModels().forEach(ocm -> {
+							OsgiServletContext ctx = this.osgiServletContexts.get(ocm);
+							if (ctx != null && ctx.getClassLoader() instanceof OsgiServletContextClassLoader) {
+								((OsgiServletContextClassLoader) ctx.getClassLoader()).removeBundle(fm.getRegisteringBundle());
+							}
+						});
+					}
+				}
+			});
+			filters.forEach(fm -> {
+				fm.getContextModels().forEach(ocm -> {
+					OsgiServletContext ctx = this.osgiServletContexts.get(ocm);
+					if (ctx != null && ctx.getClassLoader() instanceof OsgiServletContextClassLoader) {
+						((OsgiServletContextClassLoader) ctx.getClassLoader()).addBundle(fm.getRegisteringBundle());
+					}
+				});
+			});
 
 			boolean quick = canQuicklyAddFilter(deploymentInfo, filters);
 			quick &= filtersMap.values().stream().noneMatch(Objects::nonNull);
@@ -2024,6 +2076,12 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 					sessionListenerModels.add(eventListenerModel);
 				}
 
+				// we have to ensure that the context's class loader knows about listener's bundle
+				OsgiServletContext ctx = this.osgiServletContexts.get(context);
+				if (ctx != null && ctx.getClassLoader() instanceof OsgiServletContextClassLoader) {
+					((OsgiServletContextClassLoader) ctx.getClassLoader()).addBundle(eventListenerModel.getRegisteringBundle());
+				}
+
 				boolean stopped = false;
 				if (manager != null && manager.getState() != DeploymentManager.State.UNDEPLOYED
 						&& ServletContextListener.class.isAssignableFrom(eventListener.getClass())) {
@@ -2088,6 +2146,11 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 					String contextPath = context.getContextPath();
 					if (!done.add(contextPath)) {
 						return;
+					}
+
+					OsgiServletContext ctx = this.osgiServletContexts.get(context);
+					if (ctx != null && ctx.getClassLoader() instanceof OsgiServletContextClassLoader) {
+						((OsgiServletContextClassLoader) ctx.getClassLoader()).removeBundle(eventListenerModel.getRegisteringBundle());
 					}
 
 					DeploymentManager manager = getDeploymentManager(contextPath);
@@ -2364,6 +2427,12 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 				//   visit(ContainerInitializerModelChange) method
 				// so in both cases we simply have to start the server if it's not yet started
 
+				// we only have to ensure that the context's class loader knows about websocket's bundle
+				OsgiServletContext ctx = this.osgiServletContexts.get(osgiContextModel);
+				if (ctx != null && ctx.getClassLoader() instanceof OsgiServletContextClassLoader) {
+					((OsgiServletContextClassLoader) ctx.getClassLoader()).addBundle(model.getRegisteringBundle());
+				}
+
 				ensureServletContextStarted(contextPath);
 			});
 			return;
@@ -2388,6 +2457,11 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 
 					// just as when adding WebSockets, we only have to ensure that context is started if it was
 					// stopped. Restart is handled in visit(ContainerInitializerModelChange) method
+
+					OsgiServletContext ctx = this.osgiServletContexts.get(osgiContextModel);
+					if (ctx != null && ctx.getClassLoader() instanceof OsgiServletContextClassLoader) {
+						((OsgiServletContextClassLoader) ctx.getClassLoader()).removeBundle(model.getRegisteringBundle());
+					}
 
 					ensureServletContextStarted(contextPath);
 				});

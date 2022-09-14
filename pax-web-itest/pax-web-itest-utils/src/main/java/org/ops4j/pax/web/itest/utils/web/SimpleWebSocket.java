@@ -36,19 +36,22 @@ public class SimpleWebSocket {
 	List<String> messages = new ArrayList<>();
 
 	@OnOpen
-	public void onWebSocketConnect(Session sess) {
+	public void onWebSocketConnect(Session sess) throws ClassNotFoundException {
+		Thread.currentThread().getContextClassLoader().loadClass(this.getClass().getName());
 		System.out.println("Socket Connected: " + sess);
 	}
 
 	@OnMessage
-	public String onWebSocketText(String message) {
+	public String onWebSocketText(String message) throws ClassNotFoundException {
+		Thread.currentThread().getContextClassLoader().loadClass(this.getClass().getName());
 		System.out.println("Received TEXT message: " + message);
 		messages.add(message);
 		return "I got \"" + message + "\"";
 	}
 
 	@OnClose
-	public void onWebSocketClose(CloseReason reason) {
+	public void onWebSocketClose(CloseReason reason) throws ClassNotFoundException {
+		Thread.currentThread().getContextClassLoader().loadClass(this.getClass().getName());
 		System.out.println("Socket Closed: " + reason);
 	}
 
