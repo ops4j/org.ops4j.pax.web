@@ -84,6 +84,12 @@ public class OsgiServletContextClassLoader extends ClassLoader implements Bundle
 		}
 	}
 
+	public void removeBundle(Bundle bundle) {
+		if (bundle != null) {
+			bundles.remove(bundle);
+		}
+	}
+
 	/**
 	 * Adds {@link Bundle bundles} to be reachable from this {@link ClassLoader}
 	 * @param bundle

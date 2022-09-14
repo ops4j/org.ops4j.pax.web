@@ -26,10 +26,20 @@ public class WhiteboardListener implements ServletRequestListener {
 	private static final Logger LOG = LoggerFactory.getLogger(WhiteboardListener.class);
 
 	public void requestInitialized(final ServletRequestEvent sre) {
+		try {
+			Thread.currentThread().getContextClassLoader().loadClass(WhiteboardServlet.class.getName());
+		} catch (ClassNotFoundException e) {
+			throw new RuntimeException(e);
+		}
 		LOG.info("Request initialized from ip: " + sre.getServletRequest().getRemoteAddr());
 	}
 
 	public void requestDestroyed(final ServletRequestEvent sre) {
+		try {
+			Thread.currentThread().getContextClassLoader().loadClass(WhiteboardServlet.class.getName());
+		} catch (ClassNotFoundException e) {
+			throw new RuntimeException(e);
+		}
 		LOG.info("Request destroyed from ip: " + sre.getServletRequest().getRemoteAddr());
 	}
 

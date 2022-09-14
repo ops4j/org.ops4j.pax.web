@@ -929,7 +929,7 @@ class JettyServerWrapper implements BatchVisitor {
 				loader.addBundle(paxWebJettyBundle);
 				loader.addBundle(Utils.getPaxWebJspBundle(paxWebJettyBundle));
 				loader.addBundles(Utils.getJettyWebSocketBundle(paxWebJettyBundle));
-				loader.makeImmutable();
+//				loader.makeImmutable();
 				classLoader = loader;
 			} else if (classLoader == null) {
 				classLoader = this.classLoader;
@@ -1179,6 +1179,12 @@ class JettyServerWrapper implements BatchVisitor {
 				OsgiServletContext context = osgiServletContexts.get(osgiContextModel);
 				PaxWebServletHolder holder = new PaxWebServletHolder(model, osgiContextModel, context);
 
+				// we have to ensure that the context's class loader knows about servlet's bundle
+				OsgiServletContext ctx = this.osgiServletContexts.get(osgiContextModel);
+				if (ctx != null && ctx.getClassLoader() instanceof OsgiServletContextClassLoader) {
+					((OsgiServletContextClassLoader) ctx.getClassLoader()).addBundle(model.getRegisteringBundle());
+				}
+
 				// <servlet-mapping>
 				ServletMapping mapping = new ServletMapping();
 				mapping.setServletName(model.getName());
@@ -1279,6 +1285,13 @@ class JettyServerWrapper implements BatchVisitor {
 		}
 
 		((PaxWebServletHandler) sch.getServletHandler()).removeServletWithMapping(model);
+
+		model.getContextModels().forEach(ocm -> {
+			OsgiServletContext ctx = this.osgiServletContexts.get(ocm);
+			if (ctx != null && ctx.getClassLoader() instanceof OsgiServletContextClassLoader) {
+				((OsgiServletContextClassLoader) ctx.getClassLoader()).removeBundle(model.getRegisteringBundle());
+			}
+		});
 
 		LOG.info("Removing servlet {}", model);
 		LOG.debug("Removing servlet {} from context {}", model.getName(), contextPath);
@@ -1433,13 +1446,31 @@ class JettyServerWrapper implements BatchVisitor {
 			if (sch.isStarted()) {
 				for (PreprocessorFilterConfig fc : toInit) {
 					try {
+						if (fc.getModel() != null) {
+							fc.getModel().getContextModels().forEach(context -> {
+								OsgiServletContext ctx = this.osgiServletContexts.get(context);
+								if (ctx != null && ctx.getClassLoader() instanceof OsgiServletContextClassLoader) {
+									((OsgiServletContextClassLoader) ctx.getClassLoader()).addBundle(fc.getModel().getRegisteringBundle());
+								}
+							});
+						}
 						fc.getInstance().init(fc);
+						fc.setInitCalled(true);
 					} catch (ServletException ex) {
 						LOG.warn("Problem during preprocessor initialization: {}", ex.getMessage(), ex);
 					}
 				}
 				for (PreprocessorFilterConfig fc : toDestroy) {
 					fc.destroy();
+					fc.setInitCalled(false);
+					if (fc.getModel() != null) {
+						fc.getModel().getContextModels().forEach(context -> {
+							OsgiServletContext ctx = this.osgiServletContexts.get(context);
+							if (ctx != null && ctx.getClassLoader() instanceof OsgiServletContextClassLoader) {
+								((OsgiServletContextClassLoader) ctx.getClassLoader()).removeBundle(fc.getModel().getRegisteringBundle());
+							}
+						});
+					}
 				}
 			}
 
@@ -1564,6 +1595,17 @@ class JettyServerWrapper implements BatchVisitor {
 				for (FilterHolder holder : sch.getServletHandler().getFilters()) {
 					try {
 						holder.stop();
+						if (holder instanceof PaxWebFilterHolder) {
+							FilterModel filterModel = ((PaxWebFilterHolder) holder).getFilterModel();
+							if (filterModel != null) {
+								filterModel.getContextModels().forEach(context -> {
+									OsgiServletContext ctx = this.osgiServletContexts.get(context);
+									if (ctx != null && ctx.getClassLoader() instanceof OsgiServletContextClassLoader) {
+										((OsgiServletContextClassLoader) ctx.getClassLoader()).removeBundle(filterModel.getRegisteringBundle());
+									}
+								});
+							}
+						}
 					} catch (Exception e) {
 						LOG.error(e.getMessage(), e);
 					}
@@ -1575,6 +1617,15 @@ class JettyServerWrapper implements BatchVisitor {
 				for (PaxWebFilterHolder fh : newFilterHolders) {
 					if ("org.eclipse.jetty.websocket.servlet.WebSocketUpgradeFilter".equals(fh.getName())) {
 						sch.getServletContext().removeAttribute("org.eclipse.jetty.websocket.server.WebSocketUpgradeFilter");
+					}
+					FilterModel filterModel = fh.getFilterModel();
+					if (filterModel != null) {
+						filterModel.getContextModels().forEach(context -> {
+							OsgiServletContext ctx = this.osgiServletContexts.get(context);
+							if (ctx != null && ctx.getClassLoader() instanceof OsgiServletContextClassLoader) {
+								((OsgiServletContextClassLoader) ctx.getClassLoader()).addBundle(filterModel.getRegisteringBundle());
+							}
+						});
 					}
 					sch.getServletHandler().addFilter(fh);
 					if (fh.getMapping() != null) {
@@ -1623,6 +1674,12 @@ class JettyServerWrapper implements BatchVisitor {
 					sessionListenerModels.add(eventListenerModel);
 				}
 
+				// we have to ensure that the context's class loader knows about listener's bundle
+				OsgiServletContext ctx = this.osgiServletContexts.get(context);
+				if (ctx != null && ctx.getClassLoader() instanceof OsgiServletContextClassLoader) {
+					((OsgiServletContextClassLoader) ctx.getClassLoader()).addBundle(eventListenerModel.getRegisteringBundle());
+				}
+
 				boolean stopped = false;
 				if (servletContextHandler.isStarted() && ServletContextListener.class.isAssignableFrom(eventListener.getClass())) {
 					// we have to stop the context, so existing ServletContextListeners are called
@@ -1659,6 +1716,11 @@ class JettyServerWrapper implements BatchVisitor {
 					String contextPath = context.getContextPath();
 					if (!done.add(contextPath)) {
 						return;
+					}
+
+					OsgiServletContext ctx = this.osgiServletContexts.get(context);
+					if (ctx != null && ctx.getClassLoader() instanceof OsgiServletContextClassLoader) {
+						((OsgiServletContextClassLoader) ctx.getClassLoader()).removeBundle(eventListenerModel.getRegisteringBundle());
 					}
 
 					PaxWebServletContextHandler servletContextHandler = contextHandlers.get(contextPath);
@@ -1891,6 +1953,12 @@ class JettyServerWrapper implements BatchVisitor {
 				//   visit(ContainerInitializerModelChange) method
 				// so in both cases we simply have to start the server if it's not yet started
 
+				// we only have to ensure that the context's class loader knows about websocket's bundle
+				OsgiServletContext ctx = this.osgiServletContexts.get(osgiContextModel);
+				if (ctx != null && ctx.getClassLoader() instanceof OsgiServletContextClassLoader) {
+					((OsgiServletContextClassLoader) ctx.getClassLoader()).addBundle(model.getRegisteringBundle());
+				}
+
 				ensureServletContextStarted(contextHandlers.get(contextPath));
 			});
 			return;
@@ -1915,6 +1983,11 @@ class JettyServerWrapper implements BatchVisitor {
 
 					// just as when adding WebSockets, we only have to ensure that context is started if it was
 					// stopped. Restart is handled in visit(ContainerInitializerModelChange) method
+
+					OsgiServletContext ctx = this.osgiServletContexts.get(osgiContextModel);
+					if (ctx != null && ctx.getClassLoader() instanceof OsgiServletContextClassLoader) {
+						((OsgiServletContextClassLoader) ctx.getClassLoader()).removeBundle(model.getRegisteringBundle());
+					}
 
 					ensureServletContextStarted(contextHandlers.get(contextPath));
 				});
@@ -2526,6 +2599,14 @@ class JettyServerWrapper implements BatchVisitor {
 			for (int i = pos; i < newFilterHolders.length; i++) {
 				// each holder may have many mappings
 				PaxWebFilterHolder fh = newFilterHolders[i];
+
+				fh.getFilterModel().getContextModels().forEach(context -> {
+					OsgiServletContext ctx = this.osgiServletContexts.get(context);
+					if (ctx != null && ctx.getClassLoader() instanceof OsgiServletContextClassLoader) {
+						((OsgiServletContextClassLoader) ctx.getClassLoader()).addBundle(fh.getFilterModel().getRegisteringBundle());
+					}
+				});
+
 				servletHandler.addFilter(fh);
 				for (PaxWebFilterMapping paxWebFilterMapping : fh.getMapping()) {
 					if (paxWebFilterMapping.isAfter()) {
