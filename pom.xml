@@ -135,7 +135,7 @@
 		<plugin.maven-failsafe-plugin>2.22.2</plugin.maven-failsafe-plugin>
 		<plugin.maven-gpg-plugin>3.0.1</plugin.maven-gpg-plugin>
 		<plugin.maven-install-plugin>2.5.2</plugin.maven-install-plugin>
-		<plugin.maven-jar-plugin>3.2.2</plugin.maven-jar-plugin>
+		<plugin.maven-jar-plugin>3.3.0</plugin.maven-jar-plugin>
 		<plugin.maven-javadoc-plugin>3.4.1</plugin.maven-javadoc-plugin>
 		<plugin.maven-release-plugin>2.5.3</plugin.maven-release-plugin>
 		<plugin.maven-remote-resources-plugin>1.7.0</plugin.maven-remote-resources-plugin>
