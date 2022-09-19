@@ -1519,7 +1519,8 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 				}
 
 				// new servlet info
-				ServletInfo info = new PaxWebServletInfo(model, osgiContext, context);
+				ServletInfo info = new PaxWebServletInfo(model, osgiContext, context,
+						"whiteboard".equalsIgnoreCase(configuration.server().getTCCLType()));
 
 				boolean isDefaultResourceServlet = model.isResourceServlet();
 				if (isDefaultResourceServlet) {
@@ -1792,7 +1793,8 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 				Deployment deployment = manager == null ? null : manager.getDeployment();
 
 				// filter definition
-				FilterInfo info = new PaxWebFilterInfo(model, osgiContext);
+				FilterInfo info = new PaxWebFilterInfo(model, osgiContext,
+						"whiteboard".equalsIgnoreCase(configuration.server().getTCCLType()));
 
 				deploymentInfo.addFilter(info);
 				if (deployment != null) {
@@ -1995,7 +1997,8 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 				OsgiServletContext context = osgiServletContexts.get(highestRankedModel);
 
 				// filter definition
-				FilterInfo info = new PaxWebFilterInfo(model, context);
+				FilterInfo info = new PaxWebFilterInfo(model, context,
+						"whiteboard".equalsIgnoreCase(configuration.server().getTCCLType()));
 
 				if (quick) {
 					// we can operate on existing ManagedFilters object from current deployment

@@ -161,6 +161,26 @@ public interface PaxWebConfig {
 	 */
 	String BUNDLE_CONTEXT_PROPERTY_WAR_EXTENDER_JARS_TO_SCAN = "org.ops4j.pax.web.extender.war.jarsToScan";
 
+	/**
+	 * <p>Defines the type of TCCL that should be set for service methods (like {@link javax.servlet.Servlet#service}).
+	 * It can take two values:<ul>
+	 *     <li>{@code servlet} (the default, assumed value) - {@link ServletContext#getClassLoader()} returns
+	 *     only the bundle's class loader for given servlet/filter, but TCCL is set to servlet context's classloader</li>
+	 *     <li>{@code whiteboard} - {@link ServletContext#getClassLoader()} and TCCL are set to the same classloader,
+	 *     the classloader of a bundle which was used to register given web element.</li>
+	 * </ul></p>
+	 * <p>According to Whiteboard specification, {@link ServletContext#getClassLoader()} should return a classloader
+	 * for a bundle which was used to register given Whiteboard service (like servlet or a filter). This is ensured
+	 * by Pax Web 8. However, Whiteboard specification doesn't say anything about
+	 * {@link Thread#getContextClassLoader() Thread Context ClassLoader}, so by the principle of least surprise,
+	 * the TCCL is set to a "servlet context class loader", which in Pax Web is a delegating class loader, which can
+	 * reach to multiple bundles, including the bundle of the runtime (like pax-web-jetty), JSP bundle, whiteboard
+	 * bundle and definitely - all the bundles for all the web elements which are registered into the given servlet
+	 * context - this is the default behavior, because it matches the expected behavior for web applications
+	 * (WARs/WABs).</p>
+	 */
+	String PID_CFG_TCCL_TYPE = "org.ops4j.pax.web.tccl.type";
+
 	// --- security configuration properties
 
 	/**

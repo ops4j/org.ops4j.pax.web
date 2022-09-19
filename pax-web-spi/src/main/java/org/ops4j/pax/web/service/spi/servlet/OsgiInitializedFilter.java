@@ -49,10 +49,18 @@ public class OsgiInitializedFilter implements Filter {
 	private final ServletContext servletContext;
 	private Pattern[] filterPatterns = null;
 
-	public OsgiInitializedFilter(Filter filter, FilterModel model, ServletContext servletSpecificContext) {
+	/**
+	 * Whether TCCL should be set to servlet's bundle classloader. If {@code false}, TCCL from
+	 * containing {@link ServletContext} will be used.
+	 */
+	private final boolean whiteboardTCCL;
+
+	public OsgiInitializedFilter(Filter filter, FilterModel model, ServletContext servletSpecificContext,
+			boolean whiteboardTCCL) {
 		this.filter = filter;
 		this.filterModel = model;
 		this.servletContext = servletSpecificContext;
+		this.whiteboardTCCL = whiteboardTCCL;
 
 		if (model != null && model.getMappingsPerDispatcherTypes().size() == 1) {
 			String[] regexPatterns = model.getMappingsPerDispatcherTypes().get(0).getRegexPatterns();
@@ -132,34 +140,45 @@ public class OsgiInitializedFilter implements Filter {
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-		if (filterPatterns != null) {
-			// do RegEx matching
-			boolean match = false;
-			if (request instanceof HttpServletRequest) {
-				String uri = ((HttpServletRequest) request).getRequestURI();
-				if (((HttpServletRequest) request).getQueryString() != null) {
-					uri += "?" + ((HttpServletRequest) request).getQueryString();
-				}
-				for (Pattern p : filterPatterns) {
-					if (p.matcher(uri).matches()) {
-						match = true;
-						break;
+		ClassLoader tccl = null;
+		try {
+			if (whiteboardTCCL) {
+				tccl = Thread.currentThread().getContextClassLoader();
+				Thread.currentThread().setContextClassLoader(request.getServletContext().getClassLoader());
+			}
+			if (filterPatterns != null) {
+				// do RegEx matching
+				boolean match = false;
+				if (request instanceof HttpServletRequest) {
+					String uri = ((HttpServletRequest) request).getRequestURI();
+					if (((HttpServletRequest) request).getQueryString() != null) {
+						uri += "?" + ((HttpServletRequest) request).getQueryString();
 					}
+					for (Pattern p : filterPatterns) {
+						if (p.matcher(uri).matches()) {
+							match = true;
+							break;
+						}
+					}
+				} else {
+					match = true;
+				}
+				if (match) {
+					filter.doFilter(request, response, chain);
+				} else {
+					// just invoke the chain without this filter
+					chain.doFilter(request, response);
 				}
 			} else {
-				match = true;
+				if (filter == null) {
+					chain.doFilter(request, response);
+				} else {
+					filter.doFilter(request, response, chain);
+				}
 			}
-			if (match) {
-				filter.doFilter(request, response, chain);
-			} else {
-				// just invoke the chain without this filter
-				chain.doFilter(request, response);
-			}
-		} else {
-			if (filter == null) {
-				chain.doFilter(request, response);
-			} else {
-				filter.doFilter(request, response, chain);
+		} finally {
+			if (whiteboardTCCL) {
+				Thread.currentThread().setContextClassLoader(tccl);
 			}
 		}
 	}

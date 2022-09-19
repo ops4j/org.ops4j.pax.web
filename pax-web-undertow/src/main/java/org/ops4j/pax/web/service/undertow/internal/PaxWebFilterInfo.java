@@ -45,10 +45,14 @@ public class PaxWebFilterInfo extends FilterInfo {
 
 	private ServiceReference<? extends Filter> serviceReference;
 
-	public PaxWebFilterInfo(FilterModel model, OsgiServletContext osgiServletContext) {
+	private boolean whiteboardTCCL;
+
+	public PaxWebFilterInfo(FilterModel model, OsgiServletContext osgiServletContext,
+			boolean whiteboardTCCL) {
 		super(model.getName(), model.getActualClass(),
 				new FilterModelFactory(model,
-						new OsgiScopedServletContext(osgiServletContext, model.getRegisteringBundle())));
+						new OsgiScopedServletContext(osgiServletContext, model.getRegisteringBundle()),
+						whiteboardTCCL));
 
 		this.osgiServletContext = osgiServletContext;
 
@@ -60,12 +64,13 @@ public class PaxWebFilterInfo extends FilterInfo {
 		setAsyncSupported(filterModel.getAsyncSupported() != null && filterModel.getAsyncSupported());
 
 		filterModel.getInitParams().forEach(this::addInitParam);
+		this.whiteboardTCCL = whiteboardTCCL;
 	}
 
 	@Override
-	@SuppressWarnings("MethodDoesntCallSuperMethod")
 	public FilterInfo clone() {
-		final FilterInfo info = new PaxWebFilterInfo(this.filterModel, this.osgiServletContext);
+		final FilterInfo info = new PaxWebFilterInfo(this.filterModel, this.osgiServletContext,
+				this.whiteboardTCCL);
 
 		info.setAsyncSupported(isAsyncSupported());
 		getInitParams().forEach(info::addInitParam);
@@ -86,9 +91,12 @@ public class PaxWebFilterInfo extends FilterInfo {
 		private final OsgiScopedServletContext osgiScopedServletContext;
 		private ServiceObjects<Filter> serviceObjects;
 
-		FilterModelFactory(FilterModel model, OsgiScopedServletContext osgiScopedServletContext) {
+		private final boolean whiteboardTCCL;
+
+		FilterModelFactory(FilterModel model, OsgiScopedServletContext osgiScopedServletContext, boolean whiteboardTCCL) {
 			this.model = model;
 			this.osgiScopedServletContext = osgiScopedServletContext;
+			this.whiteboardTCCL = whiteboardTCCL;
 		}
 
 		@Override
@@ -123,7 +131,7 @@ public class PaxWebFilterInfo extends FilterInfo {
 				}
 			}
 
-			Filter osgiInitializedFilter = new OsgiInitializedFilter(instance, model, this.osgiScopedServletContext);
+			Filter osgiInitializedFilter = new OsgiInitializedFilter(instance, model, this.osgiScopedServletContext, whiteboardTCCL);
 			Filter scopedFilter = new ScopedFilter(osgiInitializedFilter, model);
 
 			return new ImmediateInstanceHandle<Filter>(scopedFilter) {

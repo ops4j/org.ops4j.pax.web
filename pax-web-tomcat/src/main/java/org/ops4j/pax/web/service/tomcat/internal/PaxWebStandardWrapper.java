@@ -70,6 +70,8 @@ public class PaxWebStandardWrapper extends StandardWrapper {
 
 	private Container originalParent;
 
+	private boolean whiteboardTCCL;
+
 	/**
 	 * Constructor to use when wrapping internal {@link Servlet servlets} which won't use OSGi machinery.
 	 * @param name
@@ -243,7 +245,7 @@ public class PaxWebStandardWrapper extends StandardWrapper {
 			throw new IllegalStateException("Can't load servlet for " + servletModel);
 		}
 
-		return new OsgiInitializedServlet(instance, servletContext);
+		return new OsgiInitializedServlet(instance, servletContext, whiteboardTCCL);
 	}
 
 	@Override
@@ -260,6 +262,10 @@ public class PaxWebStandardWrapper extends StandardWrapper {
 		if (servletModel != null && servletModel.getRegisteringBundle() != null) {
 			servletContext.releaseWebContainerContext(servletModel.getRegisteringBundle());
 		}
+	}
+
+	public void setWhiteboardTCCL(boolean whiteboardTCCL) {
+		this.whiteboardTCCL = whiteboardTCCL;
 	}
 
 }

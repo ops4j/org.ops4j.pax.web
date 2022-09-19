@@ -180,4 +180,11 @@ public interface ServerConfiguration {
 	 */
 	String[] getConnectors();
 
+	/**
+	 * Returns the type of TCCL that should be set for service methods ({@code servlet} (default) or
+	 * {@code whiteboard}).
+	 * @return
+	 */
+	String getTCCLType();
+
 }

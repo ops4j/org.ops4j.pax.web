@@ -74,6 +74,8 @@ public class PaxWebServletInfo extends ServletInfo {
 	 */
 	private final List<String> mappings = new ArrayList<>();
 
+	private final boolean whiteboardTCCL;
+
 	/**
 	 * Constructor to use when wrapping internal {@link Servlet servlets} which won't use OSGi machinery.
 	 *
@@ -89,14 +91,16 @@ public class PaxWebServletInfo extends ServletInfo {
 		webContainerContext = null;
 		this.servlet = servlet;
 		this.is404 = is404;
+		this.whiteboardTCCL = false;
 	}
 
 	public PaxWebServletInfo(ServletModel model, OsgiContextModel osgiContextModel,
-				OsgiServletContext osgiServletContext) {
+			OsgiServletContext osgiServletContext, boolean whiteboardTCCL) {
 		// a bit tricky, because we have to call super() first
 		super(model.getName(), model.getActualClass(),
 				new ServletModelFactory(model,
-						new OsgiScopedServletContext(osgiServletContext, model.getRegisteringBundle())));
+						new OsgiScopedServletContext(osgiServletContext, model.getRegisteringBundle()),
+						whiteboardTCCL));
 
 		this.osgiContextModel = osgiContextModel;
 		this.osgiServletContext = osgiServletContext;
@@ -117,6 +121,8 @@ public class PaxWebServletInfo extends ServletInfo {
 
 		this.servletContext = ((ServletModelFactory)super.getInstanceFactory()).getServletContext();
 		this.webContainerContext = servletContext.getResolvedWebContainerContext();
+
+		this.whiteboardTCCL = whiteboardTCCL;
 	}
 
 	public ServletModel getServletModel() {
@@ -172,7 +178,7 @@ public class PaxWebServletInfo extends ServletInfo {
 	public ServletInfo clone() {
 		final ServletInfo info;
 		if (!is404) {
-			info = new PaxWebServletInfo(this.servletModel, this.osgiContextModel, this.osgiServletContext);
+			info = new PaxWebServletInfo(this.servletModel, this.osgiContextModel, this.osgiServletContext, this.whiteboardTCCL);
 		} else {
 			info = new PaxWebServletInfo(getName(), servlet, true);
 
@@ -214,9 +220,12 @@ public class PaxWebServletInfo extends ServletInfo {
 		private final OsgiScopedServletContext osgiScopedServletContext;
 		private ServiceObjects<Servlet> serviceObjects;
 
-		ServletModelFactory(ServletModel model, OsgiScopedServletContext osgiScopedServletContext) {
+		private final boolean whiteboardTCCL;
+
+		ServletModelFactory(ServletModel model, OsgiScopedServletContext osgiScopedServletContext, boolean whiteboardTCCL) {
 			this.model = model;
 			this.osgiScopedServletContext = osgiScopedServletContext;
+			this.whiteboardTCCL = whiteboardTCCL;
 		}
 
 		@Override
@@ -256,7 +265,7 @@ public class PaxWebServletInfo extends ServletInfo {
 				((UndertowResourceServlet) instance).setWelcomeFilesRedirect(osgiScopedServletContext.isWelcomeFilesRedirect());
 			}
 
-			return new ImmediateInstanceHandle<Servlet>(new OsgiInitializedServlet(instance, this.osgiScopedServletContext)) {
+			return new ImmediateInstanceHandle<Servlet>(new OsgiInitializedServlet(instance, this.osgiScopedServletContext, whiteboardTCCL)) {
 				@Override
 				public void release() {
 					if (model.getElementReference() != null) {

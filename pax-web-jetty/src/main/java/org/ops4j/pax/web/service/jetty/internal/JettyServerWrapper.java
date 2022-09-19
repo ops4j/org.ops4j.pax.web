@@ -1178,6 +1178,7 @@ class JettyServerWrapper implements BatchVisitor {
 				// <servlet> - always associated with one of ServletModel's OsgiContextModels
 				OsgiServletContext context = osgiServletContexts.get(osgiContextModel);
 				PaxWebServletHolder holder = new PaxWebServletHolder(model, osgiContextModel, context);
+				holder.setWhiteboardTCCL("whiteboard".equalsIgnoreCase(configuration.server().getTCCLType()));
 
 				// we have to ensure that the context's class loader knows about servlet's bundle
 				OsgiServletContext ctx = this.osgiServletContexts.get(osgiContextModel);
@@ -1366,6 +1367,7 @@ class JettyServerWrapper implements BatchVisitor {
 				ServletHandler servletHandler = sch.getServletHandler();
 				List<PaxWebFilterMapping> mapping = configureFilterMappings(model);
 				PaxWebFilterHolder holder = new PaxWebFilterHolder(model, context);
+				holder.setWhiteboardTCCL("whiteboard".equalsIgnoreCase(configuration.server().getTCCLType()));
 				holder.setMapping(mapping);
 				for (PaxWebFilterMapping m : mapping) {
 					servletHandler.addFilter(holder);
@@ -1553,6 +1555,7 @@ class JettyServerWrapper implements BatchVisitor {
 				OsgiServletContext context = osgiServletContexts.get(highestRankedModel);
 
 				PaxWebFilterHolder holder = new PaxWebFilterHolder(model, context);
+				holder.setWhiteboardTCCL("whiteboard".equalsIgnoreCase(configuration.server().getTCCLType()));
 				holder.setMapping(configureFilterMappings(model));
 
 				newFilterHolders[pos] = holder;
