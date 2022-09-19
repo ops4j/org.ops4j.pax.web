@@ -75,6 +75,9 @@
 		<AD id="org.ops4j.pax.web.default.connectors" required="false" type="String" default=""
 				name="Default Connectors for all deployed contexts" />
 
+		<AD id="org.ops4j.pax.web.tccl.type" required="false" type="String" default="servlet"
+				name="TCCL type to set in servlet/filter service methods" />
+
 		<!-- Properties related to Security/SSL/TLS -->
 
 		<AD id="org.ops4j.pax.web.ssl.keystore" type="String" default=""

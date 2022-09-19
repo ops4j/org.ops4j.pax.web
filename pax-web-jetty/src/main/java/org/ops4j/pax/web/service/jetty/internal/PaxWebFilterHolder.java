@@ -59,6 +59,8 @@ public class PaxWebFilterHolder extends FilterHolder {
 
 	private ServiceObjects<Filter> serviceObjects;
 
+	private boolean whiteboardTCCL;
+
 	/**
 	 * Initialize {@link PaxWebFilterHolder} with {@link FilterModel}. All its
 	 * {@link FilterModel#getContextModels() OSGi contexts} will determinie when the filter will be used during
@@ -175,7 +177,8 @@ public class PaxWebFilterHolder extends FilterHolder {
 		}
 
 		return instance == null ? null
-				: new OsgiInitializedFilter(instance, filterModel, servletContext == null ? osgiServletContext : servletContext);
+				: new OsgiInitializedFilter(instance, filterModel, servletContext == null ? osgiServletContext : servletContext,
+				whiteboardTCCL);
 	}
 
 	@Override
@@ -224,6 +227,10 @@ public class PaxWebFilterHolder extends FilterHolder {
 
 	public List<PaxWebFilterMapping> getMapping() {
 		return mapping;
+	}
+
+	public void setWhiteboardTCCL(boolean whiteboardTCCL) {
+		this.whiteboardTCCL = whiteboardTCCL;
 	}
 
 }

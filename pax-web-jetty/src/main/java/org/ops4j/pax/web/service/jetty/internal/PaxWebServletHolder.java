@@ -75,6 +75,8 @@ public class PaxWebServletHolder extends ServletHolder {
 	 */
 	private boolean is404;
 
+	private boolean whiteboardTCCL;
+
 	/**
 	 * Constructor to use when wrapping internal {@link Servlet servlets} which won't use OSGi machinery.
 	 *
@@ -234,7 +236,7 @@ public class PaxWebServletHolder extends ServletHolder {
 		// if null, newInstance() will be called
 		// In Tomcat configuration is taken from the StandardWrapper, here
 		// org.eclipse.jetty.servlet.ServletHolder._config is private, so we need special OsgiInitializedServlet
-		return instance == null ? null : new OsgiInitializedServlet(instance, servletContext);
+		return instance == null ? null : new OsgiInitializedServlet(instance, servletContext, whiteboardTCCL);
 	}
 
 	@Override
@@ -276,7 +278,7 @@ public class PaxWebServletHolder extends ServletHolder {
 	@Override
 	protected Servlet newInstance() throws Exception {
 		// no need to do anything special, but we have a Bundle reference, so we could use it if needed
-		return new OsgiInitializedServlet(super.newInstance(), servletContext);
+		return new OsgiInitializedServlet(super.newInstance(), servletContext, whiteboardTCCL);
 	}
 
 	/**
@@ -308,6 +310,10 @@ public class PaxWebServletHolder extends ServletHolder {
 	 */
 	public ServletMapping getMapping() {
 		return mapping;
+	}
+
+	public void setWhiteboardTCCL(boolean whiteboardTCCL) {
+		this.whiteboardTCCL = whiteboardTCCL;
 	}
 
 }

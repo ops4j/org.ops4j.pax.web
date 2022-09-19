@@ -768,6 +768,8 @@ class TomcatServerWrapper implements BatchVisitor {
 
 //							Context ctx = new HttpServiceContext(getHost(), accessControllerContext);
 			PaxWebStandardContext context = new PaxWebStandardContext(default404Servlet, new OsgiSessionAttributeListener(sessionListenerModels));
+			context.setWhiteboardTCCL("whiteboard".equalsIgnoreCase(configuration.server().getTCCLType()));
+
 			context.setPath("/".equals(contextPath) ? "" : contextPath);
 			// name is used in final toString(), so better to have it clearer
 			context.setName(contextPath);
@@ -1127,6 +1129,7 @@ class TomcatServerWrapper implements BatchVisitor {
 				// <servlet> - always associated with one of ServletModel's OsgiContextModels
 				OsgiServletContext context = osgiServletContexts.get(osgiContext);
 				PaxWebStandardWrapper wrapper = new PaxWebStandardWrapper(model, osgiContext, context, realContext);
+				wrapper.setWhiteboardTCCL("whiteboard".equalsIgnoreCase(configuration.server().getTCCLType()));
 
 				// we have to ensure that the context's class loader knows about servlet's bundle
 				OsgiServletContext ctx = this.osgiServletContexts.get(osgiContext);
@@ -1347,7 +1350,9 @@ class TomcatServerWrapper implements BatchVisitor {
 				PaxWebStandardContext context = contextHandlers.get(contextPath);
 				OsgiServletContext osgiContext = osgiServletContexts.get(highestRankedModel);
 
-				context.addFilterDef(new PaxWebFilterDef(model, false, osgiContext));
+				PaxWebFilterDef filterDef = new PaxWebFilterDef(model, false, osgiContext);
+				filterDef.setWhiteboardTCCL("whiteboard".equalsIgnoreCase(configuration.server().getTCCLType()));
+				context.addFilterDef(filterDef);
 				configureFilterMappings(model, context);
 			}
 		}
@@ -1447,7 +1452,9 @@ class TomcatServerWrapper implements BatchVisitor {
 					}
 				});
 
-				context.addFilterDef(new PaxWebFilterDef(model, false, osgiContext));
+				PaxWebFilterDef filterDef = new PaxWebFilterDef(model, false, osgiContext);
+				filterDef.setWhiteboardTCCL("whiteboard".equalsIgnoreCase(configuration.server().getTCCLType()));
+				context.addFilterDef(filterDef);
 				configureFilterMappings(model, context);
 			}
 

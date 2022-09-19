@@ -121,6 +121,7 @@ public class PaxWebStandardContext extends StandardContext {
 	private String[] virtualHosts;
 	private boolean[] virtualHostWildcards;
 	private String[] connectorNames;
+	private boolean whiteboardTCCL;
 
 	public PaxWebStandardContext(Default404Servlet defaultServlet, OsgiSessionAttributeListener osgiSessionsBridge) {
 		super();
@@ -176,6 +177,7 @@ public class PaxWebStandardContext extends StandardContext {
 				DispatcherType.ASYNC
 		});
 		PaxWebFilterDef osgiInitFilterDef = new PaxWebFilterDef(filterModel, true, null);
+		osgiInitFilterDef.setWhiteboardTCCL(whiteboardTCCL);
 		PaxWebFilterMap osgiInitFilterMap = new PaxWebFilterMap(filterModel, true);
 
 		addFilterDef(osgiInitFilterDef);
@@ -326,6 +328,7 @@ public class PaxWebStandardContext extends StandardContext {
 					OsgiScopedServletContext osgiServletContext = (OsgiScopedServletContext) pwsw.getServletContext();
 					PaxWebStandardWrapper wrapper = new PaxWebStandardWrapper(model,
 							pwsw.getOsgiContextModel(), osgiServletContext.getOsgiContext(), this);
+					wrapper.setWhiteboardTCCL(whiteboardTCCL);
 
 					boolean isDefaultResourceServlet = model.isResourceServlet();
 					for (String pattern : model.getUrlPatterns()) {
@@ -595,6 +598,10 @@ public class PaxWebStandardContext extends StandardContext {
 			}
 		}
 		return false;
+	}
+
+	public void setWhiteboardTCCL(boolean whiteboardTCCL) {
+		this.whiteboardTCCL = whiteboardTCCL;
 	}
 
 }

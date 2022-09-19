@@ -36,9 +36,16 @@ public class OsgiInitializedServlet implements Servlet {
 	private final Servlet servlet;
 	private final OsgiScopedServletContext servletContext;
 
-	public OsgiInitializedServlet(Servlet servlet, OsgiScopedServletContext servletSpecificContext) {
+	/**
+	 * Whether TCCL should be set to servlet's bundle classloader. If {@code false}, TCCL from
+	 * containing {@link ServletContext} will be used.
+	 */
+	private final boolean whiteboardTCCL;
+
+	public OsgiInitializedServlet(Servlet servlet, OsgiScopedServletContext servletSpecificContext, boolean whiteboardTCCL) {
 		this.servlet = servlet;
 		this.servletContext = servletSpecificContext;
+		this.whiteboardTCCL = whiteboardTCCL;
 	}
 
 	@Override
@@ -91,7 +98,17 @@ public class OsgiInitializedServlet implements Servlet {
 
 	@Override
 	public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
-		servlet.service(req, res);
+		if (!whiteboardTCCL) {
+			servlet.service(req, res);
+		} else {
+			ClassLoader tccl = Thread.currentThread().getContextClassLoader();
+			try {
+				Thread.currentThread().setContextClassLoader(req.getServletContext().getClassLoader());
+				servlet.service(req, res);
+			} finally {
+				Thread.currentThread().setContextClassLoader(tccl);
+			}
+		}
 	}
 
 	@Override

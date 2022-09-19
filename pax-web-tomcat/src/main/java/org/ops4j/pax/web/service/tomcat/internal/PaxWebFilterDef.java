@@ -54,6 +54,8 @@ public class PaxWebFilterDef extends FilterDef {
 	/** This {@link ServletContext} is scoped to particular Whiteboard filter */
 	private OsgiScopedServletContext servletContext = null;
 
+	private boolean whiteboardTCCL;
+
 	public PaxWebFilterDef(FilterModel filterModel, boolean initialFilter, OsgiServletContext osgiContext) {
 		this.filterModel = filterModel;
 		this.initialFilter = initialFilter;
@@ -97,7 +99,7 @@ public class PaxWebFilterDef extends FilterDef {
 			super.setFilter(filter);
 		} else {
 			Filter delegate = filter == null ? new LifecycleFilter()
-					: new ScopedFilter(new OsgiInitializedFilter(filter, filterModel, servletContext), filterModel);
+					: new ScopedFilter(new OsgiInitializedFilter(filter, filterModel, servletContext, whiteboardTCCL), filterModel);
 			super.setFilter(delegate);
 		}
 	}
@@ -119,6 +121,10 @@ public class PaxWebFilterDef extends FilterDef {
 
 	public FilterModel getFilterModel() {
 		return filterModel;
+	}
+
+	public void setWhiteboardTCCL(boolean whiteboardTCCL) {
+		this.whiteboardTCCL = whiteboardTCCL;
 	}
 
 	/**
@@ -152,7 +158,7 @@ public class PaxWebFilterDef extends FilterDef {
 					filterModel.setDtoFailureCode(DTOConstants.FAILURE_REASON_SERVICE_NOT_GETTABLE);
 				}
 
-				filter = new ScopedFilter(new OsgiInitializedFilter(instance, filterModel, servletContext), filterModel);
+				filter = new ScopedFilter(new OsgiInitializedFilter(instance, filterModel, servletContext, whiteboardTCCL), filterModel);
 			} else {
 				// strange...
 				filter = new GenericFilter() {
