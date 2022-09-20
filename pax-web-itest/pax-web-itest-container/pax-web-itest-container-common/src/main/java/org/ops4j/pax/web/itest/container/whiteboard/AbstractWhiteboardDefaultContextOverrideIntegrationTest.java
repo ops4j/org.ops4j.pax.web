@@ -22,25 +22,35 @@ import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
-import org.osgi.service.cm.ConfigurationAdmin;
-
-import javax.inject.Inject;
 
 public abstract class AbstractWhiteboardDefaultContextOverrideIntegrationTest extends AbstractContainerTestBase {
 
-	private Bundle bundle;
+	private Bundle bundle2;
+	private Bundle bundle3;
 
 	@Before
 	public void setUp() throws Exception {
-		configureAndWaitForServletWithMapping("/wb/*",
-				() -> bundle = installAndStartBundle(sampleURI("whiteboard-2")));
+		bundle("org.ops4j.pax.web.pax-web-runtime").stop(Bundle.STOP_TRANSIENT);
+		configureAndWaitForServletWithMapping("/wb/*", () -> {
+			// registers org.osgi.service.http.context.ServletContextHelper
+			bundle2 = installAndStartBundle(sampleURI("whiteboard-2"));
+			// registers javax.servlet.Servlet and picks up the above related OsgiContextModel, which is not
+			// known to the runtime yet
+			bundle3 = installAndStartBundle(sampleURI("whiteboard-3"));
+
+			bundle("org.ops4j.pax.web.pax-web-runtime").start();
+		});
 	}
 
 	@After
 	public void tearDown() throws BundleException {
-		if (bundle != null) {
-			bundle.stop();
-			bundle.uninstall();
+		if (bundle2 != null) {
+			bundle2.stop();
+			bundle2.uninstall();
+		}
+		if (bundle3 != null) {
+			bundle3.stop();
+			bundle3.uninstall();
 		}
 	}
 

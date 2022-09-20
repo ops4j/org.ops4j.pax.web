@@ -259,6 +259,24 @@ public class WhiteboardExtenderContext implements WebContainerListener, WebConte
 			// check _contexts_ managed at pax-web-extender-whiteboard level
 			for (OsgiContextModel model : osgiContextsList) {
 				// one line "140.3 Common Whiteboard Properties" implementation of LDAP filter matching
+				BundleWhiteboardApplication app = getBundleApplication(model.getOwnerBundle());
+				if (!OsgiContextModel.DEFAULT_CONTEXT_MODEL.equals(model)
+						&& (app == null || !app.isRegistered(model))) {
+					// if the HttpService is added after pax-web-extender-whiteboard did the tracking, we may
+					// end with this situation:
+					//  - bundle A registers a "default" context (like OCM-2)
+					//  - bundle B registers a servlet targetting "default" context - it's already found in
+					//    this.osgiContextsList
+					//  - HttpService is registered
+					//  - pax-web-extender-whiteboard gets the service and passes it to each "whiteboard app"
+					//    from the hashmap
+					//  - "whiteboard app" for bundle B gets the reference a registers the servlet - but the runtime
+					//    (Jetty, Tomcat, Undertow) doesn't know anything about the context yet
+					//  - "whiteboard app" for bundle A gets the reference and only then registers its context
+					//
+					// that's why we have to skip the OsgiContextModels that are not really registered yet
+					continue;
+				}
 				if (selector.matchCase(model.getContextRegistrationProperties())) {
 					targetContexts.add(model);
 				}
@@ -319,6 +337,10 @@ public class WhiteboardExtenderContext implements WebContainerListener, WebConte
 
 		// install using new reference which will be dereferenced using a bundle for particular application
 		installWhiteboardApplications(ref);
+
+		// in case some servlets were registered above which should switch to contexts from other whiteboard
+		// applications registered later (https://github.com/ops4j/org.ops4j.pax.web/issues/1769)
+		reRegisterWebElements();
 
 		acceptWabContexts.set(true);
 	}

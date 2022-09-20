@@ -28,10 +28,10 @@
 	</parent>
 
 	<groupId>org.ops4j.pax.web.samples</groupId>
-	<artifactId>whiteboard-2</artifactId>
+	<artifactId>whiteboard-3</artifactId>
 	<packaging>bundle</packaging>
 
-	<name>OPS4J Pax Web Whiteboard Samples - Whiteboard 2</name>
+	<name>OPS4J Pax Web Whiteboard Samples - Whiteboard 3</name>
 
 	<build>
 		<plugins>
