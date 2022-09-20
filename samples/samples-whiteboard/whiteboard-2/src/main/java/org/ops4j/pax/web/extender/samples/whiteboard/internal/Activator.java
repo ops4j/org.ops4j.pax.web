@@ -42,6 +42,13 @@ public class Activator implements BundleActivator {
 		Dictionary<String, Object> props;
 
 		props = new Hashtable<>();
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "whiteboard-servlet");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, new String[] { "/wb/*" });
+		servletReg = bundleContext.registerService(Servlet.class, new WhiteboardServlet(), props);
+
+		Thread.sleep(400);
+
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "default");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/");
 		props.put(Constants.SERVICE_RANKING, Integer.MAX_VALUE);
@@ -52,11 +59,6 @@ public class Activator implements BundleActivator {
 				return true;
 			}
 		}, props);
-
-		props = new Hashtable<>();
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "whiteboard-servlet");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, new String[] { "/wb/*" });
-		servletReg = bundleContext.registerService(Servlet.class, new WhiteboardServlet(), props);
 	}
 
 	public void stop(BundleContext bundleContext) throws Exception {
