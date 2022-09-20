@@ -1,5 +1,5 @@
 /*
- * Copyright 2008 Alin Dreghiciu.
+ * Copyright 2022 OPS4J.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
