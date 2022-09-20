@@ -534,6 +534,10 @@
 			<groupId>org.ops4j.pax.web.samples</groupId>
 			<artifactId>whiteboard-2</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>whiteboard-3</artifactId>
+		</dependency>
 
 		<!-- OPS4J dependencies -->
 

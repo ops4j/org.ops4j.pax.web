@@ -93,6 +93,10 @@ public class BundleWhiteboardApplication {
 		return Collections.unmodifiableList(new LinkedList<>(webContexts.keySet()));
 	}
 
+	public boolean isRegistered(OsgiContextModel contextModel) {
+		return webContexts.containsKey(contextModel) && webContexts.get(contextModel);
+	}
+
 	public List<OsgiContextModel> getWebContainerOsgiContextModels() {
 		List<OsgiContextModel> models = new LinkedList<>();
 		WhiteboardWebContainerView view = webContainerManager.whiteboardView(bundle, webContainerServiceRef);
