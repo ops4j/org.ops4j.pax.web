@@ -203,6 +203,11 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 			name = UUID.randomUUID().toString();
 		}
 		this.name = name;
+
+
+		if (this.asyncSupported == null) {
+			this.asyncSupported = "true".equalsIgnoreCase(this.initParams.remove(PaxWebConstants.SERVICE_PROPERTY_ASYNC_SUPPORTED));
+		}
 	}
 
 	@Override
