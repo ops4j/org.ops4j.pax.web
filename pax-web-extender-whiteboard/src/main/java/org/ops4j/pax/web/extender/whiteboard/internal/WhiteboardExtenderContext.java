@@ -270,7 +270,7 @@ public class WhiteboardExtenderContext implements WebContainerListener, WebConte
 					//  - HttpService is registered
 					//  - pax-web-extender-whiteboard gets the service and passes it to each "whiteboard app"
 					//    from the hashmap
-					//  - "whiteboard app" for bundle B gets the reference a registers the servlet - but the runtime
+					//  - "whiteboard app" for bundle B gets the reference and registers the servlet - but the runtime
 					//    (Jetty, Tomcat, Undertow) doesn't know anything about the context yet
 					//  - "whiteboard app" for bundle A gets the reference and only then registers its context
 					//
