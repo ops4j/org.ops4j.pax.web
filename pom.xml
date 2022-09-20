@@ -1319,6 +1319,11 @@
 				<artifactId>whiteboard-1</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>whiteboard-2</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 
 <!--			<dependency>-->
 <!--				<groupId>org.ops4j.pax.web.samples</groupId>-->
