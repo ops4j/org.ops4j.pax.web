@@ -247,6 +247,11 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 		}
 		this.name = name;
 
+		if (this.asyncSupported == null) {
+			// for CXF servlet: https://github.com/apache/cxf/blame/cxf-3.5.3/rt/transports/http/src/main/java/org/apache/cxf/transport/http/osgi/ServletExporter.java#L104-L105
+			this.asyncSupported = "true".equalsIgnoreCase(this.initParams.remove(PaxWebConstants.SERVICE_PROPERTY_ASYNC_SUPPORTED));
+		}
+
 		if ((this.urlPatterns == null || this.urlPatterns.length == 0) && this.alias != null) {
 			// Http Service specification 102.4 Mapping HTTP Requests to Servlet and Resource Registrations:
 			// [...]
