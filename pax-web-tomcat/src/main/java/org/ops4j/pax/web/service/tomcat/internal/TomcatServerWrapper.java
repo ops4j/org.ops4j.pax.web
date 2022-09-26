@@ -926,7 +926,7 @@ class TomcatServerWrapper implements BatchVisitor {
 				loader.addBundle(paxWebTomcatBundle);
 				loader.addBundle(Utils.getPaxWebJspBundle(paxWebTomcatBundle));
 				loader.addBundle(Utils.getTomcatWebSocketBundle(paxWebTomcatBundle));
-//				loader.makeImmutable();
+				loader.makeImmutable();
 				classLoader = loader;
 			} else if (classLoader == null) {
 				classLoader = this.classLoader;
@@ -1131,12 +1131,6 @@ class TomcatServerWrapper implements BatchVisitor {
 				PaxWebStandardWrapper wrapper = new PaxWebStandardWrapper(model, osgiContext, context, realContext);
 				wrapper.setWhiteboardTCCL("whiteboard".equalsIgnoreCase(configuration.server().getTCCLType()));
 
-				// we have to ensure that the context's class loader knows about servlet's bundle
-				OsgiServletContext ctx = this.osgiServletContexts.get(osgiContext);
-				if (ctx != null && ctx.getClassLoader() instanceof OsgiServletContextClassLoader) {
-					((OsgiServletContextClassLoader) ctx.getClassLoader()).addBundle(model.getRegisteringBundle());
-				}
-
 				boolean isDefaultResourceServlet = model.isResourceServlet();
 				for (String pattern : model.getUrlPatterns()) {
 					isDefaultResourceServlet &= "/".equals(pattern);
@@ -1297,13 +1291,6 @@ class TomcatServerWrapper implements BatchVisitor {
 			realContext.removeChild(child);
 		}
 
-		model.getContextModels().forEach(ocm -> {
-			OsgiServletContext ctx = this.osgiServletContexts.get(ocm);
-			if (ctx != null && ctx.getClassLoader() instanceof OsgiServletContextClassLoader) {
-				((OsgiServletContextClassLoader) ctx.getClassLoader()).removeBundle(model.getRegisteringBundle());
-			}
-		});
-
 		// are there any error page declarations in the model?
 		ErrorPageModel epm = model.getErrorPageModel();
 		if (epm != null) {
@@ -1406,15 +1393,6 @@ class TomcatServerWrapper implements BatchVisitor {
 							|| (((PaxWebFilterDef) def).getFilterModel() != null && ((PaxWebFilterDef) def).getFilterModel().isDynamic())) {
 						continue;
 					}
-					FilterModel filterModel = ((PaxWebFilterDef) def).getFilterModel();
-					if (filterModel != null) {
-						filterModel.getContextModels().forEach(ocm -> {
-							OsgiServletContext ctx = this.osgiServletContexts.get(ocm);
-							if (ctx != null && ctx.getClassLoader() instanceof OsgiServletContextClassLoader) {
-								((OsgiServletContextClassLoader) ctx.getClassLoader()).removeBundle(filterModel.getRegisteringBundle());
-							}
-						});
-					}
 				}
 				context.removeFilterDef(def);
 			}
@@ -1444,13 +1422,6 @@ class TomcatServerWrapper implements BatchVisitor {
 				List<OsgiContextModel> contextModels = filtersMap.get(model) != null
 						? filtersMap.get(model) : model.getContextModels();
 				OsgiServletContext osgiContext = getHighestRankedContext(contextPath, model, contextModels);
-
-				contextModels.forEach(ocm -> {
-					OsgiServletContext ctx = this.osgiServletContexts.get(ocm);
-					if (ctx != null && ctx.getClassLoader() instanceof OsgiServletContextClassLoader) {
-						((OsgiServletContextClassLoader) ctx.getClassLoader()).addBundle(model.getRegisteringBundle());
-					}
-				});
 
 				PaxWebFilterDef filterDef = new PaxWebFilterDef(model, false, osgiContext);
 				filterDef.setWhiteboardTCCL("whiteboard".equalsIgnoreCase(configuration.server().getTCCLType()));
@@ -1487,12 +1458,6 @@ class TomcatServerWrapper implements BatchVisitor {
 				if (eventListener instanceof HttpSessionAttributeListener) {
 					// we have to store it separately to propagate OsgiHttpSession specific events
 					sessionListenerModels.add(eventListenerModel);
-				}
-
-				// we have to ensure that the context's class loader knows about listener's bundle
-				OsgiServletContext ctx = this.osgiServletContexts.get(context);
-				if (ctx != null && ctx.getClassLoader() instanceof OsgiServletContextClassLoader) {
-					((OsgiServletContextClassLoader) ctx.getClassLoader()).addBundle(eventListenerModel.getRegisteringBundle());
 				}
 
 				boolean stopped = false;
@@ -1542,11 +1507,6 @@ class TomcatServerWrapper implements BatchVisitor {
 					String contextPath = context.getContextPath();
 					if (!done.add(contextPath)) {
 						return;
-					}
-
-					OsgiServletContext ctx = this.osgiServletContexts.get(context);
-					if (ctx != null && ctx.getClassLoader() instanceof OsgiServletContextClassLoader) {
-						((OsgiServletContextClassLoader) ctx.getClassLoader()).removeBundle(eventListenerModel.getRegisteringBundle());
 					}
 
 					PaxWebStandardContext standardContext = contextHandlers.get(contextPath);
@@ -1798,12 +1758,6 @@ class TomcatServerWrapper implements BatchVisitor {
 				//   visit(ContainerInitializerModelChange) method
 				// so in both cases we simply have to start the server if it's not yet started
 
-				// we only have to ensure that the context's class loader knows about websocket's bundle
-				OsgiServletContext ctx = this.osgiServletContexts.get(osgiContextModel);
-				if (ctx != null && ctx.getClassLoader() instanceof OsgiServletContextClassLoader) {
-					((OsgiServletContextClassLoader) ctx.getClassLoader()).addBundle(model.getRegisteringBundle());
-				}
-
 				ensureServletContextStarted(contextHandlers.get(contextPath));
 			});
 			return;
@@ -1828,11 +1782,6 @@ class TomcatServerWrapper implements BatchVisitor {
 
 					// just as when adding WebSockets, we only have to ensure that context is started if it was
 					// stopped. Restart is handled in visit(ContainerInitializerModelChange) method
-
-					OsgiServletContext ctx = this.osgiServletContexts.get(osgiContextModel);
-					if (ctx != null && ctx.getClassLoader() instanceof OsgiServletContextClassLoader) {
-						((OsgiServletContextClassLoader) ctx.getClassLoader()).removeBundle(model.getRegisteringBundle());
-					}
 
 					ensureServletContextStarted(contextHandlers.get(contextPath));
 				});
