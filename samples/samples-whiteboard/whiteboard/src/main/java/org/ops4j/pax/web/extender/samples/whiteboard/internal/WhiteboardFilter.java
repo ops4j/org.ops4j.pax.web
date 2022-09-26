@@ -40,11 +40,6 @@ public class WhiteboardFilter implements Filter {
 
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
-		try {
-			Thread.currentThread().getContextClassLoader().loadClass(WhiteboardFilter.class.getName());
-		} catch (ClassNotFoundException e) {
-			throw new ServletException(e);
-		}
 		response.getWriter().println("Filter was there before. Time: " + new Date().toString());
 		chain.doFilter(request, response);
 		response.getWriter().println("Filter was there after. Time: " + new Date().toString());
