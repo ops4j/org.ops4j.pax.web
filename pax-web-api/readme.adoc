@@ -47,7 +47,7 @@ That's very important to know when to _reach_ to additional bundles/jars when, f
 
 In simplest, JavaSE scenario the runtime environment has these features (usually):
 
-* `$CLASSPATH` definiting roots to load classes and resources from
+* `$CLASSPATH` defining roots to load classes and resources from
 * an instance of `java.lang.ClassLoader` to use for class and resource loading
 
 When running simple class, the class' ClassLoader is `sun.misc.Launcher.AppClassLoader` (OpenJDK). Its parent is `sun.misc.Launcher.ExtClassLoader` which in turn doesn't have a parent. There's also out-of-hierarchy `sun.misc.Launcher.BootClassPathHolder`.
