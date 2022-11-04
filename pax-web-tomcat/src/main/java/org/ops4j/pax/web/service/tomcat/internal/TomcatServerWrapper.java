@@ -1137,6 +1137,8 @@ class TomcatServerWrapper implements BatchVisitor {
 				}
 				if (model.isResourceServlet()) {
 					wrapper.addInitParameter("pathInfoOnly", Boolean.toString(!isDefaultResourceServlet));
+					OsgiContextModel highestRankedModel = Utils.getHighestRankedModel(osgiContextModels.get(contextPath));
+					wrapper.setHighestRankedContext(osgiServletContexts.get(highestRankedModel));
 				}
 
 				// role mapping per-servlet
@@ -2079,6 +2081,18 @@ class TomcatServerWrapper implements BatchVisitor {
 					osc.setContainerServletContext(realContext);
 				}
 			});
+
+			// resource servlets need a reference to highest ranked Servlet Context
+			// because org.apache.catalina.resources attribute has to be available
+			// even if resource servlet is using custom context
+			for (Container child : context.findChildren()) {
+				if (child instanceof PaxWebStandardWrapper) {
+					ServletModel servletModel = ((PaxWebStandardWrapper) child).getServletModel();
+					if (servletModel != null && servletModel.isResourceServlet()) {
+						((PaxWebStandardWrapper) child).setHighestRankedContext(highestRankedContext);
+					}
+				}
+			}
 
 			ClassLoader tccl = Thread.currentThread().getContextClassLoader();
 			try {
