@@ -92,8 +92,8 @@ public class ClassPathUtil {
 					try {
 						// sun.net.www.protocol.jar.Handler.separator = "!/"
 						urls.add(new URL("jar:" + url.toExternalForm() + "!/"));
-					} catch (MalformedURLException ignore) {
-						LOG.debug(ignore.getMessage());
+					} catch (MalformedURLException e) {
+						LOG.debug(e.getMessage());
 					}
 				}
 			}
@@ -104,7 +104,7 @@ public class ClassPathUtil {
 			urls.addAll(getLocationsOfBundlesInClassSpace(bundle));
 		}
 
-		return urls.toArray(new URL[urls.size()]);
+		return urls.toArray(new URL[0]);
 	}
 
 	/**
@@ -137,13 +137,13 @@ public class ClassPathUtil {
 							urls.add(url);
 						}
 					}
-				} catch (MalformedURLException ignore) {
-					LOG.debug(ignore.getMessage());
+				} catch (MalformedURLException e) {
+					LOG.debug(e.getMessage());
 				}
 			}
 		}
 
-		return urls.toArray(new URL[urls.size()]);
+		return urls.toArray(new URL[0]);
 	}
 
 	/**
@@ -176,8 +176,8 @@ public class ClassPathUtil {
 							urls.add(url);
 						}
 					}
-				} catch (MalformedURLException ignore) {
-					LOG.debug(ignore.getMessage());
+				} catch (MalformedURLException e) {
+					LOG.debug(e.getMessage());
 				}
 			}
 		}
@@ -372,7 +372,7 @@ public class ClassPathUtil {
 			boolean isFragment = bundle.adapt(BundleRevision.class) != null
 					&& (bundle.adapt(BundleRevision.class).getTypes() & BundleRevision.TYPE_FRAGMENT) != 0;
 			if (!isFragment) {
-				Enumeration<URL> e = null;
+				Enumeration<URL> e;
 				try {
 					e = bundle.getResources(path);
 					if (e != null) {
@@ -475,7 +475,7 @@ public class ClassPathUtil {
 			urls = ((URLClassLoader) loader).getURLs();
 		} else {
 			try {
-				Field ucpField = null;
+				Field ucpField;
 				try {
 					ucpField = loader.getClass().getDeclaredField("ucp");
 				} catch (NoSuchFieldException e) {
@@ -663,12 +663,12 @@ public class ClassPathUtil {
 	 */
 	private static void scanJar(URL root, Pattern pattern, boolean recurse, Collection<URL> result) {
 		// root can be "jar:<location>!/" or "jar:<location>!/some/base"
+		boolean closeJar = false;
+		JarFile jar = null;
 		try {
 			URLConnection con = root.openConnection();
-			JarFile jar = null;
 			// this should never start with "/"
-			String rootEntryPath = null;
-			boolean closeJar = false;
+			String rootEntryPath;
 
 			if (con instanceof JarURLConnection) {
 				// should be the case in most of the times
@@ -714,6 +714,14 @@ public class ClassPathUtil {
 		} catch (IOException e) {
 			LOG.warn(e.getMessage(), e);
 		}
+		finally {
+			if (closeJar && jar != null) {
+				try {
+					jar.close();
+				} catch (IOException ignored) {
+				}
+			}
+		}
 	}
 
 	/**
@@ -747,7 +755,7 @@ public class ClassPathUtil {
 		}
 		try {
 			final Path root = file.toPath();
-			Files.walkFileTree(file.toPath(), new SimpleFileVisitor<Path>() {
+			Files.walkFileTree(file.toPath(), new SimpleFileVisitor<>() {
 				@Override
 				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 					String relativePath = root.relativize(file).toString();
