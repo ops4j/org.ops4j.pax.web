@@ -21,11 +21,14 @@ import javax.servlet.DispatcherType;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.catalina.Globals;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.WebResource;
+import org.apache.catalina.WebResourceRoot;
 import org.apache.catalina.servlets.DefaultServlet;
 import org.ops4j.pax.web.service.spi.config.ResourceConfiguration;
 import org.ops4j.pax.web.service.spi.servlet.OsgiScopedServletContext;
@@ -58,6 +61,8 @@ public class TomcatResourceServlet extends DefaultServlet {
 	private boolean redirectWelcome = false;
 	private boolean pathInfoOnly = true;
 
+	private OsgiServletContext highestRankedContext;
+
 	public TomcatResourceServlet(File baseDirectory, String chroot, ResourceConfiguration resourceConfig) {
 		this.baseDirectory = baseDirectory;
 		this.chroot = chroot;
@@ -84,6 +89,19 @@ public class TomcatResourceServlet extends DefaultServlet {
 
 	@Override
 	public void init() throws ServletException {
+		final ServletContext osgiScopedServletContext = getServletContext();
+		resources = (WebResourceRoot) osgiScopedServletContext.getAttribute(Globals.RESOURCES_ATTR);
+		if (resources == null && highestRankedContext != null) {
+			resources = (WebResourceRoot) highestRankedContext.getAttribute(Globals.RESOURCES_ATTR);
+		}
+		if (resources == null) {
+			throw new UnavailableException(sm.getString("defaultServlet.noResources"));
+		}
+
+		// super.init() needs Globals.RESOURCES_ATTR and it may be different, because servlets use different
+		// (OSGi) servlet contexts and OSGi context models. So we have to ensure this attribute is correct before
+		// calling super.init().
+		getServletContext().setAttribute(Globals.RESOURCES_ATTR, resources);
 		super.init();
 
 		super.listings = false;
@@ -96,8 +114,6 @@ public class TomcatResourceServlet extends DefaultServlet {
 		// super.init() created DefaultServlet.resources (fortunately protected, not private) as:
 		//     resources = (WebResourceRoot) getServletContext().getAttribute(Globals.RESOURCES_ATTR);
 		// but we want to be able to create more "resource servlets" for different bases
-
-		final ServletContext osgiScopedServletContext = getServletContext();
 
 		int maxEntrySize = resourceConfig == null || resourceConfig.maxCacheEntrySize() == null
 				? (int) resources.getCacheMaxSize() / 20 : resourceConfig.maxCacheEntrySize();
@@ -311,6 +327,10 @@ public class TomcatResourceServlet extends DefaultServlet {
 		}
 
 		return childPath;
+	}
+
+	public void setHighestRankedContext(OsgiServletContext highestRankedContext) {
+		this.highestRankedContext = highestRankedContext;
 	}
 
 }

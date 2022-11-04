@@ -54,6 +54,9 @@ public class PaxWebStandardWrapper extends StandardWrapper {
 	/** This {@link ServletContext} is scoped to particular Whiteboard servlet */
 	private final OsgiScopedServletContext servletContext;
 
+	/** This {@link ServletContext} is a highest ranked {@link OsgiServletContext} for the context */
+	private OsgiServletContext highestRankedContext;
+
 	private ServiceObjects<Servlet> serviceObjects;
 
 	/**
@@ -238,6 +241,7 @@ public class PaxWebStandardWrapper extends StandardWrapper {
 		if (instance != null && servletModel != null && servletModel.isResourceServlet()) {
 			((TomcatResourceServlet) instance).setWelcomeFiles(osgiServletContext.getWelcomeFiles());
 			((TomcatResourceServlet) instance).setWelcomeFilesRedirect(osgiServletContext.isWelcomeFilesRedirect());
+			((TomcatResourceServlet) instance).setHighestRankedContext(highestRankedContext);
 		}
 
 		if (instance == null && servletModel != null) {
@@ -266,6 +270,10 @@ public class PaxWebStandardWrapper extends StandardWrapper {
 
 	public void setWhiteboardTCCL(boolean whiteboardTCCL) {
 		this.whiteboardTCCL = whiteboardTCCL;
+	}
+
+	public void setHighestRankedContext(OsgiServletContext highestRankedContext) {
+		this.highestRankedContext = highestRankedContext;
 	}
 
 }
