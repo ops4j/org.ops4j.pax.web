@@ -713,8 +713,7 @@ public class ClassPathUtil {
 			}
 		} catch (IOException e) {
 			LOG.warn(e.getMessage(), e);
-		}
-		finally {
+		} finally {
 			if (closeJar && jar != null) {
 				try {
 					jar.close();
