@@ -242,7 +242,7 @@
 		<dependency.org.apache.ws.xmlschema>2.3.0</dependency.org.apache.ws.xmlschema>
 		<dependency.org.apache.xbean>4.21</dependency.org.apache.xbean>
 
-		<dependency.org.bouncycastle>1.70</dependency.org.bouncycastle>
+		<dependency.org.bouncycastle>1.72</dependency.org.bouncycastle>
 
 		<dependency.org.codehaus.woodstox.stax2-api>4.2.1</dependency.org.codehaus.woodstox.stax2-api>
 
@@ -2910,12 +2910,12 @@
 
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
-				<artifactId>bcprov-jdk15on</artifactId>
+				<artifactId>bcprov-jdk18on</artifactId>
 				<version>${dependency.org.bouncycastle}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
-				<artifactId>bcpkix-jdk15on</artifactId>
+				<artifactId>bcpkix-jdk18on</artifactId>
 				<version>${dependency.org.bouncycastle}</version>
 			</dependency>
 
