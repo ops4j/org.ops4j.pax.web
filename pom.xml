@@ -173,7 +173,7 @@
 		<dependency.com.fasterxml.classmate>1.5.1</dependency.com.fasterxml.classmate>
 		<dependency.com.fasterxml.jackson.core>2.14.0</dependency.com.fasterxml.jackson.core>
 		<dependency.com.fasterxml.jackson.core.databind>2.14.0</dependency.com.fasterxml.jackson.core.databind>
-		<dependency.com.fasterxml.woodstox>6.2.8</dependency.com.fasterxml.woodstox>
+		<dependency.com.fasterxml.woodstox>6.4.0</dependency.com.fasterxml.woodstox>
 		<dependency.com.sun.activation>1.2.0</dependency.com.sun.activation>
 		<dependency.com.sun.xml.bind>2.3.5</dependency.com.sun.xml.bind>
 
