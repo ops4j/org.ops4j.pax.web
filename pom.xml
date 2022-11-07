@@ -138,7 +138,7 @@
 		<dependency.swissbox.version>1.8.4</dependency.swissbox.version>
 		<dependency.tomcat.version>9.0.36</dependency.tomcat.version>
 		<dependency.xbean.version>4.20</dependency.xbean.version>
-		<dependency.undertow.version>2.2.19.Final</dependency.undertow.version>
+		<dependency.undertow.version>2.2.21.Final</dependency.undertow.version>
 		<!--
 			dependencies of Undertow 2.2.x, XNIO is important and should be kept up to date.
 			Wildfly common and client-config are not really used, but needed to satisfy imports (Java and OSGi)
