@@ -2367,15 +2367,12 @@ class JettyServerWrapper implements BatchVisitor {
 					}
 				}
 				for (URL url : contextConfigs) {
-					String path = url.getPath();
-					if (path.startsWith("/WEB-INF/") && path.endsWith(".xml") && path.contains("jetty")) {
-						XmlConfiguration cfg = new XmlConfiguration(Resource.newResource(url));
-						LOG.info("Processing context specific {} for {}", url, contextPath);
+					XmlConfiguration cfg = new XmlConfiguration(Resource.newResource(url));
+					LOG.info("Processing context specific {} for {}", url, contextPath);
 
-						processConfiguration(cfg, previous, objects);
+					processConfiguration(cfg, previous, objects);
 
-						previous = cfg;
-					}
+					previous = cfg;
 				}
 			} finally {
 				Thread.currentThread().setContextClassLoader(tccl);
