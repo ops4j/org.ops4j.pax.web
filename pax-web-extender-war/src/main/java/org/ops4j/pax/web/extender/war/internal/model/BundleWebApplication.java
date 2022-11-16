@@ -1628,12 +1628,14 @@ public class BundleWebApplication {
 						def.getServletClass(), this, e.getMessage(), e);
 				return;
 			}
-			if (servletMappings.get(sn) == null) {
+			List<String> mappingsForServlet = servletMappings.get(sn);
+			if (mappingsForServlet == null) {
 				// the servlet may have been overriden by other servlet with the same mapping (for example
 				// if you have "/" mapped servlet not named "default")
-				return;
+				// but we should still keep such servlet, see https://github.com/ops4j/org.ops4j.pax.web/issues/1794
+				mappingsForServlet = Collections.emptyList();
 			}
-			String[] mappings = servletMappings.get(sn).toArray(new String[0]);
+			String[] mappings = mappingsForServlet.toArray(new String[0]);
 			ServletModel.Builder builder = new ServletModel.Builder()
 					.withRegisteringBundle(bundle)
 					.withServletName(sn)
@@ -1679,7 +1681,7 @@ public class BundleWebApplication {
 					// we have to additionally check for conflicts with generic constraints from web.xml (and fragments)
 
 					// see org.apache.catalina.core.StandardContext.addServletSecurity()
-					for (String urlPattern : mappings) {
+					for (String urlPattern : mappingsForServlet) {
 						boolean foundConflict = false;
 
 						for (SecurityConstraintModel seccm : securityConfiguration.getSecurityConstraints()) {
