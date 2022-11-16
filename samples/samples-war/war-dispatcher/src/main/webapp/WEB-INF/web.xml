@@ -21,13 +21,13 @@
 		version="4.0">
 
 	<servlet>
-		<servlet-name>simplest-servlet</servlet-name>
+		<servlet-name>dispatch-servlet</servlet-name>
 		<servlet-class>org.ops4j.pax.web.samples.war.osgi.JustDispatchServlet</servlet-class>
 	</servlet>
 
 	<servlet-mapping>
-		<servlet-name>simplest-servlet</servlet-name>
-		<url-pattern>/servlet</url-pattern>
+		<servlet-name>dispatch-servlet</servlet-name>
+		<url-pattern>/</url-pattern>
 	</servlet-mapping>
 
 </web-app>
