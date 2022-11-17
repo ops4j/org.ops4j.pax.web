@@ -127,6 +127,9 @@ public class WhiteboardExtenderContext implements WebContainerListener, WebConte
 	 */
 	private final List<OsgiContextModel> osgiContextsList = new ArrayList<>();
 
+	/** Flag marking actual registration of {@link OsgiContextModel#DEFAULT_CONTEXT_MODEL}. */
+	private AtomicBoolean defaultContextRegistered = new AtomicBoolean(false);
+
 	public WhiteboardExtenderContext(BundleContext bundleContext) {
 		this(bundleContext, false);
 	}
@@ -260,6 +263,10 @@ public class WhiteboardExtenderContext implements WebContainerListener, WebConte
 			for (OsgiContextModel model : osgiContextsList) {
 				// one line "140.3 Common Whiteboard Properties" implementation of LDAP filter matching
 				BundleWhiteboardApplication app = getBundleApplication(model.getOwnerBundle());
+				if (OsgiContextModel.DEFAULT_CONTEXT_MODEL.equals(model) && !defaultContextRegistered.get()) {
+					// it may happen if the HttpService ref is handed to pax-web-extender-whiteboard later
+					continue;
+				}
 				if (!OsgiContextModel.DEFAULT_CONTEXT_MODEL.equals(model)
 						&& (app == null || !app.isRegistered(model))) {
 					// if the HttpService is added after pax-web-extender-whiteboard did the tracking, we may
@@ -327,6 +334,7 @@ public class WhiteboardExtenderContext implements WebContainerListener, WebConte
 		if (view != null) {
 			// install global, default OSGi Context Model using bundle context of pax-web-extender-whiteboard bundle
 			view.addWhiteboardOsgiContextModel(OsgiContextModel.DEFAULT_CONTEXT_MODEL);
+			defaultContextRegistered.set(true);
 			// register a listener, so when WABs are installed/uninstalled, their OsgiContextModels are used as
 			// the context with highest priority - hiding both the context managed by pax-web-runtime and the contexts
 			// registered by pax-web-extender-whiteboard
@@ -356,6 +364,7 @@ public class WhiteboardExtenderContext implements WebContainerListener, WebConte
 		WhiteboardWebContainerView view = webContainerManager.whiteboardView(bundle, ref);
 		if (view != null) {
 			// uninstall global, default OSGi Context Model
+			defaultContextRegistered.set(false);
 			view.removeWhiteboardOsgiContextModel(OsgiContextModel.DEFAULT_CONTEXT_MODEL);
 		}
 		// finally now we can actually release the service
