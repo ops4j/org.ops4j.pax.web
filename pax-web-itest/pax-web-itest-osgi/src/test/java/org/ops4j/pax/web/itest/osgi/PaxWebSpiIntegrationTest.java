@@ -331,7 +331,7 @@ public class PaxWebSpiIntegrationTest extends AbstractOsgiTestBase {
 	}
 
 	@Test
-	public void checkPaxSpiFragment() throws IOException {
+	public void checkPaxSpiFragment() {
 		Bundle b = SneakIntoPaxWebSpi.whatsYourBundle();
 		assertThat(b.getSymbolicName(), equalTo("org.ops4j.pax.web.pax-web-spi"));
 	}
@@ -363,7 +363,7 @@ public class PaxWebSpiIntegrationTest extends AbstractOsgiTestBase {
 	}
 
 	@Test
-	public void searchForWarResources() throws Exception {
+	public void searchForWarResources() {
 		Optional<Bundle> initializerBundles = Arrays.stream(context.getBundles())
 				.filter(b -> "org.ops4j.pax.web.samples.jsf-primefaces-embedded".equals(b.getSymbolicName())).findFirst();
 		assertTrue(initializerBundles.isPresent());

@@ -632,7 +632,7 @@ public class BundleWebApplicationClassSpace {
 			// this will fortunately cause an error later
 			// this may happen if the WAB has a bundle both wired and embedded, but unfortunately we can't
 			// provide nice message, as both jarName and URL properties of WebXml will be different.
-			fragments.get(duplicateName).setDuplicated(true);
+			fragments.get(duplicateName).addDuplicate(fragment.getURL().toString());
 			if (fragment.getJarName() != null) {
 				// Rename the current fragment so it doesn't clash
 				LOG.warn("There already exists a web fragment named {}. Renaming to {}.", duplicateName, fragment.getJarName());

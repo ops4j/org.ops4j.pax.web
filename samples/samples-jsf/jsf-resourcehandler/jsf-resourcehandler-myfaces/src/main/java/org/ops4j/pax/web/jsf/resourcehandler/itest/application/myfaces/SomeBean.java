@@ -15,12 +15,9 @@
  */
 package org.ops4j.pax.web.jsf.resourcehandler.itest.application.myfaces;
 
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.RequestScoped;
-
 @SuppressWarnings("deprecation")
-@ManagedBean
-@RequestScoped
+@javax.faces.bean.ManagedBean
+@javax.faces.bean.SessionScoped
 public class SomeBean {
 
 	public String getHello() {

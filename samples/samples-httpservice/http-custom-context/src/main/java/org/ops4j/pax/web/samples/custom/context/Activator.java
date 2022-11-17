@@ -39,6 +39,7 @@ public class Activator implements BundleActivator {
 
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public void start(BundleContext context) {
 		httpServiceTracker = new ServiceTracker<HttpService, HttpService>(context, HttpService.class, null) {
 			@Override

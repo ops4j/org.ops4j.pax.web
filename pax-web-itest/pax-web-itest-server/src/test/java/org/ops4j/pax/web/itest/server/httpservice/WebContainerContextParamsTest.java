@@ -105,6 +105,7 @@ public class WebContainerContextParamsTest extends MultiContainerTestSupport {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void configureContextParametersInServletContainerInitializerWithCustomContext() throws Exception {
 		Bundle sample1 = mockBundle("sample1");
 

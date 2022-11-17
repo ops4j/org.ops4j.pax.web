@@ -174,6 +174,7 @@ public class PaxWebServletInfo extends ServletInfo {
 		return this;
 	}
 
+	@SuppressWarnings("MethodDoesntCallSuperMethod")
 	@Override
 	public ServletInfo clone() {
 		final ServletInfo info;

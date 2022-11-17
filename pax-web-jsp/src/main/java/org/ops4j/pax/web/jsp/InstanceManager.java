@@ -31,7 +31,6 @@ import java.util.Properties;
 import java.util.WeakHashMap;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.naming.NamingException;
 import javax.servlet.Filter;
 
 import org.apache.jasper.security.SecurityUtil;
@@ -71,7 +70,7 @@ public class InstanceManager implements org.apache.tomcat.InstanceManager {
 
 	@Override
 	public Object newInstance(Class<?> clazz) throws IllegalAccessException,
-			InvocationTargetException, NamingException, InstantiationException {
+			InvocationTargetException, InstantiationException {
 		Object instance;
 		try {
 			instance = newInstance(clazz.getName());

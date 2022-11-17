@@ -67,6 +67,7 @@ public class HttpServiceShowcase implements Action {
 	private BundleContext context;
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public Object execute() {
 		if ("help".equals(action)) {
 			System.out.println("This internal command allows testing several HttpService scenarios.");
