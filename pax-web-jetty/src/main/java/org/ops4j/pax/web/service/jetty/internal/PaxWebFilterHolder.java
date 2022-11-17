@@ -156,7 +156,7 @@ public class PaxWebFilterHolder extends FilterHolder {
 		if (instance == null && getHeldClass() != null) {
 			// case of org.eclipse.jetty.websocket.server.WebSocketUpgradeFilter added by Jetty's SCI
 			try {
-				instance = getHeldClass().newInstance();
+				instance = getHeldClass().getConstructor().newInstance();
 			} catch (Exception e) {
 				throw new IllegalStateException("Can't instantiate Filter with class " + getHeldClass(), e);
 			}

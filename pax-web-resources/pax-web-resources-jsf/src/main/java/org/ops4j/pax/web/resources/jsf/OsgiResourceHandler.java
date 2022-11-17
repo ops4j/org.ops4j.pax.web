@@ -85,6 +85,7 @@ import org.slf4j.LoggerFactory;
  *
  * @see IndexedOsgiResourceLocator
  */
+@SuppressWarnings("deprecation")
 public class OsgiResourceHandler extends ResourceHandlerWrapper {
 
 	private static final String INIT_PARAM_RESOURCE_BUFFER_SIZE = "org.ops4j.pax.web.resources.jsf.RESOURCE_BUFFER_SIZE";

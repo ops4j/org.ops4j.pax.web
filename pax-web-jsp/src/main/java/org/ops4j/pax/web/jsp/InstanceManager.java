@@ -31,7 +31,6 @@ import java.util.Properties;
 import java.util.WeakHashMap;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.naming.NamingException;
 import javax.servlet.Filter;
 
 import org.apache.jasper.security.SecurityUtil;
@@ -47,20 +46,20 @@ public class InstanceManager implements org.apache.tomcat.InstanceManager {
 	@Override
 	public Object newInstance(String className) throws IllegalAccessException,
 			InvocationTargetException, InstantiationException,
-			ClassNotFoundException {
+			ClassNotFoundException, NoSuchMethodException {
 		ClassLoader classLoader = Thread.currentThread()
 				.getContextClassLoader();
 		Class<?> clazz = loadClassMaybePrivileged(className, classLoader);
-		return newInstance(clazz.newInstance(), clazz);
+		return newInstance(clazz.getConstructor().newInstance(), clazz);
 	}
 
 	@Override
 	public Object newInstance(final String className,
 							  final ClassLoader classLoader) throws IllegalAccessException,
 			InvocationTargetException, InstantiationException,
-			ClassNotFoundException {
+			ClassNotFoundException, NoSuchMethodException {
 		Class<?> clazz = classLoader.loadClass(className);
-		return newInstance(clazz.newInstance(), clazz);
+		return newInstance(clazz.getConstructor().newInstance(), clazz);
 	}
 
 	@Override
@@ -71,11 +70,11 @@ public class InstanceManager implements org.apache.tomcat.InstanceManager {
 
 	@Override
 	public Object newInstance(Class<?> clazz) throws IllegalAccessException,
-			InvocationTargetException, NamingException, InstantiationException {
+			InvocationTargetException, InstantiationException {
 		Object instance;
 		try {
 			instance = newInstance(clazz.getName());
-		} catch (ClassNotFoundException e) {
+		} catch (ClassNotFoundException | NoSuchMethodException e) {
 			throw new InstantiationException("can't create object for class "
 					+ clazz);
 		}

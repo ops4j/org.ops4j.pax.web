@@ -89,7 +89,7 @@
 						</Import-Package>
 						<Private-Package>
 							org.ops4j.pax.web.samples.config.commands,
-							org.ops4j.pax.web.samples.config.web
+							org.ops4j.pax.web.samples.config.commands.web
 						</Private-Package>
 					</instructions>
 				</configuration>

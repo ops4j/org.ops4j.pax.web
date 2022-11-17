@@ -24,6 +24,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ServiceScope;
 import org.osgi.service.http.HttpContext;
 
+@SuppressWarnings("deprecation")
 @Component(property = PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID + "=CustomHttpContextMapping", scope = ServiceScope.SINGLETON)
 public class PaxWebWhiteboardHttpContextMapping implements HttpContextMapping {
 

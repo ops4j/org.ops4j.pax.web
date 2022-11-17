@@ -292,10 +292,10 @@ public class PaxWebSpiIntegrationTest extends AbstractOsgiTestBase {
 
 		ByteArrayOutputStream baos1 = new ByteArrayOutputStream();
 		IOUtils.copy(bundle.getResource("/META-INF").openStream(), baos1);
-		LOG.info("/META-INF: \"{}\"", new String(baos1.toByteArray()));
+		LOG.info("/META-INF: \"{}\"", baos1.toString());
 		ByteArrayOutputStream baos2 = new ByteArrayOutputStream();
 		IOUtils.copy(bundle.getResource("/META-INF/").openStream(), baos2);
-		LOG.info("/META-INF/: \"{}\"", new String(baos2.toByteArray()));
+		LOG.info("/META-INF/: \"{}\"", baos2.toString());
 
 		e = bundle.getResources("/META-INF/MANIFEST.MF");
 		ok = 0;
@@ -331,7 +331,7 @@ public class PaxWebSpiIntegrationTest extends AbstractOsgiTestBase {
 	}
 
 	@Test
-	public void checkPaxSpiFragment() throws IOException {
+	public void checkPaxSpiFragment() {
 		Bundle b = SneakIntoPaxWebSpi.whatsYourBundle();
 		assertThat(b.getSymbolicName(), equalTo("org.ops4j.pax.web.pax-web-spi"));
 	}
@@ -346,24 +346,24 @@ public class PaxWebSpiIntegrationTest extends AbstractOsgiTestBase {
 		List<Class<? extends ServletContainerInitializer>> initializers = SneakIntoPaxWebSpi.findInitializersUsingServiceLoader(b);
 		assertThat(initializers.size(), equalTo(3));
 		for (Class<? extends ServletContainerInitializer> c : initializers) {
-			c.newInstance().onStartup(null, null);
+			c.getConstructor().newInstance().onStartup(null, null);
 		}
 
 		initializers = SneakIntoPaxWebSpi.findInitializersUsingBundleWiring(b);
 		assertThat(initializers.size(), equalTo(3));
 		for (Class<? extends ServletContainerInitializer> c : initializers) {
-			c.newInstance().onStartup(null, null);
+			c.getConstructor().newInstance().onStartup(null, null);
 		}
 
 		initializers = SneakIntoPaxWebSpi.findInitializersUsingBundle(b);
 		assertThat(initializers.size(), equalTo(3));
 		for (Class<? extends ServletContainerInitializer> c : initializers) {
-			c.newInstance().onStartup(null, null);
+			c.getConstructor().newInstance().onStartup(null, null);
 		}
 	}
 
 	@Test
-	public void searchForWarResources() throws Exception {
+	public void searchForWarResources() {
 		Optional<Bundle> initializerBundles = Arrays.stream(context.getBundles())
 				.filter(b -> "org.ops4j.pax.web.samples.jsf-primefaces-embedded".equals(b.getSymbolicName())).findFirst();
 		assertTrue(initializerBundles.isPresent());

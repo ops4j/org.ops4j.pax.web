@@ -29,6 +29,7 @@ public class WebSocketTracker extends AbstractElementTracker<Object, Object, Web
 		super(whiteboardExtenderContext, bundleContext);
 	}
 
+	@SuppressWarnings("deprecation")
 	public static ServiceTracker<Object, WebSocketModel> createTracker(final WhiteboardExtenderContext whiteboardExtenderContext,
 			final BundleContext bundleContext) {
 

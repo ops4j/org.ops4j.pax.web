@@ -144,7 +144,7 @@ public class Utils {
 		final SSLContext sslcontext = SSLContexts.custom()
 				.loadTrustMaterial((chain, authType) -> {
 					final X509Certificate cert = chain[0];
-					return "CN=server1".equalsIgnoreCase(cert.getSubjectDN().getName());
+					return "CN=server1".equalsIgnoreCase(cert.getSubjectX500Principal().getName());
 				})
 				.loadKeyMaterial(new File("target/client.jks"), "passw0rd".toCharArray(), "passw0rd".toCharArray(), (aliases, sslParameters) -> "client")
 				.build();

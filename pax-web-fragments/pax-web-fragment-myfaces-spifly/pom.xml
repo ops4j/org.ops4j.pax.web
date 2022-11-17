@@ -50,7 +50,34 @@
 						    osgi.extender;filter:="(&(osgi.extender=osgi.serviceloader.registrar)(version>=1.0)(!(version>=2.0)))"
 						]]></Require-Capability>
 						<Provide-Capability>
-							osgi.serviceloader;osgi.serviceloader=javax.enterprise.inject.spi.Extension;aries.cdi.extension.mode=implicit
+							osgi.serviceloader;osgi.serviceloader=javax.enterprise.inject.spi.Extension;aries.cdi.extension.mode=implicit;
+								register:=org.apache.myfaces.cdi.scope.ScopeExtension,
+							osgi.serviceloader;osgi.serviceloader=javax.enterprise.inject.spi.Extension;aries.cdi.extension.mode=implicit;
+								register:=org.apache.myfaces.cdi.JsfApplicationArtifactHolderExtension,
+							osgi.serviceloader;osgi.serviceloader=javax.enterprise.inject.spi.Extension;aries.cdi.extension.mode=implicit;
+								register:=org.apache.myfaces.cdi.view.ViewScopeContextExtension,
+							osgi.serviceloader;osgi.serviceloader=javax.enterprise.inject.spi.Extension;aries.cdi.extension.mode=implicit;
+								register:=org.apache.myfaces.flow.cdi.FlowBuilderCDIExtension,
+							osgi.serviceloader;osgi.serviceloader=javax.enterprise.inject.spi.Extension;aries.cdi.extension.mode=implicit;
+								register:=org.apache.myfaces.flow.cdi.FlowScopeCDIExtension,
+							osgi.serviceloader;osgi.serviceloader=javax.enterprise.inject.spi.Extension;aries.cdi.extension.mode=implicit;
+								register:=org.apache.myfaces.config.annotation.CdiAnnotationProviderExtension,
+							osgi.serviceloader;osgi.serviceloader=javax.enterprise.inject.spi.Extension;aries.cdi.extension.mode=implicit;
+								register:=org.apache.myfaces.push.cdi.PushContextCDIExtension,
+							osgi.serviceloader;osgi.serviceloader=javax.enterprise.inject.spi.Extension;aries.cdi.extension.mode=implicit;
+								register:=org.apache.myfaces.cdi.managedproperty.ManagedPropertyExtension,
+							osgi.serviceloader;osgi.serviceloader=javax.enterprise.inject.spi.Extension;aries.cdi.extension.mode=implicit;
+								register:=org.apache.myfaces.cdi.converter.FacesConverterExtension,
+							osgi.serviceloader;osgi.serviceloader=javax.enterprise.inject.spi.Extension;aries.cdi.extension.mode=implicit;
+								register:=org.apache.myfaces.cdi.validator.FacesValidatorExtension,
+							osgi.serviceloader;osgi.serviceloader=javax.enterprise.inject.spi.Extension;aries.cdi.extension.mode=implicit;
+								register:=org.apache.myfaces.cdi.behavior.FacesBehaviorExtension,
+							osgi.serviceloader;osgi.serviceloader=javax.enterprise.inject.spi.Extension;aries.cdi.extension.mode=implicit;
+								register:=org.apache.myfaces.cdi.model.FacesDataModelExtension,
+							osgi.serviceloader;osgi.serviceloader=javax.enterprise.inject.spi.Extension;aries.cdi.extension.mode=implicit;
+								register:=org.apache.myfaces.cdi.config.FacesConfigExtension,
+							osgi.serviceloader;osgi.serviceloader=javax.enterprise.inject.spi.Extension;aries.cdi.extension.mode=implicit;
+								register:=org.apache.myfaces.cdi.JsfArtifactProducerExtension
 						</Provide-Capability>
 					</instructions>
 				</configuration>

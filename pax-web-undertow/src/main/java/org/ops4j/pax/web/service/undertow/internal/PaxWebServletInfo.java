@@ -174,6 +174,7 @@ public class PaxWebServletInfo extends ServletInfo {
 		return this;
 	}
 
+	@SuppressWarnings("MethodDoesntCallSuperMethod")
 	@Override
 	public ServletInfo clone() {
 		final ServletInfo info;
@@ -249,7 +250,7 @@ public class PaxWebServletInfo extends ServletInfo {
 					}
 				} else if (model.getServletClass() != null) {
 					try {
-						instance = model.getServletClass().newInstance();
+						instance = model.getServletClass().getConstructor().newInstance();
 					} catch (Exception e) {
 						InstantiationException instantiationException = new InstantiationException(e.getMessage());
 						instantiationException.initCause(e);

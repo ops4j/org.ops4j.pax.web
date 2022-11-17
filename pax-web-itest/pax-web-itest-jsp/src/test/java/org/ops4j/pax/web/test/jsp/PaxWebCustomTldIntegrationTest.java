@@ -71,7 +71,7 @@ public class PaxWebCustomTldIntegrationTest {
 		Class<?> jspFactoryClass = Class.forName("javax.servlet.jsp.JspFactory");
 		Method setDefaultFactory = jspFactoryClass.getDeclaredMethod("setDefaultFactory", jspFactoryClass);
 		Class<?> jspFactoryImplClass = Class.forName("org.apache.jasper.runtime.JspFactoryImpl");
-		setDefaultFactory.invoke(null, jspFactoryClass.cast(jspFactoryImplClass.newInstance()));
+		setDefaultFactory.invoke(null, jspFactoryClass.cast(jspFactoryImplClass.getConstructor().newInstance()));
 
 		scratchDir = new File("target", "jsp");
 		FileUtils.deleteDirectory(scratchDir);
@@ -184,7 +184,8 @@ public class PaxWebCustomTldIntegrationTest {
 		when(bundle.adapt(BundleWiring.class)).thenReturn(bw);
 		context.setAttribute(PaxWebConstants.CONTEXT_PARAM_BUNDLE_CONTEXT, bc);
 
-		ServletContainerInitializer sci = (ServletContainerInitializer) Class.forName("org.ops4j.pax.web.jsp.JasperInitializer").newInstance();
+		ServletContainerInitializer sci = (ServletContainerInitializer) Class.forName("org.ops4j.pax.web.jsp.JasperInitializer")
+				.getConstructor().newInstance();
 		sci.onStartup(null, context);
 
 		MockServletConfig config = new MockServletConfig(context, "jsp");

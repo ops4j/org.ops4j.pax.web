@@ -53,7 +53,7 @@
 							*
 						</Import-Package>
 						<Private-Package>
-							org.ops4j.pax.web.samples.war
+							org.ops4j.pax.web.samples.war.osgi
 						</Private-Package>
 						<!--
 							https://bnd.bndtools.org/instructions/wab.html

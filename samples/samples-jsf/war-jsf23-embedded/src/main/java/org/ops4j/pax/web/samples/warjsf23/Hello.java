@@ -20,14 +20,13 @@ package org.ops4j.pax.web.samples.warjsf23;
 
 import java.io.IOException;
 import java.util.Properties;
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.RequestScoped;
 
 // According to "5.4 Managed Bean Annotations" of JSF 2.3 specification,javax.faces.bean package
 // is deprecated and the recommended annotations should be taken from CDI 1.2
 
-@ManagedBean
-@RequestScoped
+@SuppressWarnings("deprecation")
+@javax.faces.bean.ManagedBean
+@javax.faces.bean.RequestScoped
 public class Hello {
 
 	private String what;

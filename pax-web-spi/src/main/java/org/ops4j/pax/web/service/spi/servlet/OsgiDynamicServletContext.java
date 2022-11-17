@@ -16,6 +16,7 @@
 package org.ops4j.pax.web.service.spi.servlet;
 
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Enumeration;
@@ -161,8 +162,8 @@ public class OsgiDynamicServletContext implements ServletContext {
 	@Override
 	public <T extends Filter> T createFilter(Class<T> clazz) throws ServletException {
 		try {
-			return clazz.newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
+			return clazz.getConstructor().newInstance();
+		} catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
 			throw new ServletException(e.getMessage(), e);
 		}
 	}
@@ -170,8 +171,8 @@ public class OsgiDynamicServletContext implements ServletContext {
 	@Override
 	public <T extends EventListener> T createListener(Class<T> clazz) throws ServletException {
 		try {
-			return clazz.newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
+			return clazz.getConstructor().newInstance();
+		} catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
 			throw new ServletException(e.getMessage(), e);
 		}
 	}
@@ -179,8 +180,8 @@ public class OsgiDynamicServletContext implements ServletContext {
 	@Override
 	public <T extends Servlet> T createServlet(Class<T> clazz) throws ServletException {
 		try {
-			return clazz.newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
+			return clazz.getConstructor().newInstance();
+		} catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
 			throw new ServletException(e.getMessage(), e);
 		}
 	}

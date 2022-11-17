@@ -90,7 +90,7 @@ public class ExceptionServlet extends HttpServlet {
 			try {
 				Class<?> exp = this.getClass().getClassLoader().loadClass(error.trim());
 				if (Throwable.class.isAssignableFrom(exp)) {
-					throw new ServletException("Rethrowing " + error, (Throwable) exp.newInstance());
+					throw new ServletException("Rethrowing " + error, (Throwable) exp.getConstructor().newInstance());
 				}
 			} catch (Exception ignored) {
 			}

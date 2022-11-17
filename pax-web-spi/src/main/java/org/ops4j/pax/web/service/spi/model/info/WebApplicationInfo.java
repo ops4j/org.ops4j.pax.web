@@ -176,6 +176,7 @@ public class WebApplicationInfo implements Comparable<WebApplicationInfo> {
 		return (String) ocm.getContextReference().getProperty(Constants.SERVICE_SCOPE);
 	}
 
+	@SuppressWarnings("deprecation")
 	public List<String> getContextRegistrationIdProperties() {
 		if (contextModel == null) {
 			return Collections.emptyList();

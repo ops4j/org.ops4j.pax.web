@@ -18,6 +18,7 @@
 package org.ops4j.pax.web.extender.war.internal.model;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -1815,7 +1816,7 @@ public class BundleWebApplication {
 			Class<EventListener> listenerClass;
 			try {
 				listenerClass = (Class<EventListener>) classLoader.loadClass(listener);
-				EventListener eventListener = listenerClass.newInstance();
+				EventListener eventListener = listenerClass.getConstructor().newInstance();
 				EventListenerModel elm = new EventListenerModel(eventListener);
 				elm.setRegisteringBundle(bundle);
 				elm.addContextModel(ocm);
@@ -1826,7 +1827,7 @@ public class BundleWebApplication {
 				wabBatch.addEventListenerModel(elm);
 			} catch (ClassNotFoundException e) {
 				LOG.warn("Can't load listener class {} in the context of {}: {}", listener, this, e.getMessage(), e);
-			} catch (InstantiationException | IllegalAccessException e) {
+			} catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
 				LOG.warn("Can't instantiate listener class {} in the context of {}: {}", listener, this, e.getMessage(), e);
 			}
 		}

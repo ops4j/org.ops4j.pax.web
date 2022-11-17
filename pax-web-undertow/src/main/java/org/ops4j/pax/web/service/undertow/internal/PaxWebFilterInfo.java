@@ -45,7 +45,7 @@ public class PaxWebFilterInfo extends FilterInfo {
 
 	private ServiceReference<? extends Filter> serviceReference;
 
-	private boolean whiteboardTCCL;
+	private final boolean whiteboardTCCL;
 
 	public PaxWebFilterInfo(FilterModel model, OsgiServletContext osgiServletContext,
 			boolean whiteboardTCCL) {
@@ -67,6 +67,7 @@ public class PaxWebFilterInfo extends FilterInfo {
 		this.whiteboardTCCL = whiteboardTCCL;
 	}
 
+	@SuppressWarnings("MethodDoesntCallSuperMethod")
 	@Override
 	public FilterInfo clone() {
 		final FilterInfo info = new PaxWebFilterInfo(this.filterModel, this.osgiServletContext,
@@ -120,7 +121,7 @@ public class PaxWebFilterInfo extends FilterInfo {
 					}
 				} else if (model.getFilterClass() != null) {
 					try {
-						instance = model.getFilterClass().newInstance();
+						instance = model.getFilterClass().getConstructor().newInstance();
 					} catch (Exception e) {
 						InstantiationException instantiationException = new InstantiationException(e.getMessage());
 						instantiationException.initCause(e);

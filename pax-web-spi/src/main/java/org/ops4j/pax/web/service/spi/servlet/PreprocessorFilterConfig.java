@@ -69,7 +69,7 @@ public class PreprocessorFilterConfig implements FilterConfig {
 		}
 		if (instance == null && model.getFilterClass() != null) {
 			try {
-				instance = (Preprocessor) model.getFilterClass().newInstance();
+				instance = (Preprocessor) model.getFilterClass().getConstructor().newInstance();
 			} catch (Exception e) {
 				throw new IllegalStateException("Can't instantiate Preprocessor with class " + model.getFilterClass(), e);
 			}

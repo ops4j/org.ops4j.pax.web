@@ -15,6 +15,7 @@
  */
 package org.ops4j.pax.web.service.undertow.websocket.internal;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.HashSet;
 import java.util.Set;
@@ -76,8 +77,9 @@ public class WebSocketsInitializer implements ServletContainerInitializer {
             if (ServerApplicationConfig.class.isAssignableFrom(potentialEndpointClass)) {
                 // a class that processes javax.websocket.Endpoints
                 try {
-                    configs.add((ServerApplicationConfig) potentialEndpointClass.newInstance());
-                } catch (InstantiationException | IllegalAccessException e) {
+                    configs.add((ServerApplicationConfig) potentialEndpointClass.getConstructor().newInstance());
+                } catch (InstantiationException | IllegalAccessException | NoSuchMethodException |
+                         InvocationTargetException e) {
                     LOG.warn("Problem instantiating potentialEndpointClass {}: {}. Skipping", potentialEndpointClass,
                             e.getMessage(), e);
                 }

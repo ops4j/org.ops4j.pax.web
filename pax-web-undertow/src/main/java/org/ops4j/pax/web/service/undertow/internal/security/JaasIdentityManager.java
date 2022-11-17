@@ -70,7 +70,7 @@ public class JaasIdentityManager implements IdentityManager {
 		if (credential instanceof X509CertificateCredential) {
 			X509CertificateCredential certCredential = (X509CertificateCredential) credential;
 			X509Certificate certificate = certCredential.getCertificate();
-			return verify(certificate.getSubjectDN().getName(), credential);
+			return verify(certificate.getSubjectX500Principal().getName(), credential);
 		}
 		throw new IllegalArgumentException("Parameter must be a X509CertificateCredential");
 	}

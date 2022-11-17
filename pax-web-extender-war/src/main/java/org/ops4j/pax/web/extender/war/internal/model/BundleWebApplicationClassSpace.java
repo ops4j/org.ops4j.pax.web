@@ -19,6 +19,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -631,7 +632,7 @@ public class BundleWebApplicationClassSpace {
 			// this will fortunately cause an error later
 			// this may happen if the WAB has a bundle both wired and embedded, but unfortunately we can't
 			// provide nice message, as both jarName and URL properties of WebXml will be different.
-			fragments.get(duplicateName).setDuplicated(true);
+			fragments.get(duplicateName).addDuplicate(fragment.getURL().toString());
 			if (fragment.getJarName() != null) {
 				// Rename the current fragment so it doesn't clash
 				LOG.warn("There already exists a web fragment named {}. Renaming to {}.", duplicateName, fragment.getJarName());
@@ -859,10 +860,12 @@ public class BundleWebApplicationClassSpace {
 				if (name.length() > 0) {
 					try {
 						Class<?> sciClass = bundle.loadClass(name);
-						ServletContainerInitializer sci = (ServletContainerInitializer) sciClass.newInstance();
+						ServletContainerInitializer sci = (ServletContainerInitializer) sciClass.getConstructor()
+								.newInstance();
 						LOG.trace("      Loaded SCI {}", sci.getClass());
 						scis.add(sci);
-					} catch (ClassNotFoundException | ClassCastException | InstantiationException | IllegalAccessException e) {
+					} catch (ClassNotFoundException | ClassCastException | InstantiationException |
+							 IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
 						LOG.error("      Problem loading SCI class from {}: {}", url, e.getMessage(), e);
 					}
 				}

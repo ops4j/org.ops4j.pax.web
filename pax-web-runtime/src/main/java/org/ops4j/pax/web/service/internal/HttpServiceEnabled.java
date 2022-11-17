@@ -17,6 +17,7 @@
  */
 package org.ops4j.pax.web.service.internal;
 
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1883,7 +1884,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 						ServletContainerInitializer sci;
 						try {
 							wsSCIClass = (Class<? extends ServletContainerInitializer>) paxWebWS.loadClass(PaxWebConstants.DEFAULT_WEBSOCKET_SCI_CLASS);
-							sci = wsSCIClass.newInstance();
+							sci = wsSCIClass.getConstructor().newInstance();
 						} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
 							throw new IllegalStateException("Can't create WebSocket SCI " + PaxWebConstants.DEFAULT_WEBSOCKET_SCI_CLASS
 									+ " using bundle " + paxWebWS);
@@ -1944,8 +1945,9 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 			@SuppressWarnings("unchecked")
 			Class<? extends ServletContainerInitializer> sciClass
 					= (Class<? extends ServletContainerInitializer>) bundle.loadClass(className);
-			sci = sciClass.newInstance();
-		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+			sci = sciClass.getConstructor().newInstance();
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException |
+				 InvocationTargetException e) {
 			throw new IllegalStateException("Can't create " + containerName + " WebSocket SCI " + className
 					+ " using bundle " + bundle);
 		}

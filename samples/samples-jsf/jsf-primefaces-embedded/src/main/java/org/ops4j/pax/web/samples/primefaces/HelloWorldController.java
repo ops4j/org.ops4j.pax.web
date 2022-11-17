@@ -18,14 +18,12 @@
  */
 package org.ops4j.pax.web.samples.primefaces;
 
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
-
 // According to "5.4 Managed Bean Annotations" of JSF 2.3 specification,javax.faces.bean package
 // is deprecated and the recommended annotations should be taken from CDI 1.2
 
-@ManagedBean(name = "helloWorld")
-@SessionScoped
+@SuppressWarnings("deprecation")
+@javax.faces.bean.ManagedBean(name = "helloWorld")
+@javax.faces.bean.SessionScoped
 public class HelloWorldController {
 
 	private String name;

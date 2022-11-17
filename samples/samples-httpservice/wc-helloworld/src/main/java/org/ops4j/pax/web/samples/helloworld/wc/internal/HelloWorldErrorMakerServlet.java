@@ -18,6 +18,7 @@
 package org.ops4j.pax.web.samples.helloworld.wc.internal;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -42,12 +43,13 @@ public class HelloWorldErrorMakerServlet extends HttpServlet {
 			throw new IllegalArgumentException("Request parameter [type] is not set or is empty");
 		}
 		try {
-			final Exception exception = (Exception) Class.forName(exceptionType).newInstance();
+			final Exception exception = (Exception) Class.forName(exceptionType).getConstructor().newInstance();
 			if (exception instanceof RuntimeException) {
 				throw (RuntimeException) exception;
 			}
 			throw new ServletException(exception);
-		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException | NoSuchMethodException |
+				 InvocationTargetException e) {
 			throw new ServletException("Cannot create exception", e);
 		}
 	}
