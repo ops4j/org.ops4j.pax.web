@@ -42,6 +42,7 @@
 		<module>hs-jersey</module>
 		<module>hs-1</module>
 		<module>hs-2</module>
+		<module>hs-for-war-default</module>
 	</modules>
 
 </project>
