@@ -94,8 +94,10 @@ public abstract class AbstractWhiteboardServletAnnotatedIntegrationTest extends 
 		AnnotatedTestServlet annotatedTestServlet = new AnnotatedTestServlet();
 		final ServiceRegistration<Servlet>[] servletRegistration = new ServiceRegistration[1];
 		final ServiceRegistration<Filter>[] filterRegistration = new ServiceRegistration[1];
-		configureAndWaitForServletWithMapping("/test", () -> {
+		configureAndWaitForFilterWithMapping("/*", () -> {
 			filterRegistration[0] = context.registerService(Filter.class, new AnnotatedTestFilter(), null);
+		});
+		configureAndWaitForServletWithMapping("/test", () -> {
 			servletRegistration[0] = context.registerService(Servlet.class, annotatedTestServlet, null);
 		});
 
