@@ -251,7 +251,7 @@ public class ClassPathUtil {
 		BundleWiring bundleWiring = bundle == null ? null : bundle.adapt(BundleWiring.class);
 
 		if (bundle == null || bundleWiring == null) {
-			throw new IllegalArgumentException("Bundle, BundleContext or BundleWiring is null");
+			return Collections.emptySet();
 		}
 
 		Set<Bundle> bundles = new HashSet<>();

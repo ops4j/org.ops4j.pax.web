@@ -25,6 +25,7 @@ import javax.servlet.ServletContext;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleReference;
+import org.osgi.framework.wiring.BundleWiring;
 
 /**
  * <p>A {@link ClassLoader} added in Pax Web to replace all pax-swissbox/xbean <em>bundle classloaders</em> and to be used
@@ -113,9 +114,11 @@ public class OsgiServletContextClassLoader extends ClassLoader implements Bundle
 	public Class<?> loadClass(String name) throws ClassNotFoundException {
 		List<Exception> suppressed = new ArrayList<>(bundles.size());
 		for (Bundle b : bundles) {
-			if (b.getState() != Bundle.UNINSTALLED) {
+			BundleWiring bw = b.adapt(BundleWiring.class);
+			ClassLoader cl = bw == null ? null : bw.getClassLoader();
+			if (cl != null) {
 				try {
-					return b.loadClass(name);
+					return cl.loadClass(name);
 				} catch (Exception e) {
 					suppressed.add(e);
 				}
@@ -130,8 +133,10 @@ public class OsgiServletContextClassLoader extends ClassLoader implements Bundle
 	@Override
 	protected URL findResource(String name) {
 		for (Bundle b : bundles) {
-			if (b.getState() != Bundle.UNINSTALLED) {
-				URL res = b.getResource(name);
+			BundleWiring bw = b.adapt(BundleWiring.class);
+			ClassLoader cl = bw == null ? null : bw.getClassLoader();
+			if (cl != null) {
+				URL res = cl.getResource(name);
 				if (res != null) {
 					return res;
 				}
@@ -145,8 +150,10 @@ public class OsgiServletContextClassLoader extends ClassLoader implements Bundle
 	protected Enumeration<URL> findResources(String name) throws IOException {
 		List<URL> urls = new ArrayList<>(32);
 		for (Bundle b : bundles) {
-			if (b.getState() != Bundle.UNINSTALLED) {
-				Enumeration<URL> e = b.getResources(name);
+			BundleWiring bw = b.adapt(BundleWiring.class);
+			ClassLoader cl = bw == null ? null : bw.getClassLoader();
+			if (cl != null) {
+				Enumeration<URL> e = cl.getResources(name);
 				if (e != null) {
 					while (e.hasMoreElements()) {
 						urls.add(e.nextElement());
