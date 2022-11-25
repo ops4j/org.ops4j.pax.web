@@ -66,6 +66,7 @@
 		<module>war-http2</module>
 		<module>war-keycloak</module>
 		<module>war-dispatcher</module>
+		<module>war-default</module>
 	</modules>
 
 </project>
