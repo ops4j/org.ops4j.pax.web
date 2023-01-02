@@ -280,7 +280,7 @@
 
 		<dependency.org.ops4j.base>1.5.1</dependency.org.ops4j.base>
 		<dependency.org.ops4j.pax.exam>4.13.5</dependency.org.ops4j.pax.exam>
-		<dependency.org.ops4j.pax.logging>2.0.14</dependency.org.ops4j.pax.logging>
+		<dependency.org.ops4j.pax.logging>2.0.19</dependency.org.ops4j.pax.logging>
 		<dependency.org.ops4j.pax.swissbox>1.8.4</dependency.org.ops4j.pax.swissbox>
 		<dependency.org.ops4j.pax.url>2.6.11</dependency.org.ops4j.pax.url>
 
@@ -1516,6 +1516,11 @@
 			<dependency>
 				<groupId>org.ops4j.pax.logging</groupId>
 				<artifactId>pax-logging-service</artifactId>
+				<version>${dependency.org.ops4j.pax.logging}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.logging</groupId>
+				<artifactId>pax-logging-logback</artifactId>
 				<version>${dependency.org.ops4j.pax.logging}</version>
 			</dependency>
 			<dependency>
