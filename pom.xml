@@ -200,7 +200,7 @@
 
 		<dependency.junit>4.13.2</dependency.junit>
 
-		<dependency.org.apache.aries.cdi>1.1.4</dependency.org.apache.aries.cdi>
+		<dependency.org.apache.aries.cdi>1.1.5</dependency.org.apache.aries.cdi>
 		<dependency.org.apache.aries.component-dsl>1.2.2</dependency.org.apache.aries.component-dsl>
 		<dependency.org.apache.aries.jax.rs>2.0.1</dependency.org.apache.aries.jax.rs>
 		<dependency.org.apache.aries.spifly>1.3.4</dependency.org.apache.aries.spifly>
