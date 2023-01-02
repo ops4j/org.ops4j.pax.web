@@ -260,7 +260,7 @@
 		<dependency.org.glassfish.hk2.osgi-locator>1.0.3</dependency.org.glassfish.hk2.osgi-locator>
 		<dependency.org.glassfish.jersey>2.38</dependency.org.glassfish.jersey>
 
-		<dependency.org.javassist>3.28.0-GA</dependency.org.javassist>
+		<dependency.org.javassist>3.29.2-GA</dependency.org.javassist>
 		<dependency.org.jasypt>1.9.3</dependency.org.jasypt>
 		<dependency.org.jboss.classfilewriter>1.2.5.Final</dependency.org.jboss.classfilewriter>
 		<dependency.org.jboss.logging>3.4.3.Final</dependency.org.jboss.logging>
