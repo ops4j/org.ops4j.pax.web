@@ -50,6 +50,7 @@ import org.apache.hc.client5.http.async.methods.SimpleHttpResponse;
 import org.apache.hc.client5.http.async.methods.SimpleRequestBuilder;
 import org.apache.hc.client5.http.async.methods.SimpleRequestProducer;
 import org.apache.hc.client5.http.async.methods.SimpleResponseConsumer;
+import org.apache.hc.client5.http.config.TlsConfig;
 import org.apache.hc.client5.http.impl.async.CloseableHttpAsyncClient;
 import org.apache.hc.client5.http.impl.async.HttpAsyncClients;
 import org.apache.hc.client5.http.impl.nio.PoolingAsyncClientConnectionManager;
@@ -135,6 +136,10 @@ public class EmbeddedUndertowHttps2Test {
 					// request with PUSH_PROMISE: https://httpwg.org/specs/rfc7540.html#PUSH_PROMISE
 					PushBuilder pushBuilder = req.newPushBuilder();
 					if (pushBuilder != null) {
+						// required, otherwise this is thrown:
+						// org.apache.hc.core5.http.ProtocolException: Header 'host: 127.0.0.1:44971' is illegal for HTTP/2 messages
+						// (strange that Tomcat and Jetty doesn't have this problem)
+						pushBuilder.removeHeader("host");
 						pushBuilder.path("test/default.css").push();
 						pushBuilder.path("test/app.js").push();
 					}
@@ -177,13 +182,14 @@ public class EmbeddedUndertowHttps2Test {
 				.setHostnameVerifier(NoopHostnameVerifier.INSTANCE)
 				.build();
 		final PoolingAsyncClientConnectionManager cm = PoolingAsyncClientConnectionManagerBuilder.create()
+				.setDefaultTlsConfig(TlsConfig.custom().setVersionPolicy(HttpVersionPolicy.FORCE_HTTP_2).build())
 				.setTlsStrategy(tlsStrategy).build();
 
 		final CountDownLatch latch = new CountDownLatch(3);
 
 		try (CloseableHttpAsyncClient client = HttpAsyncClients.custom()
-				.setH2Config(H2Config.custom().setPushEnabled(true).build())
-				.setVersionPolicy(HttpVersionPolicy.FORCE_HTTP_2).setConnectionManager(cm).build()) {
+				.setH2Config(H2Config.custom().setCompressionEnabled(true).setPushEnabled(true).build())
+				.setConnectionManager(cm).build()) {
 
 			client.register("*", () -> new AsyncPushConsumer() {
 				@Override
