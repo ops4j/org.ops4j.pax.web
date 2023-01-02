@@ -293,7 +293,7 @@
 		<dependency.org.ow2.asm>9.4</dependency.org.ow2.asm>
 		<dependency.org.primefaces>12.0.0</dependency.org.primefaces>
 		<dependency.org.slf4j>1.7.35</dependency.org.slf4j>
-		<dependency.org.springframework>5.3.20</dependency.org.springframework>
+		<dependency.org.springframework>5.3.24</dependency.org.springframework>
 		<dependency.org.vaadin.artur>1.7.1</dependency.org.vaadin.artur>
 
 		<dependency.org.wildfly.client>1.0.1.Final</dependency.org.wildfly.client>
