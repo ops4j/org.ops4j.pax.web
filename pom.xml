@@ -220,7 +220,7 @@
 		<dependency.org.apache.felix.framework6>6.0.5</dependency.org.apache.felix.framework6>
 		<dependency.org.apache.felix.framework7>7.0.5</dependency.org.apache.felix.framework7>
 		<dependency.org.apache.felix.metatype>1.2.4</dependency.org.apache.felix.metatype>
-		<dependency.org.apache.felix.scr>2.1.30</dependency.org.apache.felix.scr>
+		<dependency.org.apache.felix.scr>2.2.4</dependency.org.apache.felix.scr>
 		<dependency.org.codehaus.mojo.animal-sniffer-annotations>1.20</dependency.org.codehaus.mojo.animal-sniffer-annotations>
 		<dependency.org.apache.felix.utils>1.11.8</dependency.org.apache.felix.utils>
 		<dependency.org.apache.felix.webconsole>4.7.2</dependency.org.apache.felix.webconsole>
