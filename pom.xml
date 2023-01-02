@@ -240,7 +240,7 @@
 		<dependency.org.apache.taglibs>1.2.5</dependency.org.apache.taglibs>
 		<dependency.org.apache.tomcat>9.0.69</dependency.org.apache.tomcat>
 		<dependency.org.apache.ws.xmlschema>2.3.0</dependency.org.apache.ws.xmlschema>
-		<dependency.org.apache.xbean>4.21</dependency.org.apache.xbean>
+		<dependency.org.apache.xbean>4.22</dependency.org.apache.xbean>
 
 		<dependency.org.bouncycastle>1.72</dependency.org.bouncycastle>
 
