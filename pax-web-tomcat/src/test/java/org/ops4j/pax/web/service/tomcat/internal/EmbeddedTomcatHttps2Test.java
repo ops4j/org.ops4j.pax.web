@@ -58,6 +58,7 @@ import org.apache.hc.client5.http.async.methods.SimpleHttpResponse;
 import org.apache.hc.client5.http.async.methods.SimpleRequestBuilder;
 import org.apache.hc.client5.http.async.methods.SimpleRequestProducer;
 import org.apache.hc.client5.http.async.methods.SimpleResponseConsumer;
+import org.apache.hc.client5.http.config.TlsConfig;
 import org.apache.hc.client5.http.impl.async.CloseableHttpAsyncClient;
 import org.apache.hc.client5.http.impl.async.HttpAsyncClients;
 import org.apache.hc.client5.http.impl.nio.PoolingAsyncClientConnectionManager;
@@ -79,6 +80,7 @@ import org.apache.hc.core5.http.nio.ssl.TlsStrategy;
 import org.apache.hc.core5.http.protocol.HttpContext;
 import org.apache.hc.core5.http.ssl.TLS;
 import org.apache.hc.core5.http2.HttpVersionPolicy;
+import org.apache.hc.core5.http2.config.H2Config;
 import org.apache.hc.core5.io.CloseMode;
 import org.apache.tomcat.util.file.ConfigFileLoader;
 import org.junit.Test;
@@ -222,12 +224,14 @@ public class EmbeddedTomcatHttps2Test {
 				.setHostnameVerifier(NoopHostnameVerifier.INSTANCE)
 				.build();
 		final PoolingAsyncClientConnectionManager cm = PoolingAsyncClientConnectionManagerBuilder.create()
+				.setDefaultTlsConfig(TlsConfig.custom().setVersionPolicy(HttpVersionPolicy.FORCE_HTTP_2).build())
 				.setTlsStrategy(tlsStrategy).build();
 
 		final CountDownLatch latch = new CountDownLatch(3);
 
 		try (CloseableHttpAsyncClient client = HttpAsyncClients.custom()
-				.setVersionPolicy(HttpVersionPolicy.FORCE_HTTP_2).setConnectionManager(cm).build()) {
+				.setH2Config(H2Config.custom().setCompressionEnabled(true).setPushEnabled(true).build())
+				.setConnectionManager(cm).build()) {
 
 			client.register("*", () -> new AsyncPushConsumer() {
 				@Override
