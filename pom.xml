@@ -223,7 +223,7 @@
 		<dependency.org.apache.felix.scr>2.2.4</dependency.org.apache.felix.scr>
 		<dependency.org.codehaus.mojo.animal-sniffer-annotations>1.20</dependency.org.codehaus.mojo.animal-sniffer-annotations>
 		<dependency.org.apache.felix.utils>1.11.8</dependency.org.apache.felix.utils>
-		<dependency.org.apache.felix.webconsole>4.8.2</dependency.org.apache.felix.webconsole>
+		<dependency.org.apache.felix.webconsole>4.8.4</dependency.org.apache.felix.webconsole>
 
 		<dependency.org.apache.geronimo.bundles.commons-discovery>0.4_1</dependency.org.apache.geronimo.bundles.commons-discovery>
 
