@@ -288,7 +288,7 @@
 		<dependency.org.osgi.service.cdi>1.0.1</dependency.org.osgi.service.cdi>
 		<dependency.org.osgi.service.jaxrs>1.0.1</dependency.org.osgi.service.jaxrs>
 		<dependency.org.osgi.util.function>1.2.0</dependency.org.osgi.util.function>
-		<dependency.org.osgi.util.promise>1.2.0</dependency.org.osgi.util.promise>
+		<dependency.org.osgi.util.promise>1.3.0</dependency.org.osgi.util.promise>
 
 		<dependency.org.ow2.asm>9.4</dependency.org.ow2.asm>
 		<dependency.org.primefaces>11.0.0</dependency.org.primefaces>
