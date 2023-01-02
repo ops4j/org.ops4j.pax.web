@@ -297,7 +297,7 @@
 		<dependency.org.wildfly.client>1.0.1.Final</dependency.org.wildfly.client>
 		<dependency.org.wildfly.common>1.6.0.Final</dependency.org.wildfly.common>
 
-		<dependency.org.yaml.snakeyaml>1.30</dependency.org.yaml.snakeyaml>
+		<dependency.org.yaml.snakeyaml>1.33</dependency.org.yaml.snakeyaml>
 	</properties>
 
 	<build>
