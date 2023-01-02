@@ -246,8 +246,7 @@
 
 		<dependency.org.codehaus.woodstox.stax2-api>4.2.1</dependency.org.codehaus.woodstox.stax2-api>
 
-		<!-- 3.26.0 is the last version supporting JDK 8 -->
-		<dependency.org.eclipse.jdt.ecj>3.26.0</dependency.org.eclipse.jdt.ecj>
+		<dependency.org.eclipse.jdt.ecj>3.32.0</dependency.org.eclipse.jdt.ecj>
 
 		<!-- Please keep Maven and OSGi version in sync -->
 		<dependency.org.eclipse.jetty>10.0.12</dependency.org.eclipse.jetty>
