@@ -175,6 +175,7 @@
 		<dependency.com.fasterxml.jackson.core.databind>2.14.1</dependency.com.fasterxml.jackson.core.databind>
 		<dependency.com.fasterxml.woodstox>6.4.0</dependency.com.fasterxml.woodstox>
 		<dependency.com.sun.activation>1.2.0</dependency.com.sun.activation>
+		<dependency.com.sun.istack>3.0.12</dependency.com.sun.istack>
 		<dependency.com.sun.xml.bind>2.3.7</dependency.com.sun.xml.bind>
 
 		<!--		<dependency.io.gatling.highcharts>3.6.1</dependency.io.gatling.highcharts>-->
@@ -2009,6 +2010,10 @@
 						<groupId>ch.qos.logback</groupId>
 						<artifactId>logback-classic</artifactId>
 					</exclusion>
+					<exclusion>
+						<groupId>com.sun.activation</groupId>
+						<artifactId>jakarta.activation</artifactId>
+					</exclusion>
 				</exclusions>
 			</dependency>
 
@@ -2082,8 +2087,24 @@
 				<version>${dependency.jakarta.xml.bind-api}</version>
 			</dependency>
 			<dependency>
+				<groupId>com.sun.istack</groupId>
+				<artifactId>istack-commons-runtime</artifactId>
+				<version>${dependency.com.sun.istack}</version>
+			</dependency>
+			<dependency>
 				<groupId>com.sun.xml.bind</groupId>
 				<artifactId>jaxb-impl</artifactId>
+				<version>${dependency.com.sun.xml.bind}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>com.sun.activation</groupId>
+						<artifactId>jakarta.activation</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>com.sun.xml.bind</groupId>
+				<artifactId>jaxb-osgi</artifactId>
 				<version>${dependency.com.sun.xml.bind}</version>
 			</dependency>
 			<dependency>
@@ -3137,6 +3158,12 @@
 				<groupId>org.apache.cxf</groupId>
 				<artifactId>cxf-core</artifactId>
 				<version>${dependency.org.apache.cxf}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>com.sun.activation</groupId>
+						<artifactId>jakarta.activation</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.cxf</groupId>
