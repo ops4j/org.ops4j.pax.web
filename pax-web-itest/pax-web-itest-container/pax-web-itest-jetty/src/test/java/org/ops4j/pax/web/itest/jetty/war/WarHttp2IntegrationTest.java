@@ -36,4 +36,10 @@ public class WarHttp2IntegrationTest extends AbstractWarHttp2IntegrationTest {
 		return combine(serverOptions, paxWebExtenderWar());
 	}
 
+	@Override
+	protected boolean supportsHttp2Push() {
+		// Jetty 9.4 is still Servlet API 3.1
+		return false;
+	}
+
 }

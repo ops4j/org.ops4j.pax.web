@@ -136,6 +136,10 @@ public abstract class AbstractWarHttp2IntegrationTest extends AbstractContainerT
 		});
 	}
 
+	protected boolean supportsHttp2Push() {
+		return true;
+	}
+
 	protected boolean removeHostHeader() {
 		return false;
 	}
@@ -146,46 +150,48 @@ public abstract class AbstractWarHttp2IntegrationTest extends AbstractContainerT
 				.setDefaultTlsConfig(TlsConfig.custom().setVersionPolicy(HttpVersionPolicy.FORCE_HTTP_2).build())
 				.build();
 
-		final CountDownLatch latch = new CountDownLatch(3);
+		final CountDownLatch latch = new CountDownLatch(supportsHttp2Push() ? 3 : 1);
 
 		try (CloseableHttpAsyncClient client = HttpAsyncClients.custom()
 				.setH2Config(H2Config.custom().setPushEnabled(true).build())
 				.setConnectionManager(cm).build()) {
 
-			client.register("*", () -> new AsyncPushConsumer() {
-				@Override
-				public void consumePromise(HttpRequest promise, HttpResponse response, EntityDetails entityDetails, HttpContext context) throws HttpException {
-					LOG.info("{} -> {}", promise, new StatusLine(response));
-					if (response.getVersion() == HttpVersion.HTTP_2 && response.getCode() == HttpServletResponse.SC_OK) {
-						latch.countDown();
+			if (supportsHttp2Push()) {
+				client.register("*", () -> new AsyncPushConsumer() {
+					@Override
+					public void consumePromise(HttpRequest promise, HttpResponse response, EntityDetails entityDetails, HttpContext context) throws HttpException {
+						LOG.info("{} -> {}", promise, new StatusLine(response));
+						if (response.getVersion() == HttpVersion.HTTP_2 && response.getCode() == HttpServletResponse.SC_OK) {
+							latch.countDown();
+						}
 					}
-				}
 
-				@Override
-				public void failed(Exception cause) {
-					System.out.println();
-				}
+					@Override
+					public void failed(Exception cause) {
+						System.out.println();
+					}
 
-				@Override
-				public void updateCapacity(CapacityChannel capacityChannel) {
-					System.out.println();
-				}
+					@Override
+					public void updateCapacity(CapacityChannel capacityChannel) {
+						System.out.println();
+					}
 
-				@Override
-				public void consume(ByteBuffer src) {
-					System.out.println();
-				}
+					@Override
+					public void consume(ByteBuffer src) {
+						System.out.println();
+					}
 
-				@Override
-				public void streamEnd(List<? extends Header> trailers) {
-					System.out.println();
-				}
+					@Override
+					public void streamEnd(List<? extends Header> trailers) {
+						System.out.println();
+					}
 
-				@Override
-				public void releaseResources() {
-					System.out.println();
-				}
-			});
+					@Override
+					public void releaseResources() {
+						System.out.println();
+					}
+				});
+			}
 
 			client.start();
 
@@ -203,7 +209,7 @@ public abstract class AbstractWarHttp2IntegrationTest extends AbstractContainerT
 					SimpleRequestProducer.create(request),
 					SimpleResponseConsumer.create(),
 					clientContext,
-					new FutureCallback<>() {
+					new FutureCallback<SimpleHttpResponse>() {
 						@Override
 						public void completed(final SimpleHttpResponse response) {
 							LOG.info("{} -> {}", request, new StatusLine(response));
@@ -257,46 +263,48 @@ public abstract class AbstractWarHttp2IntegrationTest extends AbstractContainerT
 				.setDefaultTlsConfig(TlsConfig.custom().setVersionPolicy(HttpVersionPolicy.FORCE_HTTP_2).build())
 				.setTlsStrategy(tlsStrategy).build();
 
-		final CountDownLatch latch = new CountDownLatch(3);
+		final CountDownLatch latch = new CountDownLatch(supportsHttp2Push() ? 3 : 1);
 
 		try (CloseableHttpAsyncClient client = HttpAsyncClients.custom()
 				.setH2Config(H2Config.custom().setPushEnabled(true).build())
 				.setConnectionManager(cm).build()) {
 
-			client.register("*", () -> new AsyncPushConsumer() {
-				@Override
-				public void consumePromise(HttpRequest promise, HttpResponse response, EntityDetails entityDetails, HttpContext context) throws HttpException {
-					LOG.info("{} -> {}", promise, new StatusLine(response));
-					if (response.getVersion() == HttpVersion.HTTP_2 && response.getCode() == HttpServletResponse.SC_OK) {
-						latch.countDown();
+			if (supportsHttp2Push()) {
+				client.register("*", () -> new AsyncPushConsumer() {
+					@Override
+					public void consumePromise(HttpRequest promise, HttpResponse response, EntityDetails entityDetails, HttpContext context) throws HttpException {
+						LOG.info("{} -> {}", promise, new StatusLine(response));
+						if (response.getVersion() == HttpVersion.HTTP_2 && response.getCode() == HttpServletResponse.SC_OK) {
+							latch.countDown();
+						}
 					}
-				}
 
-				@Override
-				public void failed(Exception cause) {
-					System.out.println();
-				}
+					@Override
+					public void failed(Exception cause) {
+						System.out.println();
+					}
 
-				@Override
-				public void updateCapacity(CapacityChannel capacityChannel) {
-					System.out.println();
-				}
+					@Override
+					public void updateCapacity(CapacityChannel capacityChannel) {
+						System.out.println();
+					}
 
-				@Override
-				public void consume(ByteBuffer src) {
-					System.out.println();
-				}
+					@Override
+					public void consume(ByteBuffer src) {
+						System.out.println();
+					}
 
-				@Override
-				public void streamEnd(List<? extends Header> trailers) {
-					System.out.println();
-				}
+					@Override
+					public void streamEnd(List<? extends Header> trailers) {
+						System.out.println();
+					}
 
-				@Override
-				public void releaseResources() {
-					System.out.println();
-				}
-			});
+					@Override
+					public void releaseResources() {
+						System.out.println();
+					}
+				});
+			}
 
 			client.start();
 
@@ -314,7 +322,7 @@ public abstract class AbstractWarHttp2IntegrationTest extends AbstractContainerT
 					SimpleRequestProducer.create(request),
 					SimpleResponseConsumer.create(),
 					clientContext,
-					new FutureCallback<>() {
+					new FutureCallback<SimpleHttpResponse>() {
 						@Override
 						public void completed(final SimpleHttpResponse response) {
 							LOG.info("{} -> {}", request, new StatusLine(response));
