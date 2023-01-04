@@ -236,7 +236,7 @@ public class EmbeddedUndertowHttps2Test {
 					SimpleRequestProducer.create(request),
 					SimpleResponseConsumer.create(),
 					clientContext,
-					new FutureCallback<>() {
+					new FutureCallback<SimpleHttpResponse>() {
 						@Override
 						public void completed(final SimpleHttpResponse response) {
 							LOG.info("{} -> {}", request, new StatusLine(response));
