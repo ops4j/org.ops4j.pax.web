@@ -510,6 +510,7 @@ public class UnifiedJettyTest {
 		response = send(port, "/gateway/x?what=forward&where=/");
 		assertTrue(response.contains("req.context_path=\"\""));
 		assertTrue(response.contains("req.request_uri=\"/index.y\""));
+		// see https://github.com/eclipse/jetty.project/issues/9119
 		assertTrue(response.contains("javax.servlet.forward.context_path=\"/\""));
 		assertTrue(response.contains("javax.servlet.forward.request_uri=\"/gateway/x\""));
 		assertTrue(response.contains("javax.servlet.forward.servlet_path=\"/gateway\""));
@@ -517,7 +518,6 @@ public class UnifiedJettyTest {
 
 		// "/", but included by gateway servlet
 		// "gateway" includes "/" which includes "/index.y"
-		// TOCHECK: with include, context path is "/"...
 		response = send(port, "/gateway/x?what=include&where=/");
 		assertTrue(response.contains("req.context_path=\"\""));
 		assertTrue(response.contains("req.request_uri=\"/gateway/x\""));
@@ -550,14 +550,16 @@ public class UnifiedJettyTest {
 		response = send(port, "/sub/");
 		assertTrue(response.contains("req.context_path=\"\""));
 		assertTrue(response.contains("req.request_uri=\"/sub/index.x\""));
+		// see https://github.com/eclipse/jetty.project/issues/9119
 		assertTrue(response.contains("javax.servlet.forward.context_path=\"/\""));
 		assertTrue(response.contains("javax.servlet.forward.request_uri=\"/sub/\""));
-		assertTrue(response.contains("javax.servlet.forward.servlet_path=\"/sub/\"")); // TOCHECK: why not "/"?
+		assertTrue(response.contains("javax.servlet.forward.servlet_path=\"/sub/\""));
 		assertTrue(response.contains("javax.servlet.forward.path_info=\"null\""));
 
 		response = send(port, "/gateway/x?what=forward&where=/sub/");
 		assertTrue(response.contains("req.context_path=\"\""));
 		assertTrue(response.contains("req.request_uri=\"/sub/index.x\""));
+		// see https://github.com/eclipse/jetty.project/issues/9119
 		assertTrue(response.contains("javax.servlet.forward.context_path=\"/\""));
 		assertTrue(response.contains("javax.servlet.forward.request_uri=\"/gateway/x\""));
 		assertTrue(response.contains("javax.servlet.forward.servlet_path=\"/gateway\""));
@@ -591,9 +593,9 @@ public class UnifiedJettyTest {
 
 		response = send(port, "/gateway/x?what=forward&where=/r/");
 		assertTrue(response.startsWith("HTTP/1.1 404"));
-		// https://github.com/eclipse/jetty.project/issues/5025
-//		response = send(port, "/gateway/x?what=include&where=/r/");
-//		assertTrue(response.startsWith("HTTP/1.1 500"));
+		response = send(port, "/gateway/x?what=include&where=/r/");
+		// HTTP 500 according to 9.3 "The Include Method"
+		assertTrue(response.startsWith("HTTP/1.1 500"));
 
 		response = send(port, "/r/sub");
 		assertTrue(response.startsWith("HTTP/1.1 302"));
@@ -608,9 +610,8 @@ public class UnifiedJettyTest {
 		assertTrue(response.endsWith("'sub/index-b2'"));
 		response = send(port, "/gateway/x?what=forward&where=/r/sub/");
 		assertTrue(response.endsWith("'sub/index-b2'"));
-		// https://github.com/eclipse/jetty.project/issues/5025
-//		response = send(port, "/gateway/x?what=include&where=/r/sub/");
-//		assertTrue(response.endsWith(">>>'sub/index-b2'<<<"));
+		response = send(port, "/gateway/x?what=include&where=/r/sub/");
+		assertTrue(response.endsWith(">>>'sub/index-b2'<<<"));
 
 		// --- resource access through "/s" servlet - welcome files with redirect
 
@@ -829,7 +830,6 @@ public class UnifiedJettyTest {
 
 		// "/", but included by gateway servlet
 		// "gateway" includes "/" which includes "/index.y"
-		// TOCHECK: with include, context path is "/"...
 		response = send(port, "/c/gateway/x?what=include&where=/");
 		assertTrue(response.contains("req.context_path=\"/c\""));
 		assertTrue(response.contains("req.request_uri=\"/c/gateway/x\""));
@@ -864,7 +864,7 @@ public class UnifiedJettyTest {
 		assertTrue(response.contains("req.request_uri=\"/c/sub/index.x\""));
 		assertTrue(response.contains("javax.servlet.forward.context_path=\"/c\""));
 		assertTrue(response.contains("javax.servlet.forward.request_uri=\"/c/sub/\""));
-		assertTrue(response.contains("javax.servlet.forward.servlet_path=\"/sub/\"")); // TOCHECK: why not "/"?
+		assertTrue(response.contains("javax.servlet.forward.servlet_path=\"/sub/\""));
 		assertTrue(response.contains("javax.servlet.forward.path_info=\"null\""));
 
 		response = send(port, "/c/gateway/x?what=forward&where=/sub/");
@@ -903,9 +903,9 @@ public class UnifiedJettyTest {
 
 		response = send(port, "/c/gateway/x?what=forward&where=/r/");
 		assertTrue(response.startsWith("HTTP/1.1 404"));
-		// https://github.com/eclipse/jetty.project/issues/5025
-//		response = send(port, "/c/gateway/x?what=include&where=/r/");
-//		assertTrue(response.startsWith("HTTP/1.1 500"));
+		response = send(port, "/c/gateway/x?what=include&where=/r/");
+		// HTTP 500 according to 9.3 "The Include Method"
+		assertTrue(response.startsWith("HTTP/1.1 500"));
 
 		response = send(port, "/c/r/sub");
 		assertTrue(response.startsWith("HTTP/1.1 302"));
@@ -920,9 +920,8 @@ public class UnifiedJettyTest {
 		assertTrue(response.endsWith("'sub/index-b2'"));
 		response = send(port, "/c/gateway/x?what=forward&where=/r/sub/");
 		assertTrue(response.endsWith("'sub/index-b2'"));
-		// https://github.com/eclipse/jetty.project/issues/5025
-//		response = send(port, "/gateway/x?what=include&where=/r/sub/");
-//		assertTrue(response.endsWith(">>>'sub/index-b2'<<<"));
+		response = send(port, "/c/gateway/x?what=include&where=/r/sub/");
+		assertTrue(response.endsWith(">>>'sub/index-b2'<<<"));
 
 		// --- resource access through "/s" servlet - welcome files with redirect
 

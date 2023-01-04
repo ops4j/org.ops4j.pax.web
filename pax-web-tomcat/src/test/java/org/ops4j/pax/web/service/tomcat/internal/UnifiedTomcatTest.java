@@ -697,7 +697,7 @@ public class UnifiedTomcatTest {
 		assertTrue(response.contains("req.request_uri=\"/sub/index.x\""));
 		assertTrue(response.contains("javax.servlet.forward.context_path=\"\""));
 		assertTrue(response.contains("javax.servlet.forward.request_uri=\"/sub/\""));
-		assertTrue(response.contains("javax.servlet.forward.servlet_path=\"/sub/\"")); // Jetty gives "/" here
+		assertTrue(response.contains("javax.servlet.forward.servlet_path=\"/sub/\""));
 		assertTrue(response.contains("javax.servlet.forward.path_info=\"null\""));
 
 		response = send(port, "/gateway/x?what=forward&where=/sub/");
@@ -753,9 +753,8 @@ public class UnifiedTomcatTest {
 		assertTrue(response.endsWith("'sub/index-b2'"));
 		response = send(port, "/gateway/x?what=forward&where=/r/sub/");
 		assertTrue(response.endsWith("'sub/index-b2'"));
-		// https://github.com/eclipse/jetty.project/issues/5025
-//		response = send(port, "/gateway/x?what=include&where=/r/sub/");
-//		assertTrue(response.endsWith(">>>'sub/index-b2'<<<"));
+		response = send(port, "/gateway/x?what=include&where=/r/sub/");
+		assertTrue(response.endsWith(">>>'sub/index-b2'<<<"));
 
 		// --- resource access through "/s" servlet - welcome files with redirect
 
@@ -1032,7 +1031,7 @@ public class UnifiedTomcatTest {
 		assertTrue(response.contains("req.request_uri=\"/c/sub/index.x\""));
 		assertTrue(response.contains("javax.servlet.forward.context_path=\"/c\""));
 		assertTrue(response.contains("javax.servlet.forward.request_uri=\"/c/sub/\""));
-		assertTrue(response.contains("javax.servlet.forward.servlet_path=\"/sub/\"")); // TOCHECK: why not "/"?
+		assertTrue(response.contains("javax.servlet.forward.servlet_path=\"/sub/\""));
 		assertTrue(response.contains("javax.servlet.forward.path_info=\"null\""));
 
 		response = send(port, "/c/gateway/x?what=forward&where=/sub/");
@@ -1088,9 +1087,8 @@ public class UnifiedTomcatTest {
 		assertTrue(response.endsWith("'sub/index-b2'"));
 		response = send(port, "/c/gateway/x?what=forward&where=/r/sub/");
 		assertTrue(response.endsWith("'sub/index-b2'"));
-		// https://github.com/eclipse/jetty.project/issues/5025
-//		response = send(port, "/gateway/x?what=include&where=/r/sub/");
-//		assertTrue(response.endsWith(">>>'sub/index-b2'<<<"));
+		response = send(port, "/c/gateway/x?what=include&where=/r/sub/");
+		assertTrue(response.endsWith(">>>'sub/index-b2'<<<"));
 
 		// --- resource access through "/s" servlet - welcome files with redirect
 

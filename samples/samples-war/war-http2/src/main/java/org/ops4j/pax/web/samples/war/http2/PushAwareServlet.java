@@ -51,7 +51,10 @@ public class PushAwareServlet extends HttpServlet {
 							"</html>\n");
 					PushBuilder builder = req.newPushBuilder();
 					if (builder != null) {
-						// can be null on Jetty
+						if ("true".equals(req.getParameter("undertow"))) {
+							// see https://issues.redhat.com/browse/UNDERTOW-2220
+							builder.removeHeader("host");
+						}
 						builder.path("servlet/default.css").push();
 						builder.path("servlet/app.js").push();
 					}

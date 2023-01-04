@@ -118,36 +118,35 @@ public class EmbeddedUndertowHttps2Test {
 		HttpServlet servletInstance = new HttpServlet() {
 			@Override
 			protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+				LOG.info("Handling request {} from {}:{}", req.getRequestURI(), req.getRemoteAddr(), req.getRemotePort());
 				if (!"/index.html".equals(req.getPathInfo())) {
 					// normal request
-					LOG.info("Handling request {} from {}:{}", req.getRequestURI(), req.getRemoteAddr(), req.getRemotePort());
-					resp.setContentType("text/plain");
 					resp.setCharacterEncoding("UTF-8");
-					if (req.getPathInfo().endsWith("css")) {
+					if (req.getPathInfo() != null && req.getPathInfo().endsWith("css")) {
 						resp.setContentType("text/css");
-						resp.getWriter().write("body { background-color: #EEE }\n");
-					} else if (req.getPathInfo().endsWith("js")) {
-						resp.getWriter().write("document.write(\"hello world\");\n");
-					} else {
-						resp.getWriter().write("OK\n");
+						resp.addHeader("X-Request-CSS", req.getHeader("X-Request-P1"));
+						resp.getWriter().write("body { margin: 0 }\n");
+					} else if (req.getPathInfo() != null && req.getPathInfo().endsWith("js")) {
+						resp.setContentType("text/javascript");
+						resp.addHeader("X-Request-JS", req.getHeader("X-Request-P2"));
+						resp.getWriter().write("window.alert(\"hello world\");\n");
 					}
 					resp.getWriter().close();
 				} else {
+					// first - normal data
+					resp.setContentType("text/plain");
+					resp.setCharacterEncoding("UTF-8");
+					resp.addHeader("X-Request", req.getRequestURI());
+					resp.getWriter().write("OK\n");
 					// request with PUSH_PROMISE: https://httpwg.org/specs/rfc7540.html#PUSH_PROMISE
 					PushBuilder pushBuilder = req.newPushBuilder();
 					if (pushBuilder != null) {
-						// required, otherwise this is thrown:
-						// org.apache.hc.core5.http.ProtocolException: Header 'host: 127.0.0.1:44971' is illegal for HTTP/2 messages
-						// (strange that Tomcat and Jetty doesn't have this problem)
+						// see https://issues.redhat.com/browse/UNDERTOW-2220
 						pushBuilder.removeHeader("host");
-						pushBuilder.path("test/default.css").push();
-						pushBuilder.path("test/app.js").push();
+						pushBuilder.path("test/default.css").addHeader("X-Request-P1", req.getRequestURI()).push();
+						pushBuilder.path("test/app.js").removeHeader("X-Request-P1").addHeader("X-Request-P2", req.getRequestURI()).push();
 					}
-					resp.setContentType("text/html");
-					resp.getWriter().write("<!DOCTYPE html>\r<html><head>" +
-							"<script src=\"test/app.js\"></script>" +
-							"<link href=\"test/default.css\" rel=\"stylesheet\">" +
-							"</head><body></body></html>");
+					resp.getWriter().close();
 				}
 			}
 		};
@@ -188,7 +187,7 @@ public class EmbeddedUndertowHttps2Test {
 		final CountDownLatch latch = new CountDownLatch(3);
 
 		try (CloseableHttpAsyncClient client = HttpAsyncClients.custom()
-				.setH2Config(H2Config.custom().setCompressionEnabled(true).setPushEnabled(true).build())
+				.setH2Config(H2Config.custom().setPushEnabled(true).build())
 				.setConnectionManager(cm).build()) {
 
 			client.register("*", () -> new AsyncPushConsumer() {
@@ -237,7 +236,7 @@ public class EmbeddedUndertowHttps2Test {
 					SimpleRequestProducer.create(request),
 					SimpleResponseConsumer.create(),
 					clientContext,
-					new FutureCallback<SimpleHttpResponse>() {
+					new FutureCallback<>() {
 						@Override
 						public void completed(final SimpleHttpResponse response) {
 							LOG.info("{} -> {}", request, new StatusLine(response));

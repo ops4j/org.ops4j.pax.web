@@ -38,6 +38,7 @@ import org.apache.hc.client5.http.async.methods.SimpleHttpResponse;
 import org.apache.hc.client5.http.async.methods.SimpleRequestBuilder;
 import org.apache.hc.client5.http.async.methods.SimpleRequestProducer;
 import org.apache.hc.client5.http.async.methods.SimpleResponseConsumer;
+import org.apache.hc.client5.http.config.TlsConfig;
 import org.apache.hc.client5.http.impl.async.CloseableHttpAsyncClient;
 import org.apache.hc.client5.http.impl.async.HttpAsyncClients;
 import org.apache.hc.client5.http.impl.nio.PoolingAsyncClientConnectionManager;
@@ -135,70 +136,74 @@ public abstract class AbstractWarHttp2IntegrationTest extends AbstractContainerT
 		});
 	}
 
-	protected boolean supportsHttp2Push() {
-		return true;
+	protected boolean removeHostHeader() {
+		return false;
 	}
 
 	@Test
 	public void testHttp2ClearText() throws Exception {
-		final PoolingAsyncClientConnectionManager cm = PoolingAsyncClientConnectionManagerBuilder.create().build();
+		final PoolingAsyncClientConnectionManager cm = PoolingAsyncClientConnectionManagerBuilder.create()
+				.setDefaultTlsConfig(TlsConfig.custom().setVersionPolicy(HttpVersionPolicy.FORCE_HTTP_2).build())
+				.build();
 
-		final CountDownLatch latch = new CountDownLatch(supportsHttp2Push() ? 3 : 1);
+		final CountDownLatch latch = new CountDownLatch(3);
 
 		try (CloseableHttpAsyncClient client = HttpAsyncClients.custom()
 				.setH2Config(H2Config.custom().setPushEnabled(true).build())
-				.setVersionPolicy(HttpVersionPolicy.FORCE_HTTP_2).setConnectionManager(cm).build()) {
+				.setConnectionManager(cm).build()) {
 
-			if (supportsHttp2Push()) {
-				client.register("*", () -> new AsyncPushConsumer() {
-					@Override
-					public void consumePromise(HttpRequest promise, HttpResponse response, EntityDetails entityDetails, HttpContext context) throws HttpException {
-						LOG.info("{} -> {}", promise, new StatusLine(response));
-						if (response.getVersion() == HttpVersion.HTTP_2 && response.getCode() == HttpServletResponse.SC_OK) {
-							latch.countDown();
-						}
+			client.register("*", () -> new AsyncPushConsumer() {
+				@Override
+				public void consumePromise(HttpRequest promise, HttpResponse response, EntityDetails entityDetails, HttpContext context) throws HttpException {
+					LOG.info("{} -> {}", promise, new StatusLine(response));
+					if (response.getVersion() == HttpVersion.HTTP_2 && response.getCode() == HttpServletResponse.SC_OK) {
+						latch.countDown();
 					}
+				}
 
-					@Override
-					public void failed(Exception cause) {
-						System.out.println();
-					}
+				@Override
+				public void failed(Exception cause) {
+					System.out.println();
+				}
 
-					@Override
-					public void updateCapacity(CapacityChannel capacityChannel) {
-						System.out.println();
-					}
+				@Override
+				public void updateCapacity(CapacityChannel capacityChannel) {
+					System.out.println();
+				}
 
-					@Override
-					public void consume(ByteBuffer src) {
-						System.out.println();
-					}
+				@Override
+				public void consume(ByteBuffer src) {
+					System.out.println();
+				}
 
-					@Override
-					public void streamEnd(List<? extends Header> trailers) {
-						System.out.println();
-					}
+				@Override
+				public void streamEnd(List<? extends Header> trailers) {
+					System.out.println();
+				}
 
-					@Override
-					public void releaseResources() {
-						System.out.println();
-					}
-				});
-			}
+				@Override
+				public void releaseResources() {
+					System.out.println();
+				}
+			});
 
 			client.start();
 
 			final HttpHost target = new HttpHost("http", "127.0.0.1", 8181);
 			final HttpClientContext clientContext = HttpClientContext.create();
 
-			final SimpleHttpRequest request = SimpleRequestBuilder.get().setHttpHost(target).setPath("/http2/servlet/index.html").build();
+			String removeHost = "";
+			if (removeHostHeader()) {
+				removeHost = "?undertow=true";
+			}
+			final SimpleHttpRequest request = SimpleRequestBuilder.get().setHttpHost(target).setPath("/http2/servlet/index.html" + removeHost).build();
 
 			LOG.info("Sending request: {}", request);
 			final Future<SimpleHttpResponse> future = client.execute(
 					SimpleRequestProducer.create(request),
 					SimpleResponseConsumer.create(),
 					clientContext,
-					new FutureCallback<SimpleHttpResponse>() {
+					new FutureCallback<>() {
 						@Override
 						public void completed(final SimpleHttpResponse response) {
 							LOG.info("{} -> {}", request, new StatusLine(response));
@@ -249,64 +254,67 @@ public abstract class AbstractWarHttp2IntegrationTest extends AbstractContainerT
 				.setHostnameVerifier(NoopHostnameVerifier.INSTANCE)
 				.build();
 		final PoolingAsyncClientConnectionManager cm = PoolingAsyncClientConnectionManagerBuilder.create()
+				.setDefaultTlsConfig(TlsConfig.custom().setVersionPolicy(HttpVersionPolicy.FORCE_HTTP_2).build())
 				.setTlsStrategy(tlsStrategy).build();
 
-		final CountDownLatch latch = new CountDownLatch(supportsHttp2Push() ? 3 : 1);
+		final CountDownLatch latch = new CountDownLatch(3);
 
 		try (CloseableHttpAsyncClient client = HttpAsyncClients.custom()
 				.setH2Config(H2Config.custom().setPushEnabled(true).build())
-				.setVersionPolicy(HttpVersionPolicy.FORCE_HTTP_2).setConnectionManager(cm).build()) {
+				.setConnectionManager(cm).build()) {
 
-			if (supportsHttp2Push()) {
-				client.register("*", () -> new AsyncPushConsumer() {
-					@Override
-					public void consumePromise(HttpRequest promise, HttpResponse response, EntityDetails entityDetails, HttpContext context) throws HttpException {
-						LOG.info("{} -> {}", promise, new StatusLine(response));
-						if (response.getVersion() == HttpVersion.HTTP_2 && response.getCode() == HttpServletResponse.SC_OK) {
-							latch.countDown();
-						}
+			client.register("*", () -> new AsyncPushConsumer() {
+				@Override
+				public void consumePromise(HttpRequest promise, HttpResponse response, EntityDetails entityDetails, HttpContext context) throws HttpException {
+					LOG.info("{} -> {}", promise, new StatusLine(response));
+					if (response.getVersion() == HttpVersion.HTTP_2 && response.getCode() == HttpServletResponse.SC_OK) {
+						latch.countDown();
 					}
+				}
 
-					@Override
-					public void failed(Exception cause) {
-						System.out.println();
-					}
+				@Override
+				public void failed(Exception cause) {
+					System.out.println();
+				}
 
-					@Override
-					public void updateCapacity(CapacityChannel capacityChannel) {
-						System.out.println();
-					}
+				@Override
+				public void updateCapacity(CapacityChannel capacityChannel) {
+					System.out.println();
+				}
 
-					@Override
-					public void consume(ByteBuffer src) {
-						System.out.println();
-					}
+				@Override
+				public void consume(ByteBuffer src) {
+					System.out.println();
+				}
 
-					@Override
-					public void streamEnd(List<? extends Header> trailers) {
-						System.out.println();
-					}
+				@Override
+				public void streamEnd(List<? extends Header> trailers) {
+					System.out.println();
+				}
 
-					@Override
-					public void releaseResources() {
-						System.out.println();
-					}
-				});
-			}
+				@Override
+				public void releaseResources() {
+					System.out.println();
+				}
+			});
 
 			client.start();
 
 			final HttpHost target = new HttpHost("https", "127.0.0.1", 8443);
 			final HttpClientContext clientContext = HttpClientContext.create();
 
-			final SimpleHttpRequest request = SimpleRequestBuilder.get().setHttpHost(target).setPath("/http2/servlet/index.html").build();
+			String removeHost = "";
+			if (removeHostHeader()) {
+				removeHost = "?undertow=true";
+			}
+			final SimpleHttpRequest request = SimpleRequestBuilder.get().setHttpHost(target).setPath("/http2/servlet/index.html" + removeHost).build();
 
 			LOG.info("Sending request: {}", request);
 			final Future<SimpleHttpResponse> future = client.execute(
 					SimpleRequestProducer.create(request),
 					SimpleResponseConsumer.create(),
 					clientContext,
-					new FutureCallback<SimpleHttpResponse>() {
+					new FutureCallback<>() {
 						@Override
 						public void completed(final SimpleHttpResponse response) {
 							LOG.info("{} -> {}", request, new StatusLine(response));

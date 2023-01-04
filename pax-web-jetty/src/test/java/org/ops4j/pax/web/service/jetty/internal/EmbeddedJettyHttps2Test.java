@@ -16,7 +16,11 @@
 package org.ops4j.pax.web.service.jetty.internal;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLSession;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -28,6 +32,7 @@ import org.apache.hc.client5.http.async.methods.SimpleHttpResponse;
 import org.apache.hc.client5.http.async.methods.SimpleRequestBuilder;
 import org.apache.hc.client5.http.async.methods.SimpleRequestProducer;
 import org.apache.hc.client5.http.async.methods.SimpleResponseConsumer;
+import org.apache.hc.client5.http.config.TlsConfig;
 import org.apache.hc.client5.http.impl.async.CloseableHttpAsyncClient;
 import org.apache.hc.client5.http.impl.async.HttpAsyncClients;
 import org.apache.hc.client5.http.impl.nio.PoolingAsyncClientConnectionManager;
@@ -36,11 +41,20 @@ import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.client5.http.ssl.ClientTlsStrategyBuilder;
 import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
 import org.apache.hc.core5.concurrent.FutureCallback;
+import org.apache.hc.core5.http.EntityDetails;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.HttpException;
 import org.apache.hc.core5.http.HttpHost;
+import org.apache.hc.core5.http.HttpRequest;
+import org.apache.hc.core5.http.HttpResponse;
 import org.apache.hc.core5.http.message.StatusLine;
+import org.apache.hc.core5.http.nio.AsyncPushConsumer;
+import org.apache.hc.core5.http.nio.CapacityChannel;
 import org.apache.hc.core5.http.nio.ssl.TlsStrategy;
+import org.apache.hc.core5.http.protocol.HttpContext;
 import org.apache.hc.core5.http.ssl.TLS;
 import org.apache.hc.core5.http2.HttpVersionPolicy;
+import org.apache.hc.core5.http2.config.H2Config;
 import org.apache.hc.core5.io.CloseMode;
 import org.eclipse.jetty.alpn.server.ALPNServerConnectionFactory;
 import org.eclipse.jetty.http.HttpVersion;
@@ -59,6 +73,8 @@ import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.junit.Assert.assertTrue;
 
 public class EmbeddedJettyHttps2Test {
 
@@ -129,26 +145,33 @@ public class EmbeddedJettyHttps2Test {
 		handler.addServletWithMapping(new ServletHolder("servlet", new HttpServlet() {
 			@Override
 			protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+				LOG.info("Handling request {} from {}:{}", req.getRequestURI(), req.getRemoteAddr(), req.getRemotePort());
 				if (!"/index.html".equals(req.getPathInfo())) {
 					// normal request
-					LOG.info("Handling request {} from {}:{}", req.getRequestURI(), req.getRemoteAddr(), req.getRemotePort());
-					resp.setContentType("text/plain");
 					resp.setCharacterEncoding("UTF-8");
-					if (req.getPathInfo().endsWith("css")) {
+					if (req.getPathInfo() != null && req.getPathInfo().endsWith("css")) {
+						resp.setContentType("text/css");
+						resp.addHeader("X-Request-CSS", req.getHeader("X-Request-P1"));
 						resp.getWriter().write("body { margin: 0 }\n");
-					} else if (req.getPathInfo().endsWith("js")) {
+					} else if (req.getPathInfo() != null && req.getPathInfo().endsWith("js")) {
+						resp.setContentType("text/javascript");
+						resp.addHeader("X-Request-JS", req.getHeader("X-Request-P2"));
 						resp.getWriter().write("window.alert(\"hello world\");\n");
-					} else {
-						resp.getWriter().write("OK\n");
 					}
 					resp.getWriter().close();
 				} else {
+					// first - normal data
+					resp.setContentType("text/plain");
+					resp.setCharacterEncoding("UTF-8");
+					resp.addHeader("X-Request", req.getRequestURI());
+					resp.getWriter().write("OK\n");
 					// request with PUSH_PROMISE: https://httpwg.org/specs/rfc7540.html#PUSH_PROMISE
 					PushBuilder pushBuilder = req.newPushBuilder();
 					if (pushBuilder != null) {
-						pushBuilder.path("test/default.css").push();
-						pushBuilder.path("test/app.js").push();
+						pushBuilder.path("test/default.css").addHeader("X-Request-P1", req.getRequestURI()).push();
+						pushBuilder.path("test/app.js").removeHeader("X-Request-P1").addHeader("X-Request-P2", req.getRequestURI()).push();
 					}
+					resp.getWriter().close();
 				}
 			}
 		}), "/test/*");
@@ -165,9 +188,48 @@ public class EmbeddedJettyHttps2Test {
 				.setHostnameVerifier(NoopHostnameVerifier.INSTANCE)
 				.build();
 		final PoolingAsyncClientConnectionManager cm = PoolingAsyncClientConnectionManagerBuilder.create()
+				.setDefaultTlsConfig(TlsConfig.custom().setVersionPolicy(HttpVersionPolicy.FORCE_HTTP_2).build())
 				.setTlsStrategy(tlsStrategy).build();
+
+		final CountDownLatch latch = new CountDownLatch(3);
+
 		try (CloseableHttpAsyncClient client = HttpAsyncClients.custom()
-				.setVersionPolicy(HttpVersionPolicy.FORCE_HTTP_2).setConnectionManager(cm).build()) {
+				.setH2Config(H2Config.custom().setPushEnabled(true).build())
+				.setConnectionManager(cm).build()) {
+
+			client.register("*", () -> new AsyncPushConsumer() {
+				@Override
+				public void consumePromise(HttpRequest promise, HttpResponse response, EntityDetails entityDetails, HttpContext context) throws HttpException {
+					LOG.info("{} -> {}", promise, new StatusLine(response));
+					LOG.info("Received promised response: {} (Content-Length: {})", response, response.getHeader("Content-Length").getValue());
+					latch.countDown();
+				}
+
+				@Override
+				public void failed(Exception cause) {
+					System.out.println();
+				}
+
+				@Override
+				public void updateCapacity(CapacityChannel capacityChannel) {
+					System.out.println();
+				}
+
+				@Override
+				public void consume(ByteBuffer src) {
+					System.out.println();
+				}
+
+				@Override
+				public void streamEnd(List<? extends Header> trailers) {
+					System.out.println();
+				}
+
+				@Override
+				public void releaseResources() {
+					System.out.println();
+				}
+			});
 
 			client.start();
 
@@ -181,7 +243,7 @@ public class EmbeddedJettyHttps2Test {
 					SimpleRequestProducer.create(request),
 					SimpleResponseConsumer.create(),
 					clientContext,
-					new FutureCallback<SimpleHttpResponse>() {
+					new FutureCallback<>() {
 						@Override
 						public void completed(final SimpleHttpResponse response) {
 							LOG.info("{} -> {}", request, new StatusLine(response));
@@ -191,6 +253,7 @@ public class EmbeddedJettyHttps2Test {
 								LOG.info("SSL Cipher Suite: {}", sslSession.getCipherSuite());
 							}
 							LOG.info("Received response: {}", response.getBody());
+							latch.countDown();
 						}
 
 						@Override
@@ -207,6 +270,8 @@ public class EmbeddedJettyHttps2Test {
 			future.get();
 			client.close(CloseMode.GRACEFUL);
 		}
+
+		assertTrue(latch.await(5, TimeUnit.SECONDS));
 
 		server.stop();
 		server.join();

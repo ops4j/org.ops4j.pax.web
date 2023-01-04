@@ -28,6 +28,7 @@ import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -55,6 +56,7 @@ import io.undertow.servlet.api.ServletInfo;
 import io.undertow.servlet.util.ImmediateInstanceFactory;
 import io.undertow.util.HeaderMap;
 import io.undertow.util.Headers;
+import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,6 +72,15 @@ public class EmbeddedUndertowHttp2Test {
 	// https://httpwg.org/specs/rfc7540.html
 	// https://sookocheff.com/post/networking/how-does-http-2-work/
 
+	private HpackDecoder decoder;
+	private Map<Integer, String> responses;
+
+	@Before
+	public void resetState() {
+		decoder = new HpackDecoder();
+		responses = new HashMap<>();
+	}
+
 	@Test
 	public void http11NioExchange() throws Exception {
 		PathHandler path = Handlers.path();
@@ -81,26 +92,13 @@ public class EmbeddedUndertowHttp2Test {
 		HttpServlet servletInstance = new HttpServlet() {
 			@Override
 			protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-				if (!"/index.html".equals(req.getPathInfo())) {
+				if ("/index.txt".equals(req.getPathInfo())) {
 					// normal request
 					LOG.info("Handling request {} from {}:{}", req.getRequestURI(), req.getRemoteAddr(), req.getRemotePort());
 					resp.setContentType("text/plain");
 					resp.setCharacterEncoding("UTF-8");
-					if (req.getPathInfo().endsWith("css")) {
-						resp.getWriter().write("body { margin: 0 }\n");
-					} else if (req.getPathInfo().endsWith("js")) {
-						resp.getWriter().write("window.alert(\"hello world\");\n");
-					} else {
-						resp.getWriter().write("OK\n");
-					}
+					resp.getWriter().write("OK\n");
 					resp.getWriter().close();
-				} else {
-					// request with PUSH_PROMISE: https://httpwg.org/specs/rfc7540.html#PUSH_PROMISE
-					PushBuilder pushBuilder = req.newPushBuilder();
-					if (pushBuilder != null) {
-						pushBuilder.path("test/default.css").push();
-						pushBuilder.path("test/app.js").push();
-					}
 				}
 			}
 		};
@@ -181,7 +179,7 @@ public class EmbeddedUndertowHttp2Test {
 			key.interestOps(SelectionKey.OP_WRITE);
 		}
 
-		buffer.put("GET /test/default.html?x=y&a=b HTTP/1.1\r\n".getBytes(StandardCharsets.UTF_8));
+		buffer.put("GET /test/index.txt?x=y&a=b HTTP/1.1\r\n".getBytes(StandardCharsets.UTF_8));
 		buffer.put("Host: 127.0.0.1\r\n".getBytes(StandardCharsets.UTF_8));
 		buffer.put("Connection: close\r\n\r\n".getBytes(StandardCharsets.UTF_8));
 
@@ -243,6 +241,7 @@ public class EmbeddedUndertowHttp2Test {
 
 		Undertow server = Undertow.builder()
 				.setServerOption(UndertowOptions.ENABLE_HTTP2, true)
+				.setServerOption(UndertowOptions.HTTP2_SETTINGS_ENABLE_PUSH, true)
 				.addHttpListener(0, "0.0.0.0")
 				.setHandler(path)
 				.build();
@@ -250,26 +249,33 @@ public class EmbeddedUndertowHttp2Test {
 		HttpServlet servletInstance = new HttpServlet() {
 			@Override
 			protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+				LOG.info("Handling request {} from {}:{}", req.getRequestURI(), req.getRemoteAddr(), req.getRemotePort());
 				if (!"/index.html".equals(req.getPathInfo())) {
 					// normal request
-					LOG.info("Handling request {} from {}:{}", req.getRequestURI(), req.getRemoteAddr(), req.getRemotePort());
-					resp.setContentType("text/plain");
 					resp.setCharacterEncoding("UTF-8");
 					if (req.getPathInfo().endsWith("css")) {
+						resp.setContentType("text/css");
+						resp.addHeader("X-Request-CSS", req.getHeader("X-Request-P1"));
 						resp.getWriter().write("body { margin: 0 }\n");
 					} else if (req.getPathInfo().endsWith("js")) {
+						resp.setContentType("text/javascript");
+						resp.addHeader("X-Request-JS", req.getHeader("X-Request-P2"));
 						resp.getWriter().write("window.alert(\"hello world\");\n");
-					} else {
-						resp.getWriter().write("OK\n");
 					}
 					resp.getWriter().close();
 				} else {
+					// first - normal data
+					resp.setContentType("text/plain");
+					resp.setCharacterEncoding("UTF-8");
+					resp.addHeader("X-Request", req.getRequestURI());
+					resp.getWriter().write("OK\n");
 					// request with PUSH_PROMISE: https://httpwg.org/specs/rfc7540.html#PUSH_PROMISE
 					PushBuilder pushBuilder = req.newPushBuilder();
 					if (pushBuilder != null) {
-						pushBuilder.path("test/default.css").push();
-						pushBuilder.path("test/app.js").push();
+						pushBuilder.path("test/default.css").addHeader("X-Request-P1", req.getRequestURI()).push();
+						pushBuilder.path("test/app.js").removeHeader("X-Request-P1").addHeader("X-Request-P2", req.getRequestURI()).push();
 					}
+					resp.getWriter().close();
 				}
 			}
 		};
@@ -341,7 +347,7 @@ public class EmbeddedUndertowHttp2Test {
 			key.interestOps(SelectionKey.OP_WRITE);
 		}
 
-		buffer.put("GET /test/index.txt?x=y&a=b HTTP/1.1\r\n".getBytes(StandardCharsets.UTF_8));
+		buffer.put("GET /test/index.html?x=y&a=b HTTP/1.1\r\n".getBytes(StandardCharsets.UTF_8));
 		buffer.put("Host: 127.0.0.1\r\n".getBytes(StandardCharsets.UTF_8));
 		// https://httpwg.org/specs/rfc7540.html#rfc.section.3.2.1
 		buffer.put("Connection: Upgrade, HTTP2-Settings\r\n".getBytes(StandardCharsets.UTF_8));
@@ -354,7 +360,7 @@ public class EmbeddedUndertowHttp2Test {
 		settings.writeInt(0x1000); // 4096 by default
 		// SETTINGS_ENABLE_PUSH (0x2)
 		settings.writeShort(0x02);
-		settings.writeInt(0x00); // 1 by default, 0 disables PUSH_PROMISE frame
+		settings.writeInt(0x01); // 1 by default, 0 disables PUSH_PROMISE frame
 		// SETTINGS_MAX_CONCURRENT_STREAMS (0x3)
 		settings.writeShort(0x03);
 		settings.writeInt(0xFF); // no default value. recommended >100
@@ -371,10 +377,12 @@ public class EmbeddedUndertowHttp2Test {
 		buffer.put(("HTTP2-Settings: " + new String(Base64.getUrlEncoder().encode(baos.toByteArray())) + "\r\n\r\n").getBytes(StandardCharsets.UTF_8));
 
 		// Starting HTTP/2 for "http" URIs - https://httpwg.org/specs/rfc7540.html#discover-http
+		LOG.info("===== Sending GET HTTP/1.1 request with Connection: Upgrade, HTTP2-Settings");
 		LOG.info("Request\n{}", new String(buffer.array(), 0, buffer.position()));
 		send(selector, key, buffer);
 
 		// now we should get "HTTP/1.1 101 Switching Protocols", but we may get some HTTP/2 frames immediately, but in more reads.
+		LOG.info("===== Receiving initial response");
 		receive(selector, key, buffer);
 
 		String fullResponse = new String(buffer.array(), 0, buffer.limit());
@@ -391,7 +399,9 @@ public class EmbeddedUndertowHttp2Test {
 			remains = decodeFrame(buffer, true);
 		}
 
-		//		// https://httpwg.org/specs/rfc7540.html#ConnectionHeader
+		// Jetty already sends the response. In Undertow, we need the magic "PRI * HTTP/2.0" string.
+
+		// https://httpwg.org/specs/rfc7540.html#ConnectionHeader
 		// [...] the connection preface starts with the string PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n).
 
 		buffer.clear();
@@ -405,6 +415,7 @@ public class EmbeddedUndertowHttp2Test {
 		});
 
 		// Starting HTTP/2 for "http" URIs - https://httpwg.org/specs/rfc7540.html#discover-http
+		LOG.info("===== Sending PRI * HTTP/2.0 request");
 		send(selector, key, buffer);
 
 		// even at this stage, we should have everything including response HEADERS and DATA frames
@@ -420,8 +431,10 @@ public class EmbeddedUndertowHttp2Test {
 				0x01,                  // flags = ACK
 				0x00, 0x00, 0x00, 0x00 // stream identifier
 		});
+		LOG.info("===== Sending ACK for sid=0 with SETTINGS response");
 		send(selector, key, buffer);
 
+		LOG.info("===== Receiving response");
 		receive(selector, key, buffer);
 		remains = true;
 		while (remains) {
@@ -434,6 +447,11 @@ public class EmbeddedUndertowHttp2Test {
 		selector.close();
 
 		server.stop();
+
+		// indexed by HTTP/2 Stream ID
+		assertThat(responses.get(1), equalTo("OK\n"));
+		assertThat(responses.get(2), equalTo("body { margin: 0 }\n"));
+		assertThat(responses.get(4), equalTo("window.alert(\"hello world\");\n"));
 	}
 
 	@Test
@@ -449,26 +467,33 @@ public class EmbeddedUndertowHttp2Test {
 		HttpServlet servletInstance = new HttpServlet() {
 			@Override
 			protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+				LOG.info("Handling request {} from {}:{}", req.getRequestURI(), req.getRemoteAddr(), req.getRemotePort());
 				if (!"/index.html".equals(req.getPathInfo())) {
 					// normal request
-					LOG.info("Handling request {} from {}:{}", req.getRequestURI(), req.getRemoteAddr(), req.getRemotePort());
-					resp.setContentType("text/plain");
 					resp.setCharacterEncoding("UTF-8");
-					if (req.getPathInfo().endsWith("css")) {
+					if (req.getPathInfo() != null && req.getPathInfo().endsWith("css")) {
+						resp.setContentType("text/css");
+						resp.addHeader("X-Request-CSS", req.getHeader("X-Request-P1"));
 						resp.getWriter().write("body { margin: 0 }\n");
-					} else if (req.getPathInfo().endsWith("js")) {
+					} else if (req.getPathInfo() != null && req.getPathInfo().endsWith("js")) {
+						resp.setContentType("text/javascript");
+						resp.addHeader("X-Request-JS", req.getHeader("X-Request-P2"));
 						resp.getWriter().write("window.alert(\"hello world\");\n");
-					} else {
-						resp.getWriter().write("OK\n");
 					}
 					resp.getWriter().close();
 				} else {
+					// first - normal data
+					resp.setContentType("text/plain");
+					resp.setCharacterEncoding("UTF-8");
+					resp.addHeader("X-Request", req.getRequestURI());
+					resp.getWriter().write("OK\n");
 					// request with PUSH_PROMISE: https://httpwg.org/specs/rfc7540.html#PUSH_PROMISE
 					PushBuilder pushBuilder = req.newPushBuilder();
 					if (pushBuilder != null) {
-						pushBuilder.path("test/default.css").push();
-						pushBuilder.path("test/app.js").push();
+						pushBuilder.path("test/default.css").addHeader("X-Request-P1", req.getRequestURI()).push();
+						pushBuilder.path("test/app.js").removeHeader("X-Request-P1").addHeader("X-Request-P2", req.getRequestURI()).push();
 					}
+					resp.getWriter().close();
 				}
 			}
 		};
@@ -560,7 +585,7 @@ public class EmbeddedUndertowHttp2Test {
 		settings.writeInt(0x1000); // 4096 by default
 		// SETTINGS_ENABLE_PUSH (0x2)
 		settings.writeShort(0x02);
-		settings.writeInt(0x00); // 1 by default, 0 disables PUSH_PROMISE frame
+		settings.writeInt(0x01); // 1 by default, 0 disables PUSH_PROMISE frame
 		// SETTINGS_MAX_CONCURRENT_STREAMS (0x3)
 		settings.writeShort(0x03);
 		settings.writeInt(0xFF); // no default value. recommended >100
@@ -577,9 +602,11 @@ public class EmbeddedUndertowHttp2Test {
 		buffer.put(baos.toByteArray(), 0, 36);
 
 		// Starting HTTP/2 for "http" URIs - https://httpwg.org/specs/rfc7540.html#discover-http
+		LOG.info("===== Sending PRI * HTTP/2.0 request");
 		send(selector, key, buffer);
 
 		// we should NOT get any HTTP/1.1 response - just HTTP/2 frames - most probably SETTINGS and WINDOW_UPDATE
+		LOG.info("===== Receiving response");
 		receive(selector, key, buffer);
 		boolean remains = true;
 		while (remains) {
@@ -595,31 +622,32 @@ public class EmbeddedUndertowHttp2Test {
 				0x01,                  // flags = ACK
 				0x00, 0x00, 0x00, 0x00 // stream identifier
 		});
+		LOG.info("===== Sending ACK for sid=0 with SETTINGS response");
 		send(selector, key, buffer);
 
 		// With "PRI * HTTP/2.0" there's no actual request sent, so we have to prepare one
 		buffer.clear();
-		int pos = buffer.position();
 		buffer.put(new byte[] {
-				0x00, 0x00, 0x00,      // length - placeholder
+				0x00, 0x00, 0x00,      // length - to be calculated
 				0x01,                  // type = HEADERS
 				0x04 | 0x01,           // flags - END_HEADERS | END_STREAM
 				0x00, 0x00, 0x00, 0x01 // stream identifier - arbitrary, should be taken from a sequence
 		});
 		HpackEncoder encoder = new HpackEncoder(4096);
-		HeaderMap hmap = new HeaderMap();
-		hmap.add(Http2Channel.METHOD, "GET");
-		hmap.add(Http2Channel.SCHEME, "http");
-		hmap.add(Http2Channel.PATH, "/test/index.txt");
-		hmap.add(Headers.HOST, "127.0.0.1");
-		encoder.encode(hmap, buffer);
-		int length = buffer.position() - 9;
-		buffer.array()[pos + 2] = (byte) (length & 0xFF);
-		buffer.array()[pos + 1] = (byte) (length >> 8 & 0xFF);
+		HeaderMap headers = new HeaderMap();
+		headers.add(Http2Channel.METHOD, "GET");
+		headers.add(Http2Channel.SCHEME, "http");
+		headers.add(Http2Channel.PATH, "/test/index.html?x=y&a=b");
+		headers.add(Headers.HOST, "127.0.0.1");
+		int p1 = buffer.position();
+		encoder.encode(headers, buffer);
+		// assume it's one byte
+		buffer.array()[2] = (byte) (buffer.position() - p1);
+
 		send(selector, key, buffer);
 
 		receive(selector, key, buffer);
-		remains = buffer.hasRemaining();
+		remains = true;
 		while (remains) {
 			remains = decodeFrame(buffer, true);
 		}
@@ -630,6 +658,11 @@ public class EmbeddedUndertowHttp2Test {
 		selector.close();
 
 		server.stop();
+
+		// indexed by HTTP/2 Stream ID
+		assertThat(responses.get(1), equalTo("OK\n"));
+		assertThat(responses.get(2), equalTo("body { margin: 0 }\n"));
+		assertThat(responses.get(4), equalTo("window.alert(\"hello world\");\n"));
 	}
 
 	private void send(Selector selector, SelectionKey key, ByteBuffer buffer) throws IOException {
@@ -690,12 +723,21 @@ public class EmbeddedUndertowHttp2Test {
 
 	// https://httpwg.org/specs/rfc7540.html#FramingLayer
 	private boolean decodeFrame(ByteBuffer buffer, boolean incoming) throws IOException, HpackException {
+		if (!buffer.hasRemaining()) {
+			return false;
+		}
 		DataInputStream dis = new DataInputStream(new ByteArrayInputStream(buffer.array(), buffer.position(), buffer.limit()));
+		// 24 bit length
 		int length = 0;
-		length |= dis.readByte() << 16;
-		length |= dis.readByte() << 8;
-		length |= dis.readByte();
+		int b1 = dis.readUnsignedByte();
+		int b2 = dis.readUnsignedByte();
+		int b3 = dis.readUnsignedByte();
+		length |= b1 << 16;
+		length |= b2 << 8;
+		length |= b3;
+		// 8 bit type - The frame type determines the format and semantics of the frame
 		byte type = dis.readByte();
+		// 8 bit flags - specific to the frame type
 		byte flags = dis.readByte();
 		int sid = dis.readInt();
 		byte[] payload = new byte[length];
@@ -714,12 +756,15 @@ public class EmbeddedUndertowHttp2Test {
 				} else {
 					LOG.info("> Sending DATA frame (flags: {}, sid: {}, length: {})", flags, sid, length);
 				}
+				boolean endStream = (flags & 0x01) != 0;
 				boolean padded = (flags & 0x08) != 0;
 				int offset = 0;
 				if (padded) {
 					offset++;
 				}
-				LOG.info(" - DATA: {}", new String(payload, offset, length - offset));
+				String data = new String(payload, offset, length - offset);
+				LOG.info(" - DATA: >>>{}<<<", data);
+				responses.put(sid, data);
 				break;
 			}
 			case 0x01: { // HEADERS https://httpwg.org/specs/rfc7540.html#HEADERS
@@ -728,15 +773,15 @@ public class EmbeddedUndertowHttp2Test {
 				} else {
 					LOG.info("> Sending HEADERS frame (flags: {}, sid: {}, length: {})", flags, sid, length);
 				}
-				boolean padded = (flags & 0x08) != 0;
+				boolean endStream = (flags & 0x01) != 0;
 				boolean last = (flags & 0x04) != 0;
+				boolean padded = (flags & 0x08) != 0;
 				boolean priority = (flags & 0x20) != 0;
 				byte padLength = padded ? fdis.readByte() : 0;
 				int streamDependency = priority ? fdis.readInt() : 0;
 				int weight = priority ? (int) fdis.readByte() : 0;
 				// https://httpwg.org/specs/rfc7540.html#HeaderBlock
 				// see org.eclipse.jetty.http2.client.HTTP2ClientConnectionFactory.newConnection
-				HpackDecoder decoder = new HpackDecoder();
 				int offset = 0;
 				if (padded) {
 					offset++;
@@ -744,11 +789,11 @@ public class EmbeddedUndertowHttp2Test {
 				if (priority) {
 					offset += 5;
 				}
-				final Map<String, String> headers = new HashMap<>();
+				final Map<String, String> headers = new LinkedHashMap<>();
 				decoder.setHeaderEmitter((name, value, neverIndex) -> headers.put(name.toString(), value));
 				decoder.decode(ByteBuffer.wrap(payload, offset, length - offset), false);
 				for (Map.Entry<String, String> f : headers.entrySet()) {
-					LOG.info(" - HEADERS::{}: {}", f.getKey(), f.getValue());
+					LOG.info(" - HEADERS::\"{}\": {}", f.getKey(), f.getValue());
 				}
 				break;
 			}
@@ -811,10 +856,25 @@ public class EmbeddedUndertowHttp2Test {
 				break;
 			}
 			case 0x05: { // PUSH_PROMISE https://httpwg.org/specs/rfc7540.html#PUSH_PROMISE
+				boolean last = (flags & 0x04) != 0;
+				boolean padded = (flags & 0x08) != 0;
+				byte padLength = padded ? fdis.readByte() : 0;
+				// promised stream ID
+				int psid = fdis.readInt();
+				int offset = 4;
+				if (padded) {
+					offset++;
+				}
 				if (incoming) {
-					LOG.info("< Received PUSH_PROMISE frame (flags: {}, sid: {}, length: {})", flags, sid, length);
+					LOG.info("< Received PUSH_PROMISE frame (flags: {}, sid: {}, length: {}, psid: {})", flags, sid, length, psid);
 				} else {
-					LOG.info("> Sending PUSH_PROMISE frame (flags: {}, sid: {}, length: {})", flags, sid, length);
+					LOG.info("> Sending PUSH_PROMISE frame (flags: {}, sid: {}, length: {}, psid: {})", flags, sid, length, psid);
+				}
+				final Map<String, String> headers = new LinkedHashMap<>();
+				decoder.setHeaderEmitter((name, value, neverIndex) -> headers.put(name.toString(), value));
+				decoder.decode(ByteBuffer.wrap(payload, offset, length - offset), false);
+				for (Map.Entry<String, String> f : headers.entrySet()) {
+					LOG.info(" - HEADERS::\"{}\": {}", f.getKey(), f.getValue());
 				}
 				break;
 			}
