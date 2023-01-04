@@ -30,9 +30,4 @@ public class Http2JettyKarafTest extends Http2BaseKarafTest {
 		return combine(combine(jettyHttp2Config(), jspConfig()), securityConfig());
 	}
 
-	@Override
-	protected boolean supportsHttp2Push() {
-		return false;
-	}
-
 }

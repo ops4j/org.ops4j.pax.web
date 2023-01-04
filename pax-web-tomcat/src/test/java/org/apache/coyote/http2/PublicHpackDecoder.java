@@ -16,7 +16,7 @@
 package org.apache.coyote.http2;
 
 import java.nio.ByteBuffer;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 public class PublicHpackDecoder extends HpackDecoder {
 
 	public static final Logger LOG = LoggerFactory.getLogger(PublicHpackDecoder.class);
-	private final Map<String, String> headers = new HashMap<>();
+	private final Map<String, String> headers = new LinkedHashMap<>();
 
 	@Override
 	public void decode(ByteBuffer buffer) {
@@ -52,6 +52,10 @@ public class PublicHpackDecoder extends HpackDecoder {
 
 	public Map<String, String> getHeaders() {
 		return headers;
+	}
+
+	public void reset() {
+		headers.clear();
 	}
 
 }

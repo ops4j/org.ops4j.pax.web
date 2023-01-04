@@ -76,6 +76,10 @@ public class PaxWebOuterHandlerWrapper implements HandlerWrapper {
 				// We'll do the VHost/connector mapping as in Jetty, because it's better (and consistent with the rest
 				// of Pax Web) than io.undertow.server.handlers.NameVirtualHostHandler
 				String hostHeader = exchange.getRequestHeaders().getFirst(Headers.HOST);
+				if (hostHeader == null) {
+					// in HTTP/2, "Host" header is replaced by ":authority" header
+					hostHeader = incomingRequest.getServerName();
+				}
 				String connectorName = exchange.getConnection().getUndertowOptions().get(UndertowFactory.PAX_WEB_CONNECTOR_NAME);
 				if (hostHeader.contains(":")) {
 					// strip port number in Host header

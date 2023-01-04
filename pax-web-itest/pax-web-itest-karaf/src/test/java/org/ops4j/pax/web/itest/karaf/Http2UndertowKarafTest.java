@@ -30,4 +30,10 @@ public class Http2UndertowKarafTest extends Http2BaseKarafTest {
 		return combine(combine(undertowConfig(), jspConfig()), securityConfig());
 	}
 
+	@Override
+	protected boolean removeHostHeader() {
+		// see https://issues.redhat.com/browse/UNDERTOW-2220
+		return true;
+	}
+
 }

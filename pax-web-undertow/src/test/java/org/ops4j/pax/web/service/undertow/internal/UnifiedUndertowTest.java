@@ -547,7 +547,7 @@ public class UnifiedUndertowTest {
 		assertTrue(response.endsWith("'index-z-b1'"));
 
 		// "/" - no "/index.x" or "/index.y" physical resource, but existing mapping for *.y to indexx servlet
-		// forward is performed implicitly by Tomcat's DefaultServlet
+		// forward is performed implicitly by Undertow's DefaultServlet
 		response = send(port, "/");
 		assertTrue(response.contains("req.context_path=\"\""));
 		assertTrue(response.contains("req.request_uri=\"/index.y\""));
@@ -624,7 +624,7 @@ public class UnifiedUndertowTest {
 		response = send(port, "/gateway/x?what=include&where=/sub/");
 		assertTrue(response.contains("req.context_path=\"\""));
 		assertTrue(response.contains("req.request_uri=\"/gateway/x\""));
-		assertTrue(response.contains("javax.servlet.include.context_path=\"\"")); // "/" for Jetty
+		assertTrue(response.contains("javax.servlet.include.context_path=\"\""));
 		assertTrue(response.contains("javax.servlet.include.request_uri=\"/sub/index.x\""));
 		assertTrue(response.contains("javax.servlet.include.servlet_path=\"/sub/index.x\""));
 		assertTrue(response.contains("javax.servlet.include.path_info=\"null\""));
@@ -666,9 +666,8 @@ public class UnifiedUndertowTest {
 		assertTrue(response.endsWith("'sub/index-b2'"));
 		response = send(port, "/gateway/x?what=forward&where=/r/sub/");
 		assertTrue(response.endsWith("'sub/index-b2'"));
-		// https://github.com/eclipse/jetty.project/issues/5025
-//		response = send(port, "/gateway/x?what=include&where=/r/sub/");
-//		assertTrue(response.endsWith(">>>'sub/index-b2'<<<"));
+		response = send(port, "/gateway/x?what=include&where=/r/sub/");
+		assertTrue(response.endsWith(">>>'sub/index-b2'<<<"));
 
 		// --- resource access through "/s" servlet - welcome files with redirect
 
@@ -928,7 +927,7 @@ public class UnifiedUndertowTest {
 		assertTrue(response.contains("req.request_uri=\"/c/sub/index.x\""));
 		assertTrue(response.contains("javax.servlet.forward.context_path=\"/c\""));
 		assertTrue(response.contains("javax.servlet.forward.request_uri=\"/c/sub/\""));
-		assertTrue(response.contains("javax.servlet.forward.servlet_path=\"/sub/\"")); // TOCHECK: why not "/"?
+		assertTrue(response.contains("javax.servlet.forward.servlet_path=\"/sub/\""));
 		assertTrue(response.contains("javax.servlet.forward.path_info=\"null\""));
 
 		response = send(port, "/c/gateway/x?what=forward&where=/sub/");
@@ -984,9 +983,8 @@ public class UnifiedUndertowTest {
 		assertTrue(response.endsWith("'sub/index-b2'"));
 		response = send(port, "/c/gateway/x?what=forward&where=/r/sub/");
 		assertTrue(response.endsWith("'sub/index-b2'"));
-		// https://github.com/eclipse/jetty.project/issues/5025
-//		response = send(port, "/gateway/x?what=include&where=/r/sub/");
-//		assertTrue(response.endsWith(">>>'sub/index-b2'<<<"));
+		response = send(port, "/c/gateway/x?what=include&where=/r/sub/");
+		assertTrue(response.endsWith(">>>'sub/index-b2'<<<"));
 
 		// --- resource access through "/s" servlet - welcome files with redirect
 

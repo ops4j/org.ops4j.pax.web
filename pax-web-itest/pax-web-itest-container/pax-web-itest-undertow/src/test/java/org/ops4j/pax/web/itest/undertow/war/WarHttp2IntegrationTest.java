@@ -36,4 +36,9 @@ public class WarHttp2IntegrationTest extends AbstractWarHttp2IntegrationTest {
 		return combine(serverOptions, paxWebExtenderWar());
 	}
 
+	protected boolean removeHostHeader() {
+		// see https://issues.redhat.com/browse/UNDERTOW-2220
+		return true;
+	}
+
 }
