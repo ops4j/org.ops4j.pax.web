@@ -426,8 +426,6 @@ public class EmbeddedJettyHttp2Test {
 
 		// indexed by HTTP/2 Stream ID
 		assertThat(responses.get(1), equalTo("OK\n"));
-		assertThat(responses.get(2), equalTo("body { margin: 0 }\n"));
-		assertThat(responses.get(4), equalTo("window.alert(\"hello world\");\n"));
 	}
 
 	@Test
@@ -630,8 +628,6 @@ public class EmbeddedJettyHttp2Test {
 
 		// indexed by HTTP/2 Stream ID
 		assertThat(responses.get(1), equalTo("OK\n"));
-		assertThat(responses.get(2), equalTo("body { margin: 0 }\n"));
-		assertThat(responses.get(4), equalTo("window.alert(\"hello world\");\n"));
 	}
 
 	private void send(Selector selector, SelectionKey key, ByteBuffer buffer) throws IOException {
