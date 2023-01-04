@@ -118,7 +118,13 @@
 							org.w3c.dom.traversal;resolution:=optional,
 							org.xml.sax,
 							org.xml.sax.ext,
-							org.xml.sax.helpers
+							org.xml.sax.helpers,
+
+							org.apache.xml.dtm;resolution:=optional,
+							org.apache.xml.utils;resolution:=optional,
+							org.apache.xpath;resolution:=optional,
+							org.apache.xpath.objects;resolution:=optional
+
 <!--							org.graalvm.nativeimage-->
 						</Import-Package>
 						<Export-Package>
