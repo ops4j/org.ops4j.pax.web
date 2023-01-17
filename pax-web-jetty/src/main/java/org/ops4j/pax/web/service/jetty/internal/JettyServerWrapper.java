@@ -16,6 +16,7 @@
 package org.ops4j.pax.web.service.jetty.internal;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
 import java.net.URL;
 import java.util.ArrayList;
@@ -1572,6 +1573,17 @@ class JettyServerWrapper implements BatchVisitor {
 					} catch (Exception e) {
 						LOG.error(e.getMessage(), e);
 					}
+				}
+
+				// a trick we need - reset org.eclipse.jetty.servlet.ServletHandler._matchAfterIndex value
+				// because it's only reset when ServletHandler stops, but this is too much - we don't want
+				// to stop the servlets and entire context (ServletHandler.doStop() calls
+				// org.eclipse.jetty.server.handler.ContextHandler.contextDestroyed())
+				try {
+					Field maiField = ServletHandler.class.getDeclaredField("_matchAfterIndex");
+					maiField.setAccessible(true);
+					maiField.set(sch.getServletHandler(), -1);
+				} catch (NoSuchFieldException | IllegalAccessException ignore) {
 				}
 
 				sch.getServletHandler().setFilters(new FilterHolder[0]);
