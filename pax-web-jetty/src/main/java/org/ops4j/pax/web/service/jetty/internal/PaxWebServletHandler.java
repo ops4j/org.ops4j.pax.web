@@ -42,6 +42,7 @@ import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.servlet.ServletMapping;
 import org.eclipse.jetty.util.ArrayUtil;
+import org.eclipse.jetty.util.MultiException;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
@@ -151,7 +152,16 @@ public class PaxWebServletHandler extends ServletHandler {
 			fc.getInstance().init(fc);
 		}
 
-		super.initialize();
+		try {
+			super.initialize();
+		} catch (MultiException e) {
+			// See https://github.com/ops4j/org.ops4j.pax.web/issues/1725
+			// we don't want entire context to become UNAVAILABLE just because some servlets/filters
+			// thrown javax.servlet.UnavailableException
+			// in OSGi it is quite common and we should handle exceptions like ClassNotFoundException
+			// in less fatal way
+			LOG.error(e.getMessage(), e);
+		}
 	}
 
 	@Override
