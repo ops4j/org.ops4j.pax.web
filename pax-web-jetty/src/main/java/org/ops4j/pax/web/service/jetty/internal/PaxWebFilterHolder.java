@@ -15,11 +15,17 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 import javax.servlet.Filter;
+import javax.servlet.FilterChain;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.UnavailableException;
 
 import org.eclipse.jetty.servlet.BaseHolder;
 import org.eclipse.jetty.servlet.FilterHolder;
@@ -193,6 +199,22 @@ public class PaxWebFilterHolder extends FilterHolder {
 		}
 		if (filterModel != null && filterModel.getRegisteringBundle() != null) {
 			servletContext.releaseWebContainerContext(filterModel.getRegisteringBundle());
+		}
+	}
+
+	@Override
+	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+		if (isStarted()) {
+			super.doFilter(request, response, chain);
+		} else {
+			String name = getName();
+			if (name == null) {
+				name = getClassName();
+			}
+			if (name == null) {
+				name = this.toString();
+			}
+			throw new UnavailableException("Filter " + name + " is unavailable");
 		}
 	}
 
