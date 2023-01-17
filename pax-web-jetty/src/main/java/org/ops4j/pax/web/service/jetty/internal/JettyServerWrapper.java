@@ -390,7 +390,9 @@ class JettyServerWrapper implements BatchVisitor {
 					}
 					Thread.currentThread().setContextClassLoader(cl);
 				}
-				// it's not enough to load a class to get static{} block called
+				// it's not enough to load a class to get static{} block called. PreEncodedHttpField
+				// itself can be loaded normally, but the static{} block uses
+				// ServiceLoader.load(HttpFieldPreEncoder.class) with TCCL
 				new PreEncodedHttpField("empty", "empty");
 			} finally {
 				Thread.currentThread().setContextClassLoader(tccl);
