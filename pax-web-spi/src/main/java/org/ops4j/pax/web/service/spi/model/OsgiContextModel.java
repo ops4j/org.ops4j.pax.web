@@ -801,6 +801,13 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 			return (int) serviceId;
 		}
 
+		if (isWab() != o.isWab()) {
+			// the WAB should ALWAYS win, because Whiteboard and HttpService work on existing instances
+			// while WAB does a lot of classloading during initialization
+			// see https://github.com/ops4j/org.ops4j.pax.web/issues/1725 where it was described
+			return isWab() ? -1 : 1;
+		}
+
 		// fallback case - mostly in tests cases
 		return this.getNumericId() - o.getNumericId();
 	}
@@ -856,73 +863,5 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 		scDTO.failureReason = failureReason;
 		return scDTO;
 	}
-
-//	/** Access controller context of the bundle that registered the http context. */
-//	@Review("it's so rarely used - only in one resource access scenario, though there are many such scenarios.")
-//	private final AccessControlContext accessControllerContext;
-//
-//	/**
-//	 * Registered jsp servlets for this context.
-//	 */
-//	private Map<Servlet, String[]> jspServlets;
-//
-//	private final Boolean showStacks;
-//
-//	/**
-//	 * Jetty Web XML URL
-//	 */
-//	private URL jettyWebXmlUrl;
-
-//	@SuppressWarnings("rawtypes")
-//	public void setContextParams(final Dictionary contextParameters) {
-//		contextParams.clear();
-//		if (contextParameters != null && !contextParameters.isEmpty()) {
-//			final Enumeration keys = contextParameters.keys();
-//			while (keys.hasMoreElements()) {
-//				final Object key = keys.nextElement();
-//				final Object value = contextParameters.get(key);
-//				if (!(key instanceof String) || !(value instanceof String)) {
-//					throw new IllegalArgumentException(
-//							"Context params keys and values must be Strings");
-//				}
-//				contextParams.put((String) key, (String) value);
-//			}
-//			contextName = contextParams.get(PaxWebConstants.CONTEXT_NAME);
-//		}
-//		if (contextName != null) {
-//			contextName = contextName.trim();
-//		} else {
-//			contextName = "";
-//		}
-//	}
-//	/**
-//	 * Getter.
-//	 *
-//	 * @return jsp servlet
-//	 */
-//	public Map<Servlet, String[]> getJspServlets() {
-//		return jspServlets;
-//	}
-//	/**
-//	 * Getter.
-//	 *
-//	 * @return the access controller context of the bundle that registred the
-//	 * context
-//	 */
-//	public AccessControlContext getAccessControllerContext() {
-//		return accessControllerContext;
-//	}
-//
-//	public Boolean isShowStacks() {
-//		return showStacks;
-//	}
-//
-//	public void setJettyWebXmlUrl(URL jettyWebXmlUrl) {
-//		this.jettyWebXmlUrl = jettyWebXmlUrl;
-//	}
-//
-//	public URL getJettyWebXmlURL() {
-//		return jettyWebXmlUrl;
-//	}
 
 }
