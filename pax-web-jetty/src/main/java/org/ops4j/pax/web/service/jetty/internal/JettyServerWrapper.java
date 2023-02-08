@@ -2388,10 +2388,10 @@ class JettyServerWrapper implements BatchVisitor {
 
 					previous = cfg;
 				}
+				sch.start();
 			} finally {
 				Thread.currentThread().setContextClassLoader(tccl);
 			}
-			sch.start();
 
 			dynamicContext.rememberAttributesFromSCIs();
 		} catch (Exception e) {
