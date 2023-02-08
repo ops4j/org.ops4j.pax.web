@@ -60,7 +60,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.Version;
-import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedServiceFactory;
 import org.osgi.util.tracker.BundleTracker;
 import org.osgi.util.tracker.BundleTrackerCustomizer;
@@ -102,7 +101,7 @@ public class HttpContextProcessing implements ManagedServiceFactory {
 	}
 
 	@Override
-	public void updated(String pid, Dictionary<String, ?> properties) throws ConfigurationException {
+	public void updated(String pid, Dictionary<String, ?> properties) {
 		LOG.info("Updated configuration for pid={}", pid);
 
 		// we're in the context of ConfigurationAdmin UpdateThread, but we should not hold it too long
@@ -216,7 +215,7 @@ public class HttpContextProcessing implements ManagedServiceFactory {
 					return;
 				}
 
-				// non-null symbolicName is kind if indicator that the configuration is correct
+				// non-null symbolicName is kind of indicator that the configuration is correct
 				properties = Utils.toMap(props);
 				symbolicName = properties.get(KEY_BUNDLE_SN).trim();
 				contextId = properties.get(KEY_CONTEXT_ID);
