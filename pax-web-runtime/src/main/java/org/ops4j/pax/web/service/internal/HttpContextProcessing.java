@@ -18,13 +18,16 @@ package org.ops4j.pax.web.service.internal;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
@@ -169,7 +172,7 @@ public class HttpContextProcessing implements ManagedServiceFactory {
 		// <login-config>
 		private LoginConfigModel loginConfiguration;
 		// <security-role>
-		private final List<String> securityRoles = new LinkedList<>();
+		private final Set<String> securityRoles = new LinkedHashSet<>();
 		// <security-constraint>
 		private final List<SecurityConstraintModel> securityMappings = new LinkedList<>();
 
@@ -426,7 +429,7 @@ public class HttpContextProcessing implements ManagedServiceFactory {
 			}
 
 			// login config and security constraints
-			batch.getOperations().add(new SecurityConfigChange(OpCode.ADD, osgiContextModel, loginConfiguration, securityMappings, securityRoles));
+			batch.getOperations().add(new SecurityConfigChange(OpCode.ADD, osgiContextModel, loginConfiguration, securityMappings, new ArrayList<>(securityRoles)));
 
 			// start after reconfiguration
 			batch.getOperations().add(new ContextStartChange(OpCode.MODIFY, osgiContextModel));
@@ -459,7 +462,7 @@ public class HttpContextProcessing implements ManagedServiceFactory {
 
 			// login config and security constraints - yes - login config be changed to null (even if there was something
 			// configured before HTTP context processing)
-			batch.getOperations().add(new SecurityConfigChange(OpCode.DELETE, osgiContextModel, loginConfiguration, securityMappings, securityRoles));
+			batch.getOperations().add(new SecurityConfigChange(OpCode.DELETE, osgiContextModel, loginConfiguration, securityMappings, new ArrayList<>(securityRoles)));
 
 			// start after reconfiguration
 			batch.getOperations().add(new ContextStartChange(OpCode.MODIFY, osgiContextModel));
