@@ -87,6 +87,7 @@ import org.ops4j.pax.web.service.spi.model.views.DynamicJEEWebContainerView;
 import org.ops4j.pax.web.service.spi.task.Batch;
 import org.ops4j.pax.web.service.spi.task.Change;
 import org.ops4j.pax.web.service.spi.task.ContainerInitializerModelChange;
+import org.ops4j.pax.web.service.spi.task.ContextParamsChange;
 import org.ops4j.pax.web.service.spi.task.ErrorPageModelChange;
 import org.ops4j.pax.web.service.spi.task.EventListenerModelChange;
 import org.ops4j.pax.web.service.spi.task.FilterModelChange;
@@ -1744,8 +1745,8 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 			LOG.info("Setting context init parameters in {}", contextModel);
 
-			// we're in configuration thread, so no harm can be done
-			contextModel.getContextParams().putAll(Utils.toMap(params));
+			batch.getOperations().add(new ContextParamsChange(OpCode.ADD, contextModel, Utils.toMap(params)));
+//			contextModel.getContextParams().putAll(Utils.toMap(params));
 
 			// if there's a need to actually create the context
 			serverController.sendBatch(batch);
