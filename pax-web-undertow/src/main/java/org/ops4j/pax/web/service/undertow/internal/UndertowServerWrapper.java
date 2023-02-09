@@ -2530,8 +2530,13 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 		if (change.getKind() == OpCode.ADD) {
 			LOG.info("Adding security configuration to {}", ocm);
 			// just operate on the same OsgiContextModel that comes with the change
-			// even if it's not highest ranked
-			ocm.getSecurityConfiguration().setLoginConfig(loginConfigModel);
+			// even if it's not highest ranked - it also means we don't have to process the configuration
+			// in ServiceModel visitor
+			if (loginConfigModel != null) {
+				// null is an indication that we're adding security constraints using HttpService approach
+				// after previously adding LoginConfig
+				ocm.getSecurityConfiguration().setLoginConfig(loginConfigModel);
+			}
 			ocm.getSecurityConfiguration().getSecurityRoles().addAll(securityRoles);
 			ocm.getSecurityConfiguration().getSecurityConstraints().addAll(securityConstraints);
 
@@ -2543,14 +2548,26 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 					.put(ocm, ocm.getSecurityConfiguration());
 		} else {
 			LOG.info("Removing security configuration from {}", ocm);
-			ocm.getSecurityConfiguration().setLoginConfig(null);
-			securityRoles.forEach(ocm.getSecurityConfiguration().getSecurityRoles()::remove);
-			securityConstraints.forEach(sc -> {
-				ocm.getSecurityConfiguration().getSecurityConstraints()
-						.removeIf(scm -> scm.getName().equals(sc.getName()));
-			});
-			TreeMap<OsgiContextModel, SecurityConfigurationModel> constraints = contextSecurityConstraints.get(ocm.getContextPath());
-			constraints.remove(ocm);
+			if (!ocm.hasDirectHttpContextInstance() || loginConfigModel != null) {
+				// non-null LoginConfigModel for HttpService based security configuration means
+				// that we're removing only login configuration
+				ocm.getSecurityConfiguration().setLoginConfig(null);
+			}
+			if (ocm.hasDirectHttpContextInstance() && loginConfigModel == null) {
+				// null LoginConfigModel for HttpService based security configuration means
+				// that we clear ALL security constraints and roles
+				ocm.getSecurityConfiguration().getSecurityRoles().clear();
+				ocm.getSecurityConfiguration().getSecurityConstraints().clear();
+			} else {
+				// this is the Whiteboard/WAB/HttpContextProcessing case
+				securityRoles.forEach(ocm.getSecurityConfiguration().getSecurityRoles()::remove);
+				securityConstraints.forEach(sc -> {
+					ocm.getSecurityConfiguration().getSecurityConstraints()
+							.removeIf(scm -> scm.getName().equals(sc.getName()));
+				});
+				TreeMap<OsgiContextModel, SecurityConfigurationModel> constraints = contextSecurityConstraints.get(ocm.getContextPath());
+				constraints.remove(ocm);
+			}
 		}
 	}
 
@@ -2773,12 +2790,10 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 
 			List<SecurityConstraintModel> allConstraints = new ArrayList<>();
 			Set<String> allRoles = new LinkedHashSet<>();
-			if (allSecConfigs != null) {
-				allSecConfigs.values().forEach(sc -> {
-					allConstraints.addAll(sc.getSecurityConstraints());
-					allRoles.addAll(sc.getSecurityRoles());
-				});
-			}
+			allSecConfigs.values().forEach(sc -> {
+				allConstraints.addAll(sc.getSecurityConstraints());
+				allRoles.addAll(sc.getSecurityRoles());
+			});
 
 			deployment.addSecurityRoles(allRoles);
 

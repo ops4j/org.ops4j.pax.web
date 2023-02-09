@@ -408,6 +408,30 @@ class HttpServiceProxy implements WebContainer, StoppableHttpService {
 		delegate.unregisterWebSocket(webSocket, httpContext);
 	}
 
+	// #1823: methods used to configure security (login configuration and security constraints)
+
+	@Override
+	public void registerLoginConfig(String authMethod, String realmName, String formLoginPage, String formErrorPage, HttpContext httpContext) {
+		delegate.registerLoginConfig(authMethod, realmName, formLoginPage, formErrorPage, httpContext);
+	}
+
+	@Override
+	public void registerConstraintMapping(String constraintName, String httpMethod, String url, String dataConstraint, boolean authentication, List<String> roles, HttpContext httpContext) {
+		delegate.registerConstraintMapping(constraintName, httpMethod, url, dataConstraint, authentication, roles, httpContext);
+	}
+
+	// #1823: methods used to un-configure security (login configuration and security constraints)
+
+	@Override
+	public void unregisterLoginConfig(HttpContext httpContext) {
+		delegate.unregisterLoginConfig(httpContext);
+	}
+
+	@Override
+	public void unregisterConstraintMapping(HttpContext httpContext) {
+		delegate.unregisterConstraintMapping(httpContext);
+	}
+
 	@Override
 	public String toString() {
 		return "Proxy for " + delegate.toString();
