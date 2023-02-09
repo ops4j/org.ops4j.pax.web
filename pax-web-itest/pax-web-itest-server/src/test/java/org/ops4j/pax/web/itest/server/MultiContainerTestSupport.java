@@ -77,6 +77,7 @@ import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.HttpContext
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.JspMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.ListenerMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.ResourceMappingTracker;
+import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.SecurityConfigurationMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.ServletContextHelperMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.ServletMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.WelcomeFileMappingTracker;
@@ -100,6 +101,7 @@ import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.JspModel;
+import org.ops4j.pax.web.service.spi.model.elements.SecurityConfigurationModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.elements.WebSocketModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
@@ -111,6 +113,7 @@ import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
 import org.ops4j.pax.web.service.whiteboard.JspMapping;
 import org.ops4j.pax.web.service.whiteboard.ListenerMapping;
 import org.ops4j.pax.web.service.whiteboard.ResourceMapping;
+import org.ops4j.pax.web.service.whiteboard.SecurityConfigurationMapping;
 import org.ops4j.pax.web.service.whiteboard.ServletContextHelperMapping;
 import org.ops4j.pax.web.service.whiteboard.ServletMapping;
 import org.ops4j.pax.web.service.whiteboard.WelcomeFileMapping;
@@ -200,6 +203,7 @@ public class MultiContainerTestSupport {
 	private ServiceTrackerCustomizer<ErrorPageMapping, ErrorPageModel> errorPageMappingCustomizer;
 	private ServiceTrackerCustomizer<ListenerMapping, EventListenerModel> listenerMappingCustomizer;
 	private ServiceTrackerCustomizer<JspMapping, JspModel> jspMappingCustomizer;
+	private ServiceTrackerCustomizer<SecurityConfigurationMapping, SecurityConfigurationModel> securityConfigurationCustomizer;
 
 	@Parameterized.Parameters(name = "{0}")
 	public static Collection<Object[]> data() {
@@ -315,6 +319,8 @@ public class MultiContainerTestSupport {
 			errorPageMappingCustomizer = getCustomizer(ErrorPageMappingTracker.createTracker(whiteboardExtender, whiteboardBundleContext));
 			listenerMappingCustomizer = getCustomizer(ListenerMappingTracker.createTracker(whiteboardExtender, whiteboardBundleContext));
 			jspMappingCustomizer = getCustomizer(JspMappingTracker.createTracker(whiteboardExtender, whiteboardBundleContext));
+
+			securityConfigurationCustomizer = getCustomizer(SecurityConfigurationMappingTracker.createTracker(whiteboardExtender, whiteboardBundleContext));
 		}
 
 		if (enableWarExtender()) {
@@ -795,6 +801,10 @@ public class MultiContainerTestSupport {
 
 	public ServiceTrackerCustomizer<JspMapping, JspModel> getJspMappingCustomizer() {
 		return jspMappingCustomizer;
+	}
+
+	public ServiceTrackerCustomizer<SecurityConfigurationMapping, SecurityConfigurationModel> getSecurityConfigurationCustomizer() {
+		return securityConfigurationCustomizer;
 	}
 
 	@SuppressWarnings("unchecked")
