@@ -23,6 +23,7 @@ import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.JspModel;
+import org.ops4j.pax.web.service.spi.model.elements.SecurityConfigurationModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.elements.WebSocketModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
@@ -177,6 +178,18 @@ public interface WhiteboardWebContainerView extends PaxWebContainerView {
 	 * @param model
 	 */
 	void unregisterWebSocket(WebSocketModel model);
+
+	/**
+	 * Registration of {@link SecurityConfigurationModel}
+	 * @param model
+	 */
+    void registerSecurityConfiguration(SecurityConfigurationModel model);
+
+	/**
+	 * Unregistration of {@link SecurityConfigurationModel}
+	 * @param model
+	 */
+	void unregisterSecurityConfiguration(SecurityConfigurationModel model);
 
 	/**
 	 * Send information about failure DTO related to given {@link ElementModel}. Successful DTO is sent/calculated

@@ -15,6 +15,10 @@
  */
 package org.ops4j.pax.web.service.spi.model.elements;
 
+import org.ops4j.pax.web.service.spi.model.events.SecurityConfigurationEventData;
+import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
+import org.ops4j.pax.web.service.whiteboard.SecurityConfigurationMapping;
+
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -42,7 +46,7 @@ import java.util.Set;
  * <p>Additionally, security declarations may be passed through {@link javax.servlet.ServletRegistration.Dynamic#setServletSecurity}
  * and for example, Tomcat passes the arguments to {@code org.apache.catalina.core.StandardContext#addServletSecurity()}.</p>
  */
-public class SecurityConfigurationModel {
+public class SecurityConfigurationModel extends ElementModel<SecurityConfigurationMapping, SecurityConfigurationEventData> {
 
 	private LoginConfigModel loginConfig = null;
 	private final List<SecurityConstraintModel> securityConstraints = new ArrayList<>();
@@ -75,6 +79,36 @@ public class SecurityConfigurationModel {
 	 */
 	public Set<String> getSecurityRoles() {
 		return securityRoles;
+	}
+
+	@Override
+	public void register(WhiteboardWebContainerView view) {
+		view.registerSecurityConfiguration(this);
+	}
+
+	@Override
+	public void unregister(WhiteboardWebContainerView view) {
+		view.unregisterSecurityConfiguration(this);
+	}
+
+	@Override
+	public String toString() {
+		return "SecurityConfigurationModel{id=" + getId()
+				+ ",authMethod='" + (loginConfig == null ? "<not set>" : loginConfig.getAuthMethod()) + "'"
+				+ ",realmName='" + (loginConfig == null ? "<not set>" : loginConfig.getRealmName()) + "'"
+				+ ",constraint count=" + securityConstraints.size()
+				+ ",contexts=" + contextModels
+				+ "}";
+	}
+
+	@Override
+	public Boolean performValidation() throws Exception {
+		return Boolean.TRUE;
+	}
+
+	@Override
+	public SecurityConfigurationEventData asEventData() {
+		return new SecurityConfigurationEventData(loginConfig.getAuthMethod(), loginConfig.getRealmName());
 	}
 
 }

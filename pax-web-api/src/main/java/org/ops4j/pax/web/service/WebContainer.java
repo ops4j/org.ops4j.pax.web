@@ -897,8 +897,51 @@ public interface WebContainer extends HttpService {
 	 */
 	void unregisterWebSocket(Object webSocket, HttpContext httpContext);
 
-//	RequestInfoDTO calculateRequestInfoDTO(String path, Iterator<WhiteboardElement> iterator);
-//	RuntimeDTO createWhiteboardRuntimeDTO(Iterator<WhiteboardElement> iterator);
-//	WebContainerDTO getWebcontainerDTO();
+	// #1823: methods used to configure security (login configuration and security constraints)
+
+	/**
+	 * Registers {@code <login-config>} configuration into the selected context
+	 *
+	 * @param authMethod {@code <login-config>/<auth-method>}
+	 * @param realmName {@code <login-config>/<realm-name>}
+	 * @param formLoginPage {@code <login-config>/<form-login-config>/<form-login-page>}
+	 * @param formErrorPage {@code <login-config>/<form-login-config>/<form-error-page>}
+	 * @param httpContext
+	 */
+	void registerLoginConfig(String authMethod, String realmName, String formLoginPage, String formErrorPage,
+			HttpContext httpContext);
+
+	/**
+	 * Not recommended way to register single security constraint for target context. While {@code web.xml} allows
+	 * multiple {@code <security-constraint>} and within single {@code <security-constraint>} multiple
+	 * {@code <security-constraint>/<web-resource-collection>}, this method registers only single
+	 * {@code <security-constraint>/<web-resource-collection>}
+	 *
+	 * @param constraintName {@code <security-constraint>/<display-name>}
+	 * @param httpMethod single {@code <security-constraint>/<web-resource-collection>/<http-method>}
+	 * @param url single {@code <security-constraint>/<web-resource-collection>/<url-pattern>}
+	 * @param dataConstraint {@code <security-constraint>/<user-data-constraint>/<transport-guarantee>}
+	 * @param authentication set to {@code true} if empty roles mean "deny all". {@code false} means "permit all".
+	 * @param roles {@code <security-constraint>/<auth-constraint>/<role-name>}
+	 * @param httpContext
+	 */
+	void registerConstraintMapping(String constraintName, String httpMethod,
+			String url, String dataConstraint, boolean authentication,
+			List<String> roles, HttpContext httpContext);
+
+	// #1823: methods used to un-configure security (login configuration and security constraints)
+
+	/**
+	 * Clears login configuration for given context
+	 *
+	 * @param httpContext
+	 */
+	void unregisterLoginConfig(HttpContext httpContext);
+
+	/**
+	 * Removes <em>all</em> security constraints from given context - for compatibility with Pax Web 7.
+	 * @param httpContext
+	 */
+	void unregisterConstraintMapping(HttpContext httpContext);
 
 }

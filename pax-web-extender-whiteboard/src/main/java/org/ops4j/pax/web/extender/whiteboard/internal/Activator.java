@@ -37,6 +37,7 @@ import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.HttpContext
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.JspMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.ListenerMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.ResourceMappingTracker;
+import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.SecurityConfigurationMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.ServletContextHelperMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.ServletMappingTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy.WelcomeFileMappingTracker;
@@ -47,6 +48,7 @@ import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.JspModel;
+import org.ops4j.pax.web.service.spi.model.elements.SecurityConfigurationModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.elements.WebSocketModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
@@ -57,6 +59,7 @@ import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
 import org.ops4j.pax.web.service.whiteboard.JspMapping;
 import org.ops4j.pax.web.service.whiteboard.ListenerMapping;
 import org.ops4j.pax.web.service.whiteboard.ResourceMapping;
+import org.ops4j.pax.web.service.whiteboard.SecurityConfigurationMapping;
 import org.ops4j.pax.web.service.whiteboard.ServletContextHelperMapping;
 import org.ops4j.pax.web.service.whiteboard.ServletMapping;
 import org.ops4j.pax.web.service.whiteboard.WelcomeFileMapping;
@@ -167,6 +170,7 @@ public class Activator implements BundleActivator {
 		// other
 		trackListeners();
 		trackWebSockets();
+		trackSecurityConfiguration();
 
 		LOG.debug("Pax Web Whiteboard Extender started");
 	}
@@ -333,6 +337,16 @@ public class Activator implements BundleActivator {
 				= WebSocketTracker.createTracker(whiteboardExtenderContext, context);
 		webSocketTracker.open();
 		trackers.add(webSocketTracker);
+	}
+
+	/**
+	 * Track Security Configuration
+	 */
+	private void trackSecurityConfiguration() {
+		final ServiceTracker<SecurityConfigurationMapping, SecurityConfigurationModel> securityConfigurationTracker
+				= SecurityConfigurationMappingTracker.createTracker(whiteboardExtenderContext, context);
+		securityConfigurationTracker.open();
+		trackers.add(securityConfigurationTracker);
 	}
 
 	/**

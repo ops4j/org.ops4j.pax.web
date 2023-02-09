@@ -23,8 +23,7 @@ import org.ops4j.pax.web.service.spi.model.elements.LoginConfigModel;
 import org.ops4j.pax.web.service.spi.model.elements.SecurityConstraintModel;
 
 /**
- * Change of login config and security consttrains. Currently used only by pax-web-extender-war and HTTP context
- * processing (configadmin based processing of existing contexts).
+ * Change of login config and security constraints.
  */
 public class SecurityConfigChange extends Change {
 

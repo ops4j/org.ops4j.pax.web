@@ -41,6 +41,7 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletException;
 import javax.servlet.SessionCookieConfig;
+import javax.servlet.annotation.ServletSecurity;
 import javax.servlet.descriptor.JspPropertyGroupDescriptor;
 import javax.servlet.descriptor.TaglibDescriptor;
 
@@ -61,7 +62,9 @@ import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.ServiceModel;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
+import org.ops4j.pax.web.service.spi.model.elements.LoginConfigModel;
 import org.ops4j.pax.web.service.spi.model.elements.SecurityConfigurationModel;
+import org.ops4j.pax.web.service.spi.model.elements.SecurityConstraintModel;
 import org.ops4j.pax.web.service.spi.model.info.ServletInfo;
 import org.ops4j.pax.web.service.spi.model.info.WebApplicationInfo;
 import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel;
@@ -88,6 +91,8 @@ import org.ops4j.pax.web.service.spi.task.Batch;
 import org.ops4j.pax.web.service.spi.task.Change;
 import org.ops4j.pax.web.service.spi.task.ContainerInitializerModelChange;
 import org.ops4j.pax.web.service.spi.task.ContextParamsChange;
+import org.ops4j.pax.web.service.spi.task.ContextStartChange;
+import org.ops4j.pax.web.service.spi.task.ContextStopChange;
 import org.ops4j.pax.web.service.spi.task.ErrorPageModelChange;
 import org.ops4j.pax.web.service.spi.task.EventListenerModelChange;
 import org.ops4j.pax.web.service.spi.task.FilterModelChange;
@@ -106,8 +111,6 @@ import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-//import org.ops4j.pax.web.jsp.JspServletWrapper;
 
 /**
  * <p><em>Enabled</em> {@link org.osgi.service.http.HttpService} means we can register web components. When bundle
@@ -2080,6 +2083,171 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		}
 	}
 
+	// #1823: methods used to configure security (login configuration and security constraints)
+
+	@Override
+	public void registerLoginConfig(String authMethod, String realmName, String formLoginPage, String formErrorPage, HttpContext httpContext) {
+		// With HttpService approach, we can prepare only the <login-config> part here
+		SecurityConfigurationModel model = new SecurityConfigurationModel();
+		LoginConfigModel lcm = new LoginConfigModel();
+		lcm.setAuthMethod(authMethod);
+		lcm.setRealmName(realmName);
+		lcm.setFormLoginPage(formLoginPage);
+		lcm.setFormErrorPage(formErrorPage);
+		model.setLoginConfig(lcm);
+		// indicate that we're not setting these here
+		model.getSecurityConstraints().clear();
+		model.getSecurityRoles().clear();
+		doRegisterSecurityConfiguration(Collections.singletonList(httpContext), model);
+	}
+
+	@Override
+	public void registerConstraintMapping(String constraintName, String httpMethod, String url, String dataConstraint,
+			boolean authentication, List<String> roles, HttpContext httpContext) {
+		// With HttpService approach, we can prepare only the <security-constraint> and <security-role> parts here
+		SecurityConfigurationModel model = new SecurityConfigurationModel();
+		// indicate that we're not setting login configuration here - the receiving visitor will check existing
+		// login configuration and add the constraints
+		model.setLoginConfig(null);
+		SecurityConstraintModel scm = new SecurityConstraintModel();
+		scm.setName(constraintName);
+		scm.setAuthRolesSet(true);
+		if (dataConstraint == null) {
+			scm.setTransportGuarantee(ServletSecurity.TransportGuarantee.NONE);
+		} else {
+			scm.setTransportGuarantee(ServletSecurity.TransportGuarantee.valueOf(dataConstraint.toUpperCase()));
+		}
+		// only single <security-constraint>/<web-resource-collection> can be registered using HttpService
+		SecurityConstraintModel.WebResourceCollection wrc = new SecurityConstraintModel.WebResourceCollection();
+		wrc.setName(constraintName);
+		if (httpMethod != null) {
+			wrc.getMethods().add(httpMethod);
+		}
+		wrc.getPatterns().add(url);
+		scm.getWebResourceCollections().add(wrc);
+		if (roles != null) {
+			scm.getAuthRoles().addAll(roles);
+			model.getSecurityRoles().addAll(roles);
+		}
+		model.getSecurityConstraints().add(scm);
+		doRegisterSecurityConfiguration(Collections.singletonList(httpContext), model);
+	}
+
+	private void doRegisterSecurityConfiguration(List<HttpContext> httpContexts, SecurityConfigurationModel model) {
+		LOG.debug("Passing registration of {} to configuration thread", model);
+
+		if (model.getRegisteringBundle() == null) {
+			model.setRegisteringBundle(this.serviceBundle);
+		}
+
+		event(WebElementEvent.State.DEPLOYING, model);
+
+		final Batch batch = new Batch("Registration of " + model);
+
+		try {
+			serverModel.run(() -> {
+				try {
+					translateContexts(httpContexts, model, batch);
+
+					try {
+						model.performValidation();
+					} catch (Exception e) {
+						throw new RuntimeException(e.getMessage(), e);
+					}
+
+					LOG.info("Registering {}", model);
+
+					for (OsgiContextModel ocm : model.getContextModels()) {
+						// we always have to restart the context
+						batch.getOperations().add(new ContextStopChange(OpCode.MODIFY, ocm));
+						batch.getOperations().add(new SecurityConfigChange(OpCode.ADD, ocm,
+								model.getLoginConfig(), model.getSecurityConstraints(), new ArrayList<>(model.getSecurityRoles())));
+						// start after reconfiguration
+						batch.getOperations().add(new ContextStartChange(OpCode.MODIFY, ocm));
+					}
+
+					serverController.sendBatch(batch);
+
+					batch.accept(serviceModel);
+
+					event(WebElementEvent.State.DEPLOYED, model);
+					return null;
+				} catch (Exception e) {
+					event(WebElementEvent.State.FAILED, model, e);
+					throw new RuntimeException(e.getMessage(), e);
+				}
+			}, model.isAsynchronusRegistration());
+		} catch (NamespaceException | ServletException ignored) {
+			// can't happen when adding security configuration
+		}
+	}
+
+	// #1823: methods used to un-configure security (login configuration and security constraints)
+
+	@Override
+	public void unregisterLoginConfig(HttpContext httpContext) {
+		// With HttpService approach, we can clean only the <login-config> part here
+		SecurityConfigurationModel model = new SecurityConfigurationModel();
+		// pure fact that there's non-null LoginConfigModel will indicate that we're removing this part
+		// of security configuration
+		model.setLoginConfig(new LoginConfigModel());
+		doUnregisterSecurityConfiguration(Collections.singletonList(httpContext), model);
+	}
+
+	@Override
+	public void unregisterConstraintMapping(HttpContext httpContext) {
+		// With HttpService approach, we can clean only the <security-constraint> and <security-role> parts here
+		SecurityConfigurationModel model = new SecurityConfigurationModel();
+		// pure fact that there's a null LoginConfigModel will indicate that we're removing only the constraints
+		// part of login configuration
+		model.setLoginConfig(null);
+		doUnregisterSecurityConfiguration(Collections.singletonList(httpContext), model);
+	}
+
+	private void doUnregisterSecurityConfiguration(List<HttpContext> httpContexts, SecurityConfigurationModel model) {
+		if (model.getRegisteringBundle() == null) {
+			model.setRegisteringBundle(serviceBundle);
+		}
+		Bundle registeringBundle = model.getRegisteringBundle();
+
+		final Batch batch = new Batch("Unregistration of " + model);
+
+		event(WebElementEvent.State.UNDEPLOYING, model);
+
+		try {
+			serverModel.run(() -> {
+				try {
+					// we have to "translate" contexts again, as unregistration by array doesn't tell us
+					// the actual context to which given "model" was registered, so we rely on the context passed
+					// to unregister() method
+					translateContexts(httpContexts, model, batch);
+
+					LOG.info("Unregistering {}", model);
+
+					for (OsgiContextModel ocm : model.getContextModels()) {
+						// we always have to restart the context
+						batch.getOperations().add(new ContextStopChange(OpCode.MODIFY, ocm));
+						batch.getOperations().add(new SecurityConfigChange(OpCode.DELETE, ocm,
+								model.getLoginConfig(), model.getSecurityConstraints(), new ArrayList<>(model.getSecurityRoles())));
+						// start after reconfiguration
+						batch.getOperations().add(new ContextStartChange(OpCode.MODIFY, ocm));
+					}
+
+					serverController.sendBatch(batch);
+
+					batch.accept(serviceModel);
+
+					event(WebElementEvent.State.UNDEPLOYED, model);
+					return null;
+				} catch (Exception e) {
+					event(WebElementEvent.State.FAILED, model, e);
+					throw new RuntimeException(e.getMessage(), e);
+				}
+			}, false);
+		} catch (NamespaceException | ServletException ignored) {
+		}
+	}
+
 	// --- private support methods
 
 	private void event(WebElementEvent.State type, ElementModel<?, ?> model) {
@@ -2328,6 +2496,16 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		@Override
 		public void unregisterWebSocket(WebSocketModel model) {
 			doUnregisterWebSocket(model);
+		}
+
+		@Override
+		public void registerSecurityConfiguration(SecurityConfigurationModel model) {
+			doRegisterSecurityConfiguration(Collections.emptyList(), model);
+		}
+
+		@Override
+		public void unregisterSecurityConfiguration(SecurityConfigurationModel model) {
+			doUnregisterSecurityConfiguration(Collections.emptyList(), model);
 		}
 
 		@Override
@@ -2603,206 +2781,5 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 			this.chrootBase = chrootBase;
 		}
 	}
-
-
-
-
-
-
-
-
-
-
-
-
-//	@SuppressWarnings("unchecked")
-//	private Dictionary<String, ?> createInitParams(ContextModel contextModel,
-//												   Dictionary<String, ?> initParams) {
-//		NullArgumentException.validateNotNull(initParams, "Init params");
-//		Queue<Configuration> configurations = new LinkedList<>();
-//		Configuration serverControllerConfiguration = serverController.getConfiguration();
-//
-//		PropertyResolver propertyResolver = new DictionaryPropertyResolver(initParams);
-//		Configuration c = new ConfigurationImpl(propertyResolver);
-//		configurations.add(c);
-//
-//		configurations.add(serverControllerConfiguration);
-//		for (Configuration configuration : configurations) {
-//			String scratchDir = configuration.jsp().getJspScratchDir();
-//			if (scratchDir == null) {
-//				File temporaryDirectory = configuration.server().getTemporaryDirectory();
-//				if (temporaryDirectory != null) {
-//					scratchDir = temporaryDirectory.toString();
-//				}
-//			}
-//			if (configuration.equals(serverControllerConfiguration)) {
-//				// [PAXWEB-225] creates a bundle specific scratch dir
-//				File tempDir = new File(scratchDir, contextModel.getContextName());
-//				if (!tempDir.exists()) {
-//					tempDir.mkdirs();
-//				}
-//				scratchDir = tempDir.toString();
-//			}
-//
-//			Integer jspCheckInterval = configuration.jsp().getJspCheckInterval();
-//			Boolean jspClassDebugInfo = configuration.jsp().getJspClassDebugInfo();
-//			Boolean jspDevelopment = configuration.jsp().getJspDevelopment();
-//			Boolean jspEnablePooling = configuration.jsp().getJspEnablePooling();
-//			String jspIeClassId = configuration.jsp().getJspIeClassId();
-//			String jspJavaEncoding = configuration.jsp().getJspJavaEncoding();
-//			Boolean jspKeepgenerated = configuration.jsp().getJspKeepgenerated();
-//			String jspLogVerbosityLevel = configuration.jsp().getJspLogVerbosityLevel();
-//			Boolean jspMappedfile = configuration.jsp().getJspMappedfile();
-//			Integer jspTagpoolMaxSize = configuration.jsp().getJspTagpoolMaxSize();
-//			Boolean jspPrecompilation = configuration.jsp().getJspPrecompilation();
-//
-//			Map<String, Object> params = new HashMap<>(12);
-//			params.put("checkInterval", jspCheckInterval);
-//			params.put("classdebuginfo", jspClassDebugInfo);
-//			params.put("development", jspDevelopment);
-//			params.put("enablePooling", jspEnablePooling);
-//			params.put("ieClassId", jspIeClassId);
-//			params.put("javaEncoding", jspJavaEncoding);
-//			params.put("keepgenerated", jspKeepgenerated);
-//			params.put("logVerbosityLevel", jspLogVerbosityLevel);
-//			params.put("mappedfile", jspMappedfile);
-//			params.put("scratchdir", scratchDir);
-//			params.put("tagpoolMaxSize", jspTagpoolMaxSize);
-//			params.put("usePrecompiled", jspPrecompilation);
-//
-//			params.keySet().removeAll(Collections.list(initParams.keys()));
-//			for (Map.Entry<String, Object> entry : params.entrySet()) {
-//				Object param = entry.getValue();
-//				if (param != null) {
-//					String initParam = entry.getKey();
-//					((Hashtable<String, Object>) initParams).put(initParam, param.toString());
-//				}
-//			}
-//
-//		}
-//		LOG.debug("JSP scratchdir: " + initParams.get("scratchdir"));
-//		return initParams;
-//	}
-//
-//	@Override
-//	public void registerLoginConfig(String authMethod, String realmName,
-//									String formLoginPage, String formErrorPage, HttpContext httpContext) {
-//		NullArgumentException.validateNotNull(httpContext, "Http context");
-//		final ContextModel contextModel = getOrCreateContext(httpContext);
-//		String currentAuthMethod = contextModel.getAuthMethod();
-//		String currentRealmName = contextModel.getRealmName();
-//		String currentFormLoginPage = contextModel.getFormLoginPage();
-//		String currentFormErrorPage = contextModel.getFormErrorPage();
-//		List<String> currentConfiguration = Arrays.asList(currentAuthMethod, currentRealmName, currentFormLoginPage, currentFormErrorPage);
-//		List<String> newConfiguration = Arrays.asList(authMethod, realmName, formLoginPage, formErrorPage);
-//		if (!currentConfiguration.equals(newConfiguration)) {
-//			if (!serviceModel.canBeConfigured(httpContext)) {
-//				try {
-//					LOG.debug("Stopping context model {} to register login configuration", contextModel);
-//					serverController.getContext(contextModel).stop();
-//				} catch (Exception e) {
-//					LOG.error(e.getMessage(), e);
-//				}
-//			}
-//			contextModel.setAuthMethod(authMethod);
-//			contextModel.setRealmName(realmName);
-//			contextModel.setFormLoginPage(formLoginPage);
-//			contextModel.setFormErrorPage(formErrorPage);
-//		}
-//		serviceModel.addContextModel(contextModel);
-//	}
-//
-//	@Override
-//	public void unregisterLoginConfig(final HttpContext httpContext) {
-//		NullArgumentException.validateNotNull(httpContext, "Http context");
-//		final ContextModel contextModel = serviceModel.getContextModel(httpContext);
-//		if (contextModel == null || contextModel.getAuthMethod() == null || contextModel.getRealmName() == null) {
-//			throw new IllegalArgumentException(
-//					"Security Realm and authorization method are not registered for http context ["
-//							+ httpContext + "]");
-//		}
-//
-//		try {
-//			LOG.debug("Stopping context model {} to unregister login configuration", contextModel);
-//			serverController.getContext(contextModel).stop();
-//		} catch (Exception e) {
-//			LOG.error(e.getMessage(), e);
-//		}
-//
-//		contextModel.setRealmName(null);
-//		contextModel.setAuthMethod(null);
-//		contextModel.setFormLoginPage(null);
-//		contextModel.setFormErrorPage(null);
-//	}
-//
-//	@Override
-//	public void registerConstraintMapping(String constraintName, String mapping,
-//										  String url, String dataConstraint, boolean authentication,
-//										  List<String> roles, HttpContext httpContext) {
-//		final ContextModel contextModel = getOrCreateContext(httpContext);
-//		LOG.debug("Register constraint mapping (name={}). Using context [{}]", constraintName, contextModel);
-//		SecurityConstraintMappingModel secConstraintMapModel = new SecurityConstraintMappingModel(
-//				contextModel, constraintName, mapping, url, dataConstraint,
-//				authentication, roles);
-//		serviceModel.addSecurityConstraintMappingModel(secConstraintMapModel);
-//		serverController.addSecurityConstraintMapping(secConstraintMapModel);
-//	}
-//
-//	@Override
-//	public void unregisterConstraintMapping(final HttpContext httpContext) {
-//		NullArgumentException.validateNotNull(httpContext, "Http context");
-//		final ContextModel contextModel = serviceModel.getContextModel(httpContext);
-//
-//		try {
-//			LOG.debug("Stopping context model {} to unregister constraint mapping", contextModel);
-//			serverController.getContext(contextModel).stop();
-//		} catch (Exception e) {
-//			LOG.error(e.getMessage(), e);
-//		}
-//
-//		// Without changing WebContainer interface, we can't remove individual constraints...
-//		SecurityConstraintMappingModel[] mappings = serviceModel.getSecurityConstraintMappings();
-//		if (mappings != null) {
-//			for (SecurityConstraintMappingModel model: mappings) {
-//				if (model != null) {
-//					serviceModel.removeSecurityConstraintMappingModel(model);
-//					serverController.removeSecurityConstraintMapping(model);
-//				}
-//			}
-//		}
-//	}
-
-//	@Override
-//	public void setConnectorsAndVirtualHosts(List<String> connectors, List<String> virtualHosts,
-//											 HttpContext httpContext) {
-//		NullArgumentException.validateNotNull(httpContext, "Http context");
-//		if (!serviceModel.canBeConfigured(httpContext)) {
-//			throw new IllegalStateException(
-//					"Http context already used. Connectors and VirtualHosts can be set only before first usage");
-//		}
-//
-//		final ContextModel contextModel = getOrCreateContext(httpContext);
-//		LOG.debug("Using context [" + contextModel + "]");
-//		List<String> realVirtualHosts = new LinkedList<>(virtualHosts);
-//		if (connectors.size() > 0) {
-//			for (String connector : connectors) {
-//				realVirtualHosts.add("@" + connector);
-//			}
-//		}
-//		if (realVirtualHosts.size() == 0) {
-//			realVirtualHosts = this.serverController.getConfiguration()
-//					.server().getVirtualHosts();
-//		}
-//		if (LOG.isDebugEnabled()) {
-//			StringBuilder sb = new StringBuilder("VirtualHostList=[");
-//			for (String virtualHost : realVirtualHosts) {
-//				sb.append(virtualHost).append(",");
-//			}
-//			sb.append("]");
-//			LOG.debug(sb.toString());
-//		}
-//		contextModel.setVirtualHosts(realVirtualHosts);
-//		serviceModel.addContextModel(contextModel);
-//	}
 
 }

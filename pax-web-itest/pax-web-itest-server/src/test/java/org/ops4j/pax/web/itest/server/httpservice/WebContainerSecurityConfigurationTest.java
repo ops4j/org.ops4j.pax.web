@@ -1,0 +1,194 @@
+/*
+ * Copyright 2023 OPS4J.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.ops4j.pax.web.itest.server.httpservice;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.ops4j.pax.web.itest.server.MultiContainerTestSupport;
+import org.ops4j.pax.web.itest.server.Runtime;
+import org.ops4j.pax.web.itest.server.support.Utils;
+import org.ops4j.pax.web.service.WebContainer;
+import org.ops4j.pax.web.service.internal.HttpServiceEnabled;
+import org.ops4j.pax.web.service.internal.StoppableHttpService;
+import org.osgi.framework.Bundle;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.Principal;
+import java.util.Base64;
+import java.util.Collections;
+
+import static org.junit.Assert.assertTrue;
+import static org.ops4j.pax.web.itest.server.support.Utils.httpGET;
+
+@RunWith(Parameterized.class)
+public class WebContainerSecurityConfigurationTest extends MultiContainerTestSupport {
+
+	@Test
+	public void loginConfiguration() throws Exception {
+		Bundle sample1 = mockBundle("sample1");
+
+		WebContainer wc = new HttpServiceEnabled(sample1, controller, serverModel, null, config);
+
+		wc.registerServlet("/test", new TestServlet("1"), null, null);
+
+		// no security, but user present
+		String response = httpGET(port, "/test", "Authorization: Basic " + Base64.getEncoder().encodeToString("admin:admin".getBytes(StandardCharsets.UTF_8)));
+		assertTrue(response.contains("user principal: null"));
+		assertTrue(response.contains("user principal class: null"));
+		assertTrue(response.contains("user is admin: false"));
+		// no security, no user
+		response = httpGET(port, "/test");
+		assertTrue(response.contains("user principal: null"));
+		assertTrue(response.contains("user principal class: null"));
+		assertTrue(response.contains("user is admin: false"));
+
+		wc.registerLoginConfig("BASIC", "test", null, null, null);
+
+		// without any security constraints, the realm will work, we'll get user principal from the request, but
+		// there'll be no authorization (so no 401/403 without auth)
+
+		// basic auth security
+		response = httpGET(port, "/test", "Authorization: Basic " + Base64.getEncoder().encodeToString("admin:admin".getBytes(StandardCharsets.UTF_8)));
+		if (runtime == Runtime.JETTY) {
+			assertTrue(response.contains("user principal: admin"));
+			assertTrue(response.contains("user principal class: org.eclipse.jetty.security.AbstractLoginService$UserPrincipal"));
+			assertTrue(response.contains("user is admin: true"));
+		} else if (runtime == Runtime.TOMCAT) {
+			// Tomcat doesn't perform authentication if there are no constraints configured
+			// see org.apache.catalina.authenticator.AuthenticatorBase.invoke()
+			assertTrue(response.contains("user principal: null"));
+			assertTrue(response.contains("user principal class: null"));
+			assertTrue(response.contains("user is admin: false"));
+		} else if (runtime == Runtime.UNDERTOW) {
+			assertTrue(response.contains("user principal: admin"));
+			assertTrue(response.contains("user principal class: org.ops4j.pax.web.service.undertow.internal.security.PropertiesIdentityManager$SimplePrincipal"));
+			assertTrue(response.contains("user is admin: true"));
+		}
+		// basic auth security, no user
+		response = httpGET(port, "/test");
+		assertTrue(response.contains("user principal: null"));
+		assertTrue(response.contains("user principal class: null"));
+		assertTrue(response.contains("user is admin: false"));
+
+		wc.unregisterLoginConfig(null);
+
+		// no security, but user present
+		response = httpGET(port, "/test", "Authorization: Basic " + Base64.getEncoder().encodeToString("admin:admin".getBytes(StandardCharsets.UTF_8)));
+		assertTrue(response.contains("user principal: null"));
+		assertTrue(response.contains("user principal class: null"));
+		assertTrue(response.contains("user is admin: false"));
+		// no security, no user
+		response = httpGET(port, "/test");
+		assertTrue(response.contains("user principal: null"));
+		assertTrue(response.contains("user principal class: null"));
+		assertTrue(response.contains("user is admin: false"));
+
+		((StoppableHttpService) wc).stop();
+
+		ServerModelInternals serverModelInternals = serverModelInternals(serverModel);
+		ServiceModelInternals serviceModelInternals = serviceModelInternals(wc);
+
+		assertTrue(serverModelInternals.isClean(sample1));
+		assertTrue(serviceModelInternals.isEmpty());
+	}
+
+	@Test
+	public void loginConfigurationWithSecurityConstraints() throws Exception {
+		Bundle sample1 = mockBundle("sample1");
+
+		WebContainer wc = new HttpServiceEnabled(sample1, controller, serverModel, null, config);
+
+		wc.registerServlet("/test", new TestServlet("1"), null, null);
+
+		// no security, but user present
+		String response = httpGET(port, "/test", "Authorization: Basic " + Base64.getEncoder().encodeToString("admin:admin".getBytes(StandardCharsets.UTF_8)));
+		assertTrue(response.contains("user principal: null"));
+		assertTrue(response.contains("user principal class: null"));
+		assertTrue(response.contains("user is admin: false"));
+		// no security, no user
+		response = httpGET(port, "/test");
+		assertTrue(response.contains("user principal: null"));
+		assertTrue(response.contains("user principal class: null"));
+		assertTrue(response.contains("user is admin: false"));
+
+		wc.registerLoginConfig("BASIC", "test", null, null, null);
+		wc.registerConstraintMapping("security-1", null, "/test/*", null, true, Collections.singletonList("admin"), null);
+
+		// without any security constraints, the realm will work, we'll get user principal from the request, but
+		// there'll be no authorization (so no 401/403 without auth)
+
+		// basic auth security
+		response = httpGET(port, "/test", "Authorization: Basic " + Base64.getEncoder().encodeToString("admin:admin".getBytes(StandardCharsets.UTF_8)));
+		if (runtime == Runtime.JETTY) {
+			assertTrue(response.contains("user principal: admin"));
+			assertTrue(response.contains("user principal class: org.eclipse.jetty.security.AbstractLoginService$UserPrincipal"));
+			assertTrue(response.contains("user is admin: true"));
+		} else if (runtime == Runtime.TOMCAT) {
+			assertTrue(response.contains("user principal: admin"));
+			assertTrue(response.contains("user principal class: org.apache.catalina.realm.GenericPrincipal"));
+			assertTrue(response.contains("user is admin: true"));
+		} else if (runtime == Runtime.UNDERTOW) {
+			assertTrue(response.contains("user principal: admin"));
+			assertTrue(response.contains("user principal class: org.ops4j.pax.web.service.undertow.internal.security.PropertiesIdentityManager$SimplePrincipal"));
+			assertTrue(response.contains("user is admin: true"));
+		}
+		// basic auth security, no user
+		response = httpGET(port, "/test");
+		assertTrue(response.startsWith("HTTP/1.1 401"));
+
+		wc.unregisterConstraintMapping(null);
+		wc.unregisterLoginConfig(null);
+
+		// no security, but user present
+		response = httpGET(port, "/test", "Authorization: Basic " + Base64.getEncoder().encodeToString("admin:admin".getBytes(StandardCharsets.UTF_8)));
+		assertTrue(response.contains("user principal: null"));
+		assertTrue(response.contains("user principal class: null"));
+		assertTrue(response.contains("user is admin: false"));
+		// no security, no user
+		response = httpGET(port, "/test");
+		assertTrue(response.contains("user principal: null"));
+		assertTrue(response.contains("user principal class: null"));
+		assertTrue(response.contains("user is admin: false"));
+
+		((StoppableHttpService) wc).stop();
+
+		ServerModelInternals serverModelInternals = serverModelInternals(serverModel);
+		ServiceModelInternals serviceModelInternals = serviceModelInternals(wc);
+
+		assertTrue(serverModelInternals.isClean(sample1));
+		assertTrue(serviceModelInternals.isEmpty());
+	}
+
+	private static class TestServlet extends Utils.MyIdServlet {
+
+		TestServlet(String id) {
+			super(id);
+		}
+
+		@Override
+		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+			Principal up = req.getUserPrincipal();
+			resp.getWriter().print(String.format("user principal: %s%n", up == null ? "null" : up.getName()));
+			resp.getWriter().print(String.format("user principal class: %s%n", up == null ? "null" : up.getClass().getName()));
+			resp.getWriter().print(String.format("user is admin: %b%n", req.isUserInRole("admin")));
+		}
+	}
+
+}

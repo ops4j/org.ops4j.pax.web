@@ -379,70 +379,33 @@ class HttpServiceDisabled implements WebContainer {
 		warn();
 	}
 
+	// #1823: methods used to configure security (login configuration and security constraints)
+
+	@Override
+	public void registerLoginConfig(String authMethod, String realmName, String formLoginPage, String formErrorPage, HttpContext httpContext) {
+		warn();
+	}
+
+	@Override
+	public void registerConstraintMapping(String constraintName, String httpMethod, String url, String dataConstraint, boolean authentication, List<String> roles, HttpContext httpContext) {
+		warn();
+	}
+
+	// #1823: methods used to un-configure security (login configuration and security constraints)
+
+	@Override
+	public void unregisterLoginConfig(HttpContext httpContext) {
+		warn();
+	}
+
+	@Override
+	public void unregisterConstraintMapping(HttpContext httpContext) {
+		warn();
+	}
+
 	@Override
 	public String toString() {
 		return "HttpService (disabled) for bundle " + serviceBundle;
 	}
-
-//	/**
-//	 * @see WebContainer#registerLoginConfig(String, String, String, String, HttpContext)
-//	 */
-//	@Override
-//	public void registerLoginConfig(String authMethod, String realmName,
-//									String formLoginPage, String formErrorPage, HttpContext httpContext) {
-//		LOG.warn("Http service has already been stopped");
-//	}
-//
-//	/**
-//	 * @see WebContainer#unregisterLoginConfig(HttpContext)
-//	 */
-//	@Override
-//	public void unregisterLoginConfig(HttpContext httpContext) {
-//		LOG.warn("Http service has already been stopped");
-//	}
-//
-//	/**
-//	 * @see WebContainer#registerConstraintMapping(java.lang.String,
-//	 * java.lang.String, java.lang.String, java.lang.String, boolean,
-//	 * java.util.List, org.osgi.service.http.HttpContext)
-//	 */
-//	@Override
-//	public void registerConstraintMapping(String constraintName,
-//										  String mapping, String url, String dataConstraint,
-//										  boolean authentication, List<String> roles, HttpContext httpContext) {
-//		LOG.warn("Http service has already been stopped");
-//	}
-//
-//	/**
-//	 * @see WebContainer#unregisterConstraintMapping(HttpContext)
-//	 */
-//	@Override
-//	public void unregisterConstraintMapping(HttpContext httpContext) {
-//		LOG.warn("Http service has already been stopped");
-//	}
-
-//	@Override
-//	public void setConnectorsAndVirtualHosts(List<String> connectors, List<String> virtualHosts,
-//											 HttpContext httpContext) {
-//		LOG.warn("Http service has already been stopped");
-//	}
-//
-//	@Override
-//	public RequestInfoDTO calculateRequestInfoDTO(String path, Iterator<WhiteboardElement> iterator) {
-//		LOG.warn("Http service has already been stoped");
-//		return null;
-//	}
-//
-//	@Override
-//	public RuntimeDTO createWhiteboardRuntimeDTO(Iterator<WhiteboardElement> iterator) {
-//		LOG.warn("Http service has already been stoped");
-//		return null;
-//	}
-
-//    @Override
-//    public WebContainerDTO getWebcontainerDTO() {
-//        LOG.warn("Http service has already been stoped");
-//        return null;
-//    }
 
 }
