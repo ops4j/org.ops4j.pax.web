@@ -49,6 +49,9 @@ public class SecurityConfigurationMappingTracker extends AbstractMappingTracker<
 	@Override
 	protected SecurityConfigurationModel doCreateElementModel(Bundle bundle, SecurityConfigurationMapping service, Integer rank, Long serviceId) {
 		SecurityConfigurationModel model = new SecurityConfigurationModel();
+		model.setRegisteringBundle(bundle);
+		model.setServiceRank(rank);
+		model.setServiceId(serviceId);
 
 		// the <login-config> part
 		if (service instanceof DefaultSecurityConfigurationMapping) {

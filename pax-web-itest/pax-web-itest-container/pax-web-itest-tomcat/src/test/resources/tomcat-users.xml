@@ -17,8 +17,9 @@
 
 -->
 <tomcat-users>
-	<user username="admin" password="admin" roles="server-administrator,content-administrator,admin"/>
+	<user username="admin" password="admin" roles="server-administrator,content-administrator,admin,paxweb-admin"/>
 	<user username="admin2" password="admin" roles="role-admin"/>
 	<user username="manager" password="manager" roles="role-manager"/>
 	<user username="am" password="am" roles="role-admin,role-manager"/>
+	<user username="viewer" password="viewer" roles="paxweb-viewer"/>
 </tomcat-users>

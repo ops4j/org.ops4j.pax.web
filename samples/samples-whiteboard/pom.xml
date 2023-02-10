@@ -48,6 +48,7 @@
 		<module>whiteboard-3</module>
 		<module>whiteboard-annotated</module>
 		<module>whiteboard-blueprint-jaxrs</module>
+		<module>whiteboard-security</module>
 	</modules>
 
 </project>
