@@ -240,6 +240,9 @@ public class WhiteboardExtenderContext implements WebContainerListener, WebConte
 	 * @return list of {@link OsgiContextModel} to associate the service (e.g., {@link javax.servlet.Servlet}) with.
 	 */
 	public List<OsgiContextModel> resolveContexts(Bundle bundle, Filter selector) {
+		if (bundle == null) {
+			return Collections.emptyList();
+		}
 		lock.lock();
 		try {
 			if (selector == null) {

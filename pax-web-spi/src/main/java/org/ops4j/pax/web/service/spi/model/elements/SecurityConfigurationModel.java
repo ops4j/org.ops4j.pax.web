@@ -108,7 +108,14 @@ public class SecurityConfigurationModel extends ElementModel<SecurityConfigurati
 
 	@Override
 	public SecurityConfigurationEventData asEventData() {
-		return new SecurityConfigurationEventData(loginConfig.getAuthMethod(), loginConfig.getRealmName());
+		SecurityConfigurationEventData data;
+		if (loginConfig == null) {
+			data = new SecurityConfigurationEventData("NONE", null);
+		} else {
+			data = new SecurityConfigurationEventData(loginConfig.getAuthMethod(), loginConfig.getRealmName());
+		}
+		setCommonEventProperties(data);
+		return data;
 	}
 
 }
