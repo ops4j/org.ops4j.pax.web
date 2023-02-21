@@ -169,6 +169,7 @@ public class ApplicationSessionCookieConfig implements SessionCookieConfig {
         if (sessionIdPrefix != null && sessionId.startsWith(sessionIdPrefix + "~")) {
             sessionId = sessionId.substring(sessionIdPrefix.length() + 1);
         }
+        // end of Pax Web / OSGi adjustment
 
         SessionCookieConfig scc =
             context.getServletContext().getSessionCookieConfig();

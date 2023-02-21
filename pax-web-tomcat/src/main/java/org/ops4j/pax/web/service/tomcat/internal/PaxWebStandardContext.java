@@ -127,6 +127,8 @@ public class PaxWebStandardContext extends StandardContext {
 		super();
 		getPipeline().addValve(new PaxWebStandardContextValve((ValveBase) getPipeline().getBasic(), defaultServlet));
 		this.osgiSessionsBridge = osgiSessionsBridge;
+		this.setClearReferencesObjectStreamClassCaches(false);
+		this.setClearReferencesRmiTargets(false);
 	}
 
 	/**

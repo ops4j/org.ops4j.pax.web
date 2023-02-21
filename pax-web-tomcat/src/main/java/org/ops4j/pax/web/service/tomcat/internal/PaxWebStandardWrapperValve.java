@@ -45,7 +45,6 @@ public class PaxWebStandardWrapperValve extends ValveBase {
 	public void invoke(Request request, Response response) throws IOException, ServletException {
 		// attributes to be used ONLY by "initial OSGi filter"
 		request.setAttribute(PAXWEB_STANDARD_WRAPPER, request.getWrapper());
-		PaxWebSessionIdGenerator.cookieSessionId.set(request.getRequestedSessionId());
 
 		getNext().invoke(request, response);
 	}

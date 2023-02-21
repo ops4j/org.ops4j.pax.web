@@ -30,6 +30,7 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import org.apache.catalina.Authenticator;
+import org.apache.catalina.ContainerListener;
 import org.apache.catalina.Lifecycle;
 import org.apache.catalina.LifecycleEvent;
 import org.apache.catalina.LifecycleListener;
@@ -226,6 +227,49 @@ public class OsgiContextConfiguration implements LifecycleListener {
 			} finally {
 				Thread.currentThread().setContextClassLoader(tccl);
 			}
+
+			// special removal of extra valves and listeners
+			Valve[] valves = context.getPipeline().getValves();
+			List<Valve> valvesToRemove = new ArrayList<>(valves.length);
+			for (Valve v : valves) {
+				if (v != null) {
+					String pkg = v.getClass().getPackage().getName();
+					if (pkg.startsWith("org.apache.tomcat") || pkg.startsWith("org.apache.catalina")
+							|| pkg.startsWith("org.ops4j.pax.web")) {
+						continue;
+					}
+					valvesToRemove.add(v);
+				}
+			}
+			valvesToRemove.forEach(v -> context.getPipeline().removeValve(v));
+
+			ContainerListener[] listeners = context.findContainerListeners();
+			List<ContainerListener> listenersToRemove = new ArrayList<>(listeners.length);
+			for (ContainerListener cl : listeners) {
+				if (cl != null) {
+					String pkg = cl.getClass().getPackage().getName();
+					if (pkg.startsWith("org.apache.tomcat") || pkg.startsWith("org.apache.catalina")
+							|| pkg.startsWith("org.ops4j.pax.web")) {
+						continue;
+					}
+					listenersToRemove.add(cl);
+				}
+			}
+			listenersToRemove.forEach(context::removeContainerListener);
+
+			LifecycleListener[] llisteners = context.findLifecycleListeners();
+			List<LifecycleListener> llistenersToRemove = new ArrayList<>(listeners.length);
+			for (LifecycleListener ll : llisteners) {
+				if (ll != null) {
+					String pkg = ll.getClass().getPackage().getName();
+					if (pkg.startsWith("org.apache.tomcat") || pkg.startsWith("org.apache.catalina")
+							|| pkg.startsWith("org.ops4j.pax.web")) {
+						continue;
+					}
+					llistenersToRemove.add(ll);
+				}
+			}
+			llistenersToRemove.forEach(context::removeLifecycleListener);
 
 			LoginConfig lc;
 			boolean noAuth = false;
