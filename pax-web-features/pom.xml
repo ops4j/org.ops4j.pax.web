@@ -103,6 +103,7 @@
 <!--								<feature>pax-web-jetty-http2-jdk8</feature>-->
 <!--								<feature>pax-web-jetty-http2-jdk9</feature>-->
 								<feature>pax-web-http-jetty</feature>
+<!--								<feature>pax-web-jetty-keycloak18</feature>-->
 								<feature>pax-web-tomcat</feature>
 								<feature>pax-web-tomcat-websockets</feature>
 								<feature>pax-web-http-tomcat</feature>

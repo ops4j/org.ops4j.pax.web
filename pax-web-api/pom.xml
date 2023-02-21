@@ -135,6 +135,8 @@
 							org.ops4j.pax.web.service.views;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.service.whiteboard;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.utils;version="${pax-web.osgi.version}",
+							<!-- Special export for org.keycloak:keycloak-osgi-adapter:18.0.x -->
+							org.ops4j.pax.web.service;version="7.4",
 
 							<!-- re-export OSGi CMPN R7 102 HTTP Service packages -->
 							org.osgi.service.http;version="1.2.1",
