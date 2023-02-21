@@ -20,19 +20,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.security.Principal;
 
-public class AllWelcomeServlet extends HttpServlet {
+public class LogoutServlet extends HttpServlet {
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-		Principal p = request.getUserPrincipal();
-		String name = p == null ? "<no principal>" : p.getName();
-		String className = p == null ? "<no principal>" : p.getClass().getName();
-		request.setAttribute("auth", p != null);
-		request.setAttribute("user", name);
-		request.setAttribute("principalClass", className);
-
-		request.getRequestDispatcher("/welcome.jsp").forward(request, response);
+		request.logout();
+		response.sendRedirect("/app");
 	}
 
 }

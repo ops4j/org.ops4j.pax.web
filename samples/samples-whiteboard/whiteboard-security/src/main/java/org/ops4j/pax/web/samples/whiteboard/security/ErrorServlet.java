@@ -15,6 +15,7 @@
  */
 package org.ops4j.pax.web.samples.whiteboard.security;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -22,7 +23,7 @@ import java.io.IOException;
 
 public class ErrorServlet extends HttpServlet {
 
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
 		// attributes should be like this:
 		// value: java.lang.Object  = {java.util.concurrent.ConcurrentHashMap@8832}  size = 5
 		//  {@8840} "javax.servlet.error.status_code" -> {java.lang.Integer@8841} 401
@@ -30,16 +31,18 @@ public class ErrorServlet extends HttpServlet {
 		//  {@8843} "javax.servlet.error.request_uri" -> {@8805} "/very-secure/x"
 		//  {@8844} "javax.servlet.error.servlet_name" -> {@8845} "secure-servlet"
 		//  {@8846} "javax.servlet.error.message" -> {@8847} "Unauthorized"
-		response.setContentType("text/html");
 		Integer rc = (Integer) request.getAttribute("javax.servlet.error.status_code");
+		request.setAttribute("code", rc);
 		response.setStatus(rc);
 		if (rc == 401) {
-			response.getWriter().println("Not authenticated");
+			request.setAttribute("msg", "Not authenticated");
 		} else if (rc == 403) {
-			response.getWriter().println("Not authorized");
+			request.setAttribute("msg", "Not authorized");
 		} else if (rc == 404) {
-			response.getWriter().println("Not found");
+			request.setAttribute("msg", "Not found");
 		}
+
+		request.getRequestDispatcher("/error.jsp").forward(request, response);
 	}
 
 }

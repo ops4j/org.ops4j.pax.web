@@ -15,6 +15,10 @@
  */
 package org.ops4j.pax.web.samples.whiteboard.security;
 
+import org.keycloak.KeycloakPrincipal;
+import org.keycloak.KeycloakSecurityContext;
+
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -23,12 +27,23 @@ import java.security.Principal;
 
 public class ProtectedServlet extends HttpServlet {
 
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		response.setContentType("text/html");
-		response.setStatus(HttpServletResponse.SC_OK);
-		response.getWriter().println("<p>Welcome to Protected Servlet (admins and viewers only)</p>");
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
 		Principal p = request.getUserPrincipal();
-		response.getWriter().println("<p>Logged in as: " + (p == null ? "null (impossible!)" : p.getName() + " (" + p.getClass().getName() + ")"));
+		String name = p == null ? "<no principal>" : p.getName();
+		String className = p == null ? "<no principal>" : p.getClass().getName();
+		request.setAttribute("auth", p != null);
+		request.setAttribute("user", name);
+		request.setAttribute("principalClass", className);
+		request.setAttribute("verySecure", false);
+
+		if (p instanceof KeycloakPrincipal) {
+			KeycloakSecurityContext context = ((KeycloakPrincipal<?>) p).getKeycloakSecurityContext();
+			request.setAttribute("kcRealm", context.getRealm());
+			request.setAttribute("kcTokenString", context.getTokenString());
+			request.setAttribute("kcIdTokenString", context.getIdTokenString());
+		}
+
+		request.getRequestDispatcher("/secure.jsp").forward(request, response);
 	}
 
 }
