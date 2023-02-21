@@ -1960,6 +1960,9 @@ class JettyServerWrapper implements BatchVisitor {
 	private void clearDynamicRegistrations(String contextPath, OsgiContextModel context) {
 		// there should already be a ServletContextHandler
 		PaxWebServletContextHandler sch = contextHandlers.get(contextPath);
+		if (sch == null) {
+			return;
+		}
 
 		// we can safely stop the context
 		if (sch.isStarted()) {
@@ -2138,7 +2141,9 @@ class JettyServerWrapper implements BatchVisitor {
 							.removeIf(scm -> scm.getName().equals(sc.getName()));
 				});
 				TreeMap<OsgiContextModel, SecurityConfigurationModel> constraints = contextSecurityConstraints.get(ocm.getContextPath());
-				constraints.remove(ocm);
+				if (constraints != null) {
+					constraints.remove(ocm);
+				}
 			}
 		}
 	}
@@ -2167,6 +2172,10 @@ class JettyServerWrapper implements BatchVisitor {
 			// first thing - only NOW we can set ServletContext's class loader! It affects many things, including
 			// the TCCL used for example by javax.el.ExpressionFactory.newInstance()
 			sch.setClassLoader(highestRankedContext.getClassLoader());
+
+			// copy contexts parameters - from all contexts
+			this.osgiContextModels.get(contextPath).forEach(ocm -> ocm.getContextParams()
+					.forEach((k, v) -> sch.getInitParams().put(k, v)));
 
 			highestRankedContext.clearAttributesFromPreviousCycle();
 			clearDynamicRegistrations(contextPath, highestRanked);
@@ -2300,7 +2309,7 @@ class JettyServerWrapper implements BatchVisitor {
 				}
 
 				// roles and constraints are not taken only from the highest ranked OsgiContextModel - they're
-				// taken from all the OCMs for given context path - on order of OCM rank
+				// taken from all the OCMs for given context path - in order of OCM rank
 				// it's up to user to take care of the conflicts, because simple rank-ordering will add higher-ranked
 				// rules first - the container may decide to override or reject the lower ranked later.
 

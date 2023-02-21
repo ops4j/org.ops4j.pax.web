@@ -181,6 +181,18 @@ javax.servlet.context.tempdir = ${karaf.data}/pax-web/tmp
 		</configfile>
 	</feature>
 
+	<feature name="pax-web-jetty-keycloak18" description="Keycloak 18.x Jetty bundles" version="${project.version}">
+		<!-- This requires mvn:org.keycloak/keycloak-osgi-features/${dependency.org.keycloak18}/xml/features -->
+		<feature>keycloak-adapter-core</feature>
+		<!-- These bundles are not part of any enabled Keycloak feature -->
+		<bundle>mvn:org.keycloak/keycloak-osgi-adapter/${dependency.org.keycloak18}</bundle>
+		<bundle>mvn:org.keycloak/keycloak-jetty-adapter-spi/${dependency.org.keycloak18}</bundle>
+		<bundle>mvn:org.keycloak/keycloak-jetty-core/${dependency.org.keycloak18}</bundle>
+		<bundle>mvn:org.keycloak/keycloak-jetty94-adapter/${dependency.org.keycloak18}</bundle>
+		<!-- Fragment for pax-web-jetty - should have lower start-level -->
+		<bundle start="false" start-level="25">mvn:org.keycloak/keycloak-pax-web-jetty94/${dependency.org.keycloak18}</bundle>
+	</feature>
+
 	<feature name="pax-web-tomcat" description="Tomcat 9 bundles" version="${dependency.org.apache.tomcat}">
 		<details>
 			Tomcat libraries are repackaged in pax-web-tomcat bundle based on tomcat-embed-core
