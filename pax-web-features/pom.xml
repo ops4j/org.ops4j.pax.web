@@ -107,6 +107,7 @@
 								<feature>pax-web-tomcat</feature>
 								<feature>pax-web-tomcat-websockets</feature>
 								<feature>pax-web-http-tomcat</feature>
+<!--								<feature>pax-web-tomcat-keycloak18</feature>-->
 								<feature>pax-web-undertow</feature>
 								<feature>pax-web-undertow-websockets</feature>
 								<feature>pax-web-http-undertow</feature>

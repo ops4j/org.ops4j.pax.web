@@ -23,7 +23,9 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLParameters;
 
 import org.apache.catalina.Executor;
+import org.apache.catalina.LifecycleException;
 import org.apache.catalina.Server;
+import org.apache.catalina.Service;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.core.StandardServer;
 import org.apache.catalina.core.StandardThreadExecutor;
@@ -149,7 +151,7 @@ public class TomcatFactory {
 			Configuration configuration) {
 		ServerConfiguration sc = configuration.server();
 
-		Connector defaultConnector = new Connector("org.ops4j.pax.web.service.tomcat.internal.PaxWebHttp11Nio2Protocol");
+		Connector defaultConnector = new PaxWebConnector("org.ops4j.pax.web.service.tomcat.internal.PaxWebHttp11Nio2Protocol");
 
 		defaultConnector.setProperty("PaxWebConnectorName", sc.getHttpConnectorName());
 		defaultConnector.setProperty("address", address);
@@ -161,6 +163,7 @@ public class TomcatFactory {
 		}
 
 		PaxWebHttp11Nio2Protocol protocol = (PaxWebHttp11Nio2Protocol) defaultConnector.getProtocolHandler();
+		protocol.setConnector(defaultConnector);
 
 		defaultConnector.setXpoweredBy(false);
 		defaultConnector.setAllowTrace(false);
@@ -194,7 +197,7 @@ public class TomcatFactory {
 		// but this object is configured via old/legacy/soon-deprecated setters on
 		// org.apache.coyote.http11.AbstractHttp11Protocol class
 
-		Connector secureConnector = new Connector("org.ops4j.pax.web.service.tomcat.internal.PaxWebHttp11Nio2Protocol");
+		Connector secureConnector = new PaxWebConnector("org.ops4j.pax.web.service.tomcat.internal.PaxWebHttp11Nio2Protocol");
 
 		secureConnector.setProperty("PaxWebConnectorName", sc.getHttpSecureConnectorName());
 		secureConnector.setProperty("address", address);
@@ -204,6 +207,7 @@ public class TomcatFactory {
 		secureConnector.setProperty("SSLEnabled", "true");
 
 		PaxWebHttp11Nio2Protocol protocol = (PaxWebHttp11Nio2Protocol) secureConnector.getProtocolHandler();
+		protocol.setConnector(secureConnector);
 
 		protocol.setSslImplementationName("org.apache.tomcat.util.net.jsse.JSSEImplementation");
 
@@ -373,7 +377,8 @@ public class TomcatFactory {
 		// special rule for catalinaHome / catalinaBase attributes
 		digester.getRules().match("", "Server").add(new BaseDirsRule(digester));
 
-		// special rule for Connector/@protocol - ensure that HTTP/1.1 is changed to
+		// special rule for Connector/@protocol - ensure that "HTTP/1.1" is changed to
+		// "org.ops4j.pax.web.service.tomcat.internal.PaxWebHttp11Nio2Protocol"
 		List<Rule> rules = digester.getRules().match("", "Server/Service/Connector");
 		int idx = 0;
 		for (Iterator<Rule> iterator = rules.iterator(); iterator.hasNext(); ) {
@@ -508,7 +513,30 @@ public class TomcatFactory {
 				attributes = new AttributesImpl(attributes);
 				((AttributesImpl) attributes).setValue(idx, "org.ops4j.pax.web.service.tomcat.internal.PaxWebHttp11Nio2Protocol");
 			}
-			super.begin(namespace, name, attributes);
+
+			// we need different connector class, so we don't call super.begin()
+
+			Service svc = (Service) digester.peek();
+			Executor ex = null;
+			String executorName = attributes.getValue("executor");
+			if (executorName != null ) {
+				ex = svc.getExecutor(executorName);
+			}
+			/*String */protocolName = attributes.getValue("protocol");
+			Connector con = new Connector(protocolName);
+			if (ex != null) {
+				con.getProtocolHandler().setExecutor(ex);
+//				setExecutor(con, ex);
+			}
+			String sslImplementationName = attributes.getValue("sslImplementationName");
+			if (sslImplementationName != null) {
+				((PaxWebHttp11Nio2Protocol) con.getProtocolHandler()).setSslImplementationName(sslImplementationName);
+//				setSSLImplementationName(con, sslImplementationName);
+			}
+			digester.push(con);
+
+			// do NOT call super.begin()
+//			super.begin(namespace, name, attributes);
 		}
 	}
 

@@ -24,7 +24,6 @@ import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
 import org.apache.catalina.valves.ValveBase;
 import org.apache.tomcat.util.buf.MessageBytes;
-import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.servlet.Default404Servlet;
 
 /**
@@ -76,20 +75,6 @@ public class PaxWebStandardContextValve extends ValveBase {
 		if (wrapper == null) {
 			// we need SOME wrapper, so preprocessors/security/filters are called correctly
 			request.getMappingData().wrapper = wrapperFor404Servlet;
-		}
-
-		// Now we know the target servlet (even if it's 404 servlet) and we have to ensure that Session ID
-		// generator knows about selected OsgiServletContext/OsgiContextModel
-		// because of method signatures (unlike in Jetty) we have to use thread locals here...
-		if (wrapper instanceof PaxWebStandardWrapper) {
-			PaxWebStandardWrapper pwrapper = (PaxWebStandardWrapper) wrapper;
-			OsgiContextModel osgiContextModel = !pwrapper.is404() ? pwrapper.getOsgiContextModel()
-					: getContainer() instanceof PaxWebStandardContext
-					? ((PaxWebStandardContext) getContainer()).getDefaultOsgiContextModel() : null;
-			if (osgiContextModel != null) {
-				String sessionIdPrefix = osgiContextModel.getTemporaryLocation().replaceAll("/", "_");
-				PaxWebSessionIdGenerator.sessionIdPrefix.set(sessionIdPrefix);
-			}
 		}
 
 		ClassLoader tccl = Thread.currentThread().getContextClassLoader();

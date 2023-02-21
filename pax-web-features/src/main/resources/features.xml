@@ -282,6 +282,22 @@ javax.servlet.context.tempdir = ${karaf.data}/pax-web/tmp
 		</configfile>
 	</feature>
 
+	<feature name="pax-web-tomcat-keycloak18" description="Keycloak 18.x Tomcat bundles" version="${project.version}">
+		<!-- This requires mvn:org.keycloak/keycloak-osgi-features/${dependency.org.keycloak18}/xml/features -->
+		<feature>keycloak-adapter-core</feature>
+		<bundle>mvn:org.keycloak/keycloak-osgi-adapter/${dependency.org.keycloak18}</bundle>
+		<!-- These bundles are not part of any enabled Keycloak feature -->
+<!--		<bundle>mvn:org.keycloak/keycloak-tomcat-adapter-spi/${dependency.org.keycloak18}</bundle>-->
+<!--		<bundle>mvn:org.keycloak/keycloak-tomcat-core-adapter/${dependency.org.keycloak18}</bundle>-->
+<!--		<bundle>mvn:org.keycloak/keycloak-tomcat-adapter/${dependency.org.keycloak18}</bundle>-->
+		<!-- Fragment for pax-web-tomcat - should have lower start-level -->
+<!--		<bundle start="false" start-level="25">mvn:org.keycloak/keycloak-pax-web-tomcat8/${dependency.org.keycloak18}</bundle>-->
+		<!-- However we can't even install them as bundles, because they miss OSGi headers -->
+		<!-- See: https://github.com/keycloak/keycloak/pull/11704 -->
+		<!-- That's why Pax Web itself repackages the above bundles in one: -->
+		<bundle start="false" start-level="25">mvn:org.ops4j.pax.web/pax-web-tomcat-keycloak18/${project.version}</bundle>
+	</feature>
+
 	<feature name="pax-web-undertow" description="Undertow 2 bundles" version="${dependency.io.undertow}">
 		<details>
 			Undertow libraries are proper OSGi bundles, but pax-web-undertow exports required Wildfly packages

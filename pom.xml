@@ -3342,6 +3342,10 @@
 		<module>pax-web-itest</module>
 
 		<module>pax-web-manual</module>
+
+		<!-- Keycloak support -->
+		<module>pax-web-keycloak18</module>
+
 	</modules>
 
 	<profiles>
