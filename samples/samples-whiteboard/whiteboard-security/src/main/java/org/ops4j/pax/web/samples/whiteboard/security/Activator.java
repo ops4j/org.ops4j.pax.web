@@ -15,12 +15,16 @@
  */
 package org.ops4j.pax.web.samples.whiteboard.security;
 
+import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultJspMapping;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultSecurityConfigurationMapping;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultSecurityConstraintMapping;
+import org.ops4j.pax.web.service.whiteboard.JspMapping;
 import org.ops4j.pax.web.service.whiteboard.SecurityConfigurationMapping;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
+import org.osgi.framework.PrototypeServiceFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
@@ -36,21 +40,56 @@ public class Activator implements BundleActivator {
 	private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
 
 	private ServiceRegistration<ServletContextHelper> contextReg;
+	private ServiceRegistration<ServletContextHelper> defaultContextReg;
 	private ServiceRegistration<Servlet> secureServletReg;
 	private ServiceRegistration<Servlet> protectedServletReg;
 	private ServiceRegistration<Servlet> anonymousServletReg;
 	private ServiceRegistration<Servlet> errorServletReg;
 	private ServiceRegistration<SecurityConfigurationMapping> securityReg;
+	private ServiceRegistration<JspMapping> jspReg;
 
 	public void start(final BundleContext bundleContext) {
 		Dictionary<String, Object> props;
+
+		// getting authMethod from context property, we can test the same Whiteboard example with different
+		// authentication methods - including KEYCLOAK
+		String authMethod = bundleContext.getProperty("paxweb.authMethod");
+		String realmName = bundleContext.getProperty("paxweb.realmName");
+		String resolver = bundleContext.getProperty("paxweb.keycloak.resolver");
 
 		// register a /pax-web-security context and the servlets will target both default and this context
 		// so we can check security configuration with both of them
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "pax-web-security");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/pax-web-security");
-		contextReg = bundleContext.registerService(ServletContextHelper.class, new ServletContextHelper() {
+		if ("KEYCLOAK".equalsIgnoreCase(authMethod)) {
+			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_INIT_PARAM_PREFIX + "keycloak.config.file",
+					"etc/whiteboard-customcontext-keycloak.json");
+			if (resolver != null && !"".equals(resolver)) {
+				// special configuration of the resolver to check problems detected
+				// in https://github.com/keycloak/keycloak/pull/11704/files (keycloak-pax-web-jetty94 not seeing
+				// org.keycloak.adapters.osgi.PathBasedKeycloakConfigResolver class (its package is not imported)
+				props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_INIT_PARAM_PREFIX + "keycloak.config.resolver", resolver);
+			}
+		}
+		contextReg = bundleContext.registerService(ServletContextHelper.class, new ServletContextHelper(bundleContext.getBundle()) {
+		}, props);
+
+		// in theory, we should register "default" "/" context with higher priority just to set "/" context (init) parameters, but
+		// Pax Web actually collects all the context parameters from all OSGi contexts bound to single target
+		// ServletContext
+		props = new Hashtable<>();
+		// -1 is on purpose to get LOWER ranking than the default context - we want to see if the context (init)
+		// parameter will be available anyway
+		props.put(Constants.SERVICE_RANKING, -1);
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, HttpWhiteboardConstants.HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME);
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/");
+		if ("KEYCLOAK".equalsIgnoreCase(authMethod)) {
+			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_INIT_PARAM_PREFIX + "keycloak.config.file",
+					"etc/whiteboard-rootcontext-keycloak.json");
+		}
+
+		defaultContextReg = bundleContext.registerService(ServletContextHelper.class, new ServletContextHelper(bundleContext.getBundle()) {
 		}, props);
 
 		// Pax Web specific Whiteboard registration of login configuration anf security constraints
@@ -61,10 +100,6 @@ public class Activator implements BundleActivator {
 		security.setContextSelectFilter(String.format("(|(%s=%s)(%s=%s))",
 				HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, HttpWhiteboardConstants.HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME,
 				HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "pax-web-security"));
-		// getting authMethod from context property, we can test the same Whiteboard example with different
-		// authentication methods - including KEYCLOAK
-		String authMethod = bundleContext.getProperty("paxweb.authMethod");
-		String realmName = bundleContext.getProperty("paxweb.realmName");
 		if (authMethod != null && !"".equals(authMethod.trim())) {
 			security.setAuthMethod(authMethod.trim());
 		}
@@ -92,52 +127,115 @@ public class Activator implements BundleActivator {
 		forAdminAndViewer.getUrlPatterns().add("/secure/*");
 		adminAndViewerConstraint.getWebResourceCollections().add(forAdminAndViewer);
 		security.getSecurityConstraints().add(adminAndViewerConstraint);
-		securityReg = bundleContext.registerService(SecurityConfigurationMapping.class, security, props);
+
+		// the servlet invoking javax.servlet.http.HttpServletRequest.logout() must be under some constraint,
+		// otherwise Keycloak won't notice it
+		DefaultSecurityConstraintMapping logoutConstraint = new DefaultSecurityConstraintMapping();
+		logoutConstraint.setName("logout-area");
+		logoutConstraint.getAuthRoles().add("*");
+		DefaultSecurityConstraintMapping.DefaultWebResourceCollectionMapping forLogout = new DefaultSecurityConstraintMapping.DefaultWebResourceCollectionMapping();
+		forLogout.setName("logout");
+		forLogout.getUrlPatterns().add("/logout");
+		logoutConstraint.getWebResourceCollections().add(forLogout);
+		security.getSecurityConstraints().add(logoutConstraint);
+
+		securityReg = bundleContext.registerService(SecurityConfigurationMapping.class, security, null);
+
+		DefaultJspMapping jsp = new DefaultJspMapping();
+		jsp.setUrlPatterns(new String[] { "*.jsp" });
+		jsp.setContextSelectFilter(security.getContextSelectFilter());
+		jspReg = bundleContext.registerService(JspMapping.class, jsp, null);
 
 		// Secure servlet - for admin only
-		SecureServlet secureServlet = new SecureServlet();
 		props = new Hashtable<>();
-		props.put(Constants.SERVICE_SCOPE, Constants.SCOPE_PROTOTYPE);
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "secure-servlet");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/very-secure/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, String.format("(|(%s=%s)(%s=%s))",
 				HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, HttpWhiteboardConstants.HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME,
 				HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "pax-web-security"));
-		secureServletReg = bundleContext.registerService(Servlet.class, secureServlet, props);
+		secureServletReg = bundleContext.registerService(Servlet.class, new PrototypeServiceFactory<Servlet>() {
+			@Override
+			public Servlet getService(Bundle bundle, ServiceRegistration<Servlet> registration) {
+				return new SecureServlet();
+			}
+
+			@Override
+			public void ungetService(Bundle bundle, ServiceRegistration<Servlet> registration, Servlet service) {
+			}
+		}, props);
 
 		// Protected servlet - for admin and logged-in viewer
-		ProtectedServlet protectedServlet = new ProtectedServlet();
 		props = new Hashtable<>();
-		props.put(Constants.SERVICE_SCOPE, Constants.SCOPE_PROTOTYPE);
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "protected-servlet");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/secure/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, String.format("(|(%s=%s)(%s=%s))",
 				HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, HttpWhiteboardConstants.HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME,
 				HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "pax-web-security"));
-		protectedServletReg = bundleContext.registerService(Servlet.class, protectedServlet, props);
+		protectedServletReg = bundleContext.registerService(Servlet.class, new PrototypeServiceFactory<Servlet>() {
+			@Override
+			public Servlet getService(Bundle bundle, ServiceRegistration<Servlet> registration) {
+				return new ProtectedServlet();
+			}
+
+			@Override
+			public void ungetService(Bundle bundle, ServiceRegistration<Servlet> registration, Servlet service) {
+			}
+		}, props);
 
 		// Ordinary servlet - accessible for anonymous users
-		AllWelcomeServlet anonymousServlet = new AllWelcomeServlet();
 		props = new Hashtable<>();
-		props.put(Constants.SERVICE_SCOPE, Constants.SCOPE_PROTOTYPE);
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "anonymous-servlet");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/app/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, String.format("(|(%s=%s)(%s=%s))",
 				HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, HttpWhiteboardConstants.HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME,
 				HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "pax-web-security"));
-		anonymousServletReg = bundleContext.registerService(Servlet.class, anonymousServlet, props);
+		anonymousServletReg = bundleContext.registerService(Servlet.class, new PrototypeServiceFactory<Servlet>() {
+			@Override
+			public Servlet getService(Bundle bundle, ServiceRegistration<Servlet> registration) {
+				return new AllWelcomeServlet();
+			}
+
+			@Override
+			public void ungetService(Bundle bundle, ServiceRegistration<Servlet> registration, Servlet service) {
+			}
+		}, props);
+
+		// Logout servlet
+		props = new Hashtable<>();
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "logout-servlet");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/logout");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, String.format("(|(%s=%s)(%s=%s))",
+				HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, HttpWhiteboardConstants.HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME,
+				HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "pax-web-security"));
+		anonymousServletReg = bundleContext.registerService(Servlet.class, new PrototypeServiceFactory<Servlet>() {
+			@Override
+			public Servlet getService(Bundle bundle, ServiceRegistration<Servlet> registration) {
+				return new LogoutServlet();
+			}
+
+			@Override
+			public void ungetService(Bundle bundle, ServiceRegistration<Servlet> registration, Servlet service) {
+			}
+		}, props);
 
 		// Error servlet - accessible for anonymous users
-		ErrorServlet errorServlet = new ErrorServlet();
 		props = new Hashtable<>();
-		props.put(Constants.SERVICE_SCOPE, Constants.SCOPE_PROTOTYPE);
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "error-servlet");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/error/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, String.format("(|(%s=%s)(%s=%s))",
 				HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, HttpWhiteboardConstants.HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME,
 				HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "pax-web-security"));
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE, new String[]{"401", "403", "404"});
-		errorServletReg = bundleContext.registerService(Servlet.class, errorServlet, props);
+		errorServletReg = bundleContext.registerService(Servlet.class, new PrototypeServiceFactory<Servlet>() {
+			@Override
+			public Servlet getService(Bundle bundle, ServiceRegistration<Servlet> registration) {
+				return new ErrorServlet();
+			}
+
+			@Override
+			public void ungetService(Bundle bundle, ServiceRegistration<Servlet> registration, Servlet service) {
+			}
+		}, props);
 	}
 
 	public void stop(BundleContext bundleContext) {
@@ -157,6 +255,10 @@ public class Activator implements BundleActivator {
 			errorServletReg.unregister();
 			errorServletReg = null;
 		}
+		if (jspReg != null) {
+			jspReg.unregister();
+			jspReg = null;
+		}
 		if (securityReg != null) {
 			securityReg.unregister();
 			securityReg = null;
@@ -164,6 +266,10 @@ public class Activator implements BundleActivator {
 		if (contextReg != null) {
 			contextReg.unregister();
 			contextReg = null;
+		}
+		if (defaultContextReg != null) {
+			defaultContextReg.unregister();
+			defaultContextReg = null;
 		}
 	}
 

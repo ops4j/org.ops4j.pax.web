@@ -59,7 +59,12 @@
 							org.ops4j.pax.web.extender.whiteboard.runtime,
 
 							<!-- from pax-logging-api -->
-							org.slf4j;version="[1.7,2)"
+							org.slf4j;version="[1.7,2)",
+
+							<!-- Needed to use org.keycloak.KeycloakPrincipal -->
+							org.keycloak;version="[18,22)",
+							<!-- Needed to use org.keycloak.adapters.osgi.PathBasedKeycloakConfigResolver -->
+							org.keycloak.adapters.osgi;version="[18,22)"
 						</Import-Package>
 						<Privaet-Package>org.ops4j.pax.web.samples.whiteboard.security</Privaet-Package>
 					</instructions>
@@ -67,6 +72,16 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.keycloak</groupId>
+				<artifactId>keycloak-core</artifactId>
+				<version>${dependency.org.keycloak18}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<dependencies>
 
@@ -101,12 +116,35 @@
 			<artifactId>jakarta.servlet-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.taglibs</groupId>
+			<artifactId>taglibs-standard-impl</artifactId>
+			<scope>provided</scope>
+		</dependency>
 
 		<!-- Logging -->
 
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
+		</dependency>
+
+		<!-- Keycloak -->
+
+		<dependency>
+			<groupId>org.keycloak</groupId>
+			<artifactId>keycloak-core</artifactId>
+			<scope>provided</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.bouncycastle</groupId>
+					<artifactId>bcpkix-jdk15on</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.bouncycastle</groupId>
+					<artifactId>bcprov-jdk15on</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 	</dependencies>
