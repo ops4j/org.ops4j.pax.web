@@ -18,6 +18,7 @@ package org.ops4j.pax.web.karaf.commands;
 import java.util.Set;
 
 import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.support.table.Col;
 import org.apache.karaf.shell.support.table.ShellTable;
@@ -28,6 +29,9 @@ import org.ops4j.pax.web.service.spi.model.views.ReportWebContainerView;
 @Command(scope = "web", name = "servlet-list", description = "Lists all available servlets.")
 @Service
 public class ServletListCommand extends WebCommand {
+
+	@Option(name = "-v", aliases = { "--verbose" })
+	private boolean verbose = false;
 
 	@Override
 	public void doExecute(WebContainer container) {
@@ -46,7 +50,9 @@ public class ServletListCommand extends WebCommand {
 		table.column(new Col("Context Path(s)"));
 		table.column(new Col("URLs"));
 		table.column(new Col("Type"));
-		table.column(new Col("Context Filter"));
+		if (verbose) {
+			table.column(new Col("Context Filter"));
+		}
 
 		servlets.forEach(s -> {
 			long bundleId = s.getBundle().getBundleId();
@@ -57,7 +63,11 @@ public class ServletListCommand extends WebCommand {
 			String type = s.getType();
 			String filter = s.getContextFilter();
 
-			table.addRow().addContent(bundleId, name, cls, contexts, mappings, type, filter);
+			if (verbose) {
+				table.addRow().addContent(bundleId, name, cls, contexts, mappings, type, filter);
+			} else {
+				table.addRow().addContent(bundleId, name, cls, contexts, mappings, type);
+			}
 		});
 
 		table.print(System.out, true);
