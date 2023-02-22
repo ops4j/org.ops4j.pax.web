@@ -120,6 +120,10 @@ public class PaxWebOuterHandlerWrapper implements HandlerWrapper {
 					Cookie cookie = exchange.getRequestCookie(sessionCookie);
 					if (cookie != null) {
 						PaxWebSessionIdGenerator.cookieSessionId.set(cookie.getValue());
+					} else if (context.getCurrentServletContext() != null && context.getCurrentServletContext().getSessionConfig() != null) {
+						// try to get the session ID using other means
+						String sessionId = context.getCurrentServletContext().getSessionConfig().findSessionId(exchange);
+						PaxWebSessionIdGenerator.cookieSessionId.set(sessionId);
 					}
 				}
 

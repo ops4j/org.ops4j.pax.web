@@ -62,11 +62,11 @@
 							org.slf4j;version="[1.7,2)",
 
 							<!-- Needed to use org.keycloak.KeycloakPrincipal -->
-							org.keycloak;version="[18,22)",
+<!--							org.keycloak;version="[18,22)";resolution:=optional,-->
 							<!-- Needed to use org.keycloak.adapters.osgi.PathBasedKeycloakConfigResolver -->
-							org.keycloak.adapters.osgi;version="[18,22)"
+							org.keycloak.adapters.osgi;version="[18,22)";resolution:=optional
 						</Import-Package>
-						<Privaet-Package>org.ops4j.pax.web.samples.whiteboard.security</Privaet-Package>
+						<Private-Package>org.ops4j.pax.web.samples.whiteboard.security</Private-Package>
 					</instructions>
 				</configuration>
 			</plugin>

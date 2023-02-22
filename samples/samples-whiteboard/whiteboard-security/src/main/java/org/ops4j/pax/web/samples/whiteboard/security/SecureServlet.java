@@ -15,9 +15,6 @@
  */
 package org.ops4j.pax.web.samples.whiteboard.security;
 
-import org.keycloak.KeycloakPrincipal;
-import org.keycloak.KeycloakSecurityContext;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -36,12 +33,12 @@ public class SecureServlet extends HttpServlet {
 		request.setAttribute("principalClass", className);
 		request.setAttribute("verySecure", true);
 
-		if (p instanceof KeycloakPrincipal) {
-			KeycloakSecurityContext context = ((KeycloakPrincipal<?>) p).getKeycloakSecurityContext();
-			request.setAttribute("kcRealm", context.getRealm());
-			request.setAttribute("kcTokenString", context.getTokenString());
-			request.setAttribute("kcIdTokenString", context.getIdTokenString());
-		}
+//		if (p instanceof KeycloakPrincipal) {
+//			KeycloakSecurityContext context = ((KeycloakPrincipal<?>) p).getKeycloakSecurityContext();
+//			request.setAttribute("kcRealm", context.getRealm());
+//			request.setAttribute("kcTokenString", context.getTokenString());
+//			request.setAttribute("kcIdTokenString", context.getIdTokenString());
+//		}
 
 		request.getRequestDispatcher("/secure.jsp").forward(request, response);
 	}

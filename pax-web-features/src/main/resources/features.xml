@@ -184,6 +184,8 @@ org.osgi.service.http.secure.enabled = false
 #org.ops4j.pax.web.context.file = ${karaf.etc}/jetty-web.xml
 
 # SameSite attribute configuration for session cookie (possible values: none, lax, strict)
+# Important: when using OpenID Connect / Oauth2 (e.g., Keycloak) SameSite=strict won't work, because
+# the Keycloak redirected response after authentication should contain JSESSIONID cookie
 #org.ops4j.pax.web.session.cookie.sameSite = strict
 
 # this is a root directory for all the context-specific directories managed by Pax Web
@@ -269,6 +271,8 @@ org.osgi.service.http.secure.enabled = false
 #org.ops4j.pax.web.context.file = ${karaf.etc}/tomcat-context.xml
 
 # SameSite attribute configuration for session cookie (possible values: none, lax, strict)
+# Important: when using OpenID Connect / Oauth2 (e.g., Keycloak) SameSite=strict won't work, because
+# the Keycloak redirected response after authentication should contain JSESSIONID cookie
 #org.ops4j.pax.web.session.cookie.sameSite = strict
 
 # this is a root directory for all the context-specific directories managed by Pax Web
@@ -361,6 +365,8 @@ org.osgi.service.http.secure.enabled = false
 #org.ops4j.pax.web.config.file = ${karaf.etc}/undertow.xml
 
 # SameSite attribute configuration for session cookie (possible values: none, lax, strict)
+# Important: when using OpenID Connect / Oauth2 (e.g., Keycloak) SameSite=strict won't work, because
+# the Keycloak redirected response after authentication should contain JSESSIONID cookie
 #org.ops4j.pax.web.session.cookie.sameSite = strict
 
 # this is a root directory for all the context-specific directories managed by Pax Web
@@ -369,6 +375,19 @@ javax.servlet.context.tempdir = ${karaf.data}/pax-web/tmp
 		<configfile finalname="${karaf.etc}/undertow.xml">
 			mvn:org.ops4j.pax.web/pax-web-features/${project.version}/xml/config-undertow
 		</configfile>
+	</feature>
+
+	<feature name="pax-web-undertow-keycloak18" description="Keycloak 18.x Undertow bundles" version="${project.version}">
+		<!-- This requires mvn:org.keycloak/keycloak-osgi-features/${dependency.org.keycloak18}/xml/features -->
+		<feature>keycloak-adapter-core</feature>
+		<bundle>mvn:org.keycloak/keycloak-osgi-adapter/${dependency.org.keycloak18}</bundle>
+		<!--
+			These bundles are part of "keycloak-pax-http-undertow" Keycloak feature, but this feature also includes
+			org.keycloak/keycloak-camel-undertow, so we're providing Pax Web variant of this feature
+		-->
+		<bundle>mvn:org.keycloak/keycloak-undertow-adapter-spi/${dependency.org.keycloak18}</bundle>
+		<bundle>mvn:org.keycloak/keycloak-undertow-adapter/${dependency.org.keycloak18}</bundle>
+		<bundle start="false">mvn:org.keycloak/keycloak-pax-web-undertow/${dependency.org.keycloak18}</bundle>
 	</feature>
 
 	<!-- JSP suport -->

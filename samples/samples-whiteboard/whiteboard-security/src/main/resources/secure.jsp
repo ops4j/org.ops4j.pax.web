@@ -33,10 +33,12 @@
 <p>
     Current user: ${user} (principal class: ${principalClass})<br>
 <ul>
-    <li>Keycloak user name: ${sessionScope["org.keycloak.KeycloakSecurityContext"].idToken.preferredUsername}</li>
-    <li>Keycloak realm: ${kcRealm}</li>
-    <li>Keycloak token string: ${kcTokenString}</li>
-    <li>Keycloak ID token string: ${kcIdTokenString}</li>
+    <c:if test="${not empty sessionScope['org.keycloak.KeycloakSecurityContext']}">
+        <li>Keycloak user name: ${sessionScope["org.keycloak.KeycloakSecurityContext"].idToken.preferredUsername}</li>
+        <li>Keycloak realm ID: ${pageContext.request.userPrincipal.keycloakSecurityContext.realm}</li>
+        <li>Keycloak token string: ${pageContext.request.userPrincipal.keycloakSecurityContext.tokenString}</li>
+        <li>Keycloak ID token string: ${pageContext.request.userPrincipal.keycloakSecurityContext.idTokenString}</li>
+    </c:if>
 </ul>
 </ul>
 </p>
