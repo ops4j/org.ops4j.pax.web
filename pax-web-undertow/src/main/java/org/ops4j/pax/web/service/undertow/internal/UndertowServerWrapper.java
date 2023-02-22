@@ -2421,6 +2421,9 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 
 		stopUndertowContext(contextPath, manager, null, false);
 		DeploymentInfo deploymentInfo = deploymentInfos.get(contextPath);
+		if (deploymentInfo == null) {
+			return;
+		}
 
 		final int[] removed = { 0 };
 
@@ -2606,6 +2609,9 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 			// SCIs require working ServletContext inside OsgiServletContext, but Undertow's ServletContext
 			// is created only later
 			deployment.getServletExtensions().removeIf(e -> e instanceof ContextLinkingServletExtension);
+			// I found that for Keycloak extensions, we kept adding them without removing previous ones
+			// so it's simply easier to remove all the extensions
+			deployment.getServletExtensions().clear();
 			deployment.addServletExtension(new ContextLinkingServletExtension(contextPath, highestRankedContext, highestRankedDynamicContext));
 
 			// first thing - only NOW we can set ServletContext's class loader! It affects many things, including
@@ -2613,6 +2619,9 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 			if (highestRankedContext.getClassLoader() != null) {
 				deployment.setClassLoader(highestRankedContext.getClassLoader());
 			}
+
+			// copy contexts parameters - from all contexts
+			this.osgiContextModels.get(contextPath).forEach(ocm -> ocm.getContextParams().forEach(deployment::addInitParameter));
 
 			// keycloak accesses resources directly inside
 			// org.keycloak.adapters.undertow.KeycloakServletExtension#handleDeployment where we don't have
@@ -2675,6 +2684,10 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 						public String findSessionId(HttpServerExchange exchange) {
 							String prefix = PaxWebSessionIdGenerator.sessionIdPrefix.get();
 							String id = sessionConfig.findSessionId(exchange);
+							int idx = id == null ? -1 : id.indexOf('~');
+							if (idx >= 0) {
+								id = id.substring(idx + 1);
+							}
 							if (id != null && prefix == null) {
 								// we may be restoring sessions in ServletInitialHandler...
 								ServletRequestContext ctx = exchange.getAttachment(ServletRequestContext.ATTACHMENT_KEY);

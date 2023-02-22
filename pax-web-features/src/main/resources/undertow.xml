@@ -186,7 +186,7 @@
 		<servlet-container name="default" default-session-timeout="30">
 			<!-- Not used - configured per container-agnostic web context -->
 			<jsp-config />
-			<session-cookie name="JSESSIONID" domain="domain" http-only="true" max-age="130" secure="true" comment="Session Cookie" />
+<!--			<session-cookie name="JSESSIONID" domain="domain" http-only="true" max-age="-1" secure="false" comment="Session Cookie" />-->
 			<persistent-sessions path="${karaf.data}/web-sessions" />
 			<!-- deflater-level: 0-9. See java.util.zip.Deflater.setLevel(). Used only of per-message-deflate is true -->
 			<websockets buffer-pool="default" worker="default"
