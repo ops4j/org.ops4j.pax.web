@@ -170,7 +170,13 @@ That's why Pax Web itself ships one proper bundle `mvn:org.ops4j.pax.web/pax-web
 * re-exports everything needed from Keycloak, which is related to Tomcat
 * is a fragment of pax-web-tomcat bundle (so `/META-INF/services/org.ops4j.pax.web.service.AuthenticatorService` can be found).
 
-== Technical details for Jetty integration
+This bundle can be found in `pax-web-tomcat-keycloak18` together with required features and Keycloak bundles.
+
+For Undertow, Keycloak provides `keycloak-pax-http-undertow`, however it also contains `org.keycloak/keycloak-camel-undertow` library, which we don't need here.
+
+That's why Pax Web itself provides `pax-web-undertow-keycloak18` feature, which uses only required Keycloak bundles.
+
+== Technical details for Jetty (for now) integration
 
 When analyzing problems with Keycloak integration, I found that the most problematic part was ... session management.
 This is because Whiteboard specification mandates separate sessions for different `org.osgi.service.http.context.ServletContextHelper` service even if they target the same physical target context (like `/`).

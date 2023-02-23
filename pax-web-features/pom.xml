@@ -238,6 +238,10 @@
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-tomcat-keycloak18</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-tomcat-keycloak20</artifactId>
 		</dependency>
 		<dependency>
