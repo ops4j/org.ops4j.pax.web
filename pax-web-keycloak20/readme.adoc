@@ -1,0 +1,116 @@
+= Integration with Keycloak 19+
+
+More information is available in readme file for pax-web-keycloak18.
+
+For Keycloak 19+, where the OSGi/Karaf/Pax Web bits are removed, we have to repackage more. For Keycloak 18 we had to repackage Tomcat Keycloak libraries, for Keycloak 19+ we'll additionally repackage Jetty and Undertow ones.
+
+The Keycloak libraries that were providing `org.ops4j.pax.web.service.AuthenticatorService` services in Keycloak 18 were:
+
+* org.keycloak/keycloak-pax-web-jetty94
+* org.keycloak/keycloak-pax-web-tomcat8
+* org.keycloak/keycloak-pax-web-undertow
+
+While the Undertow related library provided only `org.keycloak.adapters.osgi.tomcat.KeycloakAuthenticatorService`, Jetty and Tomcat related libraries were providing additionally:
+
+* `org.keycloak.adapters.osgi.jetty94.PaxWebIntegrationService` - this was used to call Pax Web API methods:
+** `org.ops4j.pax.web.service.WebContainer.registerJettyWebXml()`
+** `org.ops4j.pax.web.service.WebContainer.registerConstraintMapping()`
+** `org.ops4j.pax.web.service.WebContainer.registerLoginConfig()`
+* `org.keycloak.adapters.osgi.undertow.PaxWebIntegrationService` - as above, but for Undertow
+* `org.keycloak.adapters.osgi.undertow.CxfKeycloakAuthHandler` - implementation of `org.apache.cxf.transport.http_undertow.CXFUndertowHttpHandler` for `org.apache.cxf/cxf-rt-transports-http-undertow`
+
+We don't backport the above to Pax Web for Keycloak 20+ support.
+
+== Installation
+
+The Keycloak integration tests can be performed using Apache Karaf 4.4.3.
+
+Before starting Karaf:
+----
+$ cat <<EOF >>etc/config.properties
+paxweb.authMethod = KEYCLOAK
+paxweb.keycloak.resolver = org.keycloak.adapters.osgi.PathBasedKeycloakConfigResolver
+EOF
+----
+
+In Karaf for Jetty:
+----
+karaf@root()> feature:install pax-web-http-jetty
+karaf@root()> feature:install pax-web-jsp
+karaf@root()> feature:install pax-web-whiteboard
+karaf@root()> feature:install pax-web-karaf
+karaf@root()> feature:install pax-web-jetty-keycloak20
+karaf@root()> install -s mvn:org.ops4j.pax.web.samples/whiteboard-security/8.0.15
+----
+
+In Karaf for Tomcat:
+----
+karaf@root()> feature:install pax-web-http-tomcat
+karaf@root()> feature:install pax-web-jsp
+karaf@root()> feature:install pax-web-whiteboard
+karaf@root()> feature:install pax-web-karaf
+karaf@root()> feature:install pax-web-tomcat-keycloak20
+karaf@root()> install -s mvn:org.ops4j.pax.web.samples/whiteboard-security/8.0.15
+----
+
+In Karaf for Undertow:
+----
+karaf@root()> feature:install pax-web-http-undertow
+karaf@root()> feature:install pax-web-jsp
+karaf@root()> feature:install pax-web-whiteboard
+karaf@root()> feature:install pax-web-karaf
+karaf@root()> feature:install pax-web-undertow-keycloak20
+karaf@root()> install -s mvn:org.ops4j.pax.web.samples/whiteboard-security/8.0.15
+----
+
+Before trying to run the example, we need running Keycloak 20 server:
+----
+$ pwd
+/data/servers/keycloak-20.0.3
+
+$ bin/kc.sh start-dev --http-port 8180
+2023-02-23 14:17:58,426 INFO  [org.keycloak.quarkus.runtime.hostname.DefaultHostnameProvider] (main) Hostname settings: Base URL: <unset>, Hostname: <request>, Strict HTTPS: false, Path: <request>, Strict BackChannel: false, Admin URL: <unset>, Admin: <request>, Port: -1, Proxied: false
+...
+2023-02-23 14:18:02,388 INFO  [io.quarkus] (main) Keycloak 20.0.3 on JVM (powered by Quarkus 2.13.6.Final) started in 5.805s. Listening on: http://0.0.0.0:8180
+...
+----
+
+Now, the Keycloak console is available at http://127.0.0.1:8180/admin/master/console/#/.
+
+We need to prepare some configuration:
+
+* separate realm called `paxweb`
+* `paxweb-admin` and `paxweb-viewer` roles
+* `admin` and `viewer` users (users' passwords must be set)
+* `whiteboard-customcontext` _client_ with `http://localhost:8181/pax-web-security/*` _Valid Redirect URIs_
+* `whiteboard-rootcontext` _client_ with `http://localhost:8181/*` _Valid Redirect URIs_
+
+Make sure that _Standard Flow Enabled_ is selected for the clients.
+
+After configuring the realm, roles, users and the clients, we can get the configurations and write them to Karaf's:
+
+`etc/whiteboard-customcontext-keycloak.json`:
+----
+{
+  "realm": "paxweb",
+  "auth-server-url": "http://127.0.0.1:8180/auth/",
+  "ssl-required": "external",
+  "resource": "whiteboard-customcontext",
+  "public-client": true,
+  "confidential-port": 0
+}
+----
+
+`etc/whiteboard-rootcontext-keycloak.json`:
+----
+{
+  "realm": "paxweb",
+  "auth-server-url": "http://127.0.0.1:8180/auth/",
+  "ssl-required": "external",
+  "resource": "whiteboard-rootcontext",
+  "public-client": true,
+  "confidential-port": 0
+}
+----
+
+If the resolver used is `org.keycloak.adapters.osgi.PathBasedKeycloakConfigResolver`, the configuration file for `/pax-web-security` context should be `etc/pax-web-security-keycloak.json`. This option is used to check different types of `org.keycloak.adapters.KeycloakConfigResolver` implementations.

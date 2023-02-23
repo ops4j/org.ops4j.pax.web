@@ -54,10 +54,10 @@ public class WhiteboardSecurityConfigurationTest extends MultiContainerTestSuppo
 	public void whiteboardSecurityConfiguration() throws Exception {
 		Bundle sample1 = mockBundle("sample1");
 
-		ServletContextHelper helper1 = new ServletContextHelper() {};
+		ServletContextHelper helper1 = new ServletContextHelper() { };
 		getServletContextHelperCustomizer().addingService(mockServletContextHelperReference(sample1, "c1",
 				() -> helper1, 0L, 0, "/c1"));
-		ServletContextHelper helper2 = new ServletContextHelper() {};
+		ServletContextHelper helper2 = new ServletContextHelper() { };
 		getServletContextHelperCustomizer().addingService(mockServletContextHelperReference(sample1, "c2",
 				() -> helper2, 0L, 0, "/c2"));
 

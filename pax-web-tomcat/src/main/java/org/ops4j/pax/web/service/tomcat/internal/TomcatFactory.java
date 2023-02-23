@@ -23,7 +23,6 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLParameters;
 
 import org.apache.catalina.Executor;
-import org.apache.catalina.LifecycleException;
 import org.apache.catalina.Server;
 import org.apache.catalina.Service;
 import org.apache.catalina.connector.Connector;
@@ -523,7 +522,7 @@ public class TomcatFactory {
 				ex = svc.getExecutor(executorName);
 			}
 			/*String */protocolName = attributes.getValue("protocol");
-			Connector con = new Connector(protocolName);
+			PaxWebConnector con = new PaxWebConnector(protocolName);
 			if (ex != null) {
 				con.getProtocolHandler().setExecutor(ex);
 //				setExecutor(con, ex);
