@@ -172,8 +172,8 @@
 		<dependency.commons-fileupload>1.5</dependency.commons-fileupload>
 		<dependency.commons-io>2.11.0</dependency.commons-io>
 		<dependency.com.fasterxml.classmate>1.5.1</dependency.com.fasterxml.classmate>
-		<dependency.com.fasterxml.jackson.core>2.14.1</dependency.com.fasterxml.jackson.core>
-		<dependency.com.fasterxml.jackson.core.databind>2.14.1</dependency.com.fasterxml.jackson.core.databind>
+		<dependency.com.fasterxml.jackson.core>2.14.2</dependency.com.fasterxml.jackson.core>
+		<dependency.com.fasterxml.jackson.core.databind>2.14.2</dependency.com.fasterxml.jackson.core.databind>
 		<dependency.com.fasterxml.woodstox>6.4.0</dependency.com.fasterxml.woodstox>
 		<dependency.com.sun.activation>1.2.0</dependency.com.sun.activation>
 		<dependency.com.sun.istack>3.0.12</dependency.com.sun.istack>
@@ -230,7 +230,9 @@
 
 		<dependency.org.apache.geronimo.bundles.commons-discovery>0.4_1</dependency.org.apache.geronimo.bundles.commons-discovery>
 
+		<dependency.org.apache.httpcomponents.client4>4.5.14</dependency.org.apache.httpcomponents.client4>
 		<dependency.org.apache.httpcomponents.client5>5.2.1</dependency.org.apache.httpcomponents.client5>
+		<dependency.org.apache.httpcomponents.core4>4.4.16</dependency.org.apache.httpcomponents.core4>
 		<dependency.org.apache.httpcomponents.core5>5.2</dependency.org.apache.httpcomponents.core5>
 		<dependency.org.apache.karaf>4.3.8</dependency.org.apache.karaf>
 		<dependency.org.apache.logging.log4j>2.18.0</dependency.org.apache.logging.log4j>
@@ -278,6 +280,7 @@
 		<dependency.org.jline>3.21.0</dependency.org.jline>
 		<dependency.org.jsoup>1.15.3</dependency.org.jsoup>
 		<dependency.org.keycloak18>18.0.3</dependency.org.keycloak18>
+		<dependency.org.keycloak20>20.0.3</dependency.org.keycloak20>
 		<dependency.org.mockito>4.11.0</dependency.org.mockito>
 		<dependency.org.mortbay.jetty.alpn>8.1.13.v20181017</dependency.org.mortbay.jetty.alpn>
 
@@ -1382,6 +1385,39 @@
 <!--				<artifactId>whiteboard-blueprint</artifactId>-->
 <!--				<version>${project.version}</version>-->
 <!--			</dependency>-->
+
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>pax-web-jetty-keycloak20</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>pax-web-tomcat-keycloak18</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>pax-web-tomcat-keycloak20</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>pax-web-undertow-keycloak20</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>keycloak20-common</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>keycloak20-osgi-adapter</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 
 			<!-- OPS4J dependencies -->
 
@@ -2954,6 +2990,11 @@
 				<artifactId>bcpkix-jdk18on</artifactId>
 				<version>${dependency.org.bouncycastle}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcutil-jdk18on</artifactId>
+				<version>${dependency.org.bouncycastle}</version>
+			</dependency>
 
 			<dependency>
 				<groupId>org.jboss.weld</groupId>
@@ -3097,6 +3138,17 @@
 				<groupId>org.javassist</groupId>
 				<artifactId>javassist</artifactId>
 				<version>${dependency.org.javassist}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpclient-osgi</artifactId>
+				<version>${dependency.org.apache.httpcomponents.client4}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpcore-osgi</artifactId>
+				<version>${dependency.org.apache.httpcomponents.core4}</version>
 			</dependency>
 
 			<dependency>
@@ -3345,6 +3397,7 @@
 
 		<!-- Keycloak support -->
 		<module>pax-web-keycloak18</module>
+		<module>pax-web-keycloak20</module>
 
 	</modules>
 

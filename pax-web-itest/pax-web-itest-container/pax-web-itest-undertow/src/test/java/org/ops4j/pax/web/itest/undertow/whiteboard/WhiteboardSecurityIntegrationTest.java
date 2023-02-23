@@ -38,7 +38,8 @@ public class WhiteboardSecurityIntegrationTest extends AbstractWhiteboardSecurit
 		MavenArtifactProvisionOption auth = mavenBundle("org.ops4j.pax.web.samples", "auth-config-fragment-undertow")
 				.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1).noStart();
 		Option[] authOptions = combine(serverOptions, auth);
-		return combine(combine(authOptions, paxWebExtenderWhiteboard()),
+		Option[] jspOptions = combine(authOptions, paxWebJsp());
+		return combine(combine(jspOptions, paxWebExtenderWhiteboard()),
 				frameworkProperty("paxweb.authMethod").value("BASIC"),
 				frameworkProperty("paxweb.realmName").value("default"));
 	}

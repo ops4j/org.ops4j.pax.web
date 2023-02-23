@@ -50,45 +50,45 @@ public abstract class AbstractWhiteboardSecurityIntegrationTest extends Abstract
 	@Test
 	public void testSecureAccess() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
-				.withResponseAssertion("Response must contain 'Welcome to Anonymous Servlet'",
-						resp -> resp.contains("Welcome to Anonymous Servlet"))
+				.withResponseAssertion("Response must contain 'Pax Web Security example (anonymous area)'",
+						resp -> resp.contains("Pax Web Security example (anonymous area)"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/app/x");
 		HttpTestClientFactory.createDefaultTestClient()
-				.withResponseAssertion("Response must contain 'Welcome to Anonymous Servlet'",
-						resp -> resp.contains("Welcome to Anonymous Servlet"))
+				.withResponseAssertion("Response must contain 'Pax Web Security example (anonymous area)'",
+						resp -> resp.contains("Pax Web Security example (anonymous area)"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/pax-web-security/app/x");
 
 		HttpTestClientFactory.createDefaultTestClient()
 				.authenticate("admin", "admin", "default")
-				.withResponseAssertion("Response must contain 'Welcome to Protected Servlet (admins and viewers only)'",
-						resp -> resp.contains("Welcome to Protected Servlet (admins and viewers only)"))
+				.withResponseAssertion("Response must contain 'Pax Web Security example (secure area)'",
+						resp -> resp.contains("Pax Web Security example (secure area)"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/secure/x");
 		HttpTestClientFactory.createDefaultTestClient()
 				.authenticate("admin", "admin", "default")
-				.withResponseAssertion("Response must contain 'Welcome to Protected Servlet (admins and viewers only)'",
-						resp -> resp.contains("Welcome to Protected Servlet (admins and viewers only)"))
+				.withResponseAssertion("Response must contain 'Pax Web Security example (secure area)'",
+						resp -> resp.contains("Pax Web Security example (secure area)"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/pax-web-security/secure/x");
 
 		HttpTestClientFactory.createDefaultTestClient()
 				.authenticate("viewer", "viewer", "default")
-				.withResponseAssertion("Response must contain 'Welcome to Protected Servlet (admins and viewers only)'",
-						resp -> resp.contains("Welcome to Protected Servlet (admins and viewers only)"))
+				.withResponseAssertion("Response must contain 'Pax Web Security example (secure area)'",
+						resp -> resp.contains("Pax Web Security example (secure area)"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/secure/x");
 		HttpTestClientFactory.createDefaultTestClient()
 				.authenticate("viewer", "viewer", "default")
-				.withResponseAssertion("Response must contain 'Welcome to Protected Servlet (admins and viewers only)'",
-						resp -> resp.contains("Welcome to Protected Servlet (admins and viewers only)"))
+				.withResponseAssertion("Response must contain 'Pax Web Security example (secure area)'",
+						resp -> resp.contains("Pax Web Security example (secure area)"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/pax-web-security/secure/x");
 
 		HttpTestClientFactory.createDefaultTestClient()
 				.authenticate("admin", "admin", "default")
-				.withResponseAssertion("Response must contain 'Welcome to Secure Servlet (admins only)'",
-						resp -> resp.contains("Welcome to Secure Servlet (admins only)"))
+				.withResponseAssertion("Response must contain 'Pax Web Security example (very secure area)'",
+						resp -> resp.contains("Pax Web Security example (very secure area)"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/very-secure/x");
 		HttpTestClientFactory.createDefaultTestClient()
 				.authenticate("admin", "admin", "default")
-				.withResponseAssertion("Response must contain 'Welcome to Secure Servlet (admins only)'",
-						resp -> resp.contains("Welcome to Secure Servlet (admins only)"))
+				.withResponseAssertion("Response must contain 'Pax Web Security example (very secure area)'",
+						resp -> resp.contains("Pax Web Security example (very secure area)"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/pax-web-security/very-secure/x");
 
 		HttpTestClientFactory.createDefaultTestClient()
