@@ -33,6 +33,67 @@
 
 	<name>OPS4J Pax Web - Keycloak 18.x support</name>
 
+	<dependencyManagement>
+		<dependencies>
+
+			<!-- Keycloak -->
+
+			<dependency>
+				<groupId>org.keycloak</groupId>
+				<artifactId>keycloak-common</artifactId>
+				<version>${dependency.org.keycloak18}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.keycloak</groupId>
+				<artifactId>keycloak-core</artifactId>
+				<version>${dependency.org.keycloak18}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.keycloak</groupId>
+				<artifactId>keycloak-authz-client</artifactId>
+				<version>${dependency.org.keycloak18}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.keycloak</groupId>
+				<artifactId>keycloak-adapter-core</artifactId>
+				<version>${dependency.org.keycloak18}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.keycloak</groupId>
+				<artifactId>keycloak-adapter-spi</artifactId>
+				<version>${dependency.org.keycloak18}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.keycloak</groupId>
+				<artifactId>keycloak-osgi-adapter</artifactId>
+				<version>${dependency.org.keycloak18}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.keycloak</groupId>
+				<artifactId>keycloak-tomcat-core-adapter</artifactId>
+				<version>${dependency.org.keycloak18}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.keycloak</groupId>
+				<artifactId>keycloak-tomcat-adapter-spi</artifactId>
+				<version>${dependency.org.keycloak18}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.keycloak</groupId>
+				<artifactId>keycloak-tomcat-adapter</artifactId>
+				<version>${dependency.org.keycloak18}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.keycloak</groupId>
+				<artifactId>keycloak-pax-web-tomcat8</artifactId>
+				<version>${dependency.org.keycloak18}</version>
+			</dependency>
+
+		</dependencies>
+	</dependencyManagement>
+
 	<modules>
 		<module>pax-web-tomcat-keycloak18</module>
 	</modules>
