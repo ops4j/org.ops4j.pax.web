@@ -234,7 +234,7 @@
 		<dependency.org.apache.httpcomponents.core4>4.4.16</dependency.org.apache.httpcomponents.core4>
 		<dependency.org.apache.httpcomponents.core5>5.2</dependency.org.apache.httpcomponents.core5>
 		<dependency.org.apache.karaf>4.4.2</dependency.org.apache.karaf>
-		<dependency.org.apache.logging.log4j>2.18.0</dependency.org.apache.logging.log4j>
+		<dependency.org.apache.logging.log4j>2.20.0</dependency.org.apache.logging.log4j>
 		<dependency.org.apache.myfaces>2.3.10</dependency.org.apache.myfaces>
 		<dependency.org.apache.myfaces.commons.facelets-examples20>1.0.2.1</dependency.org.apache.myfaces.commons.facelets-examples20>
 		<dependency.org.apache.myfaces.trinidad>2.2.1</dependency.org.apache.myfaces.trinidad>
@@ -283,7 +283,7 @@
 
 		<dependency.org.ops4j.base>1.5.1</dependency.org.ops4j.base>
 		<dependency.org.ops4j.pax.exam>4.13.5</dependency.org.ops4j.pax.exam>
-		<dependency.org.ops4j.pax.logging>2.0.19</dependency.org.ops4j.pax.logging>
+		<dependency.org.ops4j.pax.logging>2.2.2</dependency.org.ops4j.pax.logging>
 		<dependency.org.ops4j.pax.swissbox>1.8.4</dependency.org.ops4j.pax.swissbox>
 		<dependency.org.ops4j.pax.url>2.6.12</dependency.org.ops4j.pax.url>
 
