@@ -68,7 +68,7 @@ public class WebContainerSecurityConfigurationTest extends MultiContainerTestSup
 		response = httpGET(port, "/test", "Authorization: Basic " + Base64.getEncoder().encodeToString("admin:admin".getBytes(StandardCharsets.UTF_8)));
 		if (runtime == Runtime.JETTY) {
 			assertTrue(response.contains("user principal: admin"));
-			assertTrue(response.contains("user principal class: org.eclipse.jetty.security.AbstractLoginService$UserPrincipal"));
+			assertTrue(response.contains("user principal class: org.eclipse.jetty.security.UserPrincipal"));
 			assertTrue(response.contains("user is admin: true"));
 		} else if (runtime == Runtime.TOMCAT) {
 			// Tomcat doesn't perform authentication if there are no constraints configured
@@ -138,7 +138,7 @@ public class WebContainerSecurityConfigurationTest extends MultiContainerTestSup
 		response = httpGET(port, "/test", "Authorization: Basic " + Base64.getEncoder().encodeToString("admin:admin".getBytes(StandardCharsets.UTF_8)));
 		if (runtime == Runtime.JETTY) {
 			assertTrue(response.contains("user principal: admin"));
-			assertTrue(response.contains("user principal class: org.eclipse.jetty.security.AbstractLoginService$UserPrincipal"));
+			assertTrue(response.contains("user principal class: org.eclipse.jetty.security.UserPrincipal"));
 			assertTrue(response.contains("user is admin: true"));
 		} else if (runtime == Runtime.TOMCAT) {
 			assertTrue(response.contains("user principal: admin"));
