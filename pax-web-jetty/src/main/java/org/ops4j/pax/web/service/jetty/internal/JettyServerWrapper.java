@@ -1062,13 +1062,15 @@ class JettyServerWrapper implements BatchVisitor {
 				sch.getServletContext().setEffectiveMajorVersion(meta.getMajorVersion());
 				sch.getServletContext().setEffectiveMinorVersion(meta.getMinorVersion());
 				sch.setDisplayName(meta.getDisplayName());
+				sch.setAttribute("request-character-encoding", meta.getRequestCharacterEncoding());
+				sch.setDefaultRequestCharacterEncoding(meta.getRequestCharacterEncoding());
+				sch.setAttribute("response-character-encoding", meta.getResponseCharacterEncoding());
+				sch.setDefaultResponseCharacterEncoding(meta.getResponseCharacterEncoding());
 				// org.eclipse.jetty.webapp.WebDescriptor._distributable - doesn't do anything useful (?)
 //				meta.getDistributable();
 				// nowhere to set these too
 //				meta.isMetadataComplete();
 //				meta.getPublicId();
-//				meta.getRequestCharacterEncoding();
-//				meta.getResponseCharacterEncoding();
 
 				if (sch.getSecurityHandler() instanceof ConstraintAware) {
 					((ConstraintAware) sch.getSecurityHandler()).setDenyUncoveredHttpMethods(meta.isDenyUncoveredHttpMethods());
