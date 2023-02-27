@@ -221,6 +221,14 @@ javax.servlet.context.tempdir = ${karaf.data}/pax-web/tmp
 		<bundle start="false" start-level="25">mvn:org.ops4j.pax.web/pax-web-jetty-keycloak20/${project.version}</bundle>
 	</feature>
 
+	<feature name="pax-web-jetty-keycloak21" description="Keycloak 21.x+ Jetty bundles" version="${project.version}">
+		<!-- This feature doesn't require any external feature repository -->
+		<feature>keycloak21-adapter-core</feature>
+		<feature>pax-web-http-jetty</feature>
+
+		<bundle start="false" start-level="25">mvn:org.ops4j.pax.web/pax-web-jetty-keycloak21/${project.version}</bundle>
+	</feature>
+
 	<feature name="pax-web-tomcat" description="Tomcat 9 bundles" version="${dependency.org.apache.tomcat}">
 		<details>
 			Tomcat libraries are repackaged in pax-web-tomcat bundle based on tomcat-embed-core
@@ -322,6 +330,14 @@ javax.servlet.context.tempdir = ${karaf.data}/pax-web/tmp
 		<bundle start="false" start-level="25">mvn:org.ops4j.pax.web/pax-web-tomcat-keycloak20/${project.version}</bundle>
 	</feature>
 
+	<feature name="pax-web-tomcat-keycloak21" description="Keycloak 21.x+ Tomcat bundles" version="${project.version}">
+		<!-- This feature doesn't require any external feature repository -->
+		<feature>keycloak21-adapter-core</feature>
+		<feature>pax-web-tomcat</feature>
+
+		<bundle start="false" start-level="25">mvn:org.ops4j.pax.web/pax-web-tomcat-keycloak21/${project.version}</bundle>
+	</feature>
+
 	<feature name="pax-web-undertow" description="Undertow 2 bundles" version="${dependency.io.undertow}">
 		<details>
 			Undertow libraries are proper OSGi bundles, but pax-web-undertow exports required Wildfly packages
@@ -420,6 +436,14 @@ javax.servlet.context.tempdir = ${karaf.data}/pax-web/tmp
 		<bundle start="false" start-level="25">mvn:org.ops4j.pax.web/pax-web-undertow-keycloak20/${project.version}</bundle>
 	</feature>
 
+	<feature name="pax-web-undertow-keycloak21" description="Keycloak 21.x+ Undertow bundles" version="${project.version}">
+		<!-- This feature doesn't require any external feature repository -->
+		<feature>keycloak21-adapter-core</feature>
+		<feature>pax-web-undertow</feature>
+
+		<bundle start="false" start-level="25">mvn:org.ops4j.pax.web/pax-web-undertow-keycloak21/${project.version}</bundle>
+	</feature>
+
 	<!-- JSP suport -->
 
 	<feature name="pax-web-jsp" version="${project.version}">
@@ -488,6 +512,36 @@ javax.servlet.context.tempdir = ${karaf.data}/pax-web/tmp
 
 		<bundle>mvn:org.ops4j.pax.web/keycloak20-common/${project.version}</bundle>
 		<bundle>mvn:org.ops4j.pax.web/keycloak20-osgi-adapter/${project.version}</bundle>
+
+		<bundle dependency="true">mvn:org.apache.httpcomponents/httpcore-osgi/${dependency.org.apache.httpcomponents.core4}</bundle>
+		<bundle dependency="true">mvn:org.apache.httpcomponents/httpclient-osgi/${dependency.org.apache.httpcomponents.client4}</bundle>
+
+		<bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/${dependency.com.fasterxml.jackson.core}</bundle>
+		<bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/${dependency.com.fasterxml.jackson.core}</bundle>
+		<bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/${dependency.com.fasterxml.jackson.core.databind}</bundle>
+
+		<bundle dependency="true">mvn:org.bouncycastle/bcprov-jdk18on/${dependency.org.bouncycastle}</bundle>
+		<bundle dependency="true">mvn:org.bouncycastle/bcpkix-jdk18on/${dependency.org.bouncycastle}</bundle>
+		<bundle dependency="true">mvn:org.bouncycastle/bcutil-jdk18on/${dependency.org.bouncycastle}</bundle>
+	</feature>
+
+	<feature name="keycloak21-adapter-core" description="Migration of removed Keyloak feature to Pax Web" version="${project.version}">
+		<details>This feature replaces a feature that was available in Keycloak 18 and earlier</details>
+
+		<!--
+			These bundles were part of keycloak-adapter-core feature in Keycloak 18, but
+			 - there are new dependencies (keycloak-crypto-default)
+			 - there's SPI requirement (https://github.com/keycloak/keycloak/issues/9287), but we don't want SPI-Fly
+			 - we can control packages better after repackaging (OSGi is not easy...)
+		-->
+		<!--		<bundle>mvn:org.keycloak/keycloak-common/${dependency.org.keycloak21}</bundle>-->
+		<!--		<bundle>mvn:org.keycloak/keycloak-core/${dependency.org.keycloak21}</bundle>-->
+		<!--		<bundle>mvn:org.keycloak/keycloak-authz-client/${dependency.org.keycloak21}</bundle>-->
+		<!--		<bundle>mvn:org.keycloak/keycloak-adapter-spi/${dependency.org.keycloak21}</bundle>-->
+		<!--		<bundle>mvn:org.keycloak/keycloak-adapter-core/${dependency.org.keycloak21}</bundle>-->
+
+		<bundle>mvn:org.ops4j.pax.web/keycloak21-common/${project.version}</bundle>
+		<bundle>mvn:org.ops4j.pax.web/keycloak21-osgi-adapter/${project.version}</bundle>
 
 		<bundle dependency="true">mvn:org.apache.httpcomponents/httpcore-osgi/${dependency.org.apache.httpcomponents.core4}</bundle>
 		<bundle dependency="true">mvn:org.apache.httpcomponents/httpclient-osgi/${dependency.org.apache.httpcomponents.client4}</bundle>
