@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright 2023 OPS4J.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.ops4j.pax.web</groupId>
+		<artifactId>pax-web-keycloak</artifactId>
+		<version>9.0.6-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+
+	<groupId>org.ops4j.pax.web</groupId>
+	<artifactId>keycloak-common</artifactId>
+	<packaging>bundle</packaging>
+
+	<name>OPS4J Pax Web - Keycloak 20.x+ support - common</name>
+
+	<description>
+		This module repackages fundamental Keycloak bundles ensuring correct set of exported/imported packages.
+		The reason is that Keycloak drops (not maintains) OSGi integration, so Pax Web can be a new home for
+		OSGified versions.
+	</description>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Bundle-Description>Repackage of Keycloak common packages</Bundle-Description>
+						<Private-Package>
+							org.keycloak.crypto.def;-split-package:=merge-first,
+							org.keycloak.*
+						</Private-Package>
+						<Export-Package>
+							<!--
+								org.keycloak/keycloak-common
+								depends on:
+								 - com.sun.activation/jakarta.activation
+							-->
+							org.keycloak.common;version="${dependency.org.keycloak}",
+							org.keycloak.common.constants;version="${dependency.org.keycloak}",
+							org.keycloak.common.crypto;version="${dependency.org.keycloak}",
+							org.keycloak.common.enums;version="${dependency.org.keycloak}",
+							org.keycloak.common.util;version="${dependency.org.keycloak}",
+							org.keycloak.common.util.reflections;version="${dependency.org.keycloak}",
+							<!--
+								org.keycloak/keycloak-core
+								depends on:
+								 - com.fasterxml.jackson.core/jackson-core
+								 - com.fasterxml.jackson.core/jackson-databind
+							-->
+							org.keycloak;version="${dependency.org.keycloak}",
+							org.keycloak.constants;version="${dependency.org.keycloak}",
+							org.keycloak.crypto;version="${dependency.org.keycloak}",
+							org.keycloak.enums;version="${dependency.org.keycloak}",
+							org.keycloak.exceptions;version="${dependency.org.keycloak}",
+							org.keycloak.jose;version="${dependency.org.keycloak}",
+							org.keycloak.jose.jwe;version="${dependency.org.keycloak}",
+							org.keycloak.jose.jwe.alg;version="${dependency.org.keycloak}",
+							org.keycloak.jose.jwe.enc;version="${dependency.org.keycloak}",
+							org.keycloak.jose.jwk;version="${dependency.org.keycloak}",
+							org.keycloak.jose.jws;version="${dependency.org.keycloak}",
+							org.keycloak.jose.jws.crypto;version="${dependency.org.keycloak}",
+							org.keycloak.json;version="${dependency.org.keycloak}",
+							org.keycloak.protocol;version="${dependency.org.keycloak}",
+							org.keycloak.protocol.oidc;version="${dependency.org.keycloak}",
+							org.keycloak.protocol.oidc.representations;version="${dependency.org.keycloak}",
+							org.keycloak.representations;version="${dependency.org.keycloak}",
+							org.keycloak.representations.account;version="${dependency.org.keycloak}",
+							org.keycloak.representations.adapters;version="${dependency.org.keycloak}",
+							org.keycloak.representations.adapters.action;version="${dependency.org.keycloak}",
+							org.keycloak.representations.adapters.config;version="${dependency.org.keycloak}",
+							org.keycloak.representations.docker;version="${dependency.org.keycloak}",
+							org.keycloak.representations.idm;version="${dependency.org.keycloak}",
+							org.keycloak.representations.idm.authorization;version="${dependency.org.keycloak}",
+							org.keycloak.representations.info;version="${dependency.org.keycloak}",
+							org.keycloak.representations.oidc;version="${dependency.org.keycloak}",
+							org.keycloak.representations.provider;version="${dependency.org.keycloak}",
+							org.keycloak.util;version="${dependency.org.keycloak}",
+							<!--
+								org.keycloak/keycloak-authz-client
+								depends (1st level) on:
+								 - org.apache.httpcomponents/httpclient
+								 - org.jboss.logging/jboss-logging
+							-->
+							org.keycloak.authorization.client;version="${dependency.org.keycloak}",
+							org.keycloak.authorization.client.representation;version="${dependency.org.keycloak}",
+							org.keycloak.authorization.client.resource;version="${dependency.org.keycloak}",
+							org.keycloak.authorization.client.util;version="${dependency.org.keycloak}",
+							<!--
+								org.keycloak/keycloak-adapter-spi
+							-->
+							org.keycloak.adapters.spi;version="${dependency.org.keycloak}",
+							<!--
+								org.keycloak/keycloak-adapter-core
+								depends on:
+								 - org.keycloak/keycloak-crypto-default
+								    - org.bouncycastle/bcpkix-jdk15on
+								    - org.bouncycastle/bcprov-jdk15on
+								    - org.keycloak/keycloak-server-spi
+								    - org.keycloak/keycloak-server-spi-private
+								       - com.github.ua-parser/uap-java
+								          - org.apache.commons/commons-collections4
+								          - org.yaml/snakeyaml
+								       - org.apache.httpcomponents/httpclient
+								the point is that we don't actually need the server-side stuff, only an ability
+								to get org.keycloak.crypto.def.DefaultCryptoProvider (org.keycloak.common.crypto.CryptoProvider)
+								Fortunately the server-spi[-private] deps are only needed by
+								org.keycloak.crypto.def.BCOCSPProvider
+							-->
+							org.keycloak.adapters;version="${dependency.org.keycloak}",
+							org.keycloak.adapters.authentication;version="${dependency.org.keycloak}",
+							org.keycloak.adapters.authorization;version="${dependency.org.keycloak}",
+							org.keycloak.adapters.authorization.cip;version="${dependency.org.keycloak}",
+							org.keycloak.adapters.authorization.util;version="${dependency.org.keycloak}",
+							org.keycloak.adapters.jaas;version="${dependency.org.keycloak}",
+							org.keycloak.adapters.rotation;version="${dependency.org.keycloak}",
+							<!--
+								org.keycloak/keycloak-crypto-default
+							-->
+							org.keycloak.crypto.def;version="${dependency.org.keycloak}";-split-package:=merge-first
+						</Export-Package>
+						<Import-Package>
+							com.fasterxml.jackson.annotation;version="[2.14,3)",
+							com.fasterxml.jackson.core.io;version="[2.14,3)",
+							com.fasterxml.jackson.core.type;version="[2.14,3)",
+							com.fasterxml.jackson.core.util;version="[2.14,3)",
+							com.fasterxml.jackson.core;version="[2.14,3)",
+							com.fasterxml.jackson.databind.annotation;version="[2.14,3)",
+							com.fasterxml.jackson.databind.node;version="[2.14,3)",
+							com.fasterxml.jackson.databind;version="[2.14,3)",
+							com.sun.security.jgss;resolution:=optional,
+							javax.activation;version="[1.2,2)";resolution:=optional,
+							javax.crypto,
+							javax.crypto.spec,
+							javax.net.ssl,
+							javax.security.auth;resolution:=optional,
+							javax.security.auth.kerberos;resolution:=optional,
+							javax.security.auth.login;resolution:=optional,
+							javax.security.cert,
+							javax.security.auth.callback,
+							javax.security.auth.spi,
+							org.apache.http.auth;version="[4.5,5)",
+							org.apache.http.client.config;version="[4.5,5)",
+							org.apache.http.client.entity;version="[4.5,5)",
+							org.apache.http.client.methods;version="[4.5,5)",
+							org.apache.http.client;version="[4.5,5)",
+							org.apache.http.config;version="[4.4,5)",
+							org.apache.http.conn.scheme;version="[4.5,5)",
+							org.apache.http.conn.socket;version="[4.5,5)",
+							org.apache.http.conn.ssl;version="[4.5,5)",
+							org.apache.http.conn;version="[4.5,5)",
+							org.apache.http.cookie;version="[4.5,5)",
+							org.apache.http.entity;version="[4.4,5)",
+							org.apache.http.impl.auth;version="[4.5,5)",
+							org.apache.http.impl.client;version="[4.5,5)",
+							org.apache.http.impl.conn;version="[4.5,5)",
+							org.apache.http.impl.cookie;version="[4.5,5)",
+							org.apache.http.message;version="[4.4,5)",
+							org.apache.http.protocol;version="[4.4,5)",
+							org.apache.http.util;version="[4.4,5)",
+							org.apache.http;version="[4.4,5)",
+
+							org.bouncycastle.asn1;version="[1.70,2)",
+							org.bouncycastle.asn1.x500;version="[1.70,2)",
+							org.bouncycastle.asn1.x500.style;version="[1.70,2)",
+							org.bouncycastle.asn1.x509;version="[1.70,2)",
+							org.bouncycastle.asn1.x9;version="[1.70,2)",
+							org.bouncycastle.cert;version="[1.70,2)",
+							org.bouncycastle.cert.jcajce;version="[1.70,2)",
+							org.bouncycastle.cert.ocsp;version="[1.70,2)",
+							org.bouncycastle.crypto;version="[1.70,2)",
+							org.bouncycastle.crypto.engines;version="[1.70,2)",
+							org.bouncycastle.crypto.params;version="[1.70,2)",
+							org.bouncycastle.jce;version="[1.70,2)",
+							org.bouncycastle.jce.provider;version="[1.70,2)",
+							org.bouncycastle.jce.spec;version="[1.70,2)",
+							org.bouncycastle.math.ec;version="[1.70,2)",
+							org.bouncycastle.openssl.jcajce;version="[1.70,2)",
+							org.bouncycastle.operator;version="[1.70,2)",
+							org.bouncycastle.operator.jcajce;version="[1.70,2)",
+
+							org.ietf.jgss;resolution:=optional,
+							org.jboss.logging;version="[3.4,4)"
+						</Import-Package>
+						<Embed-Dependency>
+							artifactId=keycloak-common;inline=keycloak-version.properties
+						</Embed-Dependency>
+						<_nouses>true</_nouses>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+
+		<!-- OSGi -->
+
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>osgi.core</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- Logging -->
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- Keycloak -->
+
+		<dependency>
+			<groupId>org.keycloak</groupId>
+			<artifactId>keycloak-common</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.keycloak</groupId>
+			<artifactId>keycloak-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.keycloak</groupId>
+			<artifactId>keycloak-authz-client</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.keycloak</groupId>
+			<artifactId>keycloak-adapter-spi</artifactId>
+		</dependency>
+		<dependency>
+			<!--
+				org.keycloak.adapters.KeycloakDeploymentBuilder.build(java.io.InputStream) calls
+				org.keycloak.common.crypto.CryptoIntegration.init(), which loads
+				/META-INF/services/org.keycloak.common.crypto.CryptoProvider service which is provided by several libs:
+				 - org.keycloak.crypto.def.DefaultCryptoProvider from org.keycloak/keycloak-crypto-default
+				 - org.keycloak.crypto.elytron.WildFlyElytronProvider from org.keycloak/keycloak-crypto-elytron
+				 - org.keycloak.crypto.fips.FIPS1402Provider from org.keycloak/keycloak-crypto-fips1402
+				SPI-Fly would be required, but only if keycloak-adapter-core had proper Require-Capability/Requirement
+				header.
+				It has (https://github.com/keycloak/keycloak/issues/9287) cap/req for
+				org.keycloak.adapters.authorization.ClaimInformationPointProviderFactory but misses few others, including
+				org.keycloak.common.crypto.CryptoProvider which is loaded through keycloak-common, which also misses
+				spi-fly req/cap.
+			-->
+			<groupId>org.keycloak</groupId>
+			<artifactId>keycloak-adapter-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.keycloak</groupId>
+			<artifactId>keycloak-crypto-default</artifactId>
+		</dependency>
+
+	</dependencies>
+
+</project>

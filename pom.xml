@@ -276,9 +276,10 @@
 
 		<dependency.org.jline>3.21.0</dependency.org.jline>
 		<dependency.org.jsoup>1.15.3</dependency.org.jsoup>
+		<!-- Special version of Keycloak that will never exceed 18.0.x - the last version with OSGi/Karaf/PaxWeb support -->
 		<dependency.org.keycloak18>18.0.2</dependency.org.keycloak18>
-		<dependency.org.keycloak20>20.0.5</dependency.org.keycloak20>
-		<dependency.org.keycloak21>21.0.0</dependency.org.keycloak21>
+		<!-- Keycloak version newer than 18 - just the latest available upstream version -->
+		<dependency.org.keycloak>21.0.0</dependency.org.keycloak>
 		<dependency.org.mockito>4.11.0</dependency.org.mockito>
 		<dependency.org.mortbay.jetty.alpn>8.1.13.v20181017</dependency.org.mortbay.jetty.alpn>
 
@@ -1393,7 +1394,7 @@
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.web</groupId>
-				<artifactId>pax-web-jetty-keycloak20</artifactId>
+				<artifactId>pax-web-jetty-keycloak</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -1403,7 +1404,7 @@
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.web</groupId>
-				<artifactId>pax-web-tomcat-keycloak20</artifactId>
+				<artifactId>pax-web-tomcat-keycloak</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -1413,7 +1414,7 @@
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.web</groupId>
-				<artifactId>pax-web-undertow-keycloak20</artifactId>
+				<artifactId>pax-web-undertow-keycloak</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -1424,7 +1425,7 @@
 
 			<dependency>
 				<groupId>org.ops4j.pax.web</groupId>
-				<artifactId>keycloak20-common</artifactId>
+				<artifactId>keycloak-common</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -1435,7 +1436,7 @@
 
 			<dependency>
 				<groupId>org.ops4j.pax.web</groupId>
-				<artifactId>keycloak20-osgi-adapter</artifactId>
+				<artifactId>keycloak-osgi-adapter</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -3422,8 +3423,7 @@
 
 		<!-- Keycloak support -->
 		<module>pax-web-keycloak18</module>
-		<module>pax-web-keycloak20</module>
-        <module>pax-web-keycloak21</module>
+		<module>pax-web-keycloak</module>
 
     </modules>
 
