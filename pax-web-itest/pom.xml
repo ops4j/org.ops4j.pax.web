@@ -43,7 +43,7 @@
 		<module>pax-web-itest-jsp</module>
 		<module>pax-web-itest-container</module>
 		<module>pax-web-itest-karaf</module>
-		<module>pax-web-itest-keycloak20</module>
+		<module>pax-web-itest-keycloak</module>
 	</modules>
 
 	<profiles>
