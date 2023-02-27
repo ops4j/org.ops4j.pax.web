@@ -276,8 +276,9 @@
 
 		<dependency.org.jline>3.21.0</dependency.org.jline>
 		<dependency.org.jsoup>1.15.3</dependency.org.jsoup>
-		<dependency.org.keycloak18>18.0.3</dependency.org.keycloak18>
-		<dependency.org.keycloak20>20.0.3</dependency.org.keycloak20>
+		<dependency.org.keycloak18>18.0.2</dependency.org.keycloak18>
+		<dependency.org.keycloak20>20.0.5</dependency.org.keycloak20>
+		<dependency.org.keycloak21>21.0.0</dependency.org.keycloak21>
 		<dependency.org.mockito>4.11.0</dependency.org.mockito>
 		<dependency.org.mortbay.jetty.alpn>8.1.13.v20181017</dependency.org.mortbay.jetty.alpn>
 
@@ -1387,12 +1388,17 @@
 
 			<dependency>
 				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>pax-web-tomcat-keycloak18</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
 				<artifactId>pax-web-jetty-keycloak20</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.web</groupId>
-				<artifactId>pax-web-tomcat-keycloak18</artifactId>
+				<artifactId>pax-web-jetty-keycloak21</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -1402,7 +1408,17 @@
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>pax-web-tomcat-keycloak21</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
 				<artifactId>pax-web-undertow-keycloak20</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>pax-web-undertow-keycloak21</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
@@ -1411,10 +1427,20 @@
 				<artifactId>keycloak20-common</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>keycloak21-common</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 
 			<dependency>
 				<groupId>org.ops4j.pax.web</groupId>
 				<artifactId>keycloak20-osgi-adapter</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>keycloak21-osgi-adapter</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
@@ -3397,8 +3423,9 @@
 		<!-- Keycloak support -->
 		<module>pax-web-keycloak18</module>
 		<module>pax-web-keycloak20</module>
+        <module>pax-web-keycloak21</module>
 
-	</modules>
+    </modules>
 
 	<profiles>
 
