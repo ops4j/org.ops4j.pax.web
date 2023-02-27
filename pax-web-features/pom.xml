@@ -104,21 +104,25 @@
 								<feature>pax-web-http-jetty</feature>
 <!--								<feature>pax-web-jetty-keycloak18</feature>-->
 								<feature>pax-web-jetty-keycloak20</feature>
+								<feature>pax-web-jetty-keycloak21</feature>
 								<feature>pax-web-tomcat</feature>
 								<feature>pax-web-tomcat-websockets</feature>
 								<feature>pax-web-http-tomcat</feature>
 <!--								<feature>pax-web-tomcat-keycloak18</feature>-->
 								<feature>pax-web-tomcat-keycloak20</feature>
+								<feature>pax-web-tomcat-keycloak21</feature>
 								<feature>pax-web-undertow</feature>
 								<feature>pax-web-undertow-websockets</feature>
 <!--								<feature>pax-web-undertow-keycloak18</feature>-->
 								<feature>pax-web-undertow-keycloak20</feature>
+								<feature>pax-web-undertow-keycloak21</feature>
 								<feature>pax-web-http-undertow</feature>
 								<feature>pax-web-jsp</feature>
 								<feature>pax-web-whiteboard</feature>
 								<feature>pax-web-war</feature>
 								<feature>pax-web-karaf</feature>
 								<feature>keycloak20-adapter-core</feature>
+								<feature>keycloak21-adapter-core</feature>
 							</features>
 							<verifyTransitive>false</verifyTransitive>
 							<ignoreMissingConditions>true</ignoreMissingConditions>

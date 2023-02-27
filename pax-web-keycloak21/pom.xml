@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.ops4j.pax</groupId>
+        <artifactId>web</artifactId>
+        <version>9.0.6-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <groupId>org.ops4j.pax.web</groupId>
+    <artifactId>pax-web-keycloak21</artifactId>
+    <packaging>pom</packaging>
+
+    <name>OPS4J Pax Web - Keycloak 21.x+ support</name>
+
+    <dependencyManagement>
+        <dependencies>
+
+            <!--
+                Keycloak bundles once declared in keycloak-adapter-core (18.x) feature
+            -->
+
+            <dependency>
+                <groupId>org.keycloak</groupId>
+                <artifactId>keycloak-common</artifactId>
+                <version>${dependency.org.keycloak21}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.keycloak</groupId>
+                <artifactId>keycloak-core</artifactId>
+                <version>${dependency.org.keycloak21}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.keycloak</groupId>
+                <artifactId>keycloak-authz-client</artifactId>
+                <version>${dependency.org.keycloak21}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.keycloak</groupId>
+                <artifactId>keycloak-adapter-spi</artifactId>
+                <version>${dependency.org.keycloak21}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.keycloak</groupId>
+                <artifactId>keycloak-adapter-core</artifactId>
+                <version>${dependency.org.keycloak21}</version>
+            </dependency>
+
+            <!-- New library in Keycloak 20 -->
+
+            <dependency>
+                <groupId>org.keycloak</groupId>
+                <artifactId>keycloak-crypto-default</artifactId>
+                <version>${dependency.org.keycloak21}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.bouncycastle</groupId>
+                        <artifactId>bcpkix-jdk15on</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.bouncycastle</groupId>
+                        <artifactId>bcprov-jdk15on</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.keycloak</groupId>
+                        <artifactId>keycloak-server-spi</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.keycloak</groupId>
+                        <artifactId>keycloak-server-spi-private</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <!-- bundles from keycloak-pax-http-jetty feature (18.x) -->
+
+            <dependency>
+                <groupId>org.keycloak</groupId>
+                <artifactId>keycloak-jetty-adapter-spi</artifactId>
+                <version>${dependency.org.keycloak21}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.keycloak</groupId>
+                <artifactId>keycloak-jetty-core</artifactId>
+                <version>${dependency.org.keycloak21}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.bouncycastle</groupId>
+                        <artifactId>bcprov-jdk15on</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.keycloak</groupId>
+                <artifactId>keycloak-jetty94-adapter</artifactId>
+                <version>${dependency.org.keycloak21}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.bouncycastle</groupId>
+                        <artifactId>bcprov-jdk15on</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <!-- org.keycloak/keycloak-pax-web-jetty94 is no longer available in Keycloak 20+ -->
+            <!--			<dependency>-->
+            <!--				<groupId>org.keycloak</groupId>-->
+            <!--				<artifactId>keycloak-pax-web-jetty94</artifactId>-->
+            <!--				<version>${dependency.org.keycloak21}</version>-->
+            <!--			</dependency>-->
+
+            <!-- bundles from keycloak-pax-http-tomcat feature (18.x) -->
+
+            <dependency>
+                <groupId>org.keycloak</groupId>
+                <artifactId>keycloak-tomcat-adapter-spi</artifactId>
+                <version>${dependency.org.keycloak21}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.apache.tomcat</groupId>
+                        <artifactId>tomcat-catalina</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.keycloak</groupId>
+                <artifactId>keycloak-tomcat-core-adapter</artifactId>
+                <version>${dependency.org.keycloak21}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.bouncycastle</groupId>
+                        <artifactId>bcprov-jdk15on</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.tomcat</groupId>
+                        <artifactId>tomcat-catalina</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.keycloak</groupId>
+                <artifactId>keycloak-tomcat-adapter</artifactId>
+                <version>${dependency.org.keycloak21}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.bouncycastle</groupId>
+                        <artifactId>bcprov-jdk15on</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <!-- org.keycloak/keycloak-pax-web-tomcat8 is no longer available in Keycloak 20+ -->
+            <!--			<dependency>-->
+            <!--				<groupId>org.keycloak</groupId>-->
+            <!--				<artifactId>keycloak-pax-web-tomcat8</artifactId>-->
+            <!--				<version>${dependency.org.keycloak21}</version>-->
+            <!--			</dependency>-->
+
+            <!-- bundles from keycloak-pax-http-undertow feature (18.x) -->
+            <!--			<bundle>mvn:org.keycloak/keycloak-camel-undertow/${project.version}</bundle>-->
+            <dependency>
+                <groupId>org.keycloak</groupId>
+                <artifactId>keycloak-undertow-adapter-spi</artifactId>
+                <version>${dependency.org.keycloak21}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.keycloak</groupId>
+                <artifactId>keycloak-undertow-adapter</artifactId>
+                <version>${dependency.org.keycloak21}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.bouncycastle</groupId>
+                        <artifactId>bcprov-jdk15on</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <!-- org.keycloak/keycloak-pax-web-undertow is no longer available in Keycloak 20+ -->
+            <!--			<dependency>-->
+            <!--				<groupId>org.keycloak</groupId>-->
+            <!--				<artifactId>keycloak-pax-web-undertow</artifactId>-->
+            <!--				<version>${dependency.org.keycloak21}</version>-->
+            <!--			</dependency>-->
+
+            <!-- bundles from keycloak-jaas feature (18.x) -->
+            <!--			<bundle>mvn:org.keycloak/keycloak-osgi-jaas/${project.version}</bundle>-->
+
+        </dependencies>
+    </dependencyManagement>
+
+    <modules>
+        <module>keycloak21-common</module>
+        <module>keycloak21-osgi-adapter</module>
+        <module>pax-web-jetty-keycloak21</module>
+        <module>pax-web-tomcat-keycloak21</module>
+        <module>pax-web-undertow-keycloak21</module>
+    </modules>
+
+</project>
