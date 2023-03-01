@@ -839,6 +839,8 @@ public class WarExtenderContext implements WebContainerListener, ReportViewPlugi
 				if (webApplicationQueue.containsKey(contextPath)) {
 					// in case it was awaiting the allocation
 					webApplicationQueue.get(contextPath).remove(wab);
+				} else {
+					return;
 				}
 
 				lock.lock();
