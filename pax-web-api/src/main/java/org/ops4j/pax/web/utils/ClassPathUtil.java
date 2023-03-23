@@ -594,7 +594,13 @@ public class ClassPathUtil {
 				urls = new URL[entries.length];
 				int pos = 0;
 				for (String e : entries) {
-					urls[pos++] = new URL(e);
+					try {
+						urls[pos] = new URL(e);
+					} catch (MalformedURLException ex) {
+						// treat it as relative against the surefire (or other) jar with Class-Path
+						urls[pos] = new URL(url, e);
+					}
+					pos++;
 				}
 			}
 		}
