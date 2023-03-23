@@ -79,6 +79,7 @@
 						</goals>
 						<configuration>
 							<descriptors>
+								<descriptor>mvn:org.apache.karaf.features/specs/${dependency.org.apache.karaf}/xml/features</descriptor>
 								<descriptor>mvn:org.apache.karaf.features/standard/${dependency.org.apache.karaf}/xml/features</descriptor>
 								<descriptor>file:${project.build.directory}/classes/features.xml</descriptor>
 							</descriptors>
@@ -100,6 +101,7 @@
 								<feature>pax-web-jetty-websockets</feature>
 								<feature>pax-web-jetty-extras</feature>
 								<feature>pax-web-jetty-http2</feature>
+								<feature>pax-web-jetty-http2-extras</feature>
 								<feature>pax-web-jetty-http2-jdk9</feature>
 								<feature>pax-web-http-jetty</feature>
 <!--								<feature>pax-web-jetty-keycloak18</feature>-->
