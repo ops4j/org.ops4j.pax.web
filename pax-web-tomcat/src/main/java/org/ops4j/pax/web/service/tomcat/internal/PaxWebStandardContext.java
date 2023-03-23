@@ -129,6 +129,7 @@ public class PaxWebStandardContext extends StandardContext {
 		this.osgiSessionsBridge = osgiSessionsBridge;
 		this.setClearReferencesObjectStreamClassCaches(false);
 		this.setClearReferencesRmiTargets(false);
+		this.setClearReferencesThreadLocals(false);
 	}
 
 	/**
