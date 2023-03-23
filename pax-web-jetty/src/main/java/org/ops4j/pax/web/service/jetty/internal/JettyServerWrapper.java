@@ -1778,6 +1778,9 @@ class JettyServerWrapper implements BatchVisitor {
 								&& context == pwsh.getOsgiContextModel()) {
 							try {
 								Servlet servlet = sh.getServlet();
+								if (servlet instanceof ServletHolder.Wrapper) {
+									servlet = ((ServletHolder.Wrapper) servlet).getWrapped();
+								}
 								if (servlet instanceof JettyResourceServlet) {
 									((JettyResourceServlet) servlet).setWelcomeFiles(newWelcomeFiles);
 									((JettyResourceServlet) servlet).setWelcomeFilesRedirect(model.isRedirect());
