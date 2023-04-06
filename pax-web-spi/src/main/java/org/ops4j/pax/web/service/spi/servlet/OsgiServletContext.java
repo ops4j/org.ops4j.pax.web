@@ -54,6 +54,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.Version;
 import org.osgi.framework.wiring.BundleWiring;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -195,7 +196,8 @@ public class OsgiServletContext implements ServletContext {
 				if (bc != null) {
 					Dictionary<String, Object> properties = new Hashtable<>();
 					properties.put(PaxWebConstants.SERVICE_PROPERTY_WEB_SYMBOLIC_NAME, bundle.getSymbolicName());
-					properties.put(PaxWebConstants.SERVICE_PROPERTY_WEB_VERSION, bundle.getVersion());
+					properties.put(PaxWebConstants.SERVICE_PROPERTY_WEB_VERSION,
+							bundle.getVersion() == null ? Version.emptyVersion.toString() : bundle.getVersion().toString());
 					properties.put(PaxWebConstants.SERVICE_PROPERTY_WEB_SERVLETCONTEXT_PATH, osgiContextModel.getContextPath());
 					properties.put(PaxWebConstants.SERVICE_PROPERTY_WEB_SERVLETCONTEXT_NAME, osgiContextModel.getName());
 					registration = bc.registerService(ServletContext.class, this, properties);

@@ -1044,8 +1044,8 @@ class TomcatServerWrapper implements BatchVisitor {
 					}
 				}
 
-				// and the highest ranked context should be registered as OSGi service (if it wasn't registered)
-				highestRankedContext.register();
+//				// and the highest ranked context should be registered as OSGi service (if it wasn't registered)
+//				highestRankedContext.register();
 			}
 
 			if (hasStopped) {
@@ -2168,6 +2168,10 @@ class TomcatServerWrapper implements BatchVisitor {
 			// swap dynamic to normal context
 			dynamicContext.rememberAttributesFromSCIs();
 			context.setOsgiServletContext(highestRankedContext);
+
+			// only now, according to https://docs.osgi.org/specification/osgi.cmpn/7.0.0/service.war.html#d0e100694
+			// register the servlet context
+			highestRankedContext.register();
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
 		}

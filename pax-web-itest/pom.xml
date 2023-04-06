@@ -114,6 +114,12 @@
 				</dependency>
 			</dependencies>
 		</profile>
+		<profile>
+			<id>tck</id>
+			<modules>
+				<module>pax-web-tck</module>
+			</modules>
+		</profile>
 	</profiles>
 
 </project>
