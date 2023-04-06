@@ -1384,8 +1384,8 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 					}
 				}
 
-				// and the highest ranked context should be registered as OSGi service (if it wasn't registered)
-				highestRankedContext.register();
+//				// and the highest ranked context should be registered as OSGi service (if it wasn't registered)
+//				highestRankedContext.register();
 			}
 			DeploymentInfo deploymentInfo = deploymentInfos.get(contextPath);
 			if (deploymentInfo != null) {
@@ -2908,6 +2908,10 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 
 			// actual registration of "context" in Undertow's path handler.
 			pathHandler.addPrefixPath(contextPath, handler);
+
+			// only now, according to https://docs.osgi.org/specification/osgi.cmpn/7.0.0/service.war.html#d0e100694
+			// register the servlet context
+			highestRankedContext.register();
 		} catch (ServletException e) {
 			throw new IllegalStateException("Can't start Undertow context "
 					+ contextPath + ": " + e.getMessage(), e);
