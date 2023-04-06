@@ -52,6 +52,7 @@ import org.apache.catalina.Executor;
 import org.apache.catalina.Host;
 import org.apache.catalina.LifecycleListener;
 import org.apache.catalina.LifecycleState;
+import org.apache.catalina.Server;
 import org.apache.catalina.Service;
 import org.apache.catalina.Valve;
 import org.apache.catalina.connector.Connector;
@@ -163,7 +164,7 @@ class TomcatServerWrapper implements BatchVisitor {
 	 * Actual instance of {@link org.apache.catalina.core.StandardServer}. In Jetty we had extended class. Here
 	 * we hold direct instance, because it is final.
 	 */
-	private StandardServer server;
+	private Server server;
 
 	/**
 	 * Tomcat's {@link Service}
@@ -448,7 +449,7 @@ class TomcatServerWrapper implements BatchVisitor {
 			// Jetty, Tomcat and Undertow.
 
 			// <Server>
-			server = (StandardServer) holder.getServer();
+			server = holder.getServer();
 
 			// <Server>/<Service>
 			if (server.findServices().length == 0) {
