@@ -60,7 +60,13 @@
 						</Import-Package>
 						<Require-Bundle>
 							<!-- another kind of wiring -->
-							org.primefaces
+							org.primefaces,
+							<!--
+								However, after turning off recursive detection of "WAB class space", we need to
+								wire to myfaces-impl too (so proper SCI is registered)
+								See: https://github.com/ops4j/org.ops4j.pax.web/issues/1852
+							-->
+							org.apache.myfaces.core.impl
 						</Require-Bundle>
 						<Private-Package>
 							org.ops4j.pax.web.samples.primefaces

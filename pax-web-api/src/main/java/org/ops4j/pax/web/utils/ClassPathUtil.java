@@ -211,7 +211,7 @@ public class ClassPathUtil {
 	 */
 	private static List<URL> getLocationsOfBundlesInClassSpace(Bundle bundle) {
 		List<URL> urls = new ArrayList<>();
-		Set<Bundle> importedBundles = getBundlesInClassSpace(bundle, new HashSet<>());
+		Set<Bundle> importedBundles = getBundlesInClassSpace(bundle, new HashSet<>(), false);
 		for (Bundle importedBundle : importedBundles) {
 			URL url = getLocationOfBundle(importedBundle);
 			if (url != null) {
@@ -245,9 +245,11 @@ public class ClassPathUtil {
 	 *
 	 * @param bundle
 	 * @param bundleSet
+	 * @param recurse whether to use only 1st level dependencies of given bundle ({@code recurse=false}) or collect
+	 *                entire transitive closure ({@code recurse=true})
 	 * @return
 	 */
-	public static Set<Bundle> getBundlesInClassSpace(Bundle bundle, Set<Bundle> bundleSet) {
+	public static Set<Bundle> getBundlesInClassSpace(Bundle bundle, Set<Bundle> bundleSet, boolean recurse) {
 		BundleWiring bundleWiring = bundle == null ? null : bundle.adapt(BundleWiring.class);
 
 		if (bundle == null || bundleWiring == null) {
@@ -299,9 +301,12 @@ public class ClassPathUtil {
 			bundles.removeAll(bundleSet);
 			// include the new ones in the set we're collecting
 			bundleSet.addAll(bundles);
-			// collect transitively
-			for (Bundle b : bundles) {
-				getBundlesInClassSpace(b, bundleSet);
+
+			if (recurse) {
+				// collect transitively
+				for (Bundle b : bundles) {
+					getBundlesInClassSpace(b, bundleSet, recurse);
+				}
 			}
 		}
 

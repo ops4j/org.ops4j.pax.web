@@ -672,7 +672,7 @@ public class ClassPathUtilIntegrationTest extends AbstractOsgiTestBase {
 		//  - bundle fragments wired _to_ current bundle using Fragment-Host
 
 		Set<Bundle> bundles = new HashSet<>();
-		ClassPathUtil.getBundlesInClassSpace(b, bundles);
+		ClassPathUtil.getBundlesInClassSpace(b, bundles, false);
 		LOG.info("=== Bundles in Classspace for bundle {}/{}", b.getSymbolicName(), b.getVersion());
 		for (Bundle bundle : bundles) {
 			boolean fragment = (bundle.adapt(BundleRevision.class).getTypes() & BundleRevision.TYPE_FRAGMENT) != 0;

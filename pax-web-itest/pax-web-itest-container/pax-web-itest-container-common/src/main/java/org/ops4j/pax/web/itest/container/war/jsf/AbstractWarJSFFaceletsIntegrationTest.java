@@ -39,7 +39,8 @@ public abstract class AbstractWarJSFFaceletsIntegrationTest extends AbstractCont
 							+ "javax.faces.component,javax.faces.application,javax.faces.render,javax.faces.event,"
 							+ "javax.faces.component.visit,javax.faces.component.behavior,javax.faces.el,"
 							+ "javax.faces.convert,javax.crypto,javax.naming,javax.faces.lifecycle,javax.faces.model,"
-							+ "javax.servlet.jsp.tagext,javax.servlet.jsp,javax.faces.validator");
+							+ "javax.servlet.jsp.tagext,javax.servlet.jsp,javax.faces.validator"
+							+ "&Require-Bundle=org.apache.myfaces.core.impl");
 		});
 	}
 

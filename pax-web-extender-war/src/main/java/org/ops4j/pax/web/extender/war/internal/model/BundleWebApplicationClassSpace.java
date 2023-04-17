@@ -331,20 +331,28 @@ public class BundleWebApplicationClassSpace {
 			}
 		}
 
-		// 3) Scan reachable bundles (ClassPath hierarchy in JavaEE) - without the WAB itself
+		// 3) Scan reachable bundles (ClassPath hierarchy in JavaEE) - without the WAB itself and only directly
+		//    wired bundles. So if we have a situation that:
+		//     - our WAB has Import-Package (or Require-Bundle) for bundle-A
+		//     - bundle-A has Import-Package (or Require-Bundle) for bundle-B
+		//     - bundle-B has web-fragment.xml or SCI that we're interested in
+		//    then it's our responsibility to "wire" our WAB with bundle-B
 
 		LOG.trace("Searching for web fragments in WAB wired bundles");
 		Set<Bundle> processedBundles = new HashSet<>();
+		Set<Bundle> reached = new HashSet<>();
 		Deque<Bundle> bundles = new LinkedList<>();
 		// added as already processed, but we need it to get reachable bundles
 		bundles.add(wabBundle);
 		processedBundles.add(wabBundle);
+		reached.add(wabBundle);
 
 		// JSP support is independent on targer runtime, so it's either/or situation
 		if (paxWebJspBundle != null) {
 			// this will give us access to Jasper SCI even if WAB doesn't have explicit
 			// wires to pax-web-jsp bundle or to other JSTL implementations
 			bundles.add(paxWebJspBundle);
+			reached.add(paxWebJspBundle);
 		}
 
 		// WebSockets are a bit tricky - every container has special SCIs for that (and Undertow also has
@@ -355,17 +363,29 @@ public class BundleWebApplicationClassSpace {
 		Bundle jettyWebSocketBundle = Utils.getJettyWebSocketBundle(wabBundle);
 		if (jettyWebSocketBundle != null) {
 			bundles.add(jettyWebSocketBundle);
+			reached.add(jettyWebSocketBundle);
 		}
 		Bundle tomcatWebSocketBundle = Utils.getTomcatWebSocketBundle(wabBundle);
 		if (tomcatWebSocketBundle != null) {
 			bundles.add(tomcatWebSocketBundle);
+			reached.add(tomcatWebSocketBundle);
 		}
 		Bundle undertowWebSocketBundle = Utils.getUndertowWebSocketBundle(wabBundle);
 		if (undertowWebSocketBundle != null) {
 			bundles.add(undertowWebSocketBundle);
+			reached.add(undertowWebSocketBundle);
 		}
 
-		Set<Bundle> reached = new HashSet<>();
+		// get a class space only for our WAB
+		Set<Bundle> reachable = new HashSet<>();
+		ClassPathUtil.getBundlesInClassSpace(wabBundle, reachable, false);
+		for (Bundle rb : reachable) {
+			if (!reached.contains(rb) && !processedBundles.contains(rb) && !Utils.isFragment(rb)) {
+				reached.add(rb);
+				bundles.add(rb);
+			}
+		}
+
 		while (bundles.size() > 0) {
 			// org.apache.tomcat.util.scan.StandardJarScanner.processURLs() - Tomcat traverses CL hierarchy
 			// and collects non-filtered (see conf/catalina.properties:
@@ -378,14 +398,6 @@ public class BundleWebApplicationClassSpace {
 				continue;
 			}
 
-			Set<Bundle> reachable = new HashSet<>();
-			ClassPathUtil.getBundlesInClassSpace(scannedBundle, reachable);
-			for (Bundle rb : reachable) {
-				if (!reached.contains(rb) && !processedBundles.contains(rb) && !Utils.isFragment(rb)) {
-					reached.add(rb);
-					bundles.add(rb);
-				}
-			}
 			if (processedBundles.contains(scannedBundle)) {
 				continue;
 			}

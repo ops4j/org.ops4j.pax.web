@@ -58,6 +58,9 @@
 							org.osgi.service.cdi.annotations,
 							org.ops4j.pax.web.service.spi
 						</Import-Package>
+						<Require-Bundle>
+							org.apache.myfaces.core.impl
+						</Require-Bundle>
 						<Private-Package>
 							org.ops4j.pax.web.samples.warjsf23cdi
 						</Private-Package>
