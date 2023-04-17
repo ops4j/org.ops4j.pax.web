@@ -107,11 +107,21 @@
 						</goals>
 						<configuration>
 							<target>
-								<xslt basedir="${project.build.directory}/test-reports/tck"
+<!--								<xslt basedir="${project.build.directory}/test-reports/tck-cmpn-102"-->
+<!--									destdir="${project.build.directory}"-->
+<!--									style="${project.build.directory}/unpack-bnd/aQute/bnd/main/testreport.xsl"-->
+<!--									includes="TEST-*.xml"-->
+<!--									extension=".html" />-->
+								<xslt basedir="${project.build.directory}/test-reports/tck-cmpn-128"
 									destdir="${project.build.directory}"
 									style="${project.build.directory}/unpack-bnd/aQute/bnd/main/testreport.xsl"
 									includes="TEST-*.xml"
 									extension=".html" />
+<!--								<xslt basedir="${project.build.directory}/test-reports/tck-cmpn-140"-->
+<!--									destdir="${project.build.directory}"-->
+<!--									style="${project.build.directory}/unpack-bnd/aQute/bnd/main/testreport.xsl"-->
+<!--									includes="TEST-*.xml"-->
+<!--									extension=".html" />-->
 							</target>
 						</configuration>
 					</execution>
@@ -137,7 +147,9 @@
 						</goals>
 						<configuration>
 							<bndruns>
-								<bndrun>tck.bndrun</bndrun>
+<!--								<bndrun>tck-cmpn-102.bndrun</bndrun>-->
+								<bndrun>tck-cmpn-128.bndrun</bndrun>
+<!--								<bndrun>tck-cmpn-140.bndrun</bndrun>-->
 							</bndruns>
 							<failOnChanges>false</failOnChanges>
 							<includeDependencyManagement>true</includeDependencyManagement>
@@ -164,7 +176,9 @@
 						</goals>
 						<configuration>
 							<bndruns>
-								<include>tck.bndrun</include>
+<!--								<include>tck-cmpn-102.bndrun</include>-->
+								<include>tck-cmpn-128.bndrun</include>
+<!--								<include>tck-cmpn-140.bndrun</include>-->
 							</bndruns>
 							<failOnChanges>false</failOnChanges>
 							<includeDependencyManagement>true</includeDependencyManagement>
