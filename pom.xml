@@ -159,6 +159,7 @@
 		<plugin.mycila.license-maven-plugin>4.1</plugin.mycila.license-maven-plugin>
 		<plugin.servicemix.depends-maven-plugin>1.4.0</plugin.servicemix.depends-maven-plugin>
 		<plugin.sonatype.nexus-staging-maven-plugin>1.6.13</plugin.sonatype.nexus-staging-maven-plugin>
+		<plugin.bnd.bnd-maven-plugin>6.4.0</plugin.bnd.bnd-maven-plugin>
 
 		<!-- versions of Maven dependencies (sorted and groupped in arbitrary way)  -->
 
@@ -580,6 +581,22 @@
 					<groupId>org.eclipse.jetty</groupId>
 					<artifactId>jetty-jspc-maven-plugin</artifactId>
 					<version>${dependency.org.eclipse.jetty}</version>
+				</plugin>
+
+				<plugin>
+					<groupId>biz.aQute.bnd</groupId>
+					<artifactId>bnd-maven-plugin</artifactId>
+					<version>${plugin.bnd.bnd-maven-plugin}</version>
+				</plugin>
+				<plugin>
+					<groupId>biz.aQute.bnd</groupId>
+					<artifactId>bnd-resolver-maven-plugin</artifactId>
+					<version>${plugin.bnd.bnd-maven-plugin}</version>
+				</plugin>
+				<plugin>
+					<groupId>biz.aQute.bnd</groupId>
+					<artifactId>bnd-testing-maven-plugin</artifactId>
+					<version>${plugin.bnd.bnd-maven-plugin}</version>
 				</plugin>
 
 			</plugins>
@@ -1399,27 +1416,12 @@
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.web</groupId>
-				<artifactId>pax-web-jetty-keycloak21</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.ops4j.pax.web</groupId>
 				<artifactId>pax-web-tomcat-keycloak</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.web</groupId>
-				<artifactId>pax-web-tomcat-keycloak21</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.ops4j.pax.web</groupId>
 				<artifactId>pax-web-undertow-keycloak</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.ops4j.pax.web</groupId>
-				<artifactId>pax-web-undertow-keycloak21</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
@@ -1428,25 +1430,20 @@
 				<artifactId>keycloak-common</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-			<dependency>
-				<groupId>org.ops4j.pax.web</groupId>
-				<artifactId>keycloak21-common</artifactId>
-				<version>${project.version}</version>
-			</dependency>
 
 			<dependency>
 				<groupId>org.ops4j.pax.web</groupId>
 				<artifactId>keycloak-osgi-adapter</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-			<dependency>
-				<groupId>org.ops4j.pax.web</groupId>
-				<artifactId>keycloak21-osgi-adapter</artifactId>
-				<version>${project.version}</version>
-			</dependency>
 
 			<!-- OPS4J dependencies -->
 
+			<dependency>
+				<groupId>org.ops4j.base</groupId>
+				<artifactId>ops4j-base</artifactId>
+				<version>${dependency.org.ops4j.base}</version>
+			</dependency>
 			<dependency>
 				<groupId>org.ops4j.base</groupId>
 				<artifactId>ops4j-base-exec</artifactId>
@@ -1576,11 +1573,6 @@
 			<dependency>
 				<groupId>org.ops4j.pax.logging</groupId>
 				<artifactId>pax-logging-api</artifactId>
-				<version>${dependency.org.ops4j.pax.logging}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.ops4j.pax.logging</groupId>
-				<artifactId>pax-logging-service</artifactId>
 				<version>${dependency.org.ops4j.pax.logging}</version>
 			</dependency>
 			<dependency>
@@ -1760,6 +1752,17 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
+			<dependency>
+				<groupId>biz.aQute.bnd</groupId>
+				<artifactId>biz.aQute.bnd</artifactId>
+				<version>${dependency.biz.aQute.bnd.bndlib}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.osgi</groupId>
+						<artifactId>org.osgi.core</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
 
 			<dependency>
 				<groupId>org.apache.karaf.features</groupId>
@@ -1812,12 +1815,6 @@
 						<artifactId>org.eclipse.osgi</artifactId>
 					</exclusion>
 				</exclusions>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.karaf</groupId>
-				<artifactId>manual</artifactId>
-				<version>${dependency.org.apache.karaf}</version>
-				<type>war</type>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.karaf.system</groupId>
@@ -2622,11 +2619,6 @@
 				</exclusions>
 			</dependency>
 			<dependency>
-				<groupId>org.apache.tomcat.embed</groupId>
-				<artifactId>tomcat-embed-logging-juli</artifactId>
-				<version>${dependency.org.apache.tomcat}</version>
-			</dependency>
-			<dependency>
 				<groupId>org.apache.tomcat</groupId>
 				<artifactId>tomcat</artifactId>
 				<version>${dependency.org.apache.tomcat}</version>
@@ -3022,16 +3014,6 @@
 				<version>${dependency.org.bouncycastle}</version>
 			</dependency>
 
-			<dependency>
-				<groupId>org.jboss.weld</groupId>
-				<artifactId>weld-core</artifactId>
-				<version>${dependency.org.jboss.weld}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.jboss.weld</groupId>
-				<artifactId>weld-core-jsf</artifactId>
-				<version>${dependency.org.jboss.weld}</version>
-			</dependency>
 			<dependency>
 				<groupId>org.jboss.weld</groupId>
 				<artifactId>weld-osgi-bundle</artifactId>

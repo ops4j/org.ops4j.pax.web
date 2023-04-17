@@ -1,0 +1,109 @@
+#
+# Copyright 2023 OPS4J.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+-runfw: org.apache.felix.framework
+-tester: biz.aQute.tester.junit-platform
+
+# bnd-resolver-maven-plugin takes these requirements (symbolic names), resolves them and generates "-runbundles"
+# property. If this propery is not used, bnd-resolver-maven-plugin generates single "osgi.identity: (osgi.identity=pax-web-tck)"
+# requirement, however this depends on proper requirements specified in current artifact's MANIFEST.MF.
+# the best way I found is to list bundle symbolic names (in the below form, according to https://bnd.bndtools.org/chapters/310-testing.html)
+# with <includeDependencyManagement>true</includeDependencyManagement>, there's a lot of libraries to search
+# for the capabilities and for example `Import-Package: javax.servlet` is satisfied by org.apache.tomcat-servlet-api,
+# but in pure OSGi it should not bother us too much.
+# Maybe one day I'll turn includeDependencyManagement off and list more specific bundles
+-runrequires: \
+	bnd.identity;id='org.osgi.test.cases.webcontainer',\
+	bnd.identity;id='org.ops4j.pax.web.pax-web-api', \
+	bnd.identity;id='org.ops4j.pax.web.pax-web-compatibility-el2', \
+	bnd.identity;id='org.ops4j.pax.web.pax-web-extender-war', \
+	bnd.identity;id='org.ops4j.pax.web.pax-web-jsp', \
+	bnd.identity;id='org.ops4j.pax.web.pax-web-runtime', \
+	bnd.identity;id='org.ops4j.pax.web.pax-web-spi', \
+	bnd.identity;id='org.ops4j.pax.web.pax-web-tomcat', \
+	bnd.identity;id='org.ops4j.pax.web.pax-web-tomcat-common', \
+	bnd.identity;id='org.ops4j.base', \
+	bnd.identity;id='org.ops4j.pax.logging.pax-logging-api', \
+	bnd.identity;id='org.ops4j.pax.logging.pax-logging-log4j2', \
+	bnd.identity;id='org.ops4j.pax.swissbox.bnd', \
+	bnd.identity;id='org.ops4j.pax.swissbox.property', \
+	bnd.identity;id='org.ops4j.pax.url.commons', \
+	bnd.identity;id='org.ops4j.pax.url.war', \
+	bnd.identity;id='org.osgi.util.function', \
+	bnd.identity;id='org.osgi.util.promise', \
+	bnd.identity;id='org.osgi.test.junit4', \
+	bnd.identity;id='org.osgi.test.junit5', \
+	bnd.identity;id='org.osgi.test.common', \
+	bnd.identity;id='junit-jupiter-api', \
+	bnd.identity;id='junit-jupiter-engine', \
+	bnd.identity;id='junit-jupiter-params', \
+	bnd.identity;id='junit-platform-commons', \
+	bnd.identity;id='junit-platform-engine', \
+	bnd.identity;id='junit-platform-launcher', \
+	bnd.identity;id='junit-vintage-engine'
+
+-runproperties: \
+	report='true', \
+	org.osgi.framework.bootdelegation='sun.*,com.sun.*,sun.misc,sun.reflect', \
+	org.osgi.service.webcontainer.hostname='127.0.0.1', \
+	org.osgi.service.webcontainer.http.port='8080', \
+	org.osgi.test.testcase.timeout='10000', \
+	org.ops4j.pax.logging.DefaultServiceLog.level='INFO', \
+	org.osgi.test.testcase.scaling='1'
+
+-runvm="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"
+
+# The following is calculated by the bnd-resolver-maven-plugin and do not edit it manually
+-runbundles: \
+	jakarta.annotation-api;version='[1.3.5,1.3.6)',\
+	javax.el-api;version='[3.0.3,3.0.4)',\
+	javax.security.auth.message-api;version='[1.1.3,1.1.4)',\
+	org.apache.felix.eventadmin;version='[1.6.4,1.6.5)',\
+	org.apache.servicemix.bundles.junit;version='[4.13.2,4.13.3)',\
+	org.apache.tomcat-servlet-api;version='[9.0.73,9.0.74)',\
+	org.eclipse.jdt.core.compiler.batch;version='[3.26.0,3.26.1)',\
+	org.ops4j.pax.logging.pax-logging-api;version='[2.2.2,2.2.3)',\
+	org.ops4j.pax.web.pax-web-api;version='[8.0.20,8.0.21)',\
+	org.ops4j.pax.web.pax-web-compatibility-el2;version='[8.0.20,8.0.21)',\
+	org.ops4j.pax.web.pax-web-extender-war;version='[8.0.20,8.0.21)',\
+	org.ops4j.pax.web.pax-web-jsp;version='[8.0.20,8.0.21)',\
+	org.ops4j.pax.web.pax-web-runtime;version='[8.0.20,8.0.21)',\
+	org.ops4j.pax.web.pax-web-spi;version='[8.0.20,8.0.21)',\
+	org.ops4j.pax.web.pax-web-tomcat;version='[8.0.20,8.0.21)',\
+	org.ops4j.pax.web.pax-web-tomcat-common;version='[8.0.20,8.0.21)',\
+	org.osgi.test.cases.webcontainer;version='[8.1.0,8.1.1)',\
+	biz.aQute.bnd.util;version='[6.4.0,6.4.1)',\
+	biz.aQute.bndlib;version='[6.4.0,6.4.1)',\
+	junit-jupiter-api;version='[5.8.2,5.8.3)',\
+	junit-jupiter-engine;version='[5.8.2,5.8.3)',\
+	junit-jupiter-params;version='[5.8.2,5.8.3)',\
+	junit-platform-commons;version='[1.8.2,1.8.3)',\
+	junit-platform-engine;version='[1.8.2,1.8.3)',\
+	junit-platform-launcher;version='[1.8.2,1.8.3)',\
+	junit-vintage-engine;version='[5.8.2,5.8.3)',\
+	org.opentest4j;version='[1.2.0,1.2.1)',\
+	org.ops4j.base;version='[1.5.1,1.5.2)',\
+	org.ops4j.pax.logging.pax-logging-log4j2;version='[2.2.2,2.2.3)',\
+	org.ops4j.pax.swissbox.bnd;version='[1.8.5,1.8.6)',\
+	org.ops4j.pax.swissbox.property;version='[1.8.5,1.8.6)',\
+	org.ops4j.pax.url.commons;version='[2.6.13,2.6.14)',\
+	org.ops4j.pax.url.war;version='[2.6.13,2.6.14)',\
+	org.osgi.service.repository;version='[1.1.0,1.1.1)',\
+	org.osgi.test.common;version='[1.2.0,1.2.1)',\
+	org.osgi.test.junit4;version='[1.2.0,1.2.1)',\
+	org.osgi.test.junit5;version='[1.2.0,1.2.1)',\
+	org.osgi.util.function;version='[1.2.0,1.2.1)',\
+	org.osgi.util.promise;version='[1.3.0,1.3.1)'
