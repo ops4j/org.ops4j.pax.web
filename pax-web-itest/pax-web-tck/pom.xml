@@ -23,7 +23,7 @@
 	<parent>
 		<groupId>org.ops4j.pax.web</groupId>
 		<artifactId>pax-web-itest</artifactId>
-		<version>8.0.19-SNAPSHOT</version>
+		<version>8.0.20-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -33,6 +33,10 @@
 	<name>OPS4J Pax Web - Container Tests - TCK</name>
 
 	<description>Integration tests for TCK</description>
+
+	<properties>
+		<version.org.osgi.tck>8.1.0-SNAPSHOT</version.org.osgi.tck>
+	</properties>
 
 	<!--
 		https://aries.apache.org/documentation/development/compliancetesting.html
@@ -45,54 +49,10 @@
 	-->
 
 	<build>
-		<testResources>
-			<testResource>
-				<directory>src/test/resources</directory>
-				<filtering>true</filtering>
-			</testResource>
-			<testResource>
-				<directory>src/test/resources-binary</directory>
-				<filtering>false</filtering>
-			</testResource>
-		</testResources>
-
 		<plugins>
 
 			<!-- Core plugins -->
 
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-failsafe-plugin</artifactId>
-				<configuration>
-					<includes>
-						<include>**/*Test.java</include>
-					</includes>
-					<systemPropertyVariables>
-						<!-- to configure pax-exam with pax.exam.system=default which gives us more control over installed bundles -->
-						<pax.exam.configuration>file:./src/test/resources/controlled-exam.properties</pax.exam.configuration>
-					</systemPropertyVariables>
-					<redirectTestOutputToFile>false</redirectTestOutputToFile>
-					<runOrder>alphabetical</runOrder>
-					<classpathDependencyScopeExclude>runtime</classpathDependencyScopeExclude>
-					<forkCount>1</forkCount>
-					<reuseForks>false</reuseForks>
-					<trimStackTrace>false</trimStackTrace>
-				</configuration>
-				<executions>
-					<execution>
-						<id>integration-test</id>
-						<goals>
-							<goal>integration-test</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>verify</id>
-						<goals>
-							<goal>verify</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
@@ -100,18 +60,122 @@
 					<skip>true</skip>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
 
-			<!-- ServiceMix plugins -->
+			<!-- Tools -->
 
 			<plugin>
-				<groupId>org.apache.servicemix.tooling</groupId>
-				<artifactId>depends-maven-plugin</artifactId>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>generate-depends-file</id>
+						<!-- biz.aQute.bnd is unpacked, so we can get access to nice XSLT stylesheet -->
+						<id>unpack-bnd</id>
+						<phase>generate-resources</phase>
 						<goals>
-							<goal>generate-depends-file</goal>
+							<goal>unpack</goal>
 						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>biz.aQute.bnd</groupId>
+									<artifactId>biz.aQute.bnd</artifactId>
+								</artifactItem>
+							</artifactItems>
+							<outputDirectory>${project.build.directory}/unpack-bnd</outputDirectory>
+							<includes>**/*.xsl</includes>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<!-- Process bnd test results to generate TCK HTML report in target/ directory -->
+						<id>generate-html-test-report</id>
+						<phase>post-integration-test</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<xslt basedir="${project.build.directory}/test-reports/tck"
+									destdir="${project.build.directory}"
+									style="${project.build.directory}/unpack-bnd/aQute/bnd/main/testreport.xsl"
+									includes="TEST-*.xml"
+									extension=".html" />
+							</target>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- Other plugins -->
+
+			<plugin>
+				<groupId>biz.aQute.bnd</groupId>
+				<artifactId>bnd-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>biz.aQute.bnd</groupId>
+				<artifactId>bnd-resolver-maven-plugin</artifactId>
+				<executions>
+					<!-- Integration Test Configuration -->
+					<execution>
+						<id>resolve-test</id>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>resolve</goal>
+						</goals>
+						<configuration>
+							<bndruns>
+								<bndrun>tck.bndrun</bndrun>
+							</bndruns>
+							<failOnChanges>false</failOnChanges>
+							<includeDependencyManagement>true</includeDependencyManagement>
+							<useMavenDependencies>true</useMavenDependencies>
+							<reportOptional>false</reportOptional>
+							<scopes>
+								<scope>compile</scope>
+								<scope>runtime</scope>
+								<scope>test</scope>
+								<scope>provided</scope>
+							</scopes>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>biz.aQute.bnd</groupId>
+				<artifactId>bnd-testing-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>osgi-tck-testing</id>
+						<goals>
+							<goal>testing</goal>
+						</goals>
+						<configuration>
+							<bndruns>
+								<include>tck.bndrun</include>
+							</bndruns>
+							<failOnChanges>false</failOnChanges>
+							<includeDependencyManagement>true</includeDependencyManagement>
+							<resolve>false</resolve>
+							<scopes>
+								<scope>compile</scope>
+								<scope>runtime</scope>
+								<scope>provided</scope>
+								<scope>test</scope>
+							</scopes>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
@@ -119,209 +183,33 @@
 		</plugins>
 	</build>
 
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<!-- `gradle :org.osgi.test.cases.webcontainer:release` installs the suite into local Maven repo -->
+				<groupId>org.osgi</groupId>
+				<artifactId>org.osgi.test.cases.webcontainer</artifactId>
+				<version>${version.org.osgi.tck}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
 	<dependencies>
 
-		<!-- pax-web own artifacts -->
+		<!--
+			Almost empty on purpose - all runtime bundles will be resolved by bnd-resolver-maven-plugin
+			from available managed dependencies.
+			Here we specify only OSGi TCK artifacts and bnd jar (to extract testreport.xsl)
+		-->
 
 		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-api</artifactId>
-<!--			<scope>runtime</scope>-->
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-spi</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-runtime</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-tomcat</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-tomcat-common</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.ops4j.pax.web.itest</groupId>
-			<artifactId>pax-web-itest-common</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-compatibility-annotation13</artifactId>
-		</dependency>
-
-		<!-- OPS4J dependencies -->
-
-		<dependency>
-			<!-- required by pax-exam -->
-			<groupId>org.ops4j.base</groupId>
-			<artifactId>ops4j-base-lang</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<!-- required by pax-exam -->
-			<groupId>org.ops4j.base</groupId>
-			<artifactId>ops4j-base-util-property</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.ops4j.pax.logging</groupId>
-			<artifactId>pax-logging-api</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.logging</groupId>
-			<artifactId>pax-logging-log4j2</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.ops4j.pax.exam</groupId>
-			<artifactId>pax-exam</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.exam</groupId>
-			<artifactId>pax-exam-junit4</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.exam</groupId>
-			<artifactId>pax-exam-container-native</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.exam</groupId>
-			<artifactId>pax-exam-link-mvn</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.exam</groupId>
-			<artifactId>pax-exam-extender-service</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<!-- OSGi -->
-
-		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>osgi.core</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>osgi.cmpn</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>org.apache.felix.configadmin</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>org.apache.felix.metatype</artifactId>
-			<!-- this has to be test scope, because it's related to how pax-exam analyzes the test classes -->
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<!-- `gradle :org.osgi.test.cases.webcontainer:release` installs the suite into local Maven repo -->
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.test.cases.webcontainer</artifactId>
-			<version>8.1.0-SNAPSHOT</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>geronimo-servlet_2.5_spec</artifactId>
-					<groupId>org.apache.geronimo.specs</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>junit-jupiter-api</artifactId>
-					<groupId>org.junit.jupiter</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>junit-jupiter-engine</artifactId>
-					<groupId>org.junit.jupiter</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>junit-jupiter-params</artifactId>
-					<groupId>org.junit.jupiter</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>junit-platform-commons</artifactId>
-					<groupId>org.junit.platform</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>junit-platform-engine</artifactId>
-					<groupId>org.junit.platform</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>junit-platform-launcher</artifactId>
-					<groupId>org.junit.platform</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>junit-vintage-engine</artifactId>
-					<groupId>org.junit.vintage</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>mockito-core</artifactId>
-					<groupId>org.mockito</groupId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 
-		<!-- JavaEE -->
-
 		<dependency>
-			<groupId>jakarta.annotation</groupId>
-			<artifactId>jakarta.annotation-api</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>jakarta.servlet</groupId>
-			<artifactId>jakarta.servlet-api</artifactId>
-			<!-- it has to be "test" - Pax Exam needs javax.servlet classes when loading @Test classes -->
-			<scope>test</scope>
-		</dependency>
-
-		<!-- ServiceMIX -->
-
-		<dependency>
-			<groupId>org.apache.servicemix.bundles</groupId>
-			<artifactId>org.apache.servicemix.bundles.javax-inject</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-
-		<!-- Logging -->
-
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-slf4j-impl</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<!-- Other -->
-
-		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
-			<scope>test</scope>
+			<groupId>biz.aQute.bnd</groupId>
+			<artifactId>biz.aQute.bnd</artifactId>
 		</dependency>
 
 	</dependencies>
