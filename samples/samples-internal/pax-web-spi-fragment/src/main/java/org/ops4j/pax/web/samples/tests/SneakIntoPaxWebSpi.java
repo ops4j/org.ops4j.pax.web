@@ -50,7 +50,7 @@ public class SneakIntoPaxWebSpi {
 
 	public static void useXBeanFinder() throws IOException {
 		Bundle bundle = FrameworkUtil.getBundle(SneakIntoPaxWebSpi.class);
-		Set<Bundle> wiredBundles = ClassPathUtil.getBundlesInClassSpace(bundle, new LinkedHashSet<>());
+		Set<Bundle> wiredBundles = ClassPathUtil.getBundlesInClassSpace(bundle, new LinkedHashSet<>(), false);
 		// should be:
 		// wiredBundles: java.util.Set  = {java.util.LinkedHashSet@4061}  size = 8
 		//  0 = {org.apache.felix.framework.BundleImpl@4064} "javax.servlet-api [17]"
@@ -158,7 +158,7 @@ public class SneakIntoPaxWebSpi {
 		}
 
 		Set<Bundle> bundles = new HashSet<>();
-		bundles = ClassPathUtil.getBundlesInClassSpace(b, bundles);
+		bundles = ClassPathUtil.getBundlesInClassSpace(b, bundles, false);
 		for (Bundle bundle : bundles) {
 			LOG.info("Bundle in class space: {}", bundle);
 		}

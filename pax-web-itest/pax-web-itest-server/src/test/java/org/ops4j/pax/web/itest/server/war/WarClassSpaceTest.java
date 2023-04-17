@@ -291,8 +291,8 @@ public class WarClassSpaceTest extends MultiContainerTestSupport {
 
 		// servlet from web.xml
 		assertThat(httpGET(port, "/wab/servlet"), endsWith("Hello"));
-		// servlet from a an SCI of container-bundle-3
-		assertThat(httpGET(port, "/wab/dynamic1"), endsWith("Hello World!"));
+		// servlet from a an SCI of container-bundle-3 - not reachable directly, so not available
+		assertThat(httpGET(port, "/wab/dynamic1"), startsWith("HTTP/1.1 404"));
 		// annotated servlet from WAB fragment
 		assertThat(httpGET(port, "/wab/as1/xyz"), endsWith("Hello /xyz!"));
 		// annotated servlet from WAB fragment - filtered
@@ -322,7 +322,7 @@ public class WarClassSpaceTest extends MultiContainerTestSupport {
 		assertThat(jspResult, containsString("<h4>Mock for BundleContext"));
 		assertThat(jspResult, containsString("<h5>Mock for BundleContext"));
 		// number of ORDERED_LIBS
-		assertThat(jspResult, containsString("<h6>9</h6>"));
+		assertThat(jspResult, containsString("<h6>8</h6>"));
 		// attribute set by ServletContextListener
 		assertThat(jspResult, containsString("<h2>generated-value</h2>"));
 

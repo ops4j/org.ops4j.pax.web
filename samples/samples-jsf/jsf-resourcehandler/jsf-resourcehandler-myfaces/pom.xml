@@ -46,6 +46,9 @@
 							org.ops4j.pax.web.resources.jsf,
 							javax.faces.webapp
 						</Import-Package>
+						<Require-Bundle>
+							org.apache.myfaces.core.impl
+						</Require-Bundle>
 						<_wab>src/main/webapp</_wab>
 						<Web-ContextPath>/osgi-resourcehandler-myfaces</Web-ContextPath>
 					</instructions>

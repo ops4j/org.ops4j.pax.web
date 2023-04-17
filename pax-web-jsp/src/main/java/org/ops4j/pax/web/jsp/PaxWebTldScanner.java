@@ -169,7 +169,7 @@ public class PaxWebTldScanner extends TldScanner {
 				continue;
 			}
 			Set<Bundle> reachable = new HashSet<>();
-			ClassPathUtil.getBundlesInClassSpace(b, reachable);
+			ClassPathUtil.getBundlesInClassSpace(b, reachable, false);
 			for (Bundle rb : reachable) {
 				if (!Utils.isFragment(rb)) {
 					bundles.add(rb);

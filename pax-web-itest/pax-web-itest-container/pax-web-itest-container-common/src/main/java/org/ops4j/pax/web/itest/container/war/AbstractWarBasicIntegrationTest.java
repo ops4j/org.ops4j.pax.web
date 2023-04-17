@@ -95,10 +95,10 @@ public abstract class AbstractWarBasicIntegrationTest extends AbstractContainerT
 				.withResponseAssertion("Response must end with 'Hello'",
 						resp -> resp.endsWith("Hello"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/wab-complex/servlet");
-		// servlet from a an SCI of container-bundle-3
+		// servlet from a an SCI of container-bundle-3 - should not be reachable, because we scan only
+		// direct "wires" of a WAB
 		HttpTestClientFactory.createDefaultTestClient()
-				.withResponseAssertion("Response must end with 'Hello World!'",
-						resp -> resp.endsWith("Hello World!"))
+				.withReturnCode(404)
 				.doGETandExecuteTest("http://127.0.0.1:8181/wab-complex/dynamic1");
 		// annotated servlet from WAB fragment
 		HttpTestClientFactory.createDefaultTestClient()
