@@ -279,7 +279,7 @@
 		<dependency.org.jboss.xnio>3.8.9.Final</dependency.org.jboss.xnio>
 
 		<dependency.org.jline>3.21.0</dependency.org.jline>
-		<dependency.org.jsoup>1.15.3</dependency.org.jsoup>
+		<dependency.org.jsoup>1.15.4</dependency.org.jsoup>
 		<!-- Special version of Keycloak that will never exceed 18.0.x - the last version with OSGi/Karaf/PaxWeb support -->
 		<dependency.org.keycloak18>18.0.2</dependency.org.keycloak18>
 		<!-- Keycloak version newer than 18 - just the latest available upstream version -->
