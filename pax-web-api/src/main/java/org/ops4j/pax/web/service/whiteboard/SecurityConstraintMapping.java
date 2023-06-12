@@ -15,7 +15,7 @@
  */
 package org.ops4j.pax.web.service.whiteboard;
 
-import javax.servlet.annotation.ServletSecurity;
+import jakarta.servlet.annotation.ServletSecurity;
 import java.util.Collection;
 
 /**

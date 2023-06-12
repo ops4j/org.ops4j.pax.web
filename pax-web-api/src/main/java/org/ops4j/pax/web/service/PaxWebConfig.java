@@ -17,7 +17,7 @@ package org.ops4j.pax.web.service;
 
 import java.security.cert.CertStoreParameters;
 import javax.net.ssl.SSLContext;
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 
 /**
  * <p>Dedicated interface with constants related to configuration. Other constants reside
@@ -65,28 +65,28 @@ public interface PaxWebConfig {
 	 * This property specifies the port used for servlets and resources accessible via HTTP.
 	 * The default value for this property is {@code 80} according to specification, but we'll use {@code 8080}.
 	 */
-	String PID_CFG_HTTP_PORT = "org.osgi.service.http.port";
+	String PID_CFG_HTTP_PORT = "org.osgi.service.servlet.port";
 
 	/**
 	 * This property specifies the port used for servlets and resources accessible via HTTPS.
 	 * The default value for this property is {@code 443} according to specificaton, but we'll use {@code 8443}.
 	 */
-	String PID_CFG_HTTP_PORT_SECURE = "org.osgi.service.http.port.secure";
+	String PID_CFG_HTTP_PORT_SECURE = "org.osgi.service.servlet.port.secure";
 
 	/** Should the default non-secure port be enabled? */
-	String PID_CFG_HTTP_ENABLED = "org.osgi.service.http.enabled";
+	String PID_CFG_HTTP_ENABLED = "org.osgi.service.servlet.enabled";
 
 	/** Should the default secure port be enabled? */
-	String PID_CFG_HTTP_SECURE_ENABLED = "org.osgi.service.http.secure.enabled";
+	String PID_CFG_HTTP_SECURE_ENABLED = "org.osgi.service.servlet.secure.enabled";
 
 	/** Comma-separated list of addresses to bind listeners/connectors to. Defaults to {@code 0.0.0.0} */
 	String PID_CFG_LISTENING_ADDRESSES = "org.ops4j.pax.web.listening.addresses";
 
 	/** Name to use as <em>default</em> (non-secure) connector, defaults to {@code default}. */
-	String PID_CFG_HTTP_CONNECTOR_NAME = "org.osgi.service.http.connector.name";
+	String PID_CFG_HTTP_CONNECTOR_NAME = "org.osgi.service.servlet.connector.name";
 
 	/** Name to use as <em>secure</em> connector, defaults to {@code secureDefault}. */
-	String PID_CFG_HTTP_SECURE_CONNECTOR_NAME = "org.osgi.service.http.secure.connector.name";
+	String PID_CFG_HTTP_SECURE_CONNECTOR_NAME = "org.osgi.service.servlet.secure.connector.name";
 
 	/**
 	 * Jetty: {@code org.eclipse.jetty.server.AbstractConnector#setIdleTimeout(long)}
@@ -119,7 +119,7 @@ public interface PaxWebConfig {
 	/**
 	 * Jetty: adds {@code org.eclipse.jetty.server.ForwardedRequestCustomizer} to {@code HttpConfiguration}
 	 */
-	String PID_CFG_HTTP_CHECK_FORWARDED_HEADERS = "org.osgi.service.http.checkForwardedHeaders";
+	String PID_CFG_HTTP_CHECK_FORWARDED_HEADERS = "org.osgi.service.servlet.checkForwardedHeaders";
 
 	/**
 	 * Comma-separated list of virtual hosts to set on <em>every deployed context</em> if the context itself
@@ -162,7 +162,7 @@ public interface PaxWebConfig {
 	String BUNDLE_CONTEXT_PROPERTY_WAR_EXTENDER_JARS_TO_SCAN = "org.ops4j.pax.web.extender.war.jarsToScan";
 
 	/**
-	 * <p>Defines the type of TCCL that should be set for service methods (like {@link javax.servlet.Servlet#service}).
+	 * <p>Defines the type of TCCL that should be set for service methods (like {@link jakarta.servlet.Servlet#service}).
 	 * It can take two values:<ul>
 	 *     <li>{@code servlet} (the default, assumed value) - {@link ServletContext#getClassLoader()} returns
 	 *     only the bundle's class loader for given servlet/filter, but TCCL is set to servlet context's classloader</li>

@@ -16,7 +16,7 @@
 
 /**
  * Main Pax Web API package providing:<ul>
- *     <li>extensions to {@link org.osgi.service.http.HttpService} from OSGi CMPN Http Service specification</li>
+ *     <li>extensions to {@link org.ops4j.pax.web.service.http.HttpService} from OSGi CMPN Http Service specification</li>
  *     <li>additional interfaces supporting OSGi CMPN Whiteboard specification</li>
  * </ul>
  */

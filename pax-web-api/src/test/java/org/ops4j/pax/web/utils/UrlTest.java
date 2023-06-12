@@ -17,7 +17,7 @@ package org.ops4j.pax.web.utils;
 
 import java.net.URL;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.io.UrlResource;
 
 public class UrlTest {

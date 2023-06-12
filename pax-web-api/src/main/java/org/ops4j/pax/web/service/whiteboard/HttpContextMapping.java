@@ -16,7 +16,7 @@
 package org.ops4j.pax.web.service.whiteboard;
 
 import org.osgi.framework.Bundle;
-import org.osgi.service.http.HttpContext;
+import org.ops4j.pax.web.service.http.HttpContext;
 
 /**
  * <p><em>HttpContext mapping</em> collects all the information required to register a {@link HttpContext} to
@@ -52,7 +52,7 @@ public interface HttpContextMapping extends ContextMapping {
 	/**
 	 * <p>Get actual context being registered. This version accepts {@link Bundle} argument to reflect
 	 * recommendations from Whiteboard Service specification, where
-	 * {@link org.osgi.service.http.context.ServletContextHelper} is suggested to be registered as
+	 * {@link org.osgi.service.servlet.context.ServletContextHelper} is suggested to be registered as
 	 * {@link org.osgi.framework.ServiceFactory}.</p>
 	 *
 	 * @param bundle

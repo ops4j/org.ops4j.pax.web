@@ -16,8 +16,8 @@
 package org.ops4j.pax.web.service.whiteboard;
 
 import java.util.Map;
-import javax.servlet.DispatcherType;
-import javax.servlet.Filter;
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.Filter;
 
 /**
  * <p><em>Filter mapping</em> contains all the information required to register a {@link Filter}.</p>
@@ -48,7 +48,7 @@ public interface FilterMapping extends ContextRelated {
 	 * <p>Get a name of the filter being registered. Matches {@code <filter>/<filter-name>} element from
 	 * {@code web.xml}.</p>
 	 * <p>In <em>whiteboard</em> method, this can be specified as:<ul>
-	 *     <li>{@link org.osgi.service.http.whiteboard.HttpWhiteboardConstants#HTTP_WHITEBOARD_FILTER_NAME}
+	 *     <li>{@link org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants#HTTP_WHITEBOARD_FILTER_NAME}
 	 *     property</li>
 	 *     <li>{@code filter-name} service registration property (legacy Pax Web Whiteboard approach)</li>
 	 * </ul></p>

@@ -16,7 +16,7 @@
 package org.ops4j.pax.web.service.whiteboard;
 
 import org.osgi.framework.Bundle;
-import org.osgi.service.http.context.ServletContextHelper;
+import org.osgi.service.servlet.context.ServletContextHelper;
 
 /**
  * <p><em>ServletContextHelper mapping</em> collects all the information required to register a

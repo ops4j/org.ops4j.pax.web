@@ -16,14 +16,14 @@
 package org.ops4j.pax.web.service.whiteboard;
 
 import java.util.Map;
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 
-import org.osgi.service.http.HttpContext;
+import org.ops4j.pax.web.service.http.HttpContext;
 
 /**
  * Interface common for <em>mappings</em> related to <em>context</em>:<ul>
- *     <li>{@link org.osgi.service.http.HttpContext} for Http Service scenario</li>
- *     <li>{@link org.osgi.service.http.context.ServletContextHelper} for Whiteboard Service scenario</li>
+ *     <li>{@link org.ops4j.pax.web.service.http.HttpContext} for Http Service scenario</li>
+ *     <li>{@link org.osgi.service.servlet.context.ServletContextHelper} for Whiteboard Service scenario</li>
  * </ul>
  */
 public interface ContextMapping {
@@ -49,9 +49,9 @@ public interface ContextMapping {
 	 * <p>When registering {@link HttpContext} directly, <em>context path</em> may be specified as
 	 * {@code httpContext.id} service registration property.</p>
 	 *
-	 * <p>For complete picture, OSGi CMPN Whiteboard's {@link org.osgi.service.http.context.ServletContextHelper}
+	 * <p>For complete picture, OSGi CMPN Whiteboard's {@link org.osgi.service.servlet.context.ServletContextHelper}
 	 * may have <em>context path</em> specified using {@code osgi.http.whiteboard.context.name} service registration
-	 * property or {@link org.osgi.service.http.whiteboard.propertytypes.HttpWhiteboardContext} annotation.</p>
+	 * property or {@link org.osgi.service.servlet.whiteboard.propertytypes.HttpWhiteboardContext} annotation.</p>
 	 *
 	 * @return context path as in servlet context path; can be null
 	 */

@@ -87,10 +87,10 @@
 				<executions>
 					<execution>
 						<!--
-							copy javax/servlet/resources and javax/servlet/jsp/resources which will be
+							copy jakarta/servlet/resources and jakarta/servlet/jsp/resources which will be
 							available to slightly modified org.apache.tomcat.util.descriptor.DigesterFactory
 							Originally Tomcat load these resources through java.lang.Class.getResource() method
-							of javax.servlet.ServletContext and javax.servlet.jsp.JspContext classes
+							of jakarta.servlet.ServletContext and jakarta.servlet.jsp.JspContext classes
 						-->
 						<id>copy-selected-resources</id>
 						<phase>process-resources</phase>
@@ -101,14 +101,14 @@
 							<outputDirectory>${project.build.outputDirectory}/META-INF/resources</outputDirectory>
 							<resources>
 								<resource>
-									<directory>${project.build.directory}/unpack-deps/tomcat-servlet-api/javax/servlet/resources</directory>
+									<directory>${project.build.directory}/unpack-deps/tomcat-servlet-api/jakarta/servlet/resources</directory>
 									<includes>
 										<include>*.xsd</include>
 										<include>*.dtd</include>
 									</includes>
 								</resource>
 								<resource>
-									<directory>${project.build.directory}/unpack-deps/tomcat-jsp-api/javax/servlet/jsp/resources</directory>
+									<directory>${project.build.directory}/unpack-deps/tomcat-jsp-api/jakarta/servlet/jsp/resources</directory>
 									<includes>
 										<include>*.xsd</include>
 										<include>*.dtd</include>
@@ -126,19 +126,27 @@
 				<configuration>
 					<instructions>
 						<Import-Package>
-							<!-- ranges indicate Servlet API 3.1+ (JavaEE 7+) -->
-							javax.servlet;version="[3.1,5)",
-							javax.servlet.annotation;version="[3.1,5)",
-							javax.servlet.descriptor;version="[3.1,5)",
-							javax.servlet.http;version="[3.1,5)",
+							<!-- ranges indicate Servlet API 6.0+ (JakartaEE 10+) -->
+							jakarta.servlet;version="[6,7)",
+							jakarta.servlet.annotation;version="[6,7)",
+							jakarta.servlet.descriptor;version="[6,7)",
+							jakarta.servlet.http;version="[6,7)",
 
-							<!-- ranges indicate we can work with OSGi Core R6+ -->
-							org.osgi.dto;version="[1.0,2)",
-							org.osgi.framework;version="[1.8,2)",
+							<!-- OSGi Core R8+ -->
+							org.osgi.dto;version="[1.1,2)",
+							org.osgi.framework;version="[1.10,2)",
 							org.osgi.framework.wiring;version="[1.2,2)",
 
+							<!-- OSGi CMPN R8.1 140 Jakarta Servlet packages (formerly known as Whiteboard) -->
+							org.osgi.service.servlet.context;version="2.0.0",
+							org.osgi.service.servlet.runtime;version="2.0.0",
+							org.osgi.service.servlet.runtime.dto;version="2.0.0",
+							org.osgi.service.servlet.whiteboard;version="2.0.0",
+							org.osgi.service.servlet.whiteboard.annotations;version="2.0.0",
+							org.osgi.service.servlet.whiteboard.propertytypes;version="2.0.0",
+
 							<!-- from pax-logging-api -->
-							org.slf4j;version="[1.7,2)"
+							org.slf4j;version="[2,3)"
 						</Import-Package>
 						<Export-Package>
 							<!-- pax-web-api -->
@@ -147,18 +155,7 @@
 							org.ops4j.pax.web.service.whiteboard;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.utils;version="${pax-web.osgi.version}",
 							<!-- Special export for org.keycloak:keycloak-osgi-adapter:18.0.x -->
-							org.ops4j.pax.web.service;version="7.4",
-
-							<!-- re-export OSGi CMPN R7 102 HTTP Service packages -->
-							org.osgi.service.http;version="1.2.1",
-
-							<!-- re-export OSGi CMPN R7 140 HTTP Whiteboard packages -->
-							org.osgi.service.http.context;version="1.1",
-							org.osgi.service.http.runtime;version="1.1",
-							org.osgi.service.http.runtime.dto;version="1.1",
-							org.osgi.service.http.whiteboard;version="1.1",
-							org.osgi.service.http.whiteboard.annotations;version="1.1",
-							org.osgi.service.http.whiteboard.propertytypes;version="1.1"
+<!--							org.ops4j.pax.web.service;version="7.4",-->
 						</Export-Package>
 						<Include-Resource>
 							{maven-resources},
@@ -217,8 +214,23 @@
 			<artifactId>osgi.core</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.namespace.extender</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.service.http</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.service.servlet</artifactId>
+			<scope>provided</scope>
+		</dependency>
 
-		<!-- JavaEE -->
+		<!-- JakartaEE -->
 
 		<dependency>
 			<groupId>jakarta.servlet</groupId>
@@ -235,37 +247,48 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-slf4j-impl</artifactId>
+			<artifactId>log4j-slf4j2-impl</artifactId>
 			<scope>test</scope>
 		</dependency>
 
 		<!-- Tomcat -->
 
-<!--		<dependency>-->
-<!--			&lt;!&ndash;-->
-<!--				This dependency is used to take javax.servlet.resources package with XSDs/DTDs into pax-web-tomcat-common-->
-<!--				to satisfy the DigesterFactory-->
-<!--			&ndash;&gt;-->
-<!--			<groupId>org.apache.tomcat</groupId>-->
-<!--			<artifactId>tomcat-servlet-api</artifactId>-->
-<!--			<scope>provided</scope>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			&lt;!&ndash;-->
-<!--				This dependency is used to take javax.servlet.jsp.resources package with XSDs/DTDs into pax-web-tomcat-common-->
-<!--				to satisfy the DigesterFactory-->
-<!--			&ndash;&gt;-->
-<!--			<groupId>org.apache.tomcat</groupId>-->
-<!--			<artifactId>tomcat-jsp-api</artifactId>-->
-<!--			<scope>provided</scope>-->
-<!--		</dependency>-->
+		<dependency>
+			<!--
+				This dependency is used to take jakarta.servlet.resources package with XSDs/DTDs into pax-web-api
+				to satisfy the DigesterFactory
+			-->
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>tomcat-servlet-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<!--
+				This dependency is used to take jakarta.servlet.jsp.resources package with XSDs/DTDs into pax-web-api
+				to satisfy the DigesterFactory
+			-->
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>tomcat-jsp-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
 
 		<!-- Testing -->
 
+
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-core</artifactId>
+			<version>${dependency.org.assertj}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>

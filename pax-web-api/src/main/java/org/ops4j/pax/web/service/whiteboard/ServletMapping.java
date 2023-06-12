@@ -16,8 +16,8 @@
 package org.ops4j.pax.web.service.whiteboard;
 
 import java.util.Map;
-import javax.servlet.MultipartConfigElement;
-import javax.servlet.Servlet;
+import jakarta.servlet.MultipartConfigElement;
+import jakarta.servlet.Servlet;
 
 /**
  * <p><em>Servlet mapping</em> contains all the information required to register a {@link Servlet} (either directly or
@@ -62,7 +62,7 @@ public interface ServletMapping extends ContextRelated {
 	 * <p>Get a name of the servlet being registered. Matches {@code <servlet>/<servlet-name>} element from
 	 * {@code web.xml}.</p>
 	 * <p>In <em>whiteboard</em> method, this can be specified as:<ul>
-	 *     <li>{@link org.osgi.service.http.whiteboard.HttpWhiteboardConstants#HTTP_WHITEBOARD_SERVLET_NAME}
+	 *     <li>{@link org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants#HTTP_WHITEBOARD_SERVLET_NAME}
 	 *     property</li>
 	 *     <li>{@code servlet-name} service registration property (legacy Pax Web Whiteboard approach)</li>
 	 * </ul></p>
@@ -77,9 +77,9 @@ public interface ServletMapping extends ContextRelated {
 	 * to Servlet API 4 specification (chapter 12.2) and OSGi CMPN R6+ Whiteboard specification (chapter 140.4).
 	 * It matches {@code <servlet-mapping>/<url-pattern>} elements from {@code web.xml}.</p>
 	 * <p>In <em>whiteboard</em> method, this can be specified as:<ul>
-	 *     <li>{@link org.osgi.service.http.whiteboard.HttpWhiteboardConstants#HTTP_WHITEBOARD_SERVLET_PATTERN}
+	 *     <li>{@link org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants#HTTP_WHITEBOARD_SERVLET_PATTERN}
 	 *     property</li>
-	 *     <li>{@link org.osgi.service.http.whiteboard.propertytypes.HttpWhiteboardServletPattern} annotation</li>
+	 *     <li>{@link org.osgi.service.servlet.whiteboard.propertytypes.HttpWhiteboardServletPattern} annotation</li>
 	 *     <li>{@code urlPatterns} service registration property (legacy Pax Web Whiteboard approach)</li>
 	 * </ul>When passing service registration property, it should be one of {@code String}, {@code String[]} or
 	 * {@code Collection<String>} types.</p>
@@ -90,7 +90,7 @@ public interface ServletMapping extends ContextRelated {
 
 	/**
 	 * <p>Get an <em>alias</em> to use for servlet registration. An <em>alias</em> is defined in OSGi CMPN specification
-	 * of {@link org.osgi.service.http.HttpService HTTP Service} and is often (even in specification) confused with
+	 * of {@link org.ops4j.pax.web.service.http.HttpService HTTP Service} and is often (even in specification) confused with
 	 * <em>servlet name</em>: <em>name in the URI namespace</em>. For the purpose of Pax Web and consistency, single
 	 * <em>alias</em> is treated as one-element array of URL Patterns if the patterns are not specified.</p>
 	 * <p>There's no <em>whiteboard</em> specific method to specify an <em>alias</em>.</p>
@@ -104,9 +104,9 @@ public interface ServletMapping extends ContextRelated {
 	 * as <em>error servlet</em> matching {@code <error-page>/<error-code>} and {@code <error-page>/<exception-type>}
 	 * elementss from {@code web.xml}.</p>
 	 * <p>In <em>whiteboard</em> method, this can be specified as:<ul>
-	 *     <li>{@link org.osgi.service.http.whiteboard.HttpWhiteboardConstants#HTTP_WHITEBOARD_SERVLET_ERROR_PAGE}
+	 *     <li>{@link org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants#HTTP_WHITEBOARD_SERVLET_ERROR_PAGE}
 	 *     property</li>
-	 *     <li>{@link org.osgi.service.http.whiteboard.propertytypes.HttpWhiteboardServletErrorPage} annotation</li>
+	 *     <li>{@link org.osgi.service.servlet.whiteboard.propertytypes.HttpWhiteboardServletErrorPage} annotation</li>
 	 * </ul></p>
 	 *
 	 * @return Servlet async-supported flag
@@ -117,9 +117,9 @@ public interface ServletMapping extends ContextRelated {
 	 * <p>Get flag for supporting asynchronous servlet invocation. It matches {@code <servlet>/<async-supported>}
 	 * element from {@code web.xml}.</p>
 	 * <p>In <em>whiteboard</em> method, this can be specified as:<ul>
-	 *     <li>{@link org.osgi.service.http.whiteboard.HttpWhiteboardConstants#HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED}
+	 *     <li>{@link org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants#HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED}
 	 *     property</li>
-	 *     <li>{@link org.osgi.service.http.whiteboard.propertytypes.HttpWhiteboardServletAsyncSupported}
+	 *     <li>{@link org.osgi.service.servlet.whiteboard.propertytypes.HttpWhiteboardServletAsyncSupported}
 	 *     annotation</li>
 	 * </ul></p>
 	 *
@@ -132,9 +132,9 @@ public interface ServletMapping extends ContextRelated {
 	 * See Servlet API 4 specification (chapter 3.2 File upload) for details. It matches
 	 * {@code <servlet>/<multipart-config>} element from {@code web.xml}.</p>
 	 * <p>In <em>whiteboard</em> method, this can be specified as:<ul>
-	 *     <li>{@code org.osgi.service.http.whiteboard.HttpWhiteboardConstants#HTTP_WHITEBOARD_SERVLET_MULTIPART_*}
+	 *     <li>{@code org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants#HTTP_WHITEBOARD_SERVLET_MULTIPART_*}
 	 *     properties</li>
-	 *     <li>{@link org.osgi.service.http.whiteboard.propertytypes.HttpWhiteboardServletMultipart} annotation</li>
+	 *     <li>{@link org.osgi.service.servlet.whiteboard.propertytypes.HttpWhiteboardServletMultipart} annotation</li>
 	 * </ul></p>
 	 *
 	 * @return Servlet multipart configuration
@@ -145,7 +145,7 @@ public interface ServletMapping extends ContextRelated {
 	 * <p>Get init parameters for the servlet being registered. It matches {@code <servlet>/<init-param>}
 	 * elements from {@code web.xml}.</p>
 	 * <p>In <em>whiteboard</em> method, this can be specified as (no annotation here):<ul>
-	 *     <li>{@link org.osgi.service.http.whiteboard.HttpWhiteboardConstants#HTTP_WHITEBOARD_SERVLET_INIT_PARAM_PREFIX}
+	 *     <li>{@link org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants#HTTP_WHITEBOARD_SERVLET_INIT_PARAM_PREFIX}
 	 *     prefixed properties (OSGi CMPN Whiteboard approach)</li>
 	 *     <li>{@code init.} prefixed properties (or prefix may be specified using {@code init-prefix}
 	 *     service registration property (legacy Pax Web Whiteboard approach)</li>

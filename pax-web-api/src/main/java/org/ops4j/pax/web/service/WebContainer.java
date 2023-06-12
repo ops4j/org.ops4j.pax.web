@@ -19,19 +19,19 @@ import java.util.Collection;
 import java.util.Dictionary;
 import java.util.EventListener;
 import java.util.List;
-import javax.servlet.Filter;
-import javax.servlet.MultipartConfigElement;
-import javax.servlet.Servlet;
-import javax.servlet.ServletContainerInitializer;
-import javax.servlet.ServletException;
-import javax.servlet.SessionCookieConfig;
-import javax.servlet.descriptor.JspPropertyGroupDescriptor;
-import javax.servlet.descriptor.TaglibDescriptor;
+import jakarta.servlet.Filter;
+import jakarta.servlet.MultipartConfigElement;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletContainerInitializer;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.SessionCookieConfig;
+import jakarta.servlet.descriptor.JspPropertyGroupDescriptor;
+import jakarta.servlet.descriptor.TaglibDescriptor;
 
+import org.ops4j.pax.web.service.http.HttpContext;
+import org.ops4j.pax.web.service.http.HttpService;
+import org.ops4j.pax.web.service.http.NamespaceException;
 import org.ops4j.pax.web.service.views.PaxWebContainerView;
-import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
-import org.osgi.service.http.NamespaceException;
 
 /**
  * <p>
@@ -59,7 +59,7 @@ import org.osgi.service.http.NamespaceException;
  * <p>
  * All registration methods allow passing an instance of {@link HttpContext}
  * from original Http Service specification to indicate particular
- * <em>context</em> ({@link javax.servlet.ServletContext} from Servlet API)
+ * <em>context</em> ({@link jakarta.servlet.ServletContext} from Servlet API)
  * where given web component should be registered. This means that this <em>web
  * container</em> represents entire <em>Java HTTP/Servlet container</em> which
  * organizes web elements (like servlets) in <em>contexts</em> or simply <em>web
@@ -133,7 +133,7 @@ public interface WebContainer extends HttpService {
 	 * <li>standard (Whiteboard)
 	 * {@code osgi.http.whiteboard.context.select=(osgi.http.whiteboard.context.name=name)}
 	 * service registration property even if this property is designed to
-	 * reference {@link org.osgi.service.http.context.ServletContextHelper}
+	 * reference {@link org.osgi.service.servlet.context.ServletContextHelper}
 	 * instances</li>
 	 * <li>legacy (Pax Web specific) {@code httpContext.id=name} service
 	 * registration property</li>
@@ -151,7 +151,7 @@ public interface WebContainer extends HttpService {
 	 *
 	 * <p>
 	 * In OSGi CMPN Whiteboard implementation there's no special API to create
-	 * instances of {@link org.osgi.service.http.context.ServletContextHelper}
+	 * instances of {@link org.osgi.service.servlet.context.ServletContextHelper}
 	 * instances.
 	 * </p>
 	 *
@@ -578,14 +578,14 @@ public interface WebContainer extends HttpService {
 	/**
 	 * <p>Registers an event listener. Depending on the listener type, the listener will be notified on different life
 	 * cycle events. The following listeners are supported:<ul>
-	 *     <li>{@link javax.servlet.http.HttpSessionActivationListener}</li>
-	 *     <li>{@link javax.servlet.http.HttpSessionAttributeListener}</li>
-	 *     <li>{@link javax.servlet.http.HttpSessionBindingListener}</li>
-	 *     <li>{@link javax.servlet.http.HttpSessionListener}</li>
-	 *     <li>{@link javax.servlet.ServletContextListener}</li>
-	 *     <li>{@link javax.servlet.ServletContextAttributeListener}</li>
-	 *     <li>{@link javax.servlet.ServletRequestListener}</li>
-	 *     <li>{@link javax.servlet.ServletRequestAttributeListener}</li>
+	 *     <li>{@link jakarta.servlet.http.HttpSessionActivationListener}</li>
+	 *     <li>{@link jakarta.servlet.http.HttpSessionAttributeListener}</li>
+	 *     <li>{@link jakarta.servlet.http.HttpSessionBindingListener}</li>
+	 *     <li>{@link jakarta.servlet.http.HttpSessionListener}</li>
+	 *     <li>{@link jakarta.servlet.ServletContextListener}</li>
+	 *     <li>{@link jakarta.servlet.ServletContextAttributeListener}</li>
+	 *     <li>{@link jakarta.servlet.ServletRequestListener}</li>
+	 *     <li>{@link jakarta.servlet.ServletRequestAttributeListener}</li>
 	 *     <li></li>
 	 * </ul>
 	 * Check out Servlet specification for details on what type of event the registered listener will be notified.</p>
