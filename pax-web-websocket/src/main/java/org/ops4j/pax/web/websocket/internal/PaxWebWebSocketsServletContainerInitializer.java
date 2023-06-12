@@ -23,15 +23,15 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.servlet.ServletContainerInitializer;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.websocket.Decoder;
-import javax.websocket.DeploymentException;
-import javax.websocket.Encoder;
-import javax.websocket.Extension;
-import javax.websocket.server.ServerContainer;
-import javax.websocket.server.ServerEndpointConfig;
+import jakarta.servlet.ServletContainerInitializer;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.websocket.Decoder;
+import jakarta.websocket.DeploymentException;
+import jakarta.websocket.Encoder;
+import jakarta.websocket.Extension;
+import jakarta.websocket.server.ServerContainer;
+import jakarta.websocket.server.ServerEndpointConfig;
 
 import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel;
 import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModelAware;
@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
  * A {@link ServletContainerInitializer} that can use existing
  * {@link org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel} and
  * {@link org.ops4j.pax.web.service.spi.model.elements.WebSocketModel} to register WebSocket endpoints in previously
- * configured {@link javax.websocket.server.ServerContainer}.
+ * configured {@link jakarta.websocket.server.ServerContainer}.
  */
 public class PaxWebWebSocketsServletContainerInitializer implements ServletContainerInitializer,
 		ContainerInitializerModelAware {
@@ -57,7 +57,7 @@ public class PaxWebWebSocketsServletContainerInitializer implements ServletConta
 		ServerContainer wsContainer = (ServerContainer) ctx.getAttribute(ServerContainer.class.getName());
 
 		if (wsContainer == null) {
-			LOG.warn("No javax.websocket.server.ServerContainer available in servlet context." +
+			LOG.warn("No jakarta.websocket.server.ServerContainer available in servlet context." +
 					" Skipping WebSocket registration.");
 			return;
 		}
@@ -105,7 +105,7 @@ public class PaxWebWebSocketsServletContainerInitializer implements ServletConta
 		}
 
 		if (!annotatedEndpointInstances.isEmpty()) {
-			// we have to prepare ONE javax.websocket.server.ServerEndpointConfig object for each
+			// we have to prepare ONE jakarta.websocket.server.ServerEndpointConfig object for each
 			// WebSocket endpoint instance
 			for (Map.Entry<WebSocketModel, Object> e : annotatedEndpointInstances.entrySet()) {
 				WebSocketModel wsm = e.getKey();
