@@ -17,8 +17,8 @@ package org.ops4j.pax.web.service.spi.model.elements;
 
 import java.util.HashSet;
 import java.util.Set;
-import javax.servlet.SessionCookieConfig;
-import javax.servlet.SessionTrackingMode;
+import jakarta.servlet.SessionCookieConfig;
+import jakarta.servlet.SessionTrackingMode;
 
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 
@@ -49,7 +49,7 @@ public class SessionConfigurationModel {
 	//  - SameSite(enum None/Strict/Lax) - "Session cookie sameSite mode. Currently this is encoded in the session comment until sameSite is supported by SessionCookieConfig"
 	//  - SecureRequestOnly(boolean) (different than SessionCookieConfig.setSecure()) - "if session cookie is to be marked as secure only on HTTPS requests"
 	//  - SessionIdPathParameterName(string), default "jsessionid" - "the URL path parameter name for session id URL rewriting (null or "none" for no rewriting)"
-	//  - UsingCookies(boolean), default true, set if javax.servlet.SessionTrackingMode.COOKIE is used
+	//  - UsingCookies(boolean), default true, set if jakarta.servlet.SessionTrackingMode.COOKIE is used
 	// Tomcat (org.apache.catalina.core.StandardContext):
 	//  - sessionCookiePathUsesTrailingSlash(boolean), default false - "Is a / added to the end of the session cookie path to ensure browsers, particularly IE, don't send a session cookie for context /foo with requests intended for context /foobar."
 	// Undertow:

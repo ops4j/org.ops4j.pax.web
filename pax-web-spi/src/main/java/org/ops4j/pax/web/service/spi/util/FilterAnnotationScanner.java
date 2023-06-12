@@ -18,9 +18,9 @@ package org.ops4j.pax.web.service.spi.util;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import javax.servlet.Filter;
-import javax.servlet.annotation.WebFilter;
-import javax.servlet.annotation.WebInitParam;
+import jakarta.servlet.Filter;
+import jakarta.servlet.annotation.WebFilter;
+import jakarta.servlet.annotation.WebInitParam;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -15,7 +15,7 @@
  */
 package org.ops4j.pax.web.service.spi.model.info;
 
-import javax.servlet.Servlet;
+import jakarta.servlet.Servlet;
 
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;

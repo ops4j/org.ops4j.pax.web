@@ -27,9 +27,9 @@ import org.ops4j.pax.web.service.spi.model.events.ErrorPageEventData;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 import org.ops4j.pax.web.service.whiteboard.ErrorPageMapping;
 import org.osgi.framework.wiring.BundleWiring;
-import org.osgi.service.http.runtime.dto.DTOConstants;
-import org.osgi.service.http.runtime.dto.ErrorPageDTO;
-import org.osgi.service.http.runtime.dto.FailedErrorPageDTO;
+import org.osgi.service.servlet.runtime.dto.DTOConstants;
+import org.osgi.service.servlet.runtime.dto.ErrorPageDTO;
+import org.osgi.service.servlet.runtime.dto.FailedErrorPageDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

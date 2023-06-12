@@ -26,12 +26,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.SessionCookieConfig;
-import javax.servlet.descriptor.JspConfigDescriptor;
-import javax.servlet.descriptor.JspPropertyGroupDescriptor;
-import javax.servlet.descriptor.TaglibDescriptor;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.SessionCookieConfig;
+import jakarta.servlet.descriptor.JspConfigDescriptor;
+import jakarta.servlet.descriptor.JspPropertyGroupDescriptor;
+import jakarta.servlet.descriptor.TaglibDescriptor;
 
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainerContext;
@@ -48,18 +48,18 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.context.ServletContextHelper;
-import org.osgi.service.http.runtime.dto.DTOConstants;
-import org.osgi.service.http.runtime.dto.FailedServletContextDTO;
-import org.osgi.service.http.runtime.dto.ServletContextDTO;
-import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
+import org.ops4j.pax.web.service.http.HttpContext;
+import org.osgi.service.servlet.context.ServletContextHelper;
+import org.osgi.service.servlet.runtime.dto.DTOConstants;
+import org.osgi.service.servlet.runtime.dto.FailedServletContextDTO;
+import org.osgi.service.servlet.runtime.dto.ServletContextDTO;
+import org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * <p>This class represents OSGi-specific {@link HttpContext}/{@link ServletContextHelper}
- * and points to single, server-specific {@link javax.servlet.ServletContext} and (at model level) to single
+ * and points to single, server-specific {@link jakarta.servlet.ServletContext} and (at model level) to single
  * {@link ServletContextModel}. It maps <em>directly</em> 1:1 to an OSGi service registered by user:<ul>
  *     <li>{@link HttpContext} with legacy Pax Web servier registration properties</li>
  *     <li>{@link ServletContextHelper} with standard properties and/or annotations</li>
@@ -109,7 +109,7 @@ import org.slf4j.LoggerFactory;
  * </ul></p>
  *
  * <p><em>Shadowing</em> {@link OsgiContextModel} (see
- * {@link org.osgi.service.http.runtime.dto.DTOConstants#FAILURE_REASON_SHADOWED_BY_OTHER_SERVICE}) can happen
+ * {@link org.osgi.service.servlet.runtime.dto.DTOConstants#FAILURE_REASON_SHADOWED_BY_OTHER_SERVICE}) can happen
  * <strong>only</strong> when there's name/id conflict, so:<ul>
  *     <li>When there are two contexts with same name and different context path, one is chosen (using ranking)
  *     - that's the way to override {@code default} context, for example by changing its context path</li>
@@ -120,7 +120,7 @@ import org.slf4j.LoggerFactory;
  *     ranking</li>
  *     <li>At actual server runtime level, each servlet is associated (through {@link ServletConfig#getServletContext()})
  *     with <em>own</em> {@link OsgiContextModel}, but there are things to do before actual request processing - like
- *     calling {@link javax.servlet.ServletContainerInitializer#onStartup(Set, ServletContext)} methods. Here, the
+ *     calling {@link jakarta.servlet.ServletContainerInitializer#onStartup(Set, ServletContext)} methods. Here, the
  *     {@link OsgiContextModel} passed to such calls is the highest ranked {@link OsgiContextModel} /
  *     {@link org.ops4j.pax.web.service.spi.servlet.OsgiServletContext} which may be different that the context
  *     associated with the servlets running in such context.</li>
@@ -138,8 +138,8 @@ import org.slf4j.LoggerFactory;
  * (Whiteboard Service specification) <em>context</em>. If it's created (<em>customized</em>) for {@link HttpContext}
  * (registered directly or via {@link org.ops4j.pax.web.service.whiteboard.HttpContextMapping}) and if it's a
  * singleton, then such {@link OsgiContextModel} is equivalent to one created directly through
- * {@link org.osgi.service.http.HttpService} and user may continue to register servlets via
- * {@link org.osgi.service.http.HttpService} to such contexts. That's the way to change the context path of such
+ * {@link org.ops4j.pax.web.service.http.HttpService} and user may continue to register servlets via
+ * {@link org.ops4j.pax.web.service.http.HttpService} to such contexts. That's the way to change the context path of such
  * context. Without any additional steps, the servlets (and filters and resources) registered through
  * {@link org.ops4j.pax.web.service.WebContainer} will <strong>always</strong> be associated with {@link OsgiContextModel}
  * that is lower ranked than the "default" {@link OsgiContextModel} coming from Whiteboard.</p>
@@ -172,7 +172,7 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 		// the "instance" of the ServletContextHelper will be set as supplier, so it'll depend on the
 		// bundle context for which the web element (like servlet) is registered
 		// that's the default implementation of "140.2 The Servlet Context" chapter
-		// instance of org.osgi.service.http.context.ServletContextHelper will be used. It's abstract, but without
+		// instance of org.osgi.service.servlet.context.ServletContextHelper will be used. It's abstract, but without
 		// any abstract methods
 		DEFAULT_CONTEXT_MODEL.setContextSupplier((context, contextName) -> {
 			Bundle whiteboardBundle = context == null ? null : context.getBundle();
@@ -183,10 +183,10 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 		Hashtable<String, Object> registration = DEFAULT_CONTEXT_MODEL.getContextRegistrationProperties();
 		registration.clear();
 		// We pretend that this ServletContextModel was:
-		//  - registered to represent the Whiteboard's "default" context (org.osgi.service.http.context.ServletContextHelper)
+		//  - registered to represent the Whiteboard's "default" context (org.osgi.service.servlet.context.ServletContextHelper)
 		registration.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, HttpWhiteboardConstants.HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME);
-		//  - NOT registered to represent the HttpService's "default" context (org.osgi.service.http.HttpContext)
-		registration.remove(HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY);
+		//  - NOT registered to represent the HttpService's "default" context (org.ops4j.pax.web.service.http.HttpContext)
+		registration.remove(PaxWebConstants.HTTP_SERVICE_CONTEXT_PROPERTY);
 		registration.put(Constants.SERVICE_ID, DEFAULT_CONTEXT_MODEL.getServiceId());
 		registration.put(Constants.SERVICE_RANKING, DEFAULT_CONTEXT_MODEL.getServiceRank());
 		//  - registered with "/" context path
@@ -304,8 +304,8 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 	private final List<String> connectors = new ArrayList<>();
 
 	/**
-	 * <p>This is the <em>owner</em> bundle of this <em>context</em>. For {@link org.osgi.service.http.HttpService}
-	 * scenario, that's the bundle of bundle-scoped {@link org.osgi.service.http.HttpService} used to create
+	 * <p>This is the <em>owner</em> bundle of this <em>context</em>. For {@link org.ops4j.pax.web.service.http.HttpService}
+	 * scenario, that's the bundle of bundle-scoped {@link org.ops4j.pax.web.service.http.HttpService} used to create
 	 * {@link HttpContext}. For Whiteboard scenario, that's the bundle registering
 	 * {@link ServletContextHelper}. For old Pax Web Whiteboard, that can be a
 	 * bundle which registered <em>shared</em> {@link HttpContext}.</p>
@@ -359,7 +359,7 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 
 	/**
 	 * {@link ClassLoader} may be configured for given {@link OsgiContextModel} in some cases (WAB), but externally
-	 * configured {@link ClassLoader} may be created in other scenarios (whiteboard, {@link org.osgi.service.http.HttpService}.
+	 * configured {@link ClassLoader} may be created in other scenarios (whiteboard, {@link org.ops4j.pax.web.service.http.HttpService}.
 	 */
 	private OsgiServletContextClassLoader classLoader = null;
 
@@ -523,9 +523,9 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 	/**
 	 * <p>At {@link OsgiContextModel} level we track a list of {@link Change changes} that represent implicit
 	 * unregistrations of dynamic servlets/filters/listeners that may have been added for example inside
-	 * {@link javax.servlet.ServletContainerInitializer#onStartup(Set, ServletContext)} method.</p>
+	 * {@link jakarta.servlet.ServletContainerInitializer#onStartup(Set, ServletContext)} method.</p>
 	 *
-	 * <p>JavaEE doesn't bother with unregistration of such elements, but Pax Web does ;)</p>
+	 * <p>JakartaEE doesn't bother with unregistration of such elements, but Pax Web does ;)</p>
 	 *
 	 * @param unregistration
 	 */
@@ -687,7 +687,7 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 	}
 
 	public void addJspPropertyGroupDescriptor(JspPropertyGroupDescriptor descriptor) {
-		// because javax.servlet.descriptor.JspConfigDescriptor may contain more property group descriptors, we
+		// because jakarta.servlet.descriptor.JspConfigDescriptor may contain more property group descriptors, we
 		// should implement some kind of identification. So descriptors are "same" if they share at least one
 		// URI pattern. In such case the property group is replaced, otherwise it is added.
 		for (Iterator<JspPropertyGroupDescriptor> it = jspConfiguration.getJspPropertyGroups().iterator(); it.hasNext(); ) {
@@ -748,7 +748,7 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 
 	/**
 	 * A "whiteboard" context can override implicit "httpservice" context. This allows users to override the
-	 * context (and its path for example) used in {@link org.osgi.service.http.HttpService} scenario.
+	 * context (and its path for example) used in {@link org.ops4j.pax.web.service.http.HttpService} scenario.
 	 * @return
 	 */
 	public boolean isWhiteboard() {

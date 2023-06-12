@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiFunction;
-import javax.servlet.ServletConfig;
+import jakarta.servlet.ServletConfig;
 
 import org.apache.felix.utils.properties.InterpolationHelper;
 import org.ops4j.pax.web.service.PaxWebConstants;
@@ -500,9 +500,8 @@ public class Utils {
 
 	/**
 	 * Specialized method that's used to add Jetty WebSocket bundle that we know to contain required
-	 * {@link javax.servlet.ServletContainerInitializer} services.
-	 * Actually Jetty has two bundles with SCIs (websocket-server and javax-websocket-server-impl), but the JSR356 one
-	 * is wired to the native one
+	 * {@link jakarta.servlet.ServletContainerInitializer} services.
+	 * Jetty has websocket related SCI in jetty-ee10-websocket-jakarta-server
 	 * @param bundle
 	 * @return
 	 */
@@ -513,7 +512,7 @@ public class Utils {
 		}
 		Bundle[] bundles = new Bundle[] { null, null };
 		for (Bundle b : ctx.getBundles()) {
-			if ("org.eclipse.jetty.websocket.javax.server".equals(b.getSymbolicName())) {
+			if ("org.eclipse.jetty.ee10.websocket.jakarta.server".equals(b.getSymbolicName())) {
 				return b;
 			}
 		}
@@ -522,7 +521,7 @@ public class Utils {
 
 	/**
 	 * Specialized method that's used to add Tomcat WebSocket bundle that we know to contain required
-	 * {@link javax.servlet.ServletContainerInitializer} services
+	 * {@link jakarta.servlet.ServletContainerInitializer} services
 	 * @param bundle
 	 * @return
 	 */
@@ -541,7 +540,7 @@ public class Utils {
 
 	/**
 	 * Specialized method that's used to add Undertow WebSocket bundle that we know to contain required
-	 * {@link javax.servlet.ServletContainerInitializer} services
+	 * {@link jakarta.servlet.ServletContainerInitializer} services
 	 * @param bundle
 	 * @return
 	 */
@@ -551,7 +550,7 @@ public class Utils {
 			return null;
 		}
 		for (Bundle b : ctx.getBundles()) {
-			// undertow-websockets-jsr doesn't include javax.servlet.ServletContainerInitializer service, so
+			// undertow-websockets-jsr doesn't include jakarta.servlet.ServletContainerInitializer service, so
 			// we have to provide our own.
 			if ("org.ops4j.pax.web.pax-web-undertow-websocket".equals(b.getSymbolicName())) {
 				return b;
@@ -562,7 +561,7 @@ public class Utils {
 
 	/**
 	 * Specialized method that's used to add Undertow WebSocket bundle that we know to contain required
-	 * {@link javax.servlet.ServletContainerInitializer} services
+	 * {@link jakarta.servlet.ServletContainerInitializer} services
 	 * @param bundle
 	 * @return
 	 */
@@ -573,7 +572,7 @@ public class Utils {
 		}
 		for (Bundle b : ctx.getBundles()) {
 			// undertow-websockets-jsr provides necessary
-			// /META-INF/services/javax.websocket.server.ServerEndpointConfig$Configurator
+			// /META-INF/services/jakarta.websocket.server.ServerEndpointConfig$Configurator
 			if ("io.undertow.websockets-jsr".equals(b.getSymbolicName())) {
 				return b;
 			}

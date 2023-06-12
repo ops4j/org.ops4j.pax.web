@@ -64,9 +64,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * <p>Service Model is kept at {@link org.osgi.service.http.HttpService} level, which is bundle-scoped in Pax Web
+ * <p>Service Model is kept at {@link org.ops4j.pax.web.service.http.HttpService} level, which is bundle-scoped in Pax Web
  * (though Http Service specification doesn't mention the scope of Http Service). Its goal is to remember which
- * <em>web elements</em> were registered from given bundle (both {@link org.osgi.service.http.HttpService} usage
+ * <em>web elements</em> were registered from given bundle (both {@link org.ops4j.pax.web.service.http.HttpService} usage
  * and Whiteboard service registrations).</p>
  *
  * <p>This is just organizational separation, because the models are kept anyway at {@link ServerModel} and
@@ -84,7 +84,7 @@ public class ServiceModel implements BatchVisitor {
 
 	/**
 	 * Full {@link ServerModel}, while this {@link ServiceModel} collects elements registered within the scope
-	 * of single bundle-scoped {@link org.osgi.service.http.HttpService} or (using Whiteboard) single
+	 * of single bundle-scoped {@link org.ops4j.pax.web.service.http.HttpService} or (using Whiteboard) single
 	 * {@link org.osgi.framework.BundleContext#registerService bundle context}.
 	 */
 	private final ServerModel serverModel;
@@ -94,15 +94,15 @@ public class ServiceModel implements BatchVisitor {
 
 	/**
 	 * <p>Servlets registered under alias in given context path (exact URL pattern) by given bundle-scoped
-	 * {@link org.osgi.service.http.HttpService}. Group of disjoint slices of
+	 * {@link org.ops4j.pax.web.service.http.HttpService}. Group of disjoint slices of
 	 * {@code org.ops4j.pax.web.service.spi.model.ServletContextModel#aliasMapping} for all context mappings.</p>
 	 *
-	 * <p>Kept to fulfill the contract of {@link org.osgi.service.http.HttpService#unregister(String)}, which
+	 * <p>Kept to fulfill the contract of {@link org.ops4j.pax.web.service.http.HttpService#unregister(String)}, which
 	 * doesn't distinguish servlets registered under the same alias into different <em>contexts</em>.</p>
 	 *
 	 * <p>Two different servlets can be registered into two different context paths ({@link ServletContextModel})
 	 * through two different {@link OsgiContextModel} under the same alias.
-	 * {@link org.osgi.service.http.HttpService#unregister(String)} should unregister both of them.</p>
+	 * {@link org.ops4j.pax.web.service.http.HttpService#unregister(String)} should unregister both of them.</p>
 	 *
 	 * <p>Also, if single servlet model is registered into two different contexts, both of them should be unregistered
 	 * when needed.</p>
@@ -112,16 +112,16 @@ public class ServiceModel implements BatchVisitor {
 	 */
 	private final Map<String, Map<String, ServletModel>> aliasMapping = new HashMap<>();
 
-	/** All servlet models registered by given bundle-scoped {@link org.osgi.service.http.HttpService}. */
+	/** All servlet models registered by given bundle-scoped {@link org.ops4j.pax.web.service.http.HttpService}. */
 	private final Set<ServletModel> servletModels = new HashSet<>();
 
-	/** All filter models registered by given bundle-scoped {@link org.osgi.service.http.HttpService}. */
+	/** All filter models registered by given bundle-scoped {@link org.ops4j.pax.web.service.http.HttpService}. */
 	private final Set<FilterModel> filterModels = new HashSet<>();
 
-	/** All event listener models registered by given bundle-scoped {@link org.osgi.service.http.HttpService}. */
+	/** All event listener models registered by given bundle-scoped {@link org.ops4j.pax.web.service.http.HttpService}. */
 	private final Set<EventListenerModel> eventListenerModels = new HashSet<>();
 
-	/** All container initializer models registered by given bundle-scoped {@link org.osgi.service.http.HttpService}. */
+	/** All container initializer models registered by given bundle-scoped {@link org.ops4j.pax.web.service.http.HttpService}. */
 	private final Set<ContainerInitializerModel> containerInitializerModels = new HashSet<>();
 
 	/** Welcome files are just kept as a sets - separately for each {@link ContextKey}. */

@@ -23,7 +23,7 @@ import org.ops4j.pax.web.service.spi.model.events.WebElementEvent;
 public interface ServerConfiguration {
 
 	/**
-	 * Returns the temporary directory, directory that will be set as {@link javax.servlet.ServletContext#TEMPDIR}.
+	 * Returns the temporary directory, directory that will be set as {@link jakarta.servlet.ServletContext#TEMPDIR}.
 	 *
 	 * @return the temporary directory
 	 */

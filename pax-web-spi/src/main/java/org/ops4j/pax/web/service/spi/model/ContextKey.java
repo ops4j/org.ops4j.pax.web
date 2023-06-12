@@ -20,7 +20,7 @@ import java.util.Objects;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.context.WebContainerContextWrapper;
 import org.osgi.framework.Bundle;
-import org.osgi.service.http.HttpContext;
+import org.ops4j.pax.web.service.http.HttpContext;
 
 public class ContextKey {
 

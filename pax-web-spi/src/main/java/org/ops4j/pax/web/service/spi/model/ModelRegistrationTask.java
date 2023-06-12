@@ -15,9 +15,9 @@
  */
 package org.ops4j.pax.web.service.spi.model;
 
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletException;
 
-import org.osgi.service.http.NamespaceException;
+import org.ops4j.pax.web.service.http.NamespaceException;
 
 /**
  * A task that can be passed to {@link ServerModel#run(ModelRegistrationTask)} to ensure running it in

@@ -17,10 +17,10 @@ package org.ops4j.pax.web.service.spi.util;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import javax.servlet.Servlet;
-import javax.servlet.annotation.MultipartConfig;
-import javax.servlet.annotation.WebInitParam;
-import javax.servlet.annotation.WebServlet;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.annotation.MultipartConfig;
+import jakarta.servlet.annotation.WebInitParam;
+import jakarta.servlet.annotation.WebServlet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

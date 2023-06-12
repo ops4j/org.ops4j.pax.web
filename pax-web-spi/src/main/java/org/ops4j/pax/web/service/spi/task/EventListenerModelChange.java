@@ -20,6 +20,7 @@ import java.util.EventListener;
 import java.util.LinkedList;
 import java.util.List;
 
+import jakarta.servlet.ServletContextListener;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 

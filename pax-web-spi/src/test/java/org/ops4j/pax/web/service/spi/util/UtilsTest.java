@@ -15,17 +15,15 @@
  */
 package org.ops4j.pax.web.service.spi.util;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class UtilsTest {
 
 	@Test
 	public void substitution() {
-		assertThat(Utils.resolve("${java.home}"), not(equalTo("${java.home}")));
+		assertThat(Utils.resolve("${java.home}")).isNotEqualTo("${java.home}");
 	}
 
 }

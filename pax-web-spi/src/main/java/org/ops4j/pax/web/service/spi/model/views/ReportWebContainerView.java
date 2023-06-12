@@ -24,7 +24,7 @@ import org.ops4j.pax.web.service.views.PaxWebContainerView;
 /**
  * <p>This {@link PaxWebContainerView view} is used only to get read-only information about the state of
  * {@link org.ops4j.pax.web.service.spi.model.ServerModel}. It plays a role similar to
- * {@link org.osgi.service.http.runtime.HttpServiceRuntime} but with much greater flexibility.</p>
+ * {@link org.osgi.service.servlet.runtime.HttpServiceRuntime} but with much greater flexibility.</p>
  *
  * <p>This view was created especially for the purpose of Karaf commands.</p>
  */
@@ -35,7 +35,7 @@ public interface ReportWebContainerView extends PaxWebContainerView {
 	 *
 	 * <p>User expects mostly the Web Application Bundles (WABs), but the list will contain all
 	 * <em>web applications</em> - the ones created using Whiteboard registration or direct installation using
-	 * {@link org.osgi.service.http.HttpService} as well.</p>
+	 * {@link org.ops4j.pax.web.service.http.HttpService} as well.</p>
 	 *
 	 * @return
 	 */

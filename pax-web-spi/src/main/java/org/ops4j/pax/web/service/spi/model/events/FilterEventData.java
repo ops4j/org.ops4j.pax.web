@@ -18,7 +18,7 @@ package org.ops4j.pax.web.service.spi.model.events;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import javax.servlet.Filter;
+import jakarta.servlet.Filter;
 
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 

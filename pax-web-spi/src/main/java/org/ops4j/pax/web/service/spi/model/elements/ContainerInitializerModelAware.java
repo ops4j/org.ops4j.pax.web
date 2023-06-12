@@ -16,7 +16,7 @@
 package org.ops4j.pax.web.service.spi.model.elements;
 
 /**
- * Specialized interface to communicate with {@link javax.servlet.ServletContainerInitializer} instances which
+ * Specialized interface to communicate with {@link jakarta.servlet.ServletContainerInitializer} instances which
  * should be aware of {@link ContainerInitializerModel}. There's of course only one (as of 2021-07-27) such SCI,
  * which is used to register already instantiated WebSocket endpoints, but we still need this interface.
  */

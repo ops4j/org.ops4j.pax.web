@@ -15,14 +15,14 @@
  */
 package org.ops4j.pax.web.service.spi.model.events;
 
-import javax.servlet.Servlet;
+import jakarta.servlet.Servlet;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 
 /**
  * <p>Event related to registration of single {@link org.ops4j.pax.web.service.spi.model.elements.ElementModel} which
- * may represent any <em>web element</em> like {@link Servlet} or {@link javax.servlet.Filter}.
+ * may represent any <em>web element</em> like {@link Servlet} or {@link jakarta.servlet.Filter}.
  * In Pax Web 7 there was only a {@code ServletEvent}.</p>
  *
  * <p>While the names may be similar, these events are <strong>not</strong> the events mentioned in chapter 128.5,

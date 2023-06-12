@@ -31,18 +31,18 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import javax.servlet.Filter;
-import javax.servlet.FilterRegistration;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.Servlet;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletContextAttributeEvent;
-import javax.servlet.ServletContextAttributeListener;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRegistration;
-import javax.servlet.SessionCookieConfig;
-import javax.servlet.SessionTrackingMode;
-import javax.servlet.descriptor.JspConfigDescriptor;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterRegistration;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletContextAttributeEvent;
+import jakarta.servlet.ServletContextAttributeListener;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRegistration;
+import jakarta.servlet.SessionCookieConfig;
+import jakarta.servlet.SessionTrackingMode;
+import jakarta.servlet.descriptor.JspConfigDescriptor;
 
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainerContext;
@@ -62,7 +62,7 @@ import org.slf4j.LoggerFactory;
 /**
  * <p>Implementation of {@link ServletContext} for the contract described in 140.2.6 "Behavior of the Servlet Context"
  * from OSGi CMPN R7 Whiteboard Service specification. That's the 1:1 mapping with single
- * {@link org.osgi.service.http.context.ServletContextHelper} (or {@link org.osgi.service.http.HttpContext}).</p>
+ * {@link org.osgi.service.servlet.context.ServletContextHelper} (or {@link org.ops4j.pax.web.service.http.HttpContext}).</p>
  *
  * <p>When handling single servlet (or generally filters+servlet chain), we have to provide special facade for
  * {@link ServletContext} from Servlet API in the form of {@link OsgiServletContext}. And during actual request
@@ -80,8 +80,8 @@ public class OsgiServletContext implements ServletContext {
 
 	/**
 	 * {@link WebContainerContext} obtained from {@link OsgiContextModel} in the context of the bundle registering
-	 * the <em>context</em> ({@link org.osgi.service.http.HttpContext} or
-	 * {@link org.osgi.service.http.context.ServletContextHelper}). This {@link WebContainerContext} is used by
+	 * the <em>context</em> ({@link org.ops4j.pax.web.service.http.HttpContext} or
+	 * {@link org.osgi.service.servlet.context.ServletContextHelper}). This {@link WebContainerContext} is used by
 	 * default, but during actual request processing, different {@link WebContainerContext} should be used - the one
 	 * obtained (e.g., from OSGi service registry, {@link org.osgi.framework.ServiceFactory}) in the context of a
 	 * bundle that registered target {@link Servlet}.
@@ -242,7 +242,7 @@ public class OsgiServletContext implements ServletContext {
 	}
 
 	/**
-	 * This method removes the attributes set by {@link javax.servlet.ServletContainerInitializer SCIs} in previous
+	 * This method removes the attributes set by {@link jakarta.servlet.ServletContainerInitializer SCIs} in previous
 	 * restart of the context.
 	 */
 	public void clearAttributesFromPreviousCycle() {
@@ -303,14 +303,14 @@ public class OsgiServletContext implements ServletContext {
 
 	/**
 	 * This will mark the {@link OsgiServletContext} as a context that still alows for dynamic registration, but
-	 * not if the listener implements {@link javax.servlet.ServletContextListener}
+	 * not if the listener implements {@link jakarta.servlet.ServletContextListener}
 	 */
 	public void noMoreServletContextListeners() {
 		this.acceptsServletContextListeners = false;
 	}
 
 	/**
-	 * Can {@link javax.servlet.ServletContextListener} be registered?
+	 * Can {@link jakarta.servlet.ServletContextListener} be registered?
 	 * @return
 	 */
 	public boolean acceptsServletContextListeners() {
@@ -319,7 +319,7 @@ public class OsgiServletContext implements ServletContext {
 
 	/**
 	 * This method should be called with the associated context starts, so SCIs can register
-	 * {@link javax.servlet.ServletContextListener} listeners
+	 * {@link jakarta.servlet.ServletContextListener} listeners
 	 */
 	public void allowServletContextListeners() {
 		this.acceptsServletContextListeners = true;
@@ -553,18 +553,6 @@ public class OsgiServletContext implements ServletContext {
 	}
 
 	@Override
-	@SuppressWarnings("deprecation")
-	public Servlet getServlet(String name) throws ServletException {
-		return containerServletContext.getServlet(name);
-	}
-
-	@Override
-	@SuppressWarnings("deprecation")
-	public Enumeration<String> getServletNames() {
-		return containerServletContext.getServletNames();
-	}
-
-	@Override
 	public ServletRegistration getServletRegistration(String servletName) {
 		return containerServletContext.getServletRegistration(servletName);
 	}
@@ -572,12 +560,6 @@ public class OsgiServletContext implements ServletContext {
 	@Override
 	public Map<String, ? extends ServletRegistration> getServletRegistrations() {
 		return containerServletContext.getServletRegistrations();
-	}
-
-	@Override
-	@SuppressWarnings("deprecation")
-	public Enumeration<Servlet> getServlets() {
-		return containerServletContext.getServlets();
 	}
 
 	@Override
@@ -593,12 +575,6 @@ public class OsgiServletContext implements ServletContext {
 	@Override
 	public void log(String msg) {
 		containerServletContext.log(msg);
-	}
-
-	@Override
-	@SuppressWarnings("deprecation")
-	public void log(Exception exception, String msg) {
-		containerServletContext.log(exception, msg);
 	}
 
 	@Override
@@ -698,7 +674,7 @@ public class OsgiServletContext implements ServletContext {
 		// ServletContextHelper is roughly compatible, we'll leave it as is - but still we need to support a case
 		// when a WAB is installed, but then, higher-ranked ServletContextHelper is registered for WABs context path.
 
-		// special javax.faces.FACELETS_LIBRARIES handling
+		// special jakarta.faces.FACELETS_LIBRARIES handling
 		@SuppressWarnings("unchecked")
 		Map<String, URL> mapping = (Map<String, URL>) osgiContextModel.getInitialContextAttributes()
 				.get(PaxWebConstants.CONTEXT_PARAM_PAX_WEB_FACELETS_LIBRARIES);

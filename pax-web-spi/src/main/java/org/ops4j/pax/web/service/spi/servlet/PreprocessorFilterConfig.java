@@ -17,16 +17,16 @@ package org.ops4j.pax.web.service.spi.servlet;
 
 import java.util.Collections;
 import java.util.Enumeration;
-import javax.servlet.Filter;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletContext;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletContext;
 
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceObjects;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.http.runtime.dto.DTOConstants;
-import org.osgi.service.http.whiteboard.Preprocessor;
+import org.osgi.service.servlet.runtime.dto.DTOConstants;
+import org.osgi.service.servlet.whiteboard.Preprocessor;
 
 public class PreprocessorFilterConfig implements FilterConfig {
 

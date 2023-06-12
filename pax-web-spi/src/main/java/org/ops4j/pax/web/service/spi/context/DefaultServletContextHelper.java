@@ -18,11 +18,11 @@ package org.ops4j.pax.web.service.spi.context;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Set;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.osgi.framework.Bundle;
-import org.osgi.service.http.context.ServletContextHelper;
+import org.osgi.service.servlet.context.ServletContextHelper;
 
 /**
  * Default {@link ServletContextHelper} as specified in "140.2 The Servlet Context". Actually there's no need

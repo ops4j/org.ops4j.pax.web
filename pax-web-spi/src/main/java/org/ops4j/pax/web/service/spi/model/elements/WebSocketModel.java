@@ -15,9 +15,9 @@
  */
 package org.ops4j.pax.web.service.spi.model.elements;
 
-import javax.websocket.Decoder;
-import javax.websocket.Encoder;
-import javax.websocket.server.ServerEndpoint;
+import jakarta.websocket.Decoder;
+import jakarta.websocket.Encoder;
+import jakarta.websocket.server.ServerEndpoint;
 
 import org.ops4j.pax.web.service.spi.model.events.WebSocketEventData;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
@@ -33,11 +33,11 @@ public class WebSocketModel extends ElementModel<Object, WebSocketEventData> {
     public static final Logger LOG = LoggerFactory.getLogger(WebSocketModel.class);
 
     private final Object webSocketEndpoint;
-    private Class<?> webSocketEndpointClass;
+    private final Class<?> webSocketEndpointClass;
 
     private Class<?> webSocketEndpointClassResolved;
 
-    // see javax.websocket.server.ServerEndpoint.value
+    // see jakarta.websocket.server.ServerEndpoint.value
     private String mappedPath;
 
     @SuppressWarnings("unchecked")

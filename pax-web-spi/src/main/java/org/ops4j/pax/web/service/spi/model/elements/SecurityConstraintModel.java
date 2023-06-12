@@ -15,8 +15,8 @@
  */
 package org.ops4j.pax.web.service.spi.model.elements;
 
-import javax.servlet.ServletSecurityElement;
-import javax.servlet.annotation.ServletSecurity;
+import jakarta.servlet.ServletSecurityElement;
+import jakarta.servlet.annotation.ServletSecurity;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,7 +44,7 @@ public class SecurityConstraintModel {
 
 	/**
 	 * If the security constraint model was created from Servlet-specific configuration like:<ul>
-	 *     <li>{@link javax.servlet.ServletRegistration.Dynamic#setServletSecurity(ServletSecurityElement)}, or</li>
+	 *     <li>{@link jakarta.servlet.ServletRegistration.Dynamic#setServletSecurity(ServletSecurityElement)}, or</li>
 	 *     <li>{@link ServletSecurity} annotation</li>
 	 * </ul>we remember the associated {@link ServletModel}, so dynamic security constraints are properly applied.
 	 */

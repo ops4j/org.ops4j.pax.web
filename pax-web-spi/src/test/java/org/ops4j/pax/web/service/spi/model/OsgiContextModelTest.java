@@ -15,9 +15,9 @@
  */
 package org.ops4j.pax.web.service.spi.model;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class OsgiContextModelTest {
 
@@ -28,7 +28,7 @@ public class OsgiContextModelTest {
 		OsgiContextModel ocm2 = new OsgiContextModel(null, 0, 0L, true);
 		ocm2.setContextPath("/testPath");
 
-		assertTrue("Comparing by static atomic id", ocm1.compareTo(ocm2) < 0);
+		assertTrue(ocm1.compareTo(ocm2) < 0, "Comparing by static atomic id");
 	}
 
 }

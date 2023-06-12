@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import javax.servlet.DispatcherType;
+import jakarta.servlet.DispatcherType;
 
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
@@ -33,7 +33,7 @@ public class FilterStateChange extends Change {
 	/**
 	 * Whether the change is caused by dynamic filter registration. In such case, we should NEVER attempt
 	 * to start the context after registering such filter (because most probably we're in the process of starting
-	 * the context and in particular - we're calling {@link javax.servlet.ServletContainerInitializer#onStartup}).
+	 * the context and in particular - we're calling {@link jakarta.servlet.ServletContainerInitializer#onStartup}).
 	 */
 	private boolean dynamic = false;
 

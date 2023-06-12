@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleReference;
@@ -32,10 +32,10 @@ import org.osgi.framework.wiring.BundleWiring;
  * as <em>the</em> {@link ClassLoader} for {@link OsgiServletContext}.</p>
  *
  * <p>In Whiteboard scenario, an {@link OsgiServletContext} should get a {@link ClassLoader} from a bundle that
- * was used to register {@link org.osgi.service.http.context.ServletContextHelper} OSGi service and in case of
- * servlets (and filters), the {@link javax.servlet.ServletContext} obtained from {@link javax.servlet.ServletConfig}
+ * was used to register {@link org.osgi.service.servlet.context.ServletContextHelper} OSGi service and in case of
+ * servlets (and filters), the {@link jakarta.servlet.ServletContext} obtained from {@link jakarta.servlet.ServletConfig}
  * should return (in {@link ServletContext#getClassLoader()}) the {@link ClassLoader} of a bundle associated with
- * the {@link Bundle} that registered this {@link javax.servlet.Servlet} or {@link javax.servlet.Filter} OSGi service.</p>
+ * the {@link Bundle} that registered this {@link jakarta.servlet.Servlet} or {@link jakarta.servlet.Filter} OSGi service.</p>
  *
  * <p>In practice (and in WAB scenario), the actual {@link ClassLoader} returned from {@link OsgiServletContext} should
  * also be able to reach to resources/classes for given server runtime (Jetty, Tomcat, Undertow) and engines like JSP.</p>

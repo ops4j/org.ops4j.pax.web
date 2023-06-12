@@ -16,18 +16,16 @@
  */
 package org.ops4j.pax.web.service.spi.util;
 
+import org.junit.jupiter.api.Test;
+
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import org.junit.Test;
-
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class PathTest {
 
@@ -37,7 +35,7 @@ public class PathTest {
 	 */
 	@Test
 	public void replaceSlashesWithNull() {
-		assertNull("Replaced", Path.replaceSlashes(null));
+		assertNull(Path.replaceSlashes(null), "Replaced");
 	}
 
 	/**
@@ -46,7 +44,7 @@ public class PathTest {
 	 */
 	@Test
 	public void replaceSlashes01() {
-		assertEquals("Replaced", "/foo/bar/", Path.replaceSlashes("/foo/bar/"));
+		assertEquals("/foo/bar/", Path.replaceSlashes("/foo/bar/"), "Replaced");
 	}
 
 	/**
@@ -54,7 +52,7 @@ public class PathTest {
 	 */
 	@Test
 	public void replaceSlashes02() {
-		assertEquals("Replaced", "/", Path.replaceSlashes("/"));
+		assertEquals("/", Path.replaceSlashes("/"), "Replaced");
 	}
 
 	/**
@@ -62,7 +60,7 @@ public class PathTest {
 	 */
 	@Test
 	public void replaceSlashes03() {
-		assertEquals("Replaced", "/", Path.replaceSlashes("/////"));
+		assertEquals("/", Path.replaceSlashes("/////"), "Replaced");
 	}
 
 	/**
@@ -70,7 +68,7 @@ public class PathTest {
 	 */
 	@Test
 	public void replaceSlashes04() {
-		assertEquals("Replaced", "/foo/bar", Path.replaceSlashes("///foo/bar"));
+		assertEquals("/foo/bar", Path.replaceSlashes("///foo/bar"), "Replaced");
 	}
 
 	/**
@@ -78,7 +76,7 @@ public class PathTest {
 	 */
 	@Test
 	public void replaceSlashes05() {
-		assertEquals("Replaced", "foo/bar/", Path.replaceSlashes("foo/bar///"));
+		assertEquals("foo/bar/", Path.replaceSlashes("foo/bar///"), "Replaced");
 	}
 
 	/**
@@ -86,7 +84,7 @@ public class PathTest {
 	 */
 	@Test
 	public void replaceSlashes06() {
-		assertEquals("Replaced", "foo/bar", Path.replaceSlashes("foo////bar"));
+		assertEquals("foo/bar", Path.replaceSlashes("foo////bar"), "Replaced");
 	}
 
 	/**
@@ -95,7 +93,7 @@ public class PathTest {
 	 */
 	@Test
 	public void replaceSlashes07() {
-		assertEquals("Replaced", "/foo/bar/car/", Path.replaceSlashes("/foo////bar//car//"));
+		assertEquals("/foo/bar/car/", Path.replaceSlashes("/foo////bar//car//"), "Replaced");
 	}
 
 	/**
@@ -104,7 +102,7 @@ public class PathTest {
 	 */
 	@Test
 	public void normalizeResourcePathSlash01() {
-		assertEquals("Normalized", "/", Path.normalizeResourcePath("/"));
+		assertEquals("/", Path.normalizeResourcePath("/"), "Normalized");
 	}
 
 	/**
@@ -113,7 +111,7 @@ public class PathTest {
 	 */
 	@Test
 	public void normalizeResourcePathSlash02() {
-		assertEquals("Normalized", "/", Path.normalizeResourcePath("  /"));
+		assertEquals("/", Path.normalizeResourcePath("  /"), "Normalized");
 	}
 
 	/**
@@ -122,7 +120,7 @@ public class PathTest {
 	 */
 	@Test
 	public void normalizeResourcePathSlash03() {
-		assertEquals("Normalized", "/", Path.normalizeResourcePath("  /   "));
+		assertEquals("/", Path.normalizeResourcePath("  /   "), "Normalized");
 	}
 
 	/**
@@ -131,7 +129,7 @@ public class PathTest {
 	 */
 	@Test
 	public void normalizeResourcePathSlash04() {
-		assertEquals("Normalized", "/", Path.normalizeResourcePath("/   "));
+		assertEquals("/", Path.normalizeResourcePath("/   "), "Normalized");
 	}
 
 	/**
@@ -144,21 +142,21 @@ public class PathTest {
 	 */
 	@Test
 	public void secureNormalization() {
-		assertThat(Path.securePath(null), equalTo(""));
-		assertThat(Path.securePath(""), equalTo(""));
-		assertThat(Path.securePath("/"), equalTo("/"));
-		assertThat(Path.securePath("."), equalTo(""));
-		assertThat(Path.securePath(".."), nullValue());
-		assertThat(Path.securePath("./."), equalTo(""));
-		assertThat(Path.securePath("../.."), nullValue());
-		assertThat(Path.securePath("..."), equalTo("..."));
-		assertThat(Path.securePath("/a"), equalTo("/a"));
-		assertThat(Path.securePath("a"), equalTo("a"));
-		assertThat(Path.securePath("a/"), equalTo("a/"));
-		assertThat(Path.securePath("a/b"), equalTo("a/b"));
-		assertThat(Path.securePath("a/../b"), equalTo("b"));
-		assertThat(Path.securePath("a/../b/../c"), equalTo("c"));
-		assertThat(Path.securePath("a/../b/../c/../../"), nullValue());
+		assertThat(Path.securePath(null)).isEqualTo("");
+		assertThat(Path.securePath("")).isEqualTo("");
+		assertThat(Path.securePath("/")).isEqualTo("/");
+		assertThat(Path.securePath(".")).isEqualTo("");
+		assertThat(Path.securePath("..")).isNull();
+		assertThat(Path.securePath("./.")).isEqualTo("");
+		assertThat(Path.securePath("../..")).isNull();
+		assertThat(Path.securePath("...")).isEqualTo("...");
+		assertThat(Path.securePath("/a")).isEqualTo("/a");
+		assertThat(Path.securePath("a")).isEqualTo("a");
+		assertThat(Path.securePath("a/")).isEqualTo("a/");
+		assertThat(Path.securePath("a/b")).isEqualTo("a/b");
+		assertThat(Path.securePath("a/../b")).isEqualTo("b");
+		assertThat(Path.securePath("a/../b/../c")).isEqualTo("c");
+		assertThat(Path.securePath("a/../b/../c/../../")).isNull();
 	}
 
 	@Test
@@ -176,144 +174,144 @@ public class PathTest {
 		URL url;
 
 		url = new URL("file:");
-		assertThat(url.getPath(), equalTo(""));
-		assertThat(url.getHost(), equalTo(""));
-		assertThat(url.getAuthority(), nullValue());
+		assertThat(url.getPath()).isEqualTo("");
+		assertThat(url.getHost()).isEqualTo("");
+		assertThat(url.getAuthority()).isNull();
 
 		url = new URL("file:/");
-		assertThat(url.getPath(), equalTo("/"));
-		assertThat(url.getHost(), equalTo(""));
-		assertThat(url.getAuthority(), nullValue());
+		assertThat(url.getPath()).isEqualTo("/");
+		assertThat(url.getHost()).isEqualTo("");
+		assertThat(url.getAuthority()).isNull();
 
 		url = new URL("file://");
-		assertThat(url.getPath(), equalTo(""));
-		assertThat(url.getHost(), equalTo(""));
-		assertThat(url.getAuthority(), equalTo(""));
+		assertThat(url.getPath()).isEqualTo("");
+		assertThat(url.getHost()).isEqualTo("");
+		assertThat(url.getAuthority()).isEqualTo("");
 
 		url = new URL("file:///");
-		assertThat(url.getPath(), equalTo("/"));
-		assertThat(url.getHost(), equalTo(""));
-		assertThat(url.getAuthority(), equalTo(""));
+		assertThat(url.getPath()).isEqualTo("/");
+		assertThat(url.getHost()).isEqualTo("");
+		assertThat(url.getAuthority()).isEqualTo("");
 
 		url = new URL("file:////");
-		assertThat(url.getPath(), equalTo("////"));
-		assertThat(url.getHost(), equalTo(""));
-		assertThat(url.getAuthority(), nullValue());
+		assertThat(url.getPath()).isEqualTo("////");
+		assertThat(url.getHost()).isEqualTo("");
+		assertThat(url.getAuthority()).isNull();
 
 		url = new URL("file://///");
-		assertThat(url.getPath(), equalTo("/////"));
-		assertThat(url.getHost(), equalTo(""));
-		assertThat(url.getAuthority(), nullValue());
+		assertThat(url.getPath()).isEqualTo("/////");
+		assertThat(url.getHost()).isEqualTo("");
+		assertThat(url.getAuthority()).isNull();
 
 		url = new URL("file:a");
-		assertThat(url.getPath(), equalTo("a"));
-		assertThat(url.getHost(), equalTo(""));
-		assertThat(url.getAuthority(), nullValue());
+		assertThat(url.getPath()).isEqualTo("a");
+		assertThat(url.getHost()).isEqualTo("");
+		assertThat(url.getAuthority()).isNull();
 
 		url = new URL("file:a/");
-		assertThat(url.getPath(), equalTo("a/"));
-		assertThat(url.getHost(), equalTo(""));
-		assertThat(url.getAuthority(), nullValue());
+		assertThat(url.getPath()).isEqualTo("a/");
+		assertThat(url.getHost()).isEqualTo("");
+		assertThat(url.getAuthority()).isNull();
 
 		url = new URL("file:a//");
-		assertThat(url.getPath(), equalTo("a//"));
-		assertThat(url.getHost(), equalTo(""));
-		assertThat(url.getAuthority(), nullValue());
+		assertThat(url.getPath()).isEqualTo("a//");
+		assertThat(url.getHost()).isEqualTo("");
+		assertThat(url.getAuthority()).isNull();
 
 		url = new URL("file:a///");
-		assertThat(url.getPath(), equalTo("a///"));
-		assertThat(url.getHost(), equalTo(""));
-		assertThat(url.getAuthority(), nullValue());
+		assertThat(url.getPath()).isEqualTo("a///");
+		assertThat(url.getHost()).isEqualTo("");
+		assertThat(url.getAuthority()).isNull();
 
 		url = new URL("file:a////");
-		assertThat(url.getPath(), equalTo("a////"));
-		assertThat(url.getHost(), equalTo(""));
-		assertThat(url.getAuthority(), nullValue());
+		assertThat(url.getPath()).isEqualTo("a////");
+		assertThat(url.getHost()).isEqualTo("");
+		assertThat(url.getAuthority()).isNull();
 
 		url = new URL("file:a/////");
-		assertThat(url.getPath(), equalTo("a/////"));
-		assertThat(url.getHost(), equalTo(""));
-		assertThat(url.getAuthority(), nullValue());
+		assertThat(url.getPath()).isEqualTo("a/////");
+		assertThat(url.getHost()).isEqualTo("");
+		assertThat(url.getAuthority()).isNull();
 
 		url = new URL("file:a");
-		assertThat(url.getPath(), equalTo("a"));
-		assertThat(url.getHost(), equalTo(""));
-		assertThat(url.getAuthority(), nullValue());
+		assertThat(url.getPath()).isEqualTo("a");
+		assertThat(url.getHost()).isEqualTo("");
+		assertThat(url.getAuthority()).isNull();
 
 		url = new URL("file:/a");
-		assertThat(url.getPath(), equalTo("/a"));
-		assertThat(url.getHost(), equalTo(""));
-		assertThat(url.getAuthority(), nullValue());
+		assertThat(url.getPath()).isEqualTo("/a");
+		assertThat(url.getHost()).isEqualTo("");
+		assertThat(url.getAuthority()).isNull();
 
 		url = new URL("file:/a/");
-		assertThat(url.getPath(), equalTo("/a/"));
-		assertThat(url.getHost(), equalTo(""));
-		assertThat(url.getAuthority(), nullValue());
+		assertThat(url.getPath()).isEqualTo("/a/");
+		assertThat(url.getHost()).isEqualTo("");
+		assertThat(url.getAuthority()).isNull();
 
 		url = new URL("file:/a//");
-		assertThat(url.getPath(), equalTo("/a//"));
-		assertThat(url.getHost(), equalTo(""));
-		assertThat(url.getAuthority(), nullValue());
+		assertThat(url.getPath()).isEqualTo("/a//");
+		assertThat(url.getHost()).isEqualTo("");
+		assertThat(url.getAuthority()).isNull();
 
 		url = new URL("file:/a///");
-		assertThat(url.getPath(), equalTo("/a///"));
-		assertThat(url.getHost(), equalTo(""));
-		assertThat(url.getAuthority(), nullValue());
+		assertThat(url.getPath()).isEqualTo("/a///");
+		assertThat(url.getHost()).isEqualTo("");
+		assertThat(url.getAuthority()).isNull();
 
 		url = new URL("file:/a////");
-		assertThat(url.getPath(), equalTo("/a////"));
-		assertThat(url.getHost(), equalTo(""));
-		assertThat(url.getAuthority(), nullValue());
+		assertThat(url.getPath()).isEqualTo("/a////");
+		assertThat(url.getHost()).isEqualTo("");
+		assertThat(url.getAuthority()).isNull();
 
 		url = new URL("file:/");
-		assertThat(url.getPath(), equalTo("/"));
-		assertThat(url.getHost(), equalTo(""));
-		assertThat(url.getAuthority(), nullValue());
+		assertThat(url.getPath()).isEqualTo("/");
+		assertThat(url.getHost()).isEqualTo("");
+		assertThat(url.getAuthority()).isNull();
 
 		url = new URL("file://a");
-		assertThat(url.getPath(), equalTo(""));
-		assertThat(url.getHost(), equalTo("a"));
-		assertThat(url.getAuthority(), equalTo("a"));
+		assertThat(url.getPath()).isEqualTo("");
+		assertThat(url.getHost()).isEqualTo("a");
+		assertThat(url.getAuthority()).isEqualTo("a");
 
 		url = new URL("file://a/");
-		assertThat(url.getPath(), equalTo("/"));
-		assertThat(url.getHost(), equalTo("a"));
-		assertThat(url.getAuthority(), equalTo("a"));
+		assertThat(url.getPath()).isEqualTo("/");
+		assertThat(url.getHost()).isEqualTo("a");
+		assertThat(url.getAuthority()).isEqualTo("a");
 
 		url = new URL("file://a//");
-		assertThat(url.getPath(), equalTo("//"));
-		assertThat(url.getHost(), equalTo("a"));
-		assertThat(url.getAuthority(), equalTo("a"));
+		assertThat(url.getPath()).isEqualTo("//");
+		assertThat(url.getHost()).isEqualTo("a");
+		assertThat(url.getAuthority()).isEqualTo("a");
 
 		url = new URL("file://a///");
-		assertThat(url.getPath(), equalTo("///"));
-		assertThat(url.getHost(), equalTo("a"));
-		assertThat(url.getAuthority(), equalTo("a"));
+		assertThat(url.getPath()).isEqualTo("///");
+		assertThat(url.getHost()).isEqualTo("a");
+		assertThat(url.getAuthority()).isEqualTo("a");
 
 		url = new URL("file:/");
-		assertThat(url.getPath(), equalTo("/"));
-		assertThat(url.getHost(), equalTo(""));
-		assertThat(url.getAuthority(), nullValue());
+		assertThat(url.getPath()).isEqualTo("/");
+		assertThat(url.getHost()).isEqualTo("");
+		assertThat(url.getAuthority()).isNull();
 
 		url = new URL("file://");
-		assertThat(url.getPath(), equalTo(""));
-		assertThat(url.getHost(), equalTo(""));
-		assertThat(url.getAuthority(), equalTo(""));
+		assertThat(url.getPath()).isEqualTo("");
+		assertThat(url.getHost()).isEqualTo("");
+		assertThat(url.getAuthority()).isEqualTo("");
 
 		url = new URL("file:///a");
-		assertThat(url.getPath(), equalTo("/a"));
-		assertThat(url.getHost(), equalTo(""));
-		assertThat(url.getAuthority(), equalTo(""));
+		assertThat(url.getPath()).isEqualTo("/a");
+		assertThat(url.getHost()).isEqualTo("");
+		assertThat(url.getAuthority()).isEqualTo("");
 
 		url = new URL("file:///a/");
-		assertThat(url.getPath(), equalTo("/a/"));
-		assertThat(url.getHost(), equalTo(""));
-		assertThat(url.getAuthority(), equalTo(""));
+		assertThat(url.getPath()).isEqualTo("/a/");
+		assertThat(url.getHost()).isEqualTo("");
+		assertThat(url.getAuthority()).isEqualTo("");
 
 		url = new URL("file:///a//");
-		assertThat(url.getPath(), equalTo("/a//"));
-		assertThat(url.getHost(), equalTo(""));
-		assertThat(url.getAuthority(), equalTo(""));
+		assertThat(url.getPath()).isEqualTo("/a//");
+		assertThat(url.getHost()).isEqualTo("");
+		assertThat(url.getAuthority()).isEqualTo("");
 	}
 
 	@Test

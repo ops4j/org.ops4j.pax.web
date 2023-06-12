@@ -16,7 +16,7 @@
 package org.ops4j.pax.web.service.spi.model.events;
 
 import java.util.Arrays;
-import javax.servlet.Servlet;
+import jakarta.servlet.Servlet;
 
 public class ServletEventData extends WebElementEventData {
 

@@ -19,7 +19,7 @@ import java.util.Collection;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
-import org.osgi.service.http.HttpContext;
+import org.ops4j.pax.web.service.http.HttpContext;
 
 /**
  * <p>Event related to registration of a web application (WAB), described in OSGi CMPN 128 Web Applications Specification.
