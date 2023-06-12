@@ -16,7 +16,7 @@
     limitations under the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 
@@ -291,11 +291,21 @@
 		<dependency.org.ops4j.pax.swissbox>1.8.5</dependency.org.ops4j.pax.swissbox>
 		<dependency.org.ops4j.pax.url>2.6.14</dependency.org.ops4j.pax.url>
 
-		<dependency.org.osgi.core>7.0.0</dependency.org.osgi.core>
-		<dependency.org.osgi.core8>8.0.0</dependency.org.osgi.core8>
-		<dependency.org.osgi.cmpn>7.0.0</dependency.org.osgi.cmpn>
+		<dependency.org.osgi.annotation>8.1.0</dependency.org.osgi.annotation>
+		<dependency.org.osgi.core>8.0.0</dependency.org.osgi.core>
+		<!-- No more osgi.cmpn - services have own API bundles -->
 		<dependency.org.osgi.service.cdi>1.0.1</dependency.org.osgi.service.cdi>
-		<dependency.org.osgi.service.jaxrs>1.0.1</dependency.org.osgi.service.jaxrs>
+		<dependency.org.osgi.service.cm>1.6.1</dependency.org.osgi.service.cm>
+		<dependency.org.osgi.service.component>1.5.1</dependency.org.osgi.service.component>
+		<dependency.org.osgi.service.component.annotations>1.5.1</dependency.org.osgi.service.component.annotations>
+		<dependency.org.osgi.service.event>1.4.1</dependency.org.osgi.service.event>
+		<dependency.org.osgi.service.http>1.2.2</dependency.org.osgi.service.http>
+		<dependency.org.osgi.service.http.whiteboard>1.1.1</dependency.org.osgi.service.http.whiteboard>
+		<dependency.org.osgi.service.jakartars>2.0.0</dependency.org.osgi.service.jakartars>
+		<dependency.org.osgi.service.log>1.5.0</dependency.org.osgi.service.log>
+		<dependency.org.osgi.service.metatype>1.4.1</dependency.org.osgi.service.metatype>
+		<dependency.org.osgi.service.rest>1.0.0</dependency.org.osgi.service.rest>
+		<dependency.org.osgi.service.servlet>2.0.0</dependency.org.osgi.service.servlet>
 		<dependency.org.osgi.util.function>1.2.0</dependency.org.osgi.util.function>
 		<dependency.org.osgi.util.promise>1.3.0</dependency.org.osgi.util.promise>
 
@@ -615,10 +625,10 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
-					<source>11</source>
-					<target>11</target>
-					<testSource>11</testSource>
-					<testTarget>11</testTarget>
+					<source>17</source>
+					<target>17</target>
+					<testSource>17</testSource>
+					<testTarget>17</testTarget>
 					<compilerArgs>-Xlint:deprecation</compilerArgs>
 				</configuration>
 			</plugin>
@@ -1655,22 +1665,17 @@
 
 			<dependency>
 				<groupId>org.osgi</groupId>
+				<artifactId>osgi.annotation</artifactId>
+				<version>${dependency.org.osgi.annotation}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.osgi</groupId>
 				<artifactId>osgi.core</artifactId>
 				<version>${dependency.org.osgi.core}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.osgi</groupId>
-				<artifactId>osgi.cmpn</artifactId>
-				<version>${dependency.org.osgi.cmpn}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.osgi</groupId>
-				<artifactId>osgi.annotation</artifactId>
-				<version>${dependency.org.osgi.core}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.osgi</groupId>
-				<artifactId>org.osgi.service.jaxrs</artifactId>
+				<artifactId>org.osgi.service.jakartars</artifactId>
 				<version>${dependency.org.osgi.service.jaxrs}</version>
 			</dependency>
 			<dependency>
@@ -3134,45 +3139,45 @@
 		<!-- 128 CMPN Web Applications Specification -->
 		<module>pax-web-extender-war</module>
 
-		<module>pax-web-fragments</module>
+<!--		<module>pax-web-fragments</module>-->
 
-		<module>pax-web-karaf</module>
-		<module>pax-web-deployer</module>
+<!--		<module>pax-web-karaf</module>-->
+<!--		<module>pax-web-deployer</module>-->
 
 <!--		<module>pax-web-deployer</module>-->
 
-		<!-- Jetty 9 support -->
+		<!-- Jetty 12 support -->
 		<module>pax-web-jetty</module>
- 		<module>pax-web-jetty-bundle</module>
+<!-- 		<module>pax-web-jetty-bundle</module>-->
 
-		<!-- Tomcat 9 support -->
-		<module>pax-web-tomcat</module>
-		<module>pax-web-tomcat-websocket</module>
-		<module>pax-web-tomcat-bundle</module>
+		<!-- Tomcat 10 support -->
+<!--		<module>pax-web-tomcat</module>-->
+<!--		<module>pax-web-tomcat-websocket</module>-->
+<!--		<module>pax-web-tomcat-bundle</module>-->
 
-		<!-- Undertow 2 support -->
-		<module>pax-web-undertow</module>
-		<module>pax-web-undertow-websocket</module>
-		<module>pax-web-undertow-bundle</module>
+		<!-- Undertow 2.3 support -->
+<!--		<module>pax-web-undertow</module>-->
+<!--		<module>pax-web-undertow-websocket</module>-->
+<!--		<module>pax-web-undertow-bundle</module>-->
 
-		<module>pax-web-features</module>
+<!--		<module>pax-web-features</module>-->
 
 <!--		<module>pax-web-archetypes</module>-->
 <!--		<module>pax-web-jaas</module>-->
 
-		<module>pax-web-resources</module>
+<!--		<module>pax-web-resources</module>-->
 
 		<!-- All the samples (Http Service, Whiteboard, JSP, WebSockets, WAR) -->
-		<module>samples</module>
+<!--		<module>samples</module>-->
 
 		<!-- All the integration tests (OSGi, non-OSGi, Karaf) -->
-		<module>pax-web-itest</module>
+<!--		<module>pax-web-itest</module>-->
 
-		<module>pax-web-manual</module>
+<!--		<module>pax-web-manual</module>-->
 
 		<!-- Keycloak support -->
-		<module>pax-web-keycloak18</module>
-		<module>pax-web-keycloak</module>
+<!--		<module>pax-web-keycloak18</module>-->
+<!--		<module>pax-web-keycloak</module>-->
 
     </modules>
 
