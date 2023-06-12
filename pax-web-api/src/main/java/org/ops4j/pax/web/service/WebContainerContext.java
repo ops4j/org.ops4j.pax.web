@@ -16,32 +16,32 @@
 package org.ops4j.pax.web.service;
 
 import java.util.Set;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
+import org.ops4j.pax.web.service.http.HttpContext;
 import org.ops4j.pax.web.service.whiteboard.ContextRelated;
 import org.osgi.framework.Bundle;
-import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.context.ServletContextHelper;
+import org.osgi.service.servlet.context.ServletContextHelper;
 
 /**
  * <p>{@link HttpContext} extension that adds:<ul>
  *     <li><em>identity</em> (String ID) to {@link HttpContext} (knowing that single bundle using such context
  *     is part of the identity)</li>
- *     <li>missing resource-access method matching {@link javax.servlet.ServletContext#getResourcePaths(String)}
+ *     <li>missing resource-access method matching {@link jakarta.servlet.ServletContext#getResourcePaths(String)}
  *     method.</li>
  *     <li><em>shared</em> flag</li>
  * </ul></p>
  *
  * <p>All methods returning a <em>context</em> in {@link WebContainer} extension of
- * {@link org.osgi.service.http.HttpService} return implementations of this interface.</p>
+ * {@link org.ops4j.pax.web.service.http.HttpService} return implementations of this interface.</p>
  *
  * <p>No extension of the original {@link HttpContext} should specify such things as context path, virtual hosts
  * or parameters - these (to match Whiteboard specification) should be specified using service registration
  * paremeters or (legacy Pax Web method) in {@code org.ops4j.pax.web.service.whiteboard.HttpContextMapping} service
  * or (legacy and not recommended) {@code org.ops4j.pax.web.service.whiteboard.ServletContextHelperMapping}.</p>
  *
- * <p>Internally, Pax Web will wrap Whiteboard's {@link org.osgi.service.http.context.ServletContextHelper} instances
+ * <p>Internally, Pax Web will wrap Whiteboard's {@link org.osgi.service.servlet.context.ServletContextHelper} instances
  * in some implementation of {@link WebContainerContext} interface.</p>
  *
  * @author Alin Dreghiciu (adreghiciu@gmail.com)
@@ -51,10 +51,10 @@ public interface WebContainerContext extends HttpContext {
 
 	/**
 	 * <p>Complement {@link HttpContext#getResource(String)} (that matches
-	 * {@link javax.servlet.ServletContext#getResource(String)}), so we have a method matching
-	 * {@link javax.servlet.ServletContext#getResourcePaths(String)}.</p>
+	 * {@link jakarta.servlet.ServletContext#getResource(String)}), so we have a method matching
+	 * {@link jakarta.servlet.ServletContext#getResourcePaths(String)}.</p>
 	 *
-	 * <p>from {@link javax.servlet.ServletContext} javadoc: Returns a set of all the paths (String objects)
+	 * <p>from {@link jakarta.servlet.ServletContext} javadoc: Returns a set of all the paths (String objects)
 	 * to entries within the web application whose longest sub-path matches the supplied path argument.
 	 * A specified path of "/" indicates the root of the web application.</p>
 	 *
@@ -68,18 +68,18 @@ public interface WebContainerContext extends HttpContext {
 	 * {@code /WEB-INF/lib/*.jar!/META-INF/resources/} if the bundle is WAB.</p>
 	 *
 	 * @param path the path name for which to return resource paths. Just as in
-	 *        {@link javax.servlet.ServletContext#getResourcePaths(String)}, the path <em>must</em> start with {@code /}
+	 *        {@link jakarta.servlet.ServletContext#getResourcePaths(String)}, the path <em>must</em> start with {@code /}
 	 * @return a set of the resource paths (String objects) or null if no resource paths could be found or if
 	 *         the caller does not have the appropriate permissions.
 	 */
 	Set<String> getResourcePaths(String path);
 
 	/**
-	 * <p>Method matching {@link javax.servlet.ServletContext#getRealPath(String)} and
-	 * {@link org.osgi.service.http.context.ServletContextHelper#getRealPath(String)}, but not available in
+	 * <p>Method matching {@link jakarta.servlet.ServletContext#getRealPath(String)} and
+	 * {@link org.osgi.service.servlet.context.ServletContextHelper#getRealPath(String)}, but not available in
 	 * original {@link HttpContext}.</p>
 	 *
-	 * <p>As in Javadoc for {@link javax.servlet.ServletContext#getRealPath(String)}:
+	 * <p>As in Javadoc for {@link jakarta.servlet.ServletContext#getRealPath(String)}:
 	 * Resources inside the <tt>/META-INF/resources</tt> directories of JAR files bundled in the application's
 	 * <tt>/WEB-INF/lib</tt> directory must be considered only if the container has unpacked them from their containing
 	 * JAR file, in which case the path to the unpacked location must be returned.
@@ -94,7 +94,7 @@ public interface WebContainerContext extends HttpContext {
 	}
 
 	/**
-	 * Method that backports {@link org.osgi.service.http.context.ServletContextHelper#finishSecurity}
+	 * Method that backports {@link org.osgi.service.servlet.context.ServletContextHelper#finishSecurity}
 	 * into <em>old</em> {@link HttpContext}
 	 *
 	 * @param request
@@ -116,10 +116,10 @@ public interface WebContainerContext extends HttpContext {
 	 * </ul></p>
 	 *
 	 * <p>There's security concern related to String identification of <em>context</em> - both for
-	 * {@link org.osgi.service.http.HttpService#registerServlet} and whiteboard approach. If (as Pax Web allows)
+	 * {@link org.ops4j.pax.web.service.http.HttpService#registerServlet} and whiteboard approach. If (as Pax Web allows)
 	 * <em>shared</em> context is used, there should be no way of accessing resources from one bundle by another
 	 * bundle. Whiteboard specification is more clear about it - resources are loaded from the bundle registering
-	 * (publishing) {@link org.osgi.service.http.context.ServletContextHelper} service and there's assumed
+	 * (publishing) {@link org.osgi.service.servlet.context.ServletContextHelper} service and there's assumed
 	 * <em>sharing</em> of the context between bundles. That's why user chosing {@link MultiBundleWebContainerContext}
 	 * has to be aware of <em>opening</em> an access to all bundles sharing such <em>context</em>.</p>
 	 *
@@ -131,7 +131,7 @@ public interface WebContainerContext extends HttpContext {
 	 * <p>Should this <em>context</em> (as defined in "102 Http Service" specification, not in "140 Whiteboard Service"
 	 * specification) be allowed to be used by different bundles?</p>
 	 *
-	 * <p>In Whiteboard Service scenario (to wrap {@link org.osgi.service.http.context.ServletContextHelper})
+	 * <p>In Whiteboard Service scenario (to wrap {@link org.osgi.service.servlet.context.ServletContextHelper})
 	 * the context should be shared by default and there's no real way to make a <em>context</em> not shared.</p>
 	 *
 	 * <p>In Http Service scenario, but default, a <em>context</em> is not shared. It means that if a web element
@@ -154,7 +154,7 @@ public interface WebContainerContext extends HttpContext {
 	 */
 	enum DefaultContextIds {
 		/**
-		 * Used for {@link org.osgi.service.http.HttpService#createDefaultHttpContext()}
+		 * Used for {@link org.ops4j.pax.web.service.http.HttpService#createDefaultHttpContext()}
 		 */
 		DEFAULT(PaxWebConstants.DEFAULT_CONTEXT_NAME),
 

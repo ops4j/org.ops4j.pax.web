@@ -24,10 +24,10 @@ package org.ops4j.pax.web.service.whiteboard;
  * <p>This is Pax Web specific <em>Whiteboard mapping</em> approach, where all the details are
  * passed directly and not as service registration properties. The problem with CMPN Whitboard
  * specification is that <em>error pages</em> are not registered directly, but as service
- * registration properties when registering a {@link javax.servlet.Servlet}. Also, such servlet is
+ * registration properties when registering a {@link jakarta.servlet.Servlet}. Also, such servlet is
  * not required to be associated with any URL pattern. Pax Web on the other hand matches the
  * {@code web.xml} model, where <em>error page</em> is a mapping from error codes/exception names
- * to an URI (not a {@link javax.servlet.Servlet}). Thus in Pax Web we're forced to use artificial,
+ * to an URI (not a {@link jakarta.servlet.Servlet}). Thus in Pax Web we're forced to use artificial,
  * generated URI locations. With <em>mapping</em> approach, error mapping is registered together
  * with some servlet with can <strong>always</strong> be accessed directly (just as in {@code web.xml}.</p>
  *
@@ -46,8 +46,8 @@ public interface ErrorPageMapping extends ContextRelated {
 	/**
 	 * URI mapping (must start with {@code /}) that'll be used to handle the exception/error. In case of standard
 	 * OSGi CMPN Whiteboard specification, the location is passed implicitly - the associated
-	 * {@link javax.servlet.Servlet} being registered will handle the problem. In Pax Web <em>Whiteboard mapping</em>,
-	 * actual servlet should be registered separately (by registering a {@link javax.servlet.Servlet} or
+	 * {@link jakarta.servlet.Servlet} being registered will handle the problem. In Pax Web <em>Whiteboard mapping</em>,
+	 * actual servlet should be registered separately (by registering a {@link jakarta.servlet.Servlet} or
 	 * {@link ServletMapping}).
 	 * @return
 	 */

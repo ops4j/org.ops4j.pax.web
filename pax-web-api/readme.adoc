@@ -3,14 +3,14 @@
 This bundle has these purposes:
 
 * re-export packages specified in OSGi CMPN R7 102 "Http Service Specification"
-** `org.osgi.service.http` 1.2
+** `org.osgi.service.servlet` 1.2
 * re-export packages specified in OSGi CMPN R7 140 "Http Whiteboard Specification"
-** `org.osgi.service.http.context` 1.1
-** `org.osgi.service.http.runtime` 1.1
-** `org.osgi.service.http.runtime.dto` 1.1
-** `org.osgi.service.http.whiteboard` 1.1
-** `org.osgi.service.http.whiteboard.annotations` 1.1
-** `org.osgi.service.http.whiteboard.propertytypes` 1.1
+** `org.osgi.service.servlet.context` 1.1
+** `org.osgi.service.servlet.runtime` 1.1
+** `org.osgi.service.servlet.runtime.dto` 1.1
+** `org.osgi.service.servlet.whiteboard` 1.1
+** `org.osgi.service.servlet.whiteboard.annotations` 1.1
+** `org.osgi.service.servlet.whiteboard.propertytypes` 1.1
 * provide additional interfaces (like `org.ops4j.pax.web.service.WebContainer`) extending standard specification
 * provide some utilities used throughout PAX WEB (`org.ops4j.pax.web.utils` package)
 
@@ -295,19 +295,19 @@ Since OSGi CMPN R6, Http Whiteboard is an official specification and Pax Web (wh
 
 CMPN R7 Http Whiteboard Specification allows registration (as OSGi services) of the following services:
 
-* 140.4 Registering Servlets: `javax.servlet.Servlet` services
+* 140.4 Registering Servlets: `jakarta.servlet.Servlet` services
 * 140.5 Registering Servlet Filters:
-** `javax.servlet.Filter` services
-** `org.osgi.service.http.whiteboard.Preprocessor` services handled before security processing
+** `jakarta.servlet.Filter` services
+** `org.osgi.service.servlet.whiteboard.Preprocessor` services handled before security processing
 * 140.6 Registering Resources: any objects with `osgi.http.whiteboard.resource.pattern` and `osgi.http.whiteboard.resource.prefix` service properties. Actual service is irrelevant
 * 140.7 Registering Listeners: services with these subinterfaces of `java.util.EventListener`:
-** `javax.servlet.ServletContextListener`
-** `javax.servlet.ServletContextAttributeListener`
-** `javax.servlet.ServletRequestListener`
-** `javax.servlet.ServletRequestAttributeListener`
-** `javax.servlet.http.HttpSessionListener`
-** `javax.servlet.http.HttpSessionAttributeListener`
-** `javax.servlet.http.HttpSessionIdListener`
+** `jakarta.servlet.ServletContextListener`
+** `jakarta.servlet.ServletContextAttributeListener`
+** `jakarta.servlet.ServletRequestListener`
+** `jakarta.servlet.ServletRequestAttributeListener`
+** `jakarta.servlet.http.HttpSessionListener`
+** `jakarta.servlet.http.HttpSessionAttributeListener`
+** `jakarta.servlet.http.HttpSessionIdListener`
 
 When registering the above servives, all additional and required information should be specified as OSGi service properties and/or Java annotations on the services. Annotations where specified only in R7 Whiteboard specification. Version R6 specified only service registration properties.
 
@@ -319,11 +319,11 @@ This may be called _explicit whiteboard approach_ (where registration parameters
 
 === Context
 
-Java Servlet API specification defines `javax.servlet.ServletContext` interface which roughly means a distinguished namespace (with _context path_) where servlets, filters and other _web elements_ may be specified.
+Java Servlet API specification defines `jakarta.servlet.ServletContext` interface which roughly means a distinguished namespace (with _context path_) where servlets, filters and other _web elements_ may be specified.
 
-OSGi CMPN Http Service specification defines `org.osgi.service.http.HttpContext` interface that should _influence_ the `javax.servlet.ServletContext` associated with the servlets (and resources) being registered.
+OSGi CMPN Http Service specification defines `org.ops4j.pax.web.service.http.HttpContext` interface that should _influence_ the `jakarta.servlet.ServletContext` associated with the servlets (and resources) being registered.
 
-OSGi CMPN Whiteboard specification defines `org.osgi.service.http.context.ServletContextHelper` interface that plays the same role as the above `HttpContext`, but which is dedicated for Whiteboard specification.
+OSGi CMPN Whiteboard specification defines `org.osgi.service.servlet.context.ServletContextHelper` interface that plays the same role as the above `HttpContext`, but which is dedicated for Whiteboard specification.
 This `ServletContextHelper` is explicitly associated with _context path_ (using `osgi.http.whiteboard.context.path` service registration property) - unlike `HttpContext` which doesn't have a _context path_.
 
 OSGi CMPN HTTP Service specification (102.2 Registering servlets) mentions:
@@ -333,7 +333,7 @@ OSGi CMPN HTTP Service specification (102.2 Registering servlets) mentions:
 [...]. Thus, Servlet objects registered with the same HttpContext object must also share the same ServletContext object.
 ----
 
-Without actually specifying what _the same_ means. `felix.http` implements `org.osgi.service.http.HttpService.createDefaultHttpContext()` by returning _new_ instance of `org.apache.felix.http.base.internal.service.DefaultHttpContext` on each call...
+Without actually specifying what _the same_ means. `felix.http` implements `org.ops4j.pax.web.service.http.HttpService.createDefaultHttpContext()` by returning _new_ instance of `org.apache.felix.http.base.internal.service.DefaultHttpContext` on each call...
 
 OSGi CMPN Whiteboard specification (140.10 Integration with Http Service contexts) says:
 

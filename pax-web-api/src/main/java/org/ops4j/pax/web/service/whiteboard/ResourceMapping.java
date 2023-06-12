@@ -15,16 +15,16 @@
  */
 package org.ops4j.pax.web.service.whiteboard;
 
-import org.osgi.service.http.HttpContext;
+import org.ops4j.pax.web.service.http.HttpContext;
 
 /**
- * <p>Resource mapping. Even if "resource handling" is perfomed by servlet container specific {@link javax.servlet.Servlet},
+ * <p>Resource mapping. Even if "resource handling" is perfomed by servlet container specific {@link jakarta.servlet.Servlet},
  * we don't extend {@link ServletMapping} because the servlet is provided by Pax Web itself. The most important field
  * is single <em>path</em> property, which is:<ul>
  *     <li>For HttpService: 2nd parameter to
- *     {@link org.osgi.service.http.HttpService#registerResources(String, String, HttpContext)}</li>
+ *     {@link org.ops4j.pax.web.service.http.HttpService#registerResources(String, String, HttpContext)}</li>
  *     <li>For Whiteboard service:
- *     {@link org.osgi.service.http.whiteboard.HttpWhiteboardConstants#HTTP_WHITEBOARD_RESOURCE_PREFIX} service
+ *     {@link org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants#HTTP_WHITEBOARD_RESOURCE_PREFIX} service
  *     registration property</li>
  * </ul></p>
  *

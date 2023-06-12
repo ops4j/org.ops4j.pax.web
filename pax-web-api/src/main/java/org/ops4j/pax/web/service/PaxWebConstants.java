@@ -17,10 +17,10 @@
 package org.ops4j.pax.web.service;
 
 import java.net.JarURLConnection;
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 
 import org.ops4j.pax.web.service.whiteboard.ContextMapping;
-import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
+import org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants;
 
 /**
  * <p>Different constants used across Pax Web but not related to configuration that may be specified using
@@ -28,7 +28,7 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
  * {@link PaxWebConfig}.</p>
  * <p>Constants names use the following prefixes:<ul>
  *     <li>{@code SERVICE_PROPERTY_} - for names of OSGi service registration properties</li>
- *     <li>{@code INIT_PARAM_} - for legacy init parameters passed to {@link org.osgi.service.http.HttpService}
+ *     <li>{@code INIT_PARAM_} - for legacy init parameters passed to {@link org.ops4j.pax.web.service.http.HttpService}
  *     registration methods that are handled in special way by Pax Web.</li>
  *     <li>{@code CONTEXT_PARAM_} - for {@link ServletContext} attributes set by Pax Web.</li>
  *     <li>{@code DEFAULT_} - for miscellaneous <em>default</em> values (default VHost, default name, default context,
@@ -45,11 +45,11 @@ public interface PaxWebConstants {
 
 	/** Actual OSGi Http Service will be registered under these {@code objectClass} names. */
 	String[] HTTPSERVICE_REGISTRATION_NAMES = {
-			org.osgi.service.http.HttpService.class.getName(),
+			org.ops4j.pax.web.service.http.HttpService.class.getName(),
 			org.ops4j.pax.web.service.WebContainer.class.getName()
 	};
 
-	/** Default name for <em>context</em> (e.g., {@link org.osgi.service.http.context.ServletContextHelper}) */
+	/** Default name for <em>context</em> (e.g., {@link org.osgi.service.servlet.context.ServletContextHelper}) */
 	String DEFAULT_CONTEXT_NAME = HttpWhiteboardConstants.HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME;
 
 	/** Name for default <em>shared</em> contexts - Pax Web specific */
@@ -64,26 +64,26 @@ public interface PaxWebConstants {
 	/** The only supported JSP servlet class name */
 	String DEFAULT_JSP_SERVLET_CLASS = "org.ops4j.pax.web.jsp.JspServlet";
 
-	/** The only supported {@link javax.servlet.ServletContainerInitializer} class that configures JSP engine */
+	/** The only supported {@link jakarta.servlet.ServletContainerInitializer} class that configures JSP engine */
 	String DEFAULT_JSP_SCI_CLASS = "org.ops4j.pax.web.jsp.JasperInitializer";
 
 	/**
-	 * The only supported {@link javax.servlet.ServletContainerInitializer} class that configures WebSocket
+	 * The only supported {@link jakarta.servlet.ServletContainerInitializer} class that configures WebSocket
 	 * container for Jetty
 	 */
 	String DEFAULT_WEBSOCKET_JETTY_SCI_CLASS = "org.eclipse.jetty.websocket.javax.server.config.JavaxWebSocketServletContainerInitializer";
 	/**
-	 * The only supported {@link javax.servlet.ServletContainerInitializer} class that configures WebSocket
+	 * The only supported {@link jakarta.servlet.ServletContainerInitializer} class that configures WebSocket
 	 * container for Tomcat
 	 */
 	String DEFAULT_WEBSOCKET_TOMCAT_SCI_CLASS = "org.apache.tomcat.websocket.server.WsSci";
 	/**
-	 * The only supported {@link javax.servlet.ServletContainerInitializer} class that configures WebSocket
+	 * The only supported {@link jakarta.servlet.ServletContainerInitializer} class that configures WebSocket
 	 * container for Undertow
 	 */
 	String DEFAULT_WEBSOCKET_UNDERTOW_SCI_CLASS = "org.ops4j.pax.web.service.undertow.websocket.internal.WebSocketsInitializer";
 	/**
-	 * The only supported {@link javax.servlet.ServletContainerInitializer} for generic configuration of
+	 * The only supported {@link jakarta.servlet.ServletContainerInitializer} for generic configuration of
 	 * WebSocket container
  	 */
 	String DEFAULT_WEBSOCKET_SCI_CLASS = "org.ops4j.pax.web.websocket.internal.PaxWebWebSocketsServletContainerInitializer";
@@ -128,8 +128,8 @@ public interface PaxWebConstants {
 	 * <p>Pax Web specific service property used when registering:<ul>
 	 *     <li>{@link org.ops4j.pax.web.service.whiteboard.ServletContextHelperMapping}</li>
 	 *     <li>{@link org.ops4j.pax.web.service.whiteboard.HttpContextMapping}</li>
-	 *     <li>{@link org.osgi.service.http.context.ServletContextHelper}</li>
-	 *     <li>{@link org.osgi.service.http.HttpContext}</li>
+	 *     <li>{@link org.osgi.service.servlet.context.ServletContextHelper}</li>
+	 *     <li>{@link org.ops4j.pax.web.service.http.HttpContext}</li>
 	 * </ul>
 	 * services to indicate <em>virtual hosts</em> with which this context should be associated (though for the two
 	 * Pax Web specific mappings, {@link ContextMapping#getVirtualHosts()} takes precedence).</p>
@@ -141,7 +141,7 @@ public interface PaxWebConstants {
 	String SERVICE_PROPERTY_VIRTUAL_HOSTS_LEGACY = "httpContext.virtualhosts";
 	/**
 	 * <p>Improved name for the service registration property to configure virtual hosts of the context
-	 * ({@link org.osgi.service.http.context.ServletContextHelper}, {@link org.osgi.service.http.HttpContext}, etc.).</p>
+	 * ({@link org.osgi.service.servlet.context.ServletContextHelper}, {@link org.ops4j.pax.web.service.http.HttpContext}, etc.).</p>
 	 * <p>See http://www.eclipse.org/jetty/documentation/jetty-9/index.html#configuring-virtual-hosts</p>
 	 */
 	String SERVICE_PROPERTY_VIRTUAL_HOSTS = "org.ops4j.pax.web.http.whiteboard.virtualhosts";
@@ -150,8 +150,8 @@ public interface PaxWebConstants {
 	 * <p>Pax Web specific service property used when registering:<ul>
 	 *     <li>{@link org.ops4j.pax.web.service.whiteboard.ServletContextHelperMapping}</li>
 	 *     <li>{@link org.ops4j.pax.web.service.whiteboard.HttpContextMapping}</li>
-	 *     <li>{@link org.osgi.service.http.context.ServletContextHelper}</li>
-	 *     <li>{@link org.osgi.service.http.HttpContext}</li>
+	 *     <li>{@link org.osgi.service.servlet.context.ServletContextHelper}</li>
+	 *     <li>{@link org.ops4j.pax.web.service.http.HttpContext}</li>
 	 * </ul>
 	 * services to indicate <em>connector ids</em> through which this context should be associated (though for the two
 	 * Pax Web specific mappings, {@link ContextMapping#getConnectors()} takes precedence).</p>
@@ -163,21 +163,21 @@ public interface PaxWebConstants {
 	String SERVICE_PROPERTY_CONNECTORS_LEGACY = "httpContext.connectors";
 	/**
 	 * <p>Improved name for the service registration property to configure connectors of the context
-	 * ({@link org.osgi.service.http.context.ServletContextHelper}, {@link org.osgi.service.http.HttpContext}, etc.).</p>
+	 * ({@link org.osgi.service.servlet.context.ServletContextHelper}, {@link org.ops4j.pax.web.service.http.HttpContext}, etc.).</p>
 	 * <p>See http://www.eclipse.org/jetty/documentation/jetty-9/index.html#configuring-virtual-hosts</p>
 	 */
 	String SERVICE_PROPERTY_CONNECTORS = "org.ops4j.pax.web.http.whiteboard.connectors";
 
 	/**
 	 * Legacy service property for context ID.
-	 * @deprecated Use {@link org.osgi.service.http.whiteboard.HttpWhiteboardConstants#HTTP_WHITEBOARD_CONTEXT_NAME}
+	 * @deprecated Use {@link org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants#HTTP_WHITEBOARD_CONTEXT_NAME}
 	 */
 	@Deprecated
 	String SERVICE_PROPERTY_HTTP_CONTEXT_ID = "httpContext.id";
 
 	/**
-	 * Legacy property name for a legacy "shared" flag for {@link org.osgi.service.http.HttpContext} services.
-	 * @deprecated User {@link org.osgi.service.http.context.ServletContextHelper} services which are "shared"
+	 * Legacy property name for a legacy "shared" flag for {@link org.ops4j.pax.web.service.http.HttpContext} services.
+	 * @deprecated User {@link org.osgi.service.servlet.context.ServletContextHelper} services which are "shared"
 	 * by default
 	 */
 	@Deprecated
@@ -185,7 +185,7 @@ public interface PaxWebConstants {
 
 	/**
 	 * Legacy context path.
-	 * @deprecated Use {@link org.osgi.service.http.whiteboard.HttpWhiteboardConstants#HTTP_WHITEBOARD_CONTEXT_PATH}
+	 * @deprecated Use {@link org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants#HTTP_WHITEBOARD_CONTEXT_PATH}
 	 */
 	@Deprecated
 	String SERVICE_PROPERTY_HTTP_CONTEXT_PATH = "httpContext.path";
@@ -248,11 +248,11 @@ public interface PaxWebConstants {
 	/**
 	 * Filter init param name for specifying a filter-mapping dispatch behaviour Must be a comma delimited string of:
 	 * <ul>
-	 *     <li>{@link javax.servlet.DispatcherType#REQUEST}</li>
-	 *     <li>{@link javax.servlet.DispatcherType#FORWARD}</li>
-	 *     <li>{@link javax.servlet.DispatcherType#INCLUDE}</li>
-	 *     <li>{@link javax.servlet.DispatcherType#ERROR}</li>
-	 *     <li>{@link javax.servlet.DispatcherType#ASYNC}</li>
+	 *     <li>{@link jakarta.servlet.DispatcherType#REQUEST}</li>
+	 *     <li>{@link jakarta.servlet.DispatcherType#FORWARD}</li>
+	 *     <li>{@link jakarta.servlet.DispatcherType#INCLUDE}</li>
+	 *     <li>{@link jakarta.servlet.DispatcherType#ERROR}</li>
+	 *     <li>{@link jakarta.servlet.DispatcherType#ASYNC}</li>
 	 * </ul>
 	 * <p>
 	 * values are not case sensitive.

@@ -21,7 +21,7 @@ package org.ops4j.pax.web.service.whiteboard;
  * more flexibility and responsibility here.</p>
  *
  * <p>On purpose, we don't allow registration of other objects that usually can be passed (by means of
- * {@link javax.servlet.annotation.HandlesTypes} annotation on a {@link javax.servlet.ServletContainerInitializer}
+ * {@link jakarta.servlet.annotation.HandlesTypes} annotation on a {@link jakarta.servlet.ServletContainerInitializer}
  * related to WebSockets) by users. Only annontated classes or actual instances are handled and we don't support:<ul>
  *     <li>{@code javax.websocket.server.ServerApplicationConfig}</li>
  *     <li>{@code javax.websocket.Endpoint}</li>
