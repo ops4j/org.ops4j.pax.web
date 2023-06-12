@@ -42,17 +42,20 @@
 				<configuration>
 					<instructions>
 						<Import-Package>
-							<!-- ranges indicate we can work with OSGi Core R6+ -->
-							org.osgi.framework;version="[1.8,2)",
+							<!-- OSGi Core R8+ -->
+							org.osgi.dto;version="[1.1,2)",
+							org.osgi.framework;version="[1.10,2)",
 
-							javax.servlet;version="[3.1,5)",
-							javax.servlet.annotation;version="[3.1,5)",
-							javax.servlet.http;version="[3.1,5)",
-							javax.websocket;version="[1.1,2)",
-							javax.websocket.server;version="[1.1,2)",
+							<!-- ranges indicate Servlet API 6.0+ (JakartaEE 10+) -->
+							jakarta.servlet;version="[6,7)",
+							jakarta.servlet.annotation;version="[6,7)",
+							jakarta.servlet.http;version="[6,7)",
+
+							jakarta.websocket;version="[2.1,3)";resolution:=optional,
+							jakarta.websocket.server;version="[2.1,3)";resolution:=optional,
 
 							<!-- from pax-logging-api -->
-							org.slf4j;version="[1.7,2)",
+							org.slf4j;version="[2,3)",
 
 							org.ops4j.pax.web.service.spi.model.elements
 						</Import-Package>
@@ -86,7 +89,7 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<!-- JavaEE -->
+		<!-- JakartaEE -->
 
 		<dependency>
 			<groupId>jakarta.servlet</groupId>
@@ -96,6 +99,11 @@
 		<dependency>
 			<groupId>jakarta.websocket</groupId>
 			<artifactId>jakarta.websocket-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.websocket</groupId>
+			<artifactId>jakarta.websocket-client-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 
