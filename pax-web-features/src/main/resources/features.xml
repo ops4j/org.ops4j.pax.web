@@ -233,7 +233,9 @@ javax.servlet.context.tempdir = ${karaf.data}/pax-web/tmp
 		<bundle start-level="30" dependency="true">mvn:jakarta.el/jakarta.el-api/${dependency.jakarta.el-api}</bundle>
 		<bundle start-level="30" dependency="true">mvn:jakarta.annotation/jakarta.annotation-api/${dependency.jakarta.annotation-api}</bundle>
 		<bundle start-level="30" dependency="true">mvn:jakarta.servlet/jakarta.servlet-api/${dependency.jakarta.servlet-api}</bundle>
-		<bundle start-level="30" dependency="true">mvn:jakarta.security.auth.message/jakarta.security.auth.message-api/${dependency.jakarta.security.auth.message-api}</bundle>
+		<bundle start-level="30" dependency="true">
+            mvn:jakarta.security.auth.message/jakarta.security.auth.message-api/${dependency.jakarta.authentication-api}
+        </bundle>
 
 		<bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-tomcat-common/${project.version}</bundle>
 		<bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-tomcat/${project.version}</bundle>
