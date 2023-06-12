@@ -16,9 +16,9 @@
 package org.ops4j.pax.web.jsp;
 
 import java.util.Set;
-import javax.servlet.ServletContainerInitializer;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletContainerInitializer;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
 
 import org.apache.jasper.servlet.TldScanner;
 import org.apache.tomcat.JarScanner;
@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 /**
  * <p>Pax Web extends original initializer, so it is possible to override the {@link TldScanner}.</p>
  *
- * <p>This initializer is declared in {@code /META-INF/services/javax.servlet.ServletContainerInitializer}
+ * <p>This initializer is declared in {@code /META-INF/services/jakarta.servlet.ServletContainerInitializer}
  * for pax-web-extender-war purpose. For Whiteboard and HttpService purposes, it is used directly to configure the
  * context(s) when JSP support is required.</p>
  *
@@ -48,9 +48,9 @@ import org.slf4j.LoggerFactory;
  * there is not many details about how exactly JSPs (and TLDs) should be supported.</p>
  *
  * <p>So we start with the asumption that CMPN 128 specification is about supporting WARs in OSGi runtime in very
- * similar way to how they work in JavaEE environments. The most important <em>common ground</em> is how to use
+ * similar way to how they work in JakartaEE environments. The most important <em>common ground</em> is how to use
  * classloaders to find necessary resources. Details of how TLDs should be located are described inline below. Here's
- * the outline: in JavaEE, WAR is associated with single classloader, which includes:<ul>
+ * the outline: in JakartaEE, WAR is associated with single classloader, which includes:<ul>
  *     <li>{@code /WEB-INF/classes} directory</li>
  *     <li>each of the {@code /WEN-INF/lib/*.jar}</li>
  * </ul>
@@ -137,7 +137,7 @@ public class JasperInitializer extends org.apache.jasper.servlet.JasperInitializ
 		//    1a) create org.apache.tomcat.util.descriptor.tld.TldParser
 		// 2) call org.apache.jasper.servlet.TldScanner.scan() to detect all *.tld files
 		// 3) get all the listeners declared in *.tld files and pass them (as strings) to
-		//    javax.servlet.ServletContext.addListener(java.lang.String)
+		//    jakarta.servlet.ServletContext.addListener(java.lang.String)
 		super.onStartup(types, context);
 	}
 
@@ -149,14 +149,14 @@ public class JasperInitializer extends org.apache.jasper.servlet.JasperInitializ
 		//    - org.apache.tomcat.util.descriptor.tld.TaglibXml object pushed as top level bean
 		//   (the top-level element should be "{http://java.sun.com/xml/ns/javaee}taglib")
 		// - in places defined by "JSP.7.3.2 TLD resource path" of JSR 245 JSP Specification:
-		//    1) JavaEE Platform entries: JSP standard tag library and JSF libraries
+		//    1) JakartaEE Platform entries: JSP standard tag library and JSF libraries
 		//        - Tomcat does nothing here
 		//    2) JSP 7.3.3 /web-app/jsp-config/taglib/taglib-location elements from web.xml
-		//        - Tomcat calls javax.servlet.ServletContext.getJspConfigDescriptor() and then
-		//          javax.servlet.descriptor.JspConfigDescriptor.getTaglibs() - we have relevant methods in
+		//        - Tomcat calls jakarta.servlet.ServletContext.getJspConfigDescriptor() and then
+		//          jakarta.servlet.descriptor.JspConfigDescriptor.getTaglibs() - we have relevant methods in
 		//          WebContainer interface
 		//        - for each location (with /WEB-INF/ prepended if it's relative),
-		//          javax.servlet.ServletContext.getResource() is called
+		//          jakarta.servlet.ServletContext.getResource() is called
 		//           - if it's *.jar, then META-INF/taglib.tld entry is being checked
 		//           - it can't be inside /WEB-INF/classes
 		//           - it can't be inside /WEB-INF/lib
@@ -164,11 +164,11 @@ public class JasperInitializer extends org.apache.jasper.servlet.JasperInitializ
 		//    3) JSP 7.3.4 Implicit TLDs from
 		//        - WEB-INF/lib/**/*.jar files (only META-INF/**/*.tld entries)
 		//           - uses org.apache.tomcat.util.scan.StandardJarScanner
-		//              - calls javax.servlet.ServletContext.getResourcePaths("/WEB-INF/lib/")
+		//              - calls jakarta.servlet.ServletContext.getResourcePaths("/WEB-INF/lib/")
 		//              - for each JAR, tomcat.util.scan.StandardJarScanFilter.jarsToSkip and
 		//                tomcat.util.scan.StandardJarScanFilter.jarsToScan system properties are checked, which
 		//                are comma-separated simple names of jar files
-		//              - javax.servlet.ServletContext.getResource() is called for non-skipped JAR
+		//              - jakarta.servlet.ServletContext.getResource() is called for non-skipped JAR
 		//              - by default, Class-Path MANIFEST.MF entry is checked for JARs unless JARs from webapp are
 		//                checked
 		//              - for each JAR, only META-INF/**/*.tld entries are checked
@@ -177,7 +177,7 @@ public class JasperInitializer extends org.apache.jasper.servlet.JasperInitializ
 		//          unpacked into WEB-INF/classes as happens with some IDEs"
 		//        - WEB-INF/**/*.tld files (but not in WEB-INF/classes or WEB-INF/lib or WEB-INF/tags (implicit.tld
 		//          is allowed))
-		//           - Tomcat calls javax.servlet.ServletContext.getResourcePaths("/WEB-INF/") and does a DFS for
+		//           - Tomcat calls jakarta.servlet.ServletContext.getResourcePaths("/WEB-INF/") and does a DFS for
 		//             subpaths with the above reservations
 		//        - Tomcat does "Scan the classpath" (org.apache.tomcat.util.scan.StandardJarScanner.scanClassPath)
 		//          which navigates up the classloaders and for URLClassLoaders, all java.net.URLClassLoader.getURLs()
@@ -192,7 +192,7 @@ public class JasperInitializer extends org.apache.jasper.servlet.JasperInitializ
 		// stdtags in WEB-INF/lib, like in $TOMCAT_HOME/webapps/examples/WEB-INF/lib/taglibs-standard-impl-1.2.5.jar
 
 		// In Pax Web TldScanner, we:
-		//  - interpret "JavaEE Platform entries" as everything that's contained in pax-web-jsp bundle. This allows
+		//  - interpret "JakartaEE Platform entries" as everything that's contained in pax-web-jsp bundle. This allows
 		//    use to scan for standard tag library TLDs without user bundle's declaration
 		//  - skip standard classloader scanning (traversing up the CL hierarchy) - instead we'll use BundleWiring
 		//    API and ClassPathUtil to get a closure of bundles to be scanned (or in case of WAB, change the process

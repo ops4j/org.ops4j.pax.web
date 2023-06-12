@@ -21,7 +21,6 @@
  * namespace.</p>
  *
  * <p>Original package is {@code org.osgi.service.http}. There's no new equivalen of this package and users
- * are encouraged to move to <a href="https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html">Jakarta Servlet Specificaiton</a> (formerly known as
- * <em>Whiteboard specification</em>).</p>
+ * are encouraged to move to <a href="https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html">Whiteboard Specification for Jakarta™ Servlet</a>.</p>
  */
 package org.ops4j.pax.web.service.http;

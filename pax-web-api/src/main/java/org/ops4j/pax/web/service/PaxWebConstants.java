@@ -71,7 +71,7 @@ public interface PaxWebConstants {
 	 * The only supported {@link jakarta.servlet.ServletContainerInitializer} class that configures WebSocket
 	 * container for Jetty
 	 */
-	String DEFAULT_WEBSOCKET_JETTY_SCI_CLASS = "org.eclipse.jetty.websocket.javax.server.config.JavaxWebSocketServletContainerInitializer";
+	String DEFAULT_WEBSOCKET_JETTY_SCI_CLASS = "org.eclipse.jetty.ee10.websocket.jakarta.server.config.JakartaWebSocketServletContainerInitializer";
 	/**
 	 * The only supported {@link jakarta.servlet.ServletContainerInitializer} class that configures WebSocket
 	 * container for Tomcat
@@ -280,6 +280,7 @@ public interface PaxWebConstants {
 	 * help us provide nice OSGi-aware discovery mechanism. That's why this context parameter will provide special
 	 * {@link java.util.Map} that can be used when searching for FACELET resources.</p>
 	 */
+	// TODO: JakartaEE 10
 	String CONTEXT_PARAM_PAX_WEB_FACELETS_LIBRARIES = "org.ops4j.pax.web.javax.faces.FACELETS_LIBRARIES";
 
 	// --- 3 properties defined in 128.3.4 "Publishing the Servlet Context" (and one Pax Web specific)
@@ -295,5 +296,10 @@ public interface PaxWebConstants {
 
 	/** Context name of the WAB bundle or bundle registering OSGi servlet context (Pax Web addition) */
 	String SERVICE_PROPERTY_WEB_SERVLETCONTEXT_NAME = "osgi.web.contextname";
+
+	/**
+	 * For compatibility purpose (OSGi CMPN 8: {@code org.osgi.service.http.whiteboard.HttpWhiteboardConstants#HTTP_SERVICE_CONTEXT_PROPERTY})
+	 */
+	String HTTP_SERVICE_CONTEXT_PROPERTY = "osgi.http.whiteboard.context.httpservice";
 
 }

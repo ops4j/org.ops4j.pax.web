@@ -18,9 +18,6 @@ package org.ops4j.pax.web.jsp;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.security.AccessController;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -29,11 +26,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.WeakHashMap;
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.servlet.Filter;
-
-import org.apache.jasper.security.SecurityUtil;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import jakarta.servlet.Filter;
 
 public class InstanceManager implements org.apache.tomcat.InstanceManager {
 
@@ -223,27 +218,7 @@ public class InstanceManager implements org.apache.tomcat.InstanceManager {
 
 	protected Class<?> loadClassMaybePrivileged(final String className,
 												final ClassLoader classLoader) throws ClassNotFoundException {
-		Class<?> clazz;
-		if (SecurityUtil.isPackageProtectionEnabled()) {
-			try {
-				clazz = AccessController
-						.doPrivileged(new PrivilegedExceptionAction<Class<?>>() {
-
-							@Override
-							public Class<?> run() throws Exception {
-								return classLoader.loadClass(className);
-							}
-						});
-			} catch (PrivilegedActionException e) {
-				Throwable t = e.getCause();
-				if (t instanceof ClassNotFoundException) {
-					throw (ClassNotFoundException) t;
-				}
-				throw new RuntimeException(t);
-			}
-		} else {
-			clazz = classLoader.loadClass(className);
-		}
+		Class<?> clazz = classLoader.loadClass(className);
 		checkAccess(clazz);
 		return clazz;
 	}

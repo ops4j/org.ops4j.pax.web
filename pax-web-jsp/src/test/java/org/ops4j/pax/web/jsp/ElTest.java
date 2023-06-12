@@ -16,21 +16,20 @@
  */
 package org.ops4j.pax.web.jsp;
 
-import javax.el.ELContext;
-import javax.el.ELManager;
-import javax.el.ELProcessor;
-import javax.el.ELResolver;
-import javax.el.ExpressionFactory;
-import javax.el.ValueExpression;
+import jakarta.el.ELContext;
+import jakarta.el.ELManager;
+import jakarta.el.ELProcessor;
+import jakarta.el.ELResolver;
+import jakarta.el.ExpressionFactory;
+import jakarta.el.ValueExpression;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class ElTest {
 
@@ -52,26 +51,26 @@ public class ElTest {
 
 		// Provides an implementation for creating and evaluating EL expressions.
 		ExpressionFactory expressionFactory = ExpressionFactory.newInstance();
-		assertThat(expressionFactory.getClass().getName(), equalTo("org.apache.el.ExpressionFactoryImpl"));
+		assertThat(expressionFactory.getClass().getName()).isEqualTo("org.apache.el.ExpressionFactoryImpl");
 
 		manager.defineBean("model", new Model());
 
 		assertNotNull(processor.eval("model"));
 		assertNull(processor.eval("model.prop"));
 		processor.eval("model.prop = 'Grzegorz'");
-		assertThat(processor.eval("model.prop"), equalTo("Grzegorz"));
-		assertThat(processor.eval("model.hello()"), equalTo("Grzegorz"));
-		assertThat(processor.eval("model.hello(\"Grzegorz\")"), equalTo("[Grzegorz]"));
+		assertThat((String) processor.eval("model.prop")).isEqualTo("Grzegorz");
+		assertThat((String) processor.eval("model.hello()")).isEqualTo("Grzegorz");
+		assertThat((String) processor.eval("model.hello(\"Grzegorz\")")).isEqualTo("[Grzegorz]");
 
 		Model m = (Model) resolver.getValue(context, null, "model");
 		assertNotNull(m);
-		assertThat(m.hello(), equalTo("Grzegorz"));
+		assertThat(m.hello()).isEqualTo("Grzegorz");
 
 		// immediate and deferred evaluation - not relevant in plain EL usage. It is relevant in JSP/JSF
 		ValueExpression ve = expressionFactory.createValueExpression(context, "${model.prop}", String.class);
-		assertThat(ve.getValue(context), equalTo("Grzegorz"));
+		assertThat((String) ve.getValue(context)).isEqualTo("Grzegorz");
 		ve = expressionFactory.createValueExpression(context, "#{model.prop}", String.class);
-		assertThat(ve.getValue(context), equalTo("Grzegorz"));
+		assertThat((String) ve.getValue(context)).isEqualTo("Grzegorz");
 	}
 
 	public static class Model {

@@ -19,7 +19,7 @@
  *
  * <p>At some point during evolution of Servlet/JSP API specifications, the Servlet container was freed from the
  * responsibility of being "JSP container" and the interoperation was delegated to the mechanism of
- * {@link javax.servlet.ServletContainerInitializer}s (SCIs). This package contains one such SCI that prepares
+ * {@link jakarta.servlet.ServletContainerInitializer}s (SCIs). This package contains one such SCI that prepares
  * the context (and in Pax Web it is specialized <em>OSGi context</em>) to allow usage of JSPs. The most
  * important thing is support for discovering TLD descriptors.</p>
  *
