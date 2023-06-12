@@ -284,8 +284,8 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>jakarta.security.auth.message</groupId>
-			<artifactId>jakarta.security.auth.message-api</artifactId>
+			<groupId>jakarta.authentication</groupId>
+			<artifactId>jakarta.authentication-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>

@@ -187,7 +187,7 @@
 
 		<dependency>
 			<groupId>org.eclipse.jetty.http2</groupId>
-			<artifactId>http2-server</artifactId>
+			<artifactId>jetty-http2-server</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -201,13 +201,13 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.eclipse.jetty.websocket</groupId>
-			<artifactId>websocket-javax-common</artifactId>
+			<groupId>org.eclipse.jetty.ee10.websocket</groupId>
+			<artifactId>jetty-ee10-websocket-jakarta-common</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.eclipse.jetty.websocket</groupId>
-			<artifactId>websocket-javax-server</artifactId>
+			<groupId>org.eclipse.jetty.ee10.websocket</groupId>
+			<artifactId>jetty-ee10-websocket-jakarta-server</artifactId>
 			<scope>test</scope>
 		</dependency>
 

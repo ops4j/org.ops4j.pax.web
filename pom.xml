@@ -181,21 +181,21 @@
 
 		<!--		<dependency.io.gatling.highcharts>3.6.1</dependency.io.gatling.highcharts>-->
 
-		<dependency.io.undertow>2.2.24.Final</dependency.io.undertow>
+		<dependency.io.undertow>2.3.7.Final</dependency.io.undertow>
 
-		<dependency.jakarta.annotation-api>1.3.5</dependency.jakarta.annotation-api>
-		<dependency.jakarta.el-api>3.0.3</dependency.jakarta.el-api>
+		<dependency.jakarta.annotation-api>2.1.1</dependency.jakarta.annotation-api>
+		<dependency.jakarta.authentication-api>3.0.0</dependency.jakarta.authentication-api>
+		<dependency.jakarta.el-api>5.0.1</dependency.jakarta.el-api>
 		<dependency.jakarta.enterprise.cdi-api>2.0.2</dependency.jakarta.enterprise.cdi-api>
-		<dependency.jakarta.inject-api>1.0.5</dependency.jakarta.inject-api>
+		<dependency.jakarta.inject-api>2.0.1</dependency.jakarta.inject-api>
 		<dependency.jakarta.interceptor-api>1.2.5</dependency.jakarta.interceptor-api>
 		<dependency.jakarta.persistence-api>2.2.3</dependency.jakarta.persistence-api>
-		<dependency.jakarta.security.auth.message-api>1.1.3</dependency.jakarta.security.auth.message-api>
-		<dependency.jakarta.servlet-api>4.0.4</dependency.jakarta.servlet-api>
-		<dependency.jakarta.servlet.jsp-api>2.3.6</dependency.jakarta.servlet.jsp-api>
-		<dependency.jakarta.servlet.jsp.jstl-api>1.2.7</dependency.jakarta.servlet.jsp.jstl-api>
+		<dependency.jakarta.servlet-api>6.0.0</dependency.jakarta.servlet-api>
+		<dependency.jakarta.servlet.jsp-api>3.1.1</dependency.jakarta.servlet.jsp-api>
+		<dependency.jakarta.servlet.jsp.jstl-api>3.0.0</dependency.jakarta.servlet.jsp.jstl-api>
 		<dependency.jakarta.transaction-api>1.3.3</dependency.jakarta.transaction-api>
 		<dependency.jakarta.validation-api>2.0.2</dependency.jakarta.validation-api>
-		<dependency.jakarta.websocket-api>1.1.2</dependency.jakarta.websocket-api>
+		<dependency.jakarta.websocket-api>2.1.0</dependency.jakarta.websocket-api>
 		<dependency.jakarta.ws.rs-api>2.1.6</dependency.jakarta.ws.rs-api>
 		<dependency.jakarta.xml.bind-api>2.3.3</dependency.jakarta.xml.bind-api>
 		<dependency.jakarta.xml.soap-api>1.4.2</dependency.jakarta.xml.soap-api>
@@ -244,7 +244,7 @@
 		<dependency.org.apache.servicemix.bundles.jasypt>1.9.3_1</dependency.org.apache.servicemix.bundles.jasypt>
 		<dependency.org.apache.servicemix.bundles.javax-inject>1_3</dependency.org.apache.servicemix.bundles.javax-inject>
 		<dependency.org.apache.taglibs>1.2.5</dependency.org.apache.taglibs>
-		<dependency.org.apache.tomcat>9.0.76</dependency.org.apache.tomcat>
+		<dependency.org.apache.tomcat>10.1.9</dependency.org.apache.tomcat>
 		<dependency.org.apache.ws.xmlschema>2.3.0</dependency.org.apache.ws.xmlschema>
 		<dependency.org.apache.xbean>4.22</dependency.org.apache.xbean>
 
@@ -255,8 +255,8 @@
 		<dependency.org.eclipse.jdt.ecj>3.32.0</dependency.org.eclipse.jdt.ecj>
 
 		<!-- Please keep Maven and OSGi version in sync -->
-		<dependency.org.eclipse.jetty>10.0.15</dependency.org.eclipse.jetty>
-		<dependency.org.eclipse.jetty.osgi>10.0.15</dependency.org.eclipse.jetty.osgi>
+		<dependency.org.eclipse.jetty>12.0.0.beta1</dependency.org.eclipse.jetty>
+		<dependency.org.eclipse.jetty.osgi>12.0.0</dependency.org.eclipse.jetty.osgi>
 		<dependency.org.eclipse.jetty.alpn>1.1.3.v20160715</dependency.org.eclipse.jetty.alpn>
 		<dependency.org.eclipse.jetty.alpn.osgi>1.1.3</dependency.org.eclipse.jetty.alpn.osgi>
 
@@ -579,8 +579,8 @@
 					<version>${dependency.org.ops4j.pax.exam}</version>
 				</plugin>
 				<plugin>
-					<groupId>org.eclipse.jetty</groupId>
-					<artifactId>jetty-jspc-maven-plugin</artifactId>
+					<groupId>org.eclipse.jetty.ee10</groupId>
+					<artifactId>jetty-ee10-jspc-maven-plugin</artifactId>
 					<version>${dependency.org.eclipse.jetty}</version>
 				</plugin>
 
@@ -1553,6 +1553,12 @@
 				<groupId>org.ops4j.pax.url</groupId>
 				<artifactId>pax-url-aether</artifactId>
 				<version>${dependency.org.ops4j.pax.url}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>javax.annotation</groupId>
+						<artifactId>javax.annotation-api</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.url</groupId>
@@ -2193,9 +2199,9 @@
 				<version>${dependency.jakarta.websocket-api}</version>
 			</dependency>
 			<dependency>
-				<groupId>jakarta.security.auth.message</groupId>
-				<artifactId>jakarta.security.auth.message-api</artifactId>
-				<version>${dependency.jakarta.security.auth.message-api}</version>
+				<groupId>jakarta.authentication</groupId>
+				<artifactId>jakarta.authentication-api</artifactId>
+				<version>${dependency.jakarta.authentication-api}</version>
 			</dependency>
 
 			<dependency>
@@ -2284,263 +2290,18 @@
 			<!-- Jetty -->
 
 			<dependency>
-				<groupId>org.eclipse.jetty.aggregate</groupId>
-				<artifactId>jetty-all</artifactId>
-				<classifier>uber</classifier>
-				<version>${dependency.org.eclipse.jetty}</version>
-			</dependency>
-
-			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-jaas</artifactId>
+				<artifactId>jetty-bom</artifactId>
 				<version>${dependency.org.eclipse.jetty}</version>
+				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
 			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-jaspi</artifactId>
+				<groupId>org.eclipse.jetty.ee10</groupId>
+				<artifactId>jetty-ee10-bom</artifactId>
 				<version>${dependency.org.eclipse.jetty}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.eclipse.jetty.orbit</groupId>
-						<artifactId>javax.security.auth.message</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-client</artifactId>
-				<version>${dependency.org.eclipse.jetty}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-deploy</artifactId>
-				<version>${dependency.org.eclipse.jetty}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>test-jetty-webapp</artifactId>
-				<version>${dependency.org.eclipse.jetty}</version>
-				<type>war</type>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-util</artifactId>
-				<version>${dependency.org.eclipse.jetty}</version>
-			</dependency>
-			<dependency>
-				<!-- required dependency of jetty-servlet since https://github.com/eclipse/jetty.project/issues/5539 -->
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-util-ajax</artifactId>
-				<version>${dependency.org.eclipse.jetty}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-io</artifactId>
-				<version>${dependency.org.eclipse.jetty}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-http</artifactId>
-				<version>${dependency.org.eclipse.jetty}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-server</artifactId>
-				<version>${dependency.org.eclipse.jetty}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>javax.servlet</groupId>
-						<artifactId>javax.servlet-api</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-security</artifactId>
-				<version>${dependency.org.eclipse.jetty}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-servlet</artifactId>
-				<version>${dependency.org.eclipse.jetty}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-servlets</artifactId>
-				<version>${dependency.org.eclipse.jetty}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-xml</artifactId>
-				<version>${dependency.org.eclipse.jetty}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-plus</artifactId>
-				<version>${dependency.org.eclipse.jetty}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-rewrite</artifactId>
-				<version>${dependency.org.eclipse.jetty}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>javax.servlet</groupId>
-						<artifactId>javax.servlet-api</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-jmx</artifactId>
-				<version>${dependency.org.eclipse.jetty}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-jndi</artifactId>
-				<version>${dependency.org.eclipse.jetty}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-webapp</artifactId>
-				<version>${dependency.org.eclipse.jetty}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-annotations</artifactId>
-				<version>${dependency.org.eclipse.jetty}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>javax.annotation</groupId>
-						<artifactId>javax.annotation-api</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.ow2.asm</groupId>
-						<artifactId>asm</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.ow2.asm</groupId>
-						<artifactId>asm-commons</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-
-			<dependency>
-				<groupId>org.eclipse.jetty.alpn</groupId>
-				<artifactId>alpn-api</artifactId>
-				<version>${dependency.org.eclipse.jetty.alpn}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-alpn-client</artifactId>
-				<version>${dependency.org.eclipse.jetty}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-alpn-server</artifactId>
-				<version>${dependency.org.eclipse.jetty}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-alpn-java-server</artifactId>
-				<version>${dependency.org.eclipse.jetty}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>org.eclipse.jetty.http2</groupId>
-				<artifactId>http2-common</artifactId>
-				<version>${dependency.org.eclipse.jetty}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty.http2</groupId>
-				<artifactId>http2-server</artifactId>
-				<version>${dependency.org.eclipse.jetty}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty.http2</groupId>
-				<artifactId>http2-http-client-transport</artifactId>
-				<version>${dependency.org.eclipse.jetty}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty.http2</groupId>
-				<artifactId>http2-client</artifactId>
-				<version>${dependency.org.eclipse.jetty}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty.http2</groupId>
-				<artifactId>http2-hpack</artifactId>
-				<version>${dependency.org.eclipse.jetty}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>org.eclipse.jetty.websocket</groupId>
-				<artifactId>websocket-jetty-api</artifactId>
-				<version>${dependency.org.eclipse.jetty}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty.websocket</groupId>
-				<artifactId>websocket-core-common</artifactId>
-				<version>${dependency.org.eclipse.jetty}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty.websocket</groupId>
-				<artifactId>websocket-core-server</artifactId>
-				<version>${dependency.org.eclipse.jetty}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty.websocket</groupId>
-				<artifactId>websocket-core-client</artifactId>
-				<version>${dependency.org.eclipse.jetty}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty.websocket</groupId>
-				<artifactId>websocket-servlet</artifactId>
-				<version>${dependency.org.eclipse.jetty}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>javax.servlet</groupId>
-						<artifactId>javax.servlet-api</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty.websocket</groupId>
-				<artifactId>websocket-javax-common</artifactId>
-				<version>${dependency.org.eclipse.jetty}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty.websocket</groupId>
-				<artifactId>websocket-javax-client</artifactId>
-				<version>${dependency.org.eclipse.jetty}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>javax.websocket</groupId>
-						<artifactId>javax.websocket-client-api</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>javax.websocket</groupId>
-						<artifactId>javax.websocket-api</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty.websocket</groupId>
-				<artifactId>websocket-javax-server</artifactId>
-				<version>${dependency.org.eclipse.jetty}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>javax.websocket</groupId>
-						<artifactId>javax.websocket-api</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.ow2.asm</groupId>
-						<artifactId>asm</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.ow2.asm</groupId>
-						<artifactId>asm-commons</artifactId>
-					</exclusion>
-				</exclusions>
+				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
 
 			<!-- Tomcat -->
