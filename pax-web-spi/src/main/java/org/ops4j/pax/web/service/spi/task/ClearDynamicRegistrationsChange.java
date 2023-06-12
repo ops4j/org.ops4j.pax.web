@@ -22,7 +22,7 @@ import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 
 /**
  * A change that clears all dynamic registrations, potentially made using methods like
- * {@link javax.servlet.ServletContext#addServlet}
+ * {@link jakarta.servlet.ServletContext#addServlet}
  */
 public class ClearDynamicRegistrationsChange extends Change {
 

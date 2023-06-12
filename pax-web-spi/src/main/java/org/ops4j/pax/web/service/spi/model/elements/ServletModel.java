@@ -30,10 +30,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Supplier;
-import javax.servlet.MultipartConfigElement;
-import javax.servlet.Servlet;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
+import jakarta.servlet.MultipartConfigElement;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletContext;
 
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.spi.config.JspConfiguration;
@@ -45,13 +45,13 @@ import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 import org.ops4j.pax.web.service.whiteboard.ServletMapping;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.http.HttpService;
-import org.osgi.service.http.context.ServletContextHelper;
-import org.osgi.service.http.runtime.dto.DTOConstants;
-import org.osgi.service.http.runtime.dto.FailedResourceDTO;
-import org.osgi.service.http.runtime.dto.FailedServletDTO;
-import org.osgi.service.http.runtime.dto.ResourceDTO;
-import org.osgi.service.http.runtime.dto.ServletDTO;
+import org.ops4j.pax.web.service.http.HttpService;
+import org.osgi.service.servlet.context.ServletContextHelper;
+import org.osgi.service.servlet.runtime.dto.DTOConstants;
+import org.osgi.service.servlet.runtime.dto.FailedResourceDTO;
+import org.osgi.service.servlet.runtime.dto.FailedServletDTO;
+import org.osgi.service.servlet.runtime.dto.ResourceDTO;
+import org.osgi.service.servlet.runtime.dto.ServletDTO;
 
 /**
  * Set of parameters describing everything that's required to register a {@link Servlet}.
@@ -404,13 +404,6 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 			// see org.apache.jasper.servlet.JspServlet.init() and
 			// org.apache.catalina.startup.ContextConfig.convertJsp()
 			initParams.put("jspFile", jspFile);
-		}
-
-		if (multipartConfigElement != null && multipartConfigElement.getLocation() != null) {
-			if (System.getSecurityManager() != null && !getRegisteringBundle().hasPermission(new FilePermission(multipartConfigElement.getLocation(), "read,write,delete"))) {
-				dtoFailureCode = DTOConstants.FAILURE_REASON_SERVLET_WRITE_TO_LOCATION_DENIED;
-				throw new IllegalArgumentException("No Write permission to " + multipartConfigElement.getLocation());
-			}
 		}
 
 		dtoFailureCode = -1;

@@ -18,14 +18,13 @@ package org.ops4j.pax.web.service.spi.servlet.dynamic;
 import java.util.Collection;
 import java.util.EnumSet;
 
-import javax.servlet.DispatcherType;
+import jakarta.servlet.DispatcherType;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DynamicFilterRegistrationTest {
 
@@ -38,7 +37,7 @@ public class DynamicFilterRegistrationTest {
 		dfr.addMappingForServletNames(EnumSet.of(DispatcherType.ERROR, DispatcherType.INCLUDE), true, "s2", "s4");
 
 		Collection<String> patterns = dfr.getServletNameMappings();
-		assertThat(patterns.size(), equalTo(4));
+		assertThat(patterns.size()).isEqualTo(4);
 		assertTrue(patterns.contains("s1"));
 		assertTrue(patterns.contains("s2"));
 		assertTrue(patterns.contains("s3"));
@@ -54,7 +53,7 @@ public class DynamicFilterRegistrationTest {
 		dfr.addMappingForUrlPatterns(EnumSet.of(DispatcherType.ERROR, DispatcherType.INCLUDE), true, "/s2", "/s3/*");
 
 		Collection<String> patterns = dfr.getUrlPatternMappings();
-		assertThat(patterns.size(), equalTo(4));
+		assertThat(patterns.size()).isEqualTo(4);
 		assertTrue(patterns.contains("/s1"));
 		assertTrue(patterns.contains("/s2"));
 		assertTrue(patterns.contains("/s3"));

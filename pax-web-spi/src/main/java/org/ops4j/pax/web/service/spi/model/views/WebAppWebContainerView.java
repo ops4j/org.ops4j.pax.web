@@ -30,7 +30,7 @@ import org.osgi.framework.Bundle;
  * we can arrange the operations within a kind of <em>transaction</em>. This is desired and expected if all the
  * web elements belong to single WAR (WAB) and also because some kind of validation was already performed when
  * WAB's {@code web.xml} (and possibly web fragments and annotated elements) was parsed. Also all the elements
- * really belong to single {@link javax.servlet.ServletContext} and share single <em>context path</em>.</p>
+ * really belong to single {@link jakarta.servlet.ServletContext} and share single <em>context path</em>.</p>
  *
  * <p>As with traditional Servlet containers, each WAR (in OSGi: WAB) maps 1:1 to unique <em>servlet context</em>
  * identified by <em>context path</em>. In Whiteboard scenario, many bundles may <em>contribute</em> to a single

@@ -20,7 +20,7 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import javax.servlet.ServletContainerInitializer;
+import jakarta.servlet.ServletContainerInitializer;
 
 import org.ops4j.pax.web.service.spi.model.events.ContainerInitializerEventData;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;

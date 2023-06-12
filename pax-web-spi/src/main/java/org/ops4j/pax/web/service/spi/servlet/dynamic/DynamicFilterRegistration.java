@@ -22,8 +22,8 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.servlet.DispatcherType;
-import javax.servlet.FilterRegistration;
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.FilterRegistration;
 
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
@@ -53,7 +53,7 @@ public class DynamicFilterRegistration implements FilterRegistration.Dynamic {
 
 	@Override
 	public void addMappingForServletNames(EnumSet<DispatcherType> dispatcherTypes, boolean isMatchAfter, String... servletNames) {
-		// we have easier task than in javax.servlet.ServletRegistration.addMapping(), because more servlets
+		// we have easier task than in jakarta.servlet.ServletRegistration.addMapping(), because more servlets
 		// may be mapped to single servlet by name or to an URL
 		model.addDynamicServletNameMapping(dispatcherTypes, servletNames, isMatchAfter);
 	}

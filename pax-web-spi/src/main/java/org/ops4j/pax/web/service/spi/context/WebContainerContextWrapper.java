@@ -18,17 +18,17 @@ package org.ops4j.pax.web.service.spi.context;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Set;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.osgi.framework.Bundle;
-import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.context.ServletContextHelper;
+import org.ops4j.pax.web.service.http.HttpContext;
+import org.osgi.service.servlet.context.ServletContextHelper;
 
 /**
  * A simple wrapper to enclose custom {@link HttpContext http contexts} (which gets registered directly to the
- * {@link org.osgi.service.http.HttpService}) or {@link ServletContextHelper} (registered via Whiteboard service)
+ * {@link org.ops4j.pax.web.service.http.HttpService}) or {@link ServletContextHelper} (registered via Whiteboard service)
  * in an implementation of {@link org.ops4j.pax.web.service.WebContainerContext}.
  */
 public class WebContainerContextWrapper extends DefaultHttpContext {

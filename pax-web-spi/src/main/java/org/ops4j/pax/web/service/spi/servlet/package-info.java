@@ -16,6 +16,6 @@
 
 /**
  * Package with classes used in different runtimes for common tasks, like wrapping
- * {@link javax.servlet.http.HttpServletRequest}.
+ * {@link jakarta.servlet.http.HttpServletRequest}.
  */
 package org.ops4j.pax.web.service.spi.servlet;

@@ -15,7 +15,9 @@
  */
 package org.ops4j.pax.web.service.spi.servlet;
 
-import javax.servlet.SessionCookieConfig;
+import jakarta.servlet.SessionCookieConfig;
+
+import java.util.Map;
 
 public class DefaultSessionCookieConfig implements SessionCookieConfig {
 
@@ -58,11 +60,13 @@ public class DefaultSessionCookieConfig implements SessionCookieConfig {
 	}
 
 	@Override
+	@SuppressWarnings("removal")
 	public String getComment() {
 		return comment;
 	}
 
 	@Override
+	@SuppressWarnings("removal")
 	public void setComment(String comment) {
 		this.comment = comment;
 	}
@@ -95,6 +99,23 @@ public class DefaultSessionCookieConfig implements SessionCookieConfig {
 	@Override
 	public void setMaxAge(int maxAge) {
 		this.maxAge = maxAge;
+	}
+
+	@Override
+	public void setAttribute(String name, String value) {
+		// TODO: JakartaEE 10
+	}
+
+	@Override
+	public String getAttribute(String name) {
+		// TODO: JakartaEE 10
+		return null;
+	}
+
+	@Override
+	public Map<String, String> getAttributes() {
+		// TODO: JakartaEE 10
+		return null;
 	}
 
 }

@@ -21,7 +21,7 @@ import java.util.Map;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 
 /**
- * Change of context params ({@link javax.servlet.ServletContext#getInitParameter(String)}).
+ * Change of context params ({@link jakarta.servlet.ServletContext#getInitParameter(String)}).
  */
 public class ContextParamsChange extends Change {
 

@@ -16,7 +16,7 @@
 package org.ops4j.pax.web.service.spi.servlet;
 
 import java.util.Collection;
-import javax.servlet.descriptor.JspPropertyGroupDescriptor;
+import jakarta.servlet.descriptor.JspPropertyGroupDescriptor;
 
 public class DefaultJspPropertyGroupDescriptor implements JspPropertyGroupDescriptor {
 
@@ -32,6 +32,7 @@ public class DefaultJspPropertyGroupDescriptor implements JspPropertyGroupDescri
 	private String defaultContentType;
 	private String buffer;
 	private String errorOnUndeclaredNamespace;
+	private String errorOnELNotFound;
 
 	@Override
 	public Collection<String> getUrlPatterns() {
@@ -139,6 +140,15 @@ public class DefaultJspPropertyGroupDescriptor implements JspPropertyGroupDescri
 
 	public void setErrorOnUndeclaredNamespace(String errorOnUndeclaredNamespace) {
 		this.errorOnUndeclaredNamespace = errorOnUndeclaredNamespace;
+	}
+
+	@Override
+	public String getErrorOnELNotFound() {
+		return errorOnELNotFound;
+	}
+
+	public void setErrorOnELNotFound(String errorOnELNotFound) {
+		this.errorOnELNotFound = errorOnELNotFound;
 	}
 
 }

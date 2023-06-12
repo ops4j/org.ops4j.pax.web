@@ -25,16 +25,16 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import javax.servlet.Filter;
-import javax.servlet.FilterRegistration;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.Servlet;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRegistration;
-import javax.servlet.SessionCookieConfig;
-import javax.servlet.SessionTrackingMode;
-import javax.servlet.descriptor.JspConfigDescriptor;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterRegistration;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRegistration;
+import jakarta.servlet.SessionCookieConfig;
+import jakarta.servlet.SessionTrackingMode;
+import jakarta.servlet.descriptor.JspConfigDescriptor;
 
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.slf4j.Logger;
@@ -43,11 +43,11 @@ import org.slf4j.LoggerFactory;
 /**
  * <p>This class wraps {@link OsgiServletContext} and is used to perform "dynamic registration operations" of
  * servlets, filters and listeners into single physical {@link ServletContext}. This wrapper is passed to
- * {@link javax.servlet.ServletContainerInitializer}s and allows dynamic configuration. While the context that's
+ * {@link jakarta.servlet.ServletContainerInitializer}s and allows dynamic configuration. While the context that's
  * wrapped doesn't allow this.</p>
  *
  * <p>Many {@link OsgiServletContext}s may point to single container-specific physical servlet context and many
- * {@link javax.servlet.ServletContainerInitializer}s may be used to register dynamic servlets/filters/listeners
+ * {@link jakarta.servlet.ServletContainerInitializer}s may be used to register dynamic servlets/filters/listeners
  * through many {@link OsgiServletContext}s into single {@link ServletContext}. We need to keep track of the dynamic
  * web elements registered by multiple SCIs and actually register them later after all SCIs are invoked.</p>
  *
@@ -58,19 +58,19 @@ import org.slf4j.LoggerFactory;
  *         Tomcat checks {@code !context.getState().equals(LifecycleState.STARTING_PREP)} and Undertow calls
  *         {@code io.undertow.servlet.spec.ServletContextImpl#ensureNotInitialized()}</li>
  *     <li>The basic, most "initial" way of adding listeners is through web.xml, web-fragment.xml or
- *         {@link javax.servlet.annotation.WebListener} and such listeners should always be able to add more
+ *         {@link jakarta.servlet.annotation.WebListener} and such listeners should always be able to add more
  *         listeners. Each container has it's own way to mark the point when new listeners can't be added:<ul>
  *             <li>Jetty calls {@code ContextHandler.Context#setEnabled(false)} when invoking first programmatic
- *                 listener, but new {@link javax.servlet.ServletContextListener} can't be added if
+ *                 listener, but new {@link jakarta.servlet.ServletContextListener} can't be added if
  *                 {@code org.eclipse.jetty.server.handler.ContextHandler.Context#_extendedListenerTypes} is
  *                 false</li>
- *             <li>Tomcat calls SCIs which can add {@link javax.servlet.ServletContextListener}, but then inside
+ *             <li>Tomcat calls SCIs which can add {@link jakarta.servlet.ServletContextListener}, but then inside
  *                 {@code org.apache.catalina.core.StandardContext#listenerStart()}, {@code newServletContextListenerAllowed}
  *                 is set to {@code false}. Additionally all programmatic ServletContextListeners are marked as
  *                 "no pluggability listeners", so they can't add ANY new listener. ServletContextListeners added
  *                 in SCIs can add other listeners only.</li>
  *             <li>Undertow allows listeners to call {@link ServletContext#addListener} only if the adding
- *                 listener is NOT programmatic. But new {@link javax.servlet.ServletContextListener} can
+ *                 listener is NOT programmatic. But new {@link jakarta.servlet.ServletContextListener} can
  *                 never be added anyway</li>
  *         </ul></li>
  * </ul>
@@ -93,7 +93,7 @@ public class OsgiDynamicServletContext implements ServletContext {
 
 	/**
 	 * This method has to be called after {@link SCIWrapper} calls wrapped
-	 * {@link javax.servlet.ServletContainerInitializer}, so attributes potentially added by the SCI are removed
+	 * {@link jakarta.servlet.ServletContainerInitializer}, so attributes potentially added by the SCI are removed
 	 * when the context is restarted.
 	 */
 	public void rememberAttributesFromSCIs() {
@@ -281,18 +281,6 @@ public class OsgiDynamicServletContext implements ServletContext {
 	}
 
 	@Override
-	@SuppressWarnings({ "deprecation", "RedundantSuppression" })
-	public Servlet getServlet(String name) throws ServletException {
-		return osgiContext.getServlet(name);
-	}
-
-	@Override
-	@SuppressWarnings({ "deprecation", "RedundantSuppression" })
-	public Enumeration<String> getServletNames() {
-		return osgiContext.getServletNames();
-	}
-
-	@Override
 	public ServletRegistration getServletRegistration(String servletName) {
 		// this method returns a ServletRegistration by name. If a servlet is already regitered in the context
 		// (wheter using Whiteboard, HttpService or even some internal Jetty/Tomcat/Undertow means), we should return
@@ -316,12 +304,6 @@ public class OsgiDynamicServletContext implements ServletContext {
 	}
 
 	@Override
-	@SuppressWarnings({ "deprecation", "RedundantSuppression" })
-	public Enumeration<Servlet> getServlets() {
-		return osgiContext.getServlets();
-	}
-
-	@Override
 	public String getVirtualServerName() {
 		return osgiContext.getVirtualServerName();
 	}
@@ -334,12 +316,6 @@ public class OsgiDynamicServletContext implements ServletContext {
 	@Override
 	public void log(String msg) {
 		osgiContext.log(msg);
-	}
-
-	@Override
-	@SuppressWarnings({ "deprecation", "RedundantSuppression" })
-	public void log(Exception exception, String msg) {
-		osgiContext.log(exception, msg);
 	}
 
 	@Override

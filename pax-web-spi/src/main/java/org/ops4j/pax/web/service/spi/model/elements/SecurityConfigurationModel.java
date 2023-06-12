@@ -43,7 +43,7 @@ import java.util.Set;
  *     </ul></li>
  * </ul></p>
  *
- * <p>Additionally, security declarations may be passed through {@link javax.servlet.ServletRegistration.Dynamic#setServletSecurity}
+ * <p>Additionally, security declarations may be passed through {@link jakarta.servlet.ServletRegistration.Dynamic#setServletSecurity}
  * and for example, Tomcat passes the arguments to {@code org.apache.catalina.core.StandardContext#addServletSecurity()}.</p>
  */
 public class SecurityConfigurationModel extends ElementModel<SecurityConfigurationMapping, SecurityConfigurationEventData> {

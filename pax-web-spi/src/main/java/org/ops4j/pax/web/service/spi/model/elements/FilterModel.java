@@ -32,9 +32,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import javax.servlet.DispatcherType;
-import javax.servlet.Filter;
-import javax.servlet.FilterConfig;
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterConfig;
 
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
@@ -44,11 +44,11 @@ import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.http.runtime.dto.DTOConstants;
-import org.osgi.service.http.runtime.dto.FailedFilterDTO;
-import org.osgi.service.http.runtime.dto.FailedPreprocessorDTO;
-import org.osgi.service.http.runtime.dto.FilterDTO;
-import org.osgi.service.http.runtime.dto.PreprocessorDTO;
+import org.osgi.service.servlet.runtime.dto.DTOConstants;
+import org.osgi.service.servlet.runtime.dto.FailedFilterDTO;
+import org.osgi.service.servlet.runtime.dto.FailedPreprocessorDTO;
+import org.osgi.service.servlet.runtime.dto.FilterDTO;
+import org.osgi.service.servlet.runtime.dto.PreprocessorDTO;
 
 /**
  * Set of parameters describing everything that's required to register a {@link Filter}.
@@ -57,7 +57,7 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 
 	/**
 	 * <p>URL patterns and servlet names (per dispatcher type) as specified by:<ul>
-	 *     <li>Pax Web specific extensions to {@link org.osgi.service.http.HttpService}</li>
+	 *     <li>Pax Web specific extensions to {@link org.ops4j.pax.web.service.http.HttpService}</li>
 	 *     <li>Whiteboard Service specification</li>
 	 *     <li>Servlet API specification</li>
 	 * </ul></p>
@@ -74,8 +74,8 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 	private String[] flatDispatcherTypes;
 
 	/**
-	 * When using {@link javax.servlet.ServletContext#addFilter(String, Filter)} and
-	 * {@link javax.servlet.FilterRegistration.Dynamic#addMappingForServletNames(EnumSet, boolean, String...)} we
+	 * When using {@link jakarta.servlet.ServletContext#addFilter(String, Filter)} and
+	 * {@link jakarta.servlet.FilterRegistration.Dynamic#addMappingForServletNames(EnumSet, boolean, String...)} we
 	 * need to store distinct sets of mappings separately for different dispatchers (and order)
 	 */
 	private final List<DynamicMapping> dynamicUrlPatterns = new LinkedList<>();
@@ -107,11 +107,11 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 	private final Class<? extends Filter> filterClass;
 
 	/**
-	 * Flag used for models registered using {@link javax.servlet.ServletContext#addFilter}
+	 * Flag used for models registered using {@link jakarta.servlet.ServletContext#addFilter}
 	 */
 	private boolean dynamic = false;
 
-	/** Flag to mark a {@link FilterModel} for {@link org.osgi.service.http.whiteboard.Preprocessor} */
+	/** Flag to mark a {@link FilterModel} for {@link org.osgi.service.servlet.whiteboard.Preprocessor} */
 	private boolean preprocessor = false;
 
 	/**

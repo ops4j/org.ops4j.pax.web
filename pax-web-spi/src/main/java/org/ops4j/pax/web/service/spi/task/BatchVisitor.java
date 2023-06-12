@@ -20,7 +20,7 @@ package org.ops4j.pax.web.service.spi.task;
  * {@code unregisterServlet}, ...</p>
  *
  * <p>In Pax Web 8, we've tried to decrease duplication of such interfaces (similar methods were available in
- * interfaces representing {@link org.osgi.service.http.HttpService},
+ * interfaces representing {@link org.ops4j.pax.web.service.http.HttpService},
  * {@link org.ops4j.pax.web.service.spi.ServerController}, server abstraction, server state, ... Now, if any class
  * wants to handle actual (un/re)registrations, it just needs to implement the visitor and correctly
  * configured {@link Batch} can accept such visitor.</p>
@@ -125,7 +125,7 @@ public interface BatchVisitor {
 	}
 
 	/**
-	 * Process a change related to reset of dynamic registrations (like {@link javax.servlet.ServletContext#addServlet}
+	 * Process a change related to reset of dynamic registrations (like {@link jakarta.servlet.ServletContext#addServlet}
 	 * @param change
 	 */
 	void visitClearDynamicRegistrationsChange(ClearDynamicRegistrationsChange change);

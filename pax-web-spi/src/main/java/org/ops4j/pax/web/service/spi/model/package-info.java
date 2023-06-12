@@ -36,7 +36,7 @@
  *     {@code Host} HTTP header or non-matched requests if acting as <em>default virtual host</em> for an
  *     <em>engine</em>. For Tomcat purpose, a <em>virtual host</em> has dedicated <em>app base</em>.</li>
  *     <li><em>Context</em> ({@code org.apache.catalina.core.StandardContext}) represents
- *     {@link javax.servlet.ServletContext} or in other words, entire <em>web application</em>. The most important
+ *     {@link jakarta.servlet.ServletContext} or in other words, entire <em>web application</em>. The most important
  *     thing is that it uses single, unique <em>context path</em>.</li>
  * </ul></p>
  *
@@ -54,7 +54,7 @@
  *     <li><em>Handler collection</em> is a special handler recommended to set as <em>delegate</em> inside
  *     a <em>server</em>. Each handler from the collection is called until one of them marks request as "handled".</li>
  *     <li><em>Context</em> ({@code org.eclipse.jetty.server.handler.ContextHandler} and subclasses) represents</li>
- *     {@link javax.servlet.ServletContext} (or in other words, entire <em>web application</em>) and is unique wrt
+ *     {@link jakarta.servlet.ServletContext} (or in other words, entire <em>web application</em>) and is unique wrt
  *     <em>context path</em>. Standalone Jetty (in {@code etc/jetty.xml} and Pax Web itself) choose to use
  *     <em>handler collection</em> containing context handlers.</li>
  *     <li><em>Virtual host</em> is not a special handler - it's part of handling request inside <em>context
@@ -71,7 +71,7 @@
  *     <li><em>Listeners</em> receives a request and calls single <em>handler</em> inside a <em>server</em>.</li>
  *     <li><em>Virtual host</em> is just one of the handlers
  *     ({@code io.undertow.server.handlers.NameVirtualHostHandler}) and doesn't have to be set in a <em>server</em>.</li>
- *     <li><em>Context</em>, which matches {@link javax.servlet.ServletContext} has <em>context path</em> and
+ *     <li><em>Context</em>, which matches {@link jakarta.servlet.ServletContext} has <em>context path</em> and
  *     represents entire <em>web application</em> (or WAR deployment), allowing to register servlets, filters, etc.</li>
  * </ul></p>
  *
@@ -83,22 +83,22 @@
  * <em>context</em>.</p>
  *
  * <p>There are two <em>contexts</em> depending on OSGi CMPN specification considered:<ul>
- *     <li>{@link org.osgi.service.http.HttpContext} ("102 Http Service")</li>
- *     <li>{@link org.osgi.service.http.context.ServletContextHelper} ("140 Whiteboard Service")</li>
+ *     <li>{@link org.ops4j.pax.web.service.http.HttpContext} ("102 Http Service")</li>
+ *     <li>{@link org.osgi.service.servlet.context.ServletContextHelper} ("140 Whiteboard Service")</li>
  * </ul></p>
  *
- * <p>However, these <em>contexts</em> are not mapped 1:1 with single {@link javax.servlet.ServletContext}
+ * <p>However, these <em>contexts</em> are not mapped 1:1 with single {@link jakarta.servlet.ServletContext}
  * representing a <em>web application</em> as seen by actual server implementation. The above are <em>used</em>
  * by some other <em>servlet context</em> which is mapped 1:1 with original one (according to
  * <a href="https://osgi.org/specification/osgi.cmpn/7.0.0/service.http.whiteboard.html#d0e120290">OSGi CMPN R7</a>).
- * But there's still additional {@link javax.servlet.ServletContext} actually visible by servlets/filters/etc.
- * depending on the {@link org.osgi.service.http.HttpContext} or
- * {@link org.osgi.service.http.context.ServletContextHelper} with which the servlet/filter/etc. was registered
+ * But there's still additional {@link jakarta.servlet.ServletContext} actually visible by servlets/filters/etc.
+ * depending on the {@link org.ops4j.pax.web.service.http.HttpContext} or
+ * {@link org.osgi.service.servlet.context.ServletContextHelper} with which the servlet/filter/etc. was registered
  * to preserve bundle-affinity.</p>
  *
- * <p>First, original, server-specific {@link javax.servlet.ServletContext}, identified uniquely by <em>context
- * path</em> is created everytime a {@link org.osgi.service.http.HttpContext} or
- * {@link org.osgi.service.http.context.ServletContextHelper} is tracked from service registry, with specified
+ * <p>First, original, server-specific {@link jakarta.servlet.ServletContext}, identified uniquely by <em>context
+ * path</em> is created everytime a {@link org.ops4j.pax.web.service.http.HttpContext} or
+ * {@link org.osgi.service.servlet.context.ServletContextHelper} is tracked from service registry, with specified
  * <em>context path</em>. Such context is represented by {@link org.ops4j.pax.web.service.spi.model.ServletContextModel}
  * and is agnostic wrt any bundle. When more HttpContext/ServletContextHelper services are registered for a given
  * <em>context path</em>, there's no conflict - simply more OSGi-specific <em>contexts</em> point to server-specific
@@ -115,10 +115,10 @@
  *
  * <p>When servlet (or filter, or ...) is registered, it is registered with one (or more!) <em>contexts</em> and
  * when actual server implementation is asked to register such element the registration has to be done for all
- * actual {@link javax.servlet.ServletContext} instances.</p>
+ * actual {@link jakarta.servlet.ServletContext} instances.</p>
  *
- * <p>There's a requirement, that {@link org.osgi.service.http.context.ServletContextHelper} instances have to
+ * <p>There's a requirement, that {@link org.osgi.service.servlet.context.ServletContextHelper} instances have to
  * be available in OSGi registry (including the default one registered by Whiteboard implementation itself). It is
- * not a case with Http Service and {@link org.osgi.service.http.HttpContext}.</p>
+ * not a case with Http Service and {@link org.ops4j.pax.web.service.http.HttpContext}.</p>
  */
 package org.ops4j.pax.web.service.spi.model;

@@ -15,10 +15,10 @@
  */
 package org.ops4j.pax.web.service.spi.servlet;
 
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-import javax.servlet.ServletSecurityElement;
-import javax.servlet.annotation.ServletSecurity;
+import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.ServletContextListener;
+import jakarta.servlet.ServletSecurityElement;
+import jakarta.servlet.annotation.ServletSecurity;
 
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.views.DynamicJEEWebContainerView;
@@ -55,12 +55,12 @@ public class RegisteringContextListener implements ServletContextListener {
 			// just before the dynamic registration is registered, we have to do additional scanning
 
 			// check @ServletSecurity (even if "13.4.1 @ServletSecurity Annotation" constraint this to the servlets
-			// created using javax.servlet.ServletContext.createServlet()...)
+			// created using jakarta.servlet.ServletContext.createServlet()...)
 			ServletModel model = reg.getModel();
 			Class<?> cls = model.getServlet() != null ? model.getServlet().getClass() : model.getServletClass();
 			ServletSecurity security = cls == null ? null : cls.getAnnotation(ServletSecurity.class);
 			if (security != null && !model.isServletSecurityPresent()) {
-				// it means user didn't call javax.servlet.ServletRegistration.Dynamic.setServletSecurity()
+				// it means user didn't call jakarta.servlet.ServletRegistration.Dynamic.setServletSecurity()
 				// we can leverage the constructur that accepts the annotation
 				reg.setServletSecurity(new ServletSecurityElement(security));
 			}

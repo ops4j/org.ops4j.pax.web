@@ -16,11 +16,11 @@
 package org.ops4j.pax.web.service.spi.config;
 
 import java.io.File;
-import javax.servlet.SessionCookieConfig;
+import jakarta.servlet.SessionCookieConfig;
 
 /**
  * <p>While some session configuration parameters (those specified in {@code web.xml} and
- * {@link javax.servlet.SessionCookieConfig}) can be specified through {@link org.ops4j.pax.web.service.WebContainer}
+ * {@link jakarta.servlet.SessionCookieConfig}) can be specified through {@link org.ops4j.pax.web.service.WebContainer}
  * and during WAR deployment, some server-specific options can be configured only globally through
  * {@link org.ops4j.pax.web.service.PaxWebConstants#PID}.</p>
  *
@@ -28,7 +28,7 @@ import javax.servlet.SessionCookieConfig;
  */
 public interface SessionConfiguration {
 
-	// --- configuration that matches web.xml and javax.servlet.SessionCookieConfig
+	// --- configuration that matches web.xml and jakarta.servlet.SessionCookieConfig
 
 	/**
 	 * {@code <session-config>/<session-timeout>} - returns the time in minutes after which an inative settion times out.
@@ -85,7 +85,7 @@ public interface SessionConfiguration {
 	 */
 	String getSessionCookieSameSite();
 
-	// --- configuration that's not related to web.xml or javax.servlet.SessionCookieConfig
+	// --- configuration that's not related to web.xml or jakarta.servlet.SessionCookieConfig
 
 	/**
 	 * Allows configuration of Jetty's SessionHandler.SessionIdPathParameterName. By default it's {@code jsessionid}.

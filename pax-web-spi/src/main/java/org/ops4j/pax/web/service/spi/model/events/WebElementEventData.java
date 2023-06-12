@@ -24,7 +24,7 @@ import org.osgi.framework.ServiceReference;
 
 /**
  * Base class for data for events related to registration/unregistration of <em>web elements</em> like
- * {@link javax.servlet.Servlet servlets} or {@link javax.servlet.Filter filters}.
+ * {@link jakarta.servlet.Servlet servlets} or {@link jakarta.servlet.Filter filters}.
  */
 public abstract class WebElementEventData {
 

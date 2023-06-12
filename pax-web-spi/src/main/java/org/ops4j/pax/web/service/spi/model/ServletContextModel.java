@@ -19,7 +19,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 
 import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
@@ -28,12 +28,12 @@ import org.ops4j.pax.web.service.spi.model.elements.WebSocketModel;
 
 /**
  * <p>This class is 1:1 representation of server-specific {@link ServletContext} and is unaware of
- * OSGi-related representation of a <em>context</em> (like {@link org.osgi.service.http.HttpContext} and
- * {@link org.osgi.service.http.context.ServletContextHelper}).</p>
+ * OSGi-related representation of a <em>context</em> (like {@link org.ops4j.pax.web.service.http.HttpContext} and
+ * {@link org.osgi.service.servlet.context.ServletContextHelper}).</p>
  *
  * <p>It represents a <em>web application</em> (that could be described using single {@code web.xml} descriptor),
  * while the <em>web elements</em> (like servlets, filters, ...) or configuration (session, JSP config, ...) are
- * contributed possibly by many bundles (bundle-scoped {@link org.osgi.service.http.HttpService} services or
+ * contributed possibly by many bundles (bundle-scoped {@link org.ops4j.pax.web.service.http.HttpService} services or
  * whiteboard service registrations).</p>
  *
  * <p>Normally, web applications are represented by {@code web.xml} files which are parsed by server-specific
@@ -43,10 +43,10 @@ import org.ops4j.pax.web.service.spi.model.elements.WebSocketModel;
  *                 {@code org.apache.tomcat.util.descriptor.web.WebXmlParser#parseWebXml()}</li>
  * </ul></p>
  *
- * <p>When user registers (through {@link org.osgi.service.http.HttpService} or Whiteboard) a <em>web element</em>
+ * <p>When user registers (through {@link org.ops4j.pax.web.service.http.HttpService} or Whiteboard) a <em>web element</em>
  * (like servlet), the registration seems unique, but physically, given servlet has to be explicitly registered
  * to all related {@link ServletContextModel} (and eventually - {@link ServletContext}). It is even more important
- * during unregistration - simple call to {@link org.osgi.service.http.HttpService#unregister(String)} has to
+ * during unregistration - simple call to {@link org.ops4j.pax.web.service.http.HttpService#unregister(String)} has to
  * iterate over all mapped {@link ServletContextModel} contexts.</p>
  *
  * <p>Each {@link OsgiContextModel} pointing to this class may declare <em>virtual hosts</em>. Actual, server
@@ -68,7 +68,7 @@ public final class ServletContextModel extends Identity {
 	private final Map<String, ServletModel> servletNameMapping = new HashMap<>();
 
 	/**
-	 * <p>Http Service specification ({@link org.osgi.service.http.HttpService#registerServlet}) uses the concept
+	 * <p>Http Service specification ({@link org.ops4j.pax.web.service.http.HttpService#registerServlet}) uses the concept
 	 * of <em>alias</em> and requires it to be unique. It's effectively a n<em>exact</em> URL mapping for a servlet,
 	 * according to "12.2 Specification of Mappings" from Servlet specification.</p>
 	 *

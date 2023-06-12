@@ -21,12 +21,12 @@ import java.util.EventListener;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
-import javax.servlet.Filter;
-import javax.servlet.FilterRegistration;
-import javax.servlet.Servlet;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletContextListener;
-import javax.servlet.ServletRegistration;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterRegistration;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletContextListener;
+import jakarta.servlet.ServletRegistration;
 
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
@@ -51,12 +51,12 @@ import org.osgi.framework.ServiceReference;
 
 /**
  * <p>This class may be used by container-specific classes to collect dynamic servlets/filters/listeners
- * being registered by {@link javax.servlet.ServletContainerInitializer}s.</p>
+ * being registered by {@link jakarta.servlet.ServletContainerInitializer}s.</p>
  *
- * <p>Just as dynamic registration methods of {@link javax.servlet.ServletContext}, we don't bother with
+ * <p>Just as dynamic registration methods of {@link jakarta.servlet.ServletContext}, we don't bother with
  * unregistration of the elements. We will eventually clean things up, but only after given context is somehow
  * destroyed/closed. Registration declarations stored in this class are cleared after invocation of
- * context's {@link javax.servlet.ServletContainerInitializer} ends.</p>
+ * context's {@link jakarta.servlet.ServletContainerInitializer} ends.</p>
  */
 public class DynamicRegistrations {
 
@@ -106,11 +106,11 @@ public class DynamicRegistrations {
 	//
 	// According to javadocs, addXXX methods may return null if a filter/servlet with given name is already
 	// registered. On the other hand, org.apache.myfaces.ee6.MyFacesContainerInitializer.onStartup() doesn't
-	// check for null, but checks existence of the servlet using javax.servlet.ServletContext.getServletRegistrations()
-	// for javax.faces.webapp.FacesServlet class of the servlet
+	// check for null, but checks existence of the servlet using jakarta.servlet.ServletContext.getServletRegistrations()
+	// for jakarta.faces.webapp.FacesServlet class of the servlet
 	// to keep Servlet API compliance, we'll check existence by name in ServerModel/FilterModel and return null if
 	// a servlet/filter is already registered
-	// for servlet mapping (javax.servlet.ServletRegistration.addMapping()), we'll either register the ServletModel
+	// for servlet mapping (jakarta.servlet.ServletRegistration.addMapping()), we'll either register the ServletModel
 	// or return a set of conflicting mappings (even if Whiteboard specification allows shadowing of the servlets
 	// by service ranking rules)
 
@@ -168,7 +168,7 @@ public class DynamicRegistrations {
 	private FilterRegistration.Dynamic register(OsgiServletContext context, DynamicFilterRegistration reg) {
 		ServletContextModel scModel = context.getServletContextModel();
 		if (scModel.getFilterNameMapping().containsKey(reg.getName())) {
-			// according to javax.servlet.ServletContext.addFilter(java.lang.String, ...)
+			// according to jakarta.servlet.ServletContext.addFilter(java.lang.String, ...)
 			return null;
 		}
 
@@ -180,8 +180,8 @@ public class DynamicRegistrations {
 		model.setDynamic(true);
 		configureBundle(context, model, reg.getModel().getActualClass());
 
-		// JavaEE doesn't provide a way to unregister filters registered by
-		// javax.servlet.ServletContext.addFilter(), but Pax Web does!
+		// JakartaEE doesn't provide a way to unregister filters registered by
+		// jakarta.servlet.ServletContext.addFilter(), but Pax Web does!
 		configureUnregistration(context.getOsgiContextModel(), new FilterModelChange(OpCode.DELETE, model));
 
 		dynamicFilterRegistrations.put(reg.getName(), reg);
@@ -247,7 +247,7 @@ public class DynamicRegistrations {
 	private ServletRegistration.Dynamic register(OsgiServletContext context, DynamicServletRegistration reg) {
 		ServletContextModel scModel = context.getServletContextModel();
 		if (scModel.getServletNameMapping().containsKey(reg.getName())) {
-			// according to javax.servlet.ServletContext.addServlet(java.lang.String, ...)
+			// according to jakarta.servlet.ServletContext.addServlet(java.lang.String, ...)
 			return null;
 		}
 
@@ -259,8 +259,8 @@ public class DynamicRegistrations {
 		model.setDynamic(true);
 		configureBundle(context, model, reg.getModel().getActualClass());
 
-		// JavaEE doesn't provide a way to unregister servlets registered by
-		// javax.servlet.ServletContext.addServlet(), but Pax Web does!
+		// JakartaEE doesn't provide a way to unregister servlets registered by
+		// jakarta.servlet.ServletContext.addServlet(), but Pax Web does!
 		configureUnregistration(context.getOsgiContextModel(), new ServletModelChange(OpCode.DELETE, model));
 
 		dynamicServletRegistrations.put(reg.getName(), reg);
@@ -327,8 +327,8 @@ public class DynamicRegistrations {
 		model.setDynamic(true);
 		configureBundle(context, model, reg.getModel().getEventListener().getClass());
 
-		// JavaEE doesn't provide a way to unregister listeners registered by
-		// javax.servlet.ServletContext.addListener(), but Pax Web does!
+		// JakartaEE doesn't provide a way to unregister listeners registered by
+		// jakarta.servlet.ServletContext.addListener(), but Pax Web does!
 		configureUnregistration(context.getOsgiContextModel(), new EventListenerModelChange(OpCode.DELETE, model));
 
 		dynamicListenerRegistrations.put(System.identityHashCode(model.getEventListener()), reg);

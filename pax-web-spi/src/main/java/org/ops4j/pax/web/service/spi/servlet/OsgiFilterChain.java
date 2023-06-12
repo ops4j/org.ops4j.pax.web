@@ -18,25 +18,25 @@ package org.ops4j.pax.web.service.spi.servlet;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.osgi.framework.Bundle;
-import org.osgi.service.http.whiteboard.Preprocessor;
+import org.osgi.service.servlet.whiteboard.Preprocessor;
 
 /**
  * A {@link FilterChain} that can be configured in any runtime to correctly handle two concepts defined in
  * Http Service / Whiteboard Service specifications:<ul>
  *     <li>{@link Preprocessor} filters</li>
- *     <li>{@link org.osgi.service.http.HttpContext#handleSecurity} and/or
- *     {@link org.osgi.service.http.context.ServletContextHelper#handleSecurity} +
- *     {@link org.osgi.service.http.context.ServletContextHelper#finishSecurity}</li>
+ *     <li>{@link org.ops4j.pax.web.service.http.HttpContext#handleSecurity} and/or
+ *     {@link org.osgi.service.servlet.context.ServletContextHelper#handleSecurity} +
+ *     {@link org.osgi.service.servlet.context.ServletContextHelper#finishSecurity}</li>
  * </ul>
  */
 public class OsgiFilterChain implements FilterChain {

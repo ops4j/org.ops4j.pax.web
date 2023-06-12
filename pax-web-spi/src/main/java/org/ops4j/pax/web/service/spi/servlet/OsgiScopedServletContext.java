@@ -22,16 +22,16 @@ import java.util.Enumeration;
 import java.util.EventListener;
 import java.util.Map;
 import java.util.Set;
-import javax.servlet.Filter;
-import javax.servlet.FilterRegistration;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.Servlet;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRegistration;
-import javax.servlet.SessionCookieConfig;
-import javax.servlet.SessionTrackingMode;
-import javax.servlet.descriptor.JspConfigDescriptor;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterRegistration;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRegistration;
+import jakarta.servlet.SessionCookieConfig;
+import jakarta.servlet.SessionTrackingMode;
+import jakarta.servlet.descriptor.JspConfigDescriptor;
 
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
@@ -42,9 +42,9 @@ import org.osgi.framework.wiring.BundleWiring;
 /**
  * <p>This class provides special {@link ServletContext#getClassLoader()} method for Whiteboard elements.
  * All Whiteboard services should use a {@link ServletContext} which uses single
- * {@link org.osgi.service.http.HttpContext} or {@link org.osgi.service.http.context.ServletContextHelper}, but
+ * {@link org.ops4j.pax.web.service.http.HttpContext} or {@link org.osgi.service.servlet.context.ServletContextHelper}, but
  * additionally, class loader should come from the bundle which registered the Whiteboard service (e.g., a servlet)
- * itself, not from the bundle that has registered the {@link org.osgi.service.http.context.ServletContextHelper}.</p>
+ * itself, not from the bundle that has registered the {@link org.osgi.service.servlet.context.ServletContextHelper}.</p>
  */
 public class OsgiScopedServletContext implements ServletContext {
 
@@ -56,7 +56,7 @@ public class OsgiScopedServletContext implements ServletContext {
 	 */
 	private final OsgiServletContext osgiContext;
 
-	/** {@link Bundle} which was used to register target {@link javax.servlet.Servlet} */
+	/** {@link Bundle} which was used to register target {@link jakarta.servlet.Servlet} */
 	private final Bundle bundle;
 
 	private final WebContainerContext webContainerContext;
@@ -275,18 +275,6 @@ public class OsgiScopedServletContext implements ServletContext {
 	}
 
 	@Override
-	@SuppressWarnings({ "deprecation", "RedundantSuppression" })
-	public Servlet getServlet(String name) throws ServletException {
-		return osgiContext.getServlet(name);
-	}
-
-	@Override
-	@SuppressWarnings({ "deprecation", "RedundantSuppression" })
-	public Enumeration<String> getServletNames() {
-		return osgiContext.getServletNames();
-	}
-
-	@Override
 	public ServletRegistration getServletRegistration(String servletName) {
 		return osgiContext.getServletRegistration(servletName);
 	}
@@ -294,12 +282,6 @@ public class OsgiScopedServletContext implements ServletContext {
 	@Override
 	public Map<String, ? extends ServletRegistration> getServletRegistrations() {
 		return osgiContext.getServletRegistrations();
-	}
-
-	@Override
-	@SuppressWarnings({ "deprecation", "RedundantSuppression" })
-	public Enumeration<Servlet> getServlets() {
-		return osgiContext.getServlets();
 	}
 
 	@Override
@@ -315,12 +297,6 @@ public class OsgiScopedServletContext implements ServletContext {
 	@Override
 	public void log(String msg) {
 		osgiContext.log(msg);
-	}
-
-	@Override
-	@SuppressWarnings({ "deprecation", "RedundantSuppression" })
-	public void log(Exception exception, String msg) {
-		osgiContext.log(exception, msg);
 	}
 
 	@Override

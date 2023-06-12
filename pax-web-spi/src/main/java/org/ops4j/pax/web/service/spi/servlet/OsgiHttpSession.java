@@ -16,8 +16,8 @@
 package org.ops4j.pax.web.service.spi.servlet;
 
 import java.util.Enumeration;
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Special {@link HttpSession} that:<ul>
@@ -69,20 +69,8 @@ public class OsgiHttpSession implements HttpSession {
 	}
 
 	@Override
-	@SuppressWarnings("deprecation")
-	public javax.servlet.http.HttpSessionContext getSessionContext() {
-		return original.getSessionContext();
-	}
-
-	@Override
 	public Object getAttribute(String name) {
 		return original.getAttribute(name);
-	}
-
-	@Override
-	@SuppressWarnings("deprecation")
-	public Object getValue(String name) {
-		return original.getValue(name);
 	}
 
 	@Override
@@ -91,31 +79,13 @@ public class OsgiHttpSession implements HttpSession {
 	}
 
 	@Override
-	@SuppressWarnings("deprecation")
-	public String[] getValueNames() {
-		return original.getValueNames();
-	}
-
-	@Override
 	public void setAttribute(String name, Object value) {
 		original.setAttribute(name, value);
 	}
 
 	@Override
-	@SuppressWarnings("deprecation")
-	public void putValue(String name, Object value) {
-		original.putValue(name, value);
-	}
-
-	@Override
 	public void removeAttribute(String name) {
 		original.removeAttribute(name);
-	}
-
-	@Override
-	@SuppressWarnings("deprecation")
-	public void removeValue(String name) {
-		original.removeValue(name);
 	}
 
 	@Override

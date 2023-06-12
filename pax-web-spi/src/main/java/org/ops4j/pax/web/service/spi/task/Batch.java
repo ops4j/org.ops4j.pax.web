@@ -215,7 +215,7 @@ public class Batch {
 	 *
 	 * @param contextFilters
 	 * @param dynamic should be set to {@code true} when adding a {@link FilterModel} related to
-	 *        {@link javax.servlet.ServletContext#addFilter}
+	 *        {@link jakarta.servlet.ServletContext#addFilter}
 	 */
 	public void updateFilters(Map<String, TreeMap<FilterModel, List<OsgiContextModel>>> contextFilters, boolean dynamic) {
 		operations.add(new FilterStateChange(contextFilters, dynamic));
@@ -411,7 +411,7 @@ public class Batch {
 
 	/**
 	 * Operation that clears all dynamic registrations from the model and target context. Dynamic registrations
-	 * are the ones created by e.g., {@link javax.servlet.ServletContext#addServlet}.
+	 * are the ones created by e.g., {@link jakarta.servlet.ServletContext#addServlet}.
 	 * @param contextModels
 	 */
 	public void clearDynamicRegistrations(List<OsgiContextModel> contextModels) {

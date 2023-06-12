@@ -22,7 +22,7 @@ import org.ops4j.pax.web.service.views.PaxWebContainerView;
 
 /**
  * Interface with selected methods from {@link org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView}
- * used for dynamic addServlet/addFilter/addListener methods of {@link javax.servlet.ServletContext}.
+ * used for dynamic addServlet/addFilter/addListener methods of {@link jakarta.servlet.ServletContext}.
  */
 public interface DynamicJEEWebContainerView extends PaxWebContainerView {
 

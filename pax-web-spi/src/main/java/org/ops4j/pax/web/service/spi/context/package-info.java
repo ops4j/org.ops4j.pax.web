@@ -15,7 +15,7 @@
  */
 
 /**
- * <p>This package provides various implementations of {@link org.osgi.service.http.HttpContext} and
+ * <p>This package provides various implementations of {@link org.ops4j.pax.web.service.http.HttpContext} and
  * {@link org.ops4j.pax.web.service.WebContainerContext} to be used in:<ul>
  *     <li>Http Service implementation in pax-web-runtime bundle</li>
  *     <li>Whiteboard Service implementation in pax-web-extender-whiteboard bundle</li>
@@ -24,7 +24,7 @@
  * <p><em>Unique</em> implementations are wrappers for existing instances of
  * {@link org.ops4j.pax.web.service.WebContainerContext} and
  * {@link org.ops4j.pax.web.service.MultiBundleWebContainerContext} because Http Service specification says
- * that {@link org.osgi.service.http.HttpService#createDefaultHttpContext()} returns new instance on each call,
+ * that {@link org.ops4j.pax.web.service.http.HttpService#createDefaultHttpContext()} returns new instance on each call,
  * however we don't want these new instances to refer to different internal representations of the <em>contexts</em>.
  * </p>
  */

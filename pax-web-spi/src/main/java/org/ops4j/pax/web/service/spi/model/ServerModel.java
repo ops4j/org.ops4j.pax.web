@@ -47,11 +47,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import javax.servlet.Filter;
-import javax.servlet.Servlet;
-import javax.servlet.ServletContainerInitializer;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
+import jakarta.servlet.Filter;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletContainerInitializer;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
 
 import org.ops4j.pax.web.annotations.PaxWebConfiguration;
 import org.ops4j.pax.web.service.PaxWebConstants;
@@ -104,29 +104,29 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.dto.ServiceReferenceDTO;
-import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
-import org.osgi.service.http.NamespaceException;
-import org.osgi.service.http.context.ServletContextHelper;
-import org.osgi.service.http.runtime.HttpServiceRuntime;
-import org.osgi.service.http.runtime.dto.DTOConstants;
-import org.osgi.service.http.runtime.dto.ErrorPageDTO;
-import org.osgi.service.http.runtime.dto.FailedErrorPageDTO;
-import org.osgi.service.http.runtime.dto.FailedFilterDTO;
-import org.osgi.service.http.runtime.dto.FailedListenerDTO;
-import org.osgi.service.http.runtime.dto.FailedPreprocessorDTO;
-import org.osgi.service.http.runtime.dto.FailedResourceDTO;
-import org.osgi.service.http.runtime.dto.FailedServletContextDTO;
-import org.osgi.service.http.runtime.dto.FailedServletDTO;
-import org.osgi.service.http.runtime.dto.FilterDTO;
-import org.osgi.service.http.runtime.dto.ListenerDTO;
-import org.osgi.service.http.runtime.dto.PreprocessorDTO;
-import org.osgi.service.http.runtime.dto.RequestInfoDTO;
-import org.osgi.service.http.runtime.dto.ResourceDTO;
-import org.osgi.service.http.runtime.dto.RuntimeDTO;
-import org.osgi.service.http.runtime.dto.ServletContextDTO;
-import org.osgi.service.http.runtime.dto.ServletDTO;
-import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
+import org.ops4j.pax.web.service.http.HttpContext;
+import org.ops4j.pax.web.service.http.HttpService;
+import org.ops4j.pax.web.service.http.NamespaceException;
+import org.osgi.service.servlet.context.ServletContextHelper;
+import org.osgi.service.servlet.runtime.HttpServiceRuntime;
+import org.osgi.service.servlet.runtime.dto.DTOConstants;
+import org.osgi.service.servlet.runtime.dto.ErrorPageDTO;
+import org.osgi.service.servlet.runtime.dto.FailedErrorPageDTO;
+import org.osgi.service.servlet.runtime.dto.FailedFilterDTO;
+import org.osgi.service.servlet.runtime.dto.FailedListenerDTO;
+import org.osgi.service.servlet.runtime.dto.FailedPreprocessorDTO;
+import org.osgi.service.servlet.runtime.dto.FailedResourceDTO;
+import org.osgi.service.servlet.runtime.dto.FailedServletContextDTO;
+import org.osgi.service.servlet.runtime.dto.FailedServletDTO;
+import org.osgi.service.servlet.runtime.dto.FilterDTO;
+import org.osgi.service.servlet.runtime.dto.ListenerDTO;
+import org.osgi.service.servlet.runtime.dto.PreprocessorDTO;
+import org.osgi.service.servlet.runtime.dto.RequestInfoDTO;
+import org.osgi.service.servlet.runtime.dto.ResourceDTO;
+import org.osgi.service.servlet.runtime.dto.RuntimeDTO;
+import org.osgi.service.servlet.runtime.dto.ServletContextDTO;
+import org.osgi.service.servlet.runtime.dto.ServletDTO;
+import org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -989,10 +989,10 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 		Hashtable<String, Object> registration = osgiContextModel.getContextRegistrationProperties();
 		registration.clear();
 		// we pretend that this HttpContext/ServletContextModel was:
-		//  - registered to NOT represent the Whiteboard's context (org.osgi.service.http.context.ServletContextHelper)
+		//  - registered to NOT represent the Whiteboard's context (org.osgi.service.servlet.context.ServletContextHelper)
 		registration.remove(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME);
-		//  - registered to represent the HttpService's context (org.osgi.service.http.HttpContext)
-		registration.put(HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY, webContext.getContextId());
+		//  - registered to represent the HttpService's context (org.ops4j.pax.web.service.http.HttpContext)
+		registration.put(PaxWebConstants.HTTP_SERVICE_CONTEXT_PROPERTY, webContext.getContextId());
 		//  - registered with legacy context id parameter
 		registration.put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID, webContext.getContextId());
 		//  - registered with given context path
@@ -3102,7 +3102,7 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 		eventListeners.entrySet().removeIf(e -> e.getValue().isDynamic());
 	}
 
-	// --- implementation of org.osgi.service.http.runtime.HttpServiceRuntime
+	// --- implementation of org.osgi.service.servlet.runtime.HttpServiceRuntime
 
 	@Override
 	public RuntimeDTO getRuntimeDTO() {
@@ -3479,13 +3479,13 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 		//  - pax-web-extender-war deploys "full" web applications based on web.xml (and fragments + annotations)
 		//  - pax-web-extender-whiteboard tracks Whiteboard services (servlets, filters, listeners, ...) and installs
 		//    the web elements together with matching "context"
-		//  - pax-web-runtime implements org.osgi.service.http.HttpService/org.ops4j.pax.web.service.WebContainer
+		//  - pax-web-runtime implements org.ops4j.pax.web.service.http.HttpService/org.ops4j.pax.web.service.WebContainer
 		//    and allows direct registration of web elements
 		//
 		// Whatever's the origin, every "web application" is about web elements registered into single implementation
-		// of javax.servlet.ServletContext (target runtime specific) which is uniquely identified by its context path.
+		// of jakarta.servlet.ServletContext (target runtime specific) which is uniquely identified by its context path.
 		// However in OSGi (all 3 origins), web elements are not directly registered there - there's an intermediate
-		// implementation of javax.servlet.ServletContext, common for all runtimes -
+		// implementation of jakarta.servlet.ServletContext, common for all runtimes -
 		// org.ops4j.pax.web.service.spi.servlet.OsgiServletContext. And from configuration perspective, there's
 		// 1:1 mapping with even more important object - org.ops4j.pax.web.service.spi.model.OsgiContextModel
 		//
@@ -3494,10 +3494,10 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 		//  - WAB - one OsgiContextModel is created for the WAB and its context path - it's always the "best"
 		//    OsgiContextModel for ServletContext with given context path
 		//  - Whiteboard - first, one OsgiContextModel is created for each Whiteboard-registered service of
-		//    org.osgi.service.http.context.ServletContextHelper and web elements choose such helper using
+		//    org.osgi.service.servlet.context.ServletContextHelper and web elements choose such helper using
 		//    "osgi.http.whiteboard.context.select" service registration property (with specification-defined default)
 		//  - HttpService - when registering web elements, a custom (or default, if null) instance of
-		//    org.osgi.service.http.HttpContext is passed along the registration. For each such HttpContext,
+		//    org.ops4j.pax.web.service.http.HttpContext is passed along the registration. For each such HttpContext,
 		//    a HttpService-specific (tied to the registering bundle) OsgiContextModel is created
 		//
 		// org.ops4j.pax.web.service.spi.model.WebApplicationModel class is not used internally for actual

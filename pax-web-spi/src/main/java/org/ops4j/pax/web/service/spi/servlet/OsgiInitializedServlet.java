@@ -17,18 +17,18 @@ package org.ops4j.pax.web.service.spi.servlet;
 
 import java.io.IOException;
 import java.util.Enumeration;
-import javax.servlet.Servlet;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 
 import org.osgi.framework.wiring.BundleWiring;
 
 /**
  * {@link Servlet} wrapper that uses correct {@link ServletConfig} wrapper that returns correct wrapper
- * for {@link javax.servlet.ServletContext} related to given servlet. This servlet wrapper class should be used
+ * for {@link jakarta.servlet.ServletContext} related to given servlet. This servlet wrapper class should be used
  * for all the runtimes of Pax Web.
  */
 public class OsgiInitializedServlet implements Servlet {

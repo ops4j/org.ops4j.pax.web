@@ -27,8 +27,8 @@ import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
-import org.osgi.service.http.HttpService;
-import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
+import org.ops4j.pax.web.service.http.HttpService;
+import org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants;
 
 /**
  * <p>A model class representing the details of a <em>Web Application</em>.</p>
@@ -185,7 +185,7 @@ public class WebApplicationInfo implements Comparable<WebApplicationInfo> {
 		contextModel.getModel().getContextRegistrationProperties().forEach((k, v) -> {
 			if (PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID.equals(k)
 					|| PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_PATH.equals(k)
-					|| HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY.equals(k)
+					|| PaxWebConstants.HTTP_SERVICE_CONTEXT_PROPERTY.equals(k)
 					|| HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME.equals(k)
 					|| HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH.equals(k)) {
 				props.add(String.format("%s=%s", k, v));

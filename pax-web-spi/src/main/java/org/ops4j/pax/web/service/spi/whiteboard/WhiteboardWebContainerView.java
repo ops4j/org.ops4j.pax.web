@@ -40,7 +40,7 @@ import org.osgi.framework.Bundle;
  *
  * <p>The most important difference with direct usage of {@link org.ops4j.pax.web.service.WebContainer} is that
  * the passed models already have {@link OsgiContextModel}s associated, while in the {@code WebContainer} case
- * these have to be translated from {@link org.osgi.service.http.HttpContext}.</p>
+ * these have to be translated from {@link org.ops4j.pax.web.service.http.HttpContext}.</p>
  */
 public interface WhiteboardWebContainerView extends PaxWebContainerView {
 
@@ -61,9 +61,9 @@ public interface WhiteboardWebContainerView extends PaxWebContainerView {
 	List<OsgiContextModel> getOsgiContextModels(Bundle bundle);
 
 	/**
-	 * One-stop method to register a {@link javax.servlet.Servlet} described using {@link ServletModel}.
+	 * One-stop method to register a {@link jakarta.servlet.Servlet} described using {@link ServletModel}.
 	 * {@link ServletModel} should always be associated with target (one or many) {@link OsgiContextModel}, because
-	 * differently than with {@link org.osgi.service.http.HttpService} scenario, contexts are targeted by logical name
+	 * differently than with {@link org.ops4j.pax.web.service.http.HttpService} scenario, contexts are targeted by logical name
 	 * (or LDAP selector) and not as any instance.
 	 * @param model
 	 */
@@ -76,7 +76,7 @@ public interface WhiteboardWebContainerView extends PaxWebContainerView {
 	void unregisterServlet(ServletModel model);
 
 	/**
-	 * One-stop method to register a {@link javax.servlet.Filter} described using {@link FilterModel}.
+	 * One-stop method to register a {@link jakarta.servlet.Filter} described using {@link FilterModel}.
 	 * {@link FilterModel} should always be associated with target (one or many) {@link OsgiContextModel}.
 	 * @param model
 	 */
@@ -115,7 +115,7 @@ public interface WhiteboardWebContainerView extends PaxWebContainerView {
 	/**
 	 * Passes Whiteboard-registered (customized) {@link OsgiContextModel} to be managed in
 	 * {@link org.ops4j.pax.web.service.WebContainer}. Such {@link OsgiContextModel} should have
-	 * {@link org.osgi.service.http.HttpContext} / {@link org.ops4j.pax.web.service.WebContainerContext} configured
+	 * {@link org.ops4j.pax.web.service.http.HttpContext} / {@link org.ops4j.pax.web.service.WebContainerContext} configured
 	 * directly. That's the requirement, when Whiteboard cedes the management of such context from
 	 * pax-web-extender-whiteboard to pax-web-runtime.
 	 * @param model
@@ -125,7 +125,7 @@ public interface WhiteboardWebContainerView extends PaxWebContainerView {
 	/**
 	 * Removes Whiteboard-registered (customized) {@link OsgiContextModel} from
 	 * {@link org.ops4j.pax.web.service.WebContainer}, which may then switch to using "default"
-	 * {@link org.osgi.service.http.HttpContext}
+	 * {@link org.ops4j.pax.web.service.http.HttpContext}
 	 * @param model
 	 */
 	void removeWhiteboardOsgiContextModel(OsgiContextModel model);

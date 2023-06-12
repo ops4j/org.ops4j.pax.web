@@ -17,9 +17,9 @@ package org.ops4j.pax.web.service.spi.servlet;
 
 import java.util.Iterator;
 import java.util.Set;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletContextListener;
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletContextListener;
+import jakarta.servlet.ServletException;
 
 import org.ops4j.pax.web.service.spi.model.elements.ContainerInitializerModel;
 import org.ops4j.pax.web.service.spi.model.views.DynamicJEEWebContainerView;
@@ -27,7 +27,7 @@ import org.ops4j.pax.web.service.spi.servlet.dynamic.DynamicEventListenerRegistr
 import org.osgi.framework.Bundle;
 
 /**
- * <p>The {@link javax.servlet.ServletContainerInitializer} that's supposed to collect all the servlets/filters/listeners
+ * <p>The {@link jakarta.servlet.ServletContainerInitializer} that's supposed to collect all the servlets/filters/listeners
  * that may have beed dynamically added when other SCIs were called and actually register them using full Pax Web
  * procedure of going through the {@link org.ops4j.pax.web.service.spi.model.ServerModel}, batches and server
  * controllers.</p>

@@ -15,7 +15,7 @@
  */
 package org.ops4j.pax.web.service.spi.servlet;
 
-import javax.servlet.descriptor.TaglibDescriptor;
+import jakarta.servlet.descriptor.TaglibDescriptor;
 
 public class DefaultTaglibDescriptor implements TaglibDescriptor {
 

@@ -36,6 +36,7 @@
 	<build>
 		<plugins>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
 				<executions>
 					<execution>
@@ -58,6 +59,7 @@
 				</executions>
 			</plugin>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
 				<executions>
 					<execution>
@@ -86,31 +88,31 @@
 				<configuration>
 					<instructions>
 						<Import-Package>
-							<!-- ranges indicate Servlet API 3.1+ (JavaEE 7+) -->
-							javax.servlet;version="[3.1,5)",
-							javax.servlet.annotation;version="[3.1,5)",
-							javax.servlet.descriptor;version="[3.1,5)",
-							javax.servlet.http;version="[3.1,5)",
+							<!-- ranges indicate Servlet API 6.0+ (JakartaEE 10+) -->
+							jakarta.servlet;version="[6,7)",
+							jakarta.servlet.annotation;version="[6,7)",
+							jakarta.servlet.descriptor;version="[6,7)",
+							jakarta.servlet.http;version="[6,7)",
 
-							javax.websocket;version="[1.1,2)";resolution:=optional,
-							javax.websocket.server;version="[1.1,2)";resolution:=optional,
+							jakarta.websocket;version="[2.1,3)";resolution:=optional,
+							jakarta.websocket.server;version="[2.1,3)";resolution:=optional,
 
-							<!-- ranges indicate we can work with OSGi Core R6+ -->
-							org.osgi.dto;version="[1.0,2)",
-							org.osgi.framework;version="[1.8,2)",
-							org.osgi.framework.dto;version="[1.0,2)",
+							<!-- OSGi Core R8+ -->
+							org.osgi.dto;version="[1.1,2)",
+							org.osgi.framework;version="[1.10,2)",
+							org.osgi.framework.dto;version="[1.8,2)",
 							org.osgi.framework.wiring;version="[1.2,2)",
 							org.osgi.util.tracker;version="[1.5,2)",
 
 							<!-- OSGi cmpn -->
-							org.osgi.service.http;version="[1.2,2)",
-							org.osgi.service.http.context;version="[1.1,2)",
-							org.osgi.service.http.whiteboard;version="[1.1,2)",
-							org.osgi.service.http.runtime;version="[1.1,2)",
-							org.osgi.service.http.runtime.dto;version="[1.1,2)",
+							org.osgi.service.servlet.context;version="[1.1,2)",
+							org.osgi.service.servlet.whiteboard;version="[1.1,2)",
+							org.osgi.service.servlet.runtime;version="[1.1,2)",
+							org.osgi.service.servlet.runtime.dto;version="[1.1,2)",
 
 							<!-- from pax-web-api -->
 							org.ops4j.pax.web.service;version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.service.http;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.service.views;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.utils;version="${pax-web.osgi.version}",
 
@@ -168,13 +170,18 @@
 			<artifactId>osgi.core</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.service.servlet</artifactId>
+			<scope>provided</scope>
+		</dependency>
 
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.utils</artifactId>
 		</dependency>
 
-		<!-- JavaEE -->
+		<!-- JakartaEE -->
 
 		<dependency>
 			<groupId>jakarta.servlet</groupId>
@@ -184,6 +191,12 @@
 		<dependency>
 			<groupId>jakarta.websocket</groupId>
 			<artifactId>jakarta.websocket-api</artifactId>
+			<scope>provided</scope>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.websocket</groupId>
+			<artifactId>jakarta.websocket-client-api</artifactId>
 			<scope>provided</scope>
 			<optional>true</optional>
 		</dependency>
@@ -197,7 +210,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-slf4j-impl</artifactId>
+			<artifactId>log4j-slf4j2-impl</artifactId>
 			<scope>test</scope>
 		</dependency>
 
@@ -227,8 +240,13 @@
 		<!-- Testing -->
 
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

@@ -18,8 +18,8 @@ package org.ops4j.pax.web.service.spi.context;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Set;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.osgi.framework.Bundle;

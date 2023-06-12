@@ -17,7 +17,7 @@
 package org.ops4j.pax.web.service.spi;
 
 import java.net.URL;
-import javax.servlet.Servlet;
+import jakarta.servlet.Servlet;
 
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.model.events.ServerListener;
@@ -103,16 +103,16 @@ public interface ServerController {
 	 *         directory</li>
 	 *     <li>{@code base} - if the "base" is not an absolute file: directory URL, this parameter will be treated
 	 *         as prefix for the resource access as defined in Http/Whiteboard Service specifications (access via
-	 *         {@link org.osgi.service.http.HttpContext#getResource(String)} or
-	 *         {@link org.osgi.service.http.context.ServletContextHelper#getResource(String)}.</li>
+	 *         {@link org.ops4j.pax.web.service.http.HttpContext#getResource(String)} or
+	 *         {@link org.osgi.service.servlet.context.ServletContextHelper#getResource(String)}.</li>
 	 * </ul>
 	 *
 	 * @param urlBase if the "base" is found to be proper, accessible {@code file:} based directory, it is passed
 	 *        to this creation method and {@code base} can be safely ignored
 	 * @param base According to HttpService and Whiteboard specifications, this is the <em>base</em> location for
 	 *        resource fetching. By default this <em>base</em> is prepended to a path and (combined) used as argument
-	 *        to {@link org.osgi.service.http.HttpContext#getResource(String)} or
-	 *        {@link org.osgi.service.http.context.ServletContextHelper#getResource(String)}. It should not end with
+	 *        to {@link org.ops4j.pax.web.service.http.HttpContext#getResource(String)} or
+	 *        {@link org.osgi.service.servlet.context.ServletContextHelper#getResource(String)}. It should not end with
 	 *        slash ({@code /}) and can be an empty string (meaning root of the bundle).
 	 * @return
 	 */

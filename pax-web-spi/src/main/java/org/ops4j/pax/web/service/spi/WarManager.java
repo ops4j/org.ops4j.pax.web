@@ -23,7 +23,7 @@ import org.ops4j.pax.web.annotations.Review;
  *
  * @author Hiram Chirino
  */
-@Review("Extend and integrate with org.osgi.service.http.runtime.HttpServiceRuntime for Karaf commands/services"
+@Review("Extend and integrate with org.osgi.service.servlet.runtime.HttpServiceRuntime for Karaf commands/services"
 		+ " like org.apache.karaf.web.WebContainerService and org.apache.karaf.http.core.ServletService")
 public interface WarManager {
 

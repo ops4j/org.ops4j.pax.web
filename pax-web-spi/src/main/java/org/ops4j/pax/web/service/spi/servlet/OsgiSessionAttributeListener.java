@@ -18,15 +18,15 @@ package org.ops4j.pax.web.service.spi.servlet;
 import java.util.EventListener;
 import java.util.List;
 
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.HttpSessionAttributeListener;
-import javax.servlet.http.HttpSessionBindingEvent;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSessionAttributeListener;
+import jakarta.servlet.http.HttpSessionBindingEvent;
 
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 
 /**
- * A runtime-agnostic interface used to call actual {@link javax.servlet.http.HttpSessionAttributeListener}
+ * A runtime-agnostic interface used to call actual {@link jakarta.servlet.http.HttpSessionAttributeListener}
  * listeners registered in specific runtime.
  */
 public final class OsgiSessionAttributeListener {
@@ -41,7 +41,7 @@ public final class OsgiSessionAttributeListener {
 	 * Notification about attribute change in {@link OsgiHttpSession}
 	 *
 	 * @param session
-	 * @param model {@link OsgiContextModel} for which the {@link javax.servlet.http.HttpSession} is scoped
+	 * @param model {@link OsgiContextModel} for which the {@link jakarta.servlet.http.HttpSession} is scoped
 	 * @param name
 	 * @param value
 	 * @param old
