@@ -16,16 +16,16 @@
 package org.ops4j.pax.web.jsp;
 
 import java.io.IOException;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 
 import org.ops4j.pax.web.service.spi.servlet.OsgiScopedServletContext;
 
 /**
  * Pax Web extension of the original {@link org.apache.jasper.servlet.JspServlet} to set proper TCCL, so Jasper
- * can correctly create {@link javax.el.ExpressionFactory}.
+ * can correctly create {@link jakarta.el.ExpressionFactory}.
  */
 public class JspServlet extends org.apache.jasper.servlet.JspServlet {
 

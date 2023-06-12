@@ -136,7 +136,7 @@
 							org.osgi.framework;version="[1.10,2)",
 							org.osgi.framework.wiring;version="[1.2,2)",
 
-							<!-- OSGi CMPN R8.1 140 Jakarta Servlet packages (formerly known as Whiteboard) -->
+							<!-- OSGi CMPN R8.1 140 Whiteboard Specification for Jakarta™ Servlet -->
 							org.osgi.service.servlet.context;version="2.0.0",
 							org.osgi.service.servlet.runtime;version="2.0.0",
 							org.osgi.service.servlet.runtime.dto;version="2.0.0",
@@ -220,11 +220,6 @@
 		</dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.service.http</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.service.servlet</artifactId>
 			<scope>provided</scope>
 		</dependency>
@@ -287,7 +282,7 @@
 		<dependency>
 			<groupId>org.assertj</groupId>
 			<artifactId>assertj-core</artifactId>
-			<version>${dependency.org.assertj}</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>

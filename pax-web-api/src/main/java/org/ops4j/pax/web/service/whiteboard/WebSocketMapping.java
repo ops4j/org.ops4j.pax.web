@@ -23,22 +23,22 @@ package org.ops4j.pax.web.service.whiteboard;
  * <p>On purpose, we don't allow registration of other objects that usually can be passed (by means of
  * {@link jakarta.servlet.annotation.HandlesTypes} annotation on a {@link jakarta.servlet.ServletContainerInitializer}
  * related to WebSockets) by users. Only annontated classes or actual instances are handled and we don't support:<ul>
- *     <li>{@code javax.websocket.server.ServerApplicationConfig}</li>
- *     <li>{@code javax.websocket.Endpoint}</li>
+ *     <li>{@code jakarta.websocket.server.ServerApplicationConfig}</li>
+ *     <li>{@code jakarta.websocket.Endpoint}</li>
  * </ul></p>
  */
 public interface WebSocketMapping extends ContextRelated {
 
 	/**
 	 * Returns a {@link Class} of the WebSocket endpoint that should be annotated with
-	 * {@code @javax.websocket.server.ServerEndpoint} annotation. If both the
+	 * {@code @jakarta.websocket.server.ServerEndpoint} annotation. If both the
 	 * object ({@link #getWebSocketAnnotatedEndpoint()}) and the class is specified, the class takes precedence.
 	 * @return
 	 */
 	Class<?> getWebSocketClass();
 
 	/**
-	 * Returns an instance of a class annotated with {@code @javax.websocket.server.ServerEndpoint}. If both the
+	 * Returns an instance of a class annotated with {@code @jakarta.websocket.server.ServerEndpoint}. If both the
 	 * object and the class ({@link #getWebSocketClass()}) is specified, the class takes precedence.
 	 * @return
 	 */

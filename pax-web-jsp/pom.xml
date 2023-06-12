@@ -44,42 +44,41 @@
 				<configuration>
 					<instructions>
 						<Import-Package>
-							<!-- ranges indicate Servlet API 3.1+ (JavaEE 7+) -->
-							javax.servlet;version="[3.1,5)",
-							javax.servlet.annotation;version="[3.1,5)",
-							javax.servlet.descriptor;version="[3.1,5)",
-							javax.servlet.http;version="[3.1,5)",
+							<!-- ranges indicate Servlet API 6.0+ (JakartaEE 10+) -->
+							jakarta.servlet;version="[6,7)",
+							jakarta.servlet.annotation;version="[6,7)",
+							jakarta.servlet.descriptor;version="[6,7)",
+							jakarta.servlet.http;version="[6,7)",
 
 							<!-- JSP API (also exported from pax-web-jsp - this bundle) -->
-							javax.servlet.jsp;version="2.3",
-							javax.servlet.jsp.el;version="2.3",
-							javax.servlet.jsp.tagext;version="2.3",
+							jakarta.servlet.jsp;version="${dependency.jakarta.servlet.jsp-api}",
+							jakarta.servlet.jsp.el;version="${dependency.jakarta.servlet.jsp-api}",
+							jakarta.servlet.jsp.tagext;version="${dependency.jakarta.servlet.jsp-api}",
 
 							<!-- JSTL API (also exported from pax-web-jsp - this bundle) -->
-							javax.servlet.jsp.jstl.core;version="${dependency.jakarta.servlet.jsp.jstl-api}",
-							javax.servlet.jsp.jstl.fmt;version="${dependency.jakarta.servlet.jsp.jstl-api}",
-							javax.servlet.jsp.jstl.sql;version="${dependency.jakarta.servlet.jsp.jstl-api}",
-							javax.servlet.jsp.jstl.tlv;version="${dependency.jakarta.servlet.jsp.jstl-api}",
+							jakarta.servlet.jsp.jstl.core;version="${dependency.jakarta.servlet.jsp.jstl-api}",
+							jakarta.servlet.jsp.jstl.fmt;version="${dependency.jakarta.servlet.jsp.jstl-api}",
+							jakarta.servlet.jsp.jstl.sql;version="${dependency.jakarta.servlet.jsp.jstl-api}",
+							jakarta.servlet.jsp.jstl.tlv;version="${dependency.jakarta.servlet.jsp.jstl-api}",
 
 							<!-- EL API (only imported - from jakarta.el:jakarta.el-api) -->
-							javax.el;version="[3.0,4)",
+							jakarta.el;version="[5.0,6)",
 
-							<!-- ranges indicate we can work with OSGi Core R6+ -->
-							org.osgi.framework;version="[1.8,2)",
+							<!-- OSGi Core R8+ -->
+							org.osgi.dto;version="[1.1,2)",
+							org.osgi.framework;version="[1.10,2)",
 							org.osgi.framework.wiring;version="[1.2,2)",
 							org.osgi.util.tracker;version="[1.5,2)",
 
-							<!-- OSGi cmpn -->
-							org.osgi.service.http;version="[1.2,2)",
-
 							<!-- from pax-web -->
 							org.ops4j.pax.web.utils;version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.service.http;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.service.spi.model;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.service.spi.servlet;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.service.spi.util;version="${pax-web.osgi.version}",
 
 							<!-- from pax-logging-api -->
-							org.slf4j;version="[1.7,2)",
+							org.slf4j;version="[2,3)",
 							org.apache.juli.logging,
 
 							<!-- packages required by Jasper/EL implementation and exported from pax-web-tomcat-common -->
@@ -104,7 +103,7 @@
 							org.eclipse.jdt.internal.compiler.problem,
 
 							<!-- other standard packages -->
-							javax.annotation,
+							jakarta.annotation,
 							javax.naming,
 							javax.sql;resolution:=optional,
 							javax.xml.parsers,
@@ -135,31 +134,17 @@
 								re-export JSP API - from mvn:org.apache.tomcat/tomcat-jsp-api
 								(instead of from mvn:jakarta.servlet.jsp/jakarta.servlet.jsp-api)
 							-->
-							javax.servlet.jsp;version="2.3",
-							javax.servlet.jsp.el;version="2.3",
-							javax.servlet.jsp.tagext;version="2.3",
+							jakarta.servlet.jsp;version="${dependency.jakarta.servlet.jsp-api}",
+							jakarta.servlet.jsp.el;version="${dependency.jakarta.servlet.jsp-api}",
+							jakarta.servlet.jsp.tagext;version="${dependency.jakarta.servlet.jsp-api}",
 
 							<!-- re-export JSTL API from mvn:jakarta.servlet.jsp.jstl/jakarta.servlet.jsp.jstl-api -->
-							javax.servlet.jsp.jstl.core;version="${dependency.jakarta.servlet.jsp.jstl-api}",
-							javax.servlet.jsp.jstl.fmt;version="${dependency.jakarta.servlet.jsp.jstl-api}",
-							javax.servlet.jsp.jstl.sql;version="${dependency.jakarta.servlet.jsp.jstl-api}",
-							javax.servlet.jsp.jstl.tlv;version="${dependency.jakarta.servlet.jsp.jstl-api}",
+							jakarta.servlet.jsp.jstl.core;version="${dependency.jakarta.servlet.jsp.jstl-api}",
+							jakarta.servlet.jsp.jstl.fmt;version="${dependency.jakarta.servlet.jsp.jstl-api}",
+							jakarta.servlet.jsp.jstl.sql;version="${dependency.jakarta.servlet.jsp.jstl-api}",
+							jakarta.servlet.jsp.jstl.tlv;version="${dependency.jakarta.servlet.jsp.jstl-api}",
 
-							<!--
-								re-export EL Impl - from mvn:org.apache.tomcat/tomcat-jasper-el
-								for broader picture:
-								 - org.apache.tomcat/tomcat-el-api/9.0.29 has OSGi manifest, but doesn't specify versions
-								 - org.apache.tomcat/tomcat-el-api/8.5.49 is not an OSGi bundle
-								 - org.apache.tomcat/tomcat-jasper-el/9.0.29 has OSGi manifest, but doesn't specify versions
-								 - org.apache.tomcat/tomcat-jasper-el/8.5.49 is not an OSGi bundle
-								 - org.glassfish.web/javax.el/2.2.6 (EL 2.2) exports com.sun.el.* and imports javax.el
-								   at version 2.2
-								 - org.glassfish.web/el-impl/2.2 (EL 2.2) exports com.sun.el.* and imports javax.el
-								   at version 2.2
-								 - org.glassfish/javax.el/3.0.0 (EL 3.0) exports com.sun.el.* and imports javax.el
-								   at version 3.0.0
-								version of implementation should be not the same as the version of specification
-							-->
+							<!-- re-export EL Impl - from mvn:org.apache.tomcat/tomcat-jasper-el -->
 							org.apache.el;version="${dependency.org.apache.tomcat}",
 							org.apache.el.lang;version="${dependency.org.apache.tomcat}",
 							org.apache.el.parser;version="${dependency.org.apache.tomcat}",
@@ -185,6 +170,7 @@
 								impl in 2010 (http://svn.apache.org/viewvc?view=revision&revision=1026635),
 								so we hopefuly clear the confusion in pax-web-jsp
 							-->
+							<!-- TODO: JakartaEE 10 -->
 							org.apache.taglibs.standard;version="1.2",
 							org.apache.taglibs.standard.functions;version="1.2",
 							org.apache.taglibs.standard.tag.common.core;version="1.2",
@@ -197,14 +183,11 @@
 							org.apache.taglibs.standard.tag.rt.xml;version="1.2",
 							org.apache.taglibs.standard.tei;version="1.2",
 							org.apache.taglibs.standard.tlv;version="1.2",
-							org.apache.taglibs.standard.util;version="1.2",
 
-							<!-- don't re-export JSTL Impl from mvn:org.apache.taglibs/taglibs-standard-compat -->
-							!org.apache.taglibs.standard.tag.compat.*,
 							<!-- don't re-export JSTL Impl from mvn:org.apache.taglibs/taglibs-standard-jstlel -->
 							!org.apache.taglibs.standard.lang.*,
 							!org.apache.taglibs.standard.tag.el.*,
-							!org.apache.taglibs.standard.tlv.el
+							!org.apache.taglibs.standard.tlv
 						</Export-Package>
 						<Private-Package>
 							<!-- resources from mvn:org.apache.tomcat/tomcat-jasper which are not exported (no *.class there) -->
@@ -221,8 +204,9 @@
 						</Embed-Dependency>
 						<_nouses>true</_nouses>
 						<_contract>!*</_contract>
+						<!-- TODO: JakartaEE 10 -->
 						<Provide-Capability><![CDATA[
-							osgi.contract;osgi.contract=JavaJSP;uses:="javax.servlet.jsp,javax.servlet.jsp.el,javax.servlet.jsp.tagext";
+							osgi.contract;osgi.contract=JavaJSP;uses:="jakarta.servlet.jsp,jakarta.servlet.jsp.el,jakarta.servlet.jsp.tagext";
 								version:List<Version>="2.3,2.2,2.1,2"
 						]]></Provide-Capability>
 					</instructions>
@@ -271,7 +255,7 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<!-- JavaEE -->
+		<!-- JakartaEE -->
 
 		<dependency>
 			<groupId>jakarta.el</groupId>
@@ -279,8 +263,13 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
+			<groupId>jakarta.annotation</groupId>
+			<artifactId>jakarta.annotation-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
 			<!--
-				This dependency is used instead of jakarta.servlet/jakarta.servlet-api to take javax.servlet.resources
+				This dependency is used instead of jakarta.servlet/jakarta.servlet-api to take jakarta.servlet.resources
 				package with XSDs/DTDs into pax-web-jsp
 			-->
 			<groupId>org.apache.tomcat</groupId>
@@ -289,11 +278,11 @@
 		</dependency>
 		<dependency>
 			<!--
-				This dependency is used instead of jakarta.servlet.jsp/jakarta.servlet.jsp-api to take javax.servlet.jsp.resources
+				This dependency is used instead of jakarta.servlet.jsp/jakarta.servlet.jsp-api to take jakarta.servlet.jsp.resources
 				package with XSDs/DTDs into pax-web-jsp and re-export these packages from pax-web-jsp:
-				 - javax.servlet.jsp
-				 - javax.servlet.jsp.el
-				 - javax.servlet.jsp.tagext
+				 - jakarta.servlet.jsp
+				 - jakarta.servlet.jsp.el
+				 - jakarta.servlet.jsp.tagext
 			-->
 			<groupId>org.apache.tomcat</groupId>
 			<artifactId>tomcat-jsp-api</artifactId>
@@ -304,10 +293,10 @@
 				This dependency provides packages to re-export from pax-web-jsp. While jakarta.servlet-api and
 				jakarta.servlet.jsp-api can't be used (because they contain no resources), with JSTL we can use
 				jakarta.servlet.jsp.jstl-api - also because there's no analogous org.apache.tomcat JAR.
-				 - javax.servlet.jsp.jstl.core
-				 - javax.servlet.jsp.jstl.fmt
-				 - javax.servlet.jsp.jstl.sql
-				 - javax.servlet.jsp.jstl.tlv
+				 - jakarta.servlet.jsp.jstl.core
+				 - jakarta.servlet.jsp.jstl.fmt
+				 - jakarta.servlet.jsp.jstl.sql
+				 - jakarta.servlet.jsp.jstl.tlv
 			-->
 			<groupId>jakarta.servlet.jsp.jstl</groupId>
 			<artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
@@ -360,7 +349,9 @@
 
 		<dependency>
 			<!--
-				This dependency (JSTL implementation) provides packages to re-export from pax-web-jsp:
+				This dependency (JSTL implementation) provides packages to re-export from pax-web-jsp. for JakartaEE8
+				and earlier, the implementation was org.apache.taglibs:taglibs-standard-impl, but even if now
+				it is org.glassfish.web:jakarta.servlet.jsp.jstl, the package is still org.apache.taglibs.*
 				 - org.apache.taglibs.standard
 				 - org.apache.taglibs.standard.functions
 				 - org.apache.taglibs.standard.resources (resources only)
@@ -374,10 +365,9 @@
 				 - org.apache.taglibs.standard.tag.rt.xml
 				 - org.apache.taglibs.standard.tei
 				 - org.apache.taglibs.standard.tlv
-				 - org.apache.taglibs.standard.util
 			-->
-			<groupId>org.apache.taglibs</groupId>
-			<artifactId>taglibs-standard-impl</artifactId>
+			<groupId>org.glassfish.web</groupId>
+			<artifactId>jakarta.servlet.jsp.jstl</artifactId>
 			<scope>provided</scope>
 		</dependency>
 
@@ -436,7 +426,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-slf4j-impl</artifactId>
+			<artifactId>log4j-slf4j2-impl</artifactId>
 			<scope>test</scope>
 		</dependency>
 
@@ -449,9 +439,19 @@
 		</dependency>
 
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-core</artifactId>
+			<version>${dependency.org.assertj}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
@@ -460,24 +460,5 @@
 		</dependency>
 
 	</dependencies>
-
-	<profiles>
-		<profile>
-			<id>jdk11</id>
-			<activation>
-				<jdk>[9,)</jdk>
-			</activation>
-			<dependencies>
-
-				<!-- JavaEE / JakartaEE -->
-
-				<dependency>
-					<groupId>jakarta.annotation</groupId>
-					<artifactId>jakarta.annotation-api</artifactId>
-				</dependency>
-
-			</dependencies>
-		</profile>
-	</profiles>
 
 </project>

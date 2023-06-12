@@ -1,3 +1,4 @@
+// TODO: JakartaEE 10
 = pax-web-jsp
 
 == Motivation
@@ -13,8 +14,8 @@ I won't mention JSF (2.3 - JSR 372) and WebSockets (1.1 - JSR 356) here.
 
 While Pax-Web JSP (and Pax-Web in general) assumes Servlets API and EL API to be exported by separate bundles:
 
-* usually official `mvn:javax.servlet/javax.servlet-api/*`
-* usually official `mvn:javax.el/javax.el-api/3.0.0`
+* usually official `mvn:jakarta.servlet/jakarta.servlet-api/*`
+* usually official `mvn:jakarta.el/jakarta.el-api/*`
 
 These will be embedded (and in case of API also exported) within pax-web-jsp itself:
 
@@ -30,155 +31,155 @@ Servlet API implementation is provided by pax-web-tomcat, pax-web-jetty and pax-
 
 `pax-web-jsp` doesn't provide any OSGi _entry points_ like bundle activators, SCR components or blueprint descriptors. This bundle's classes have to be used explicitly.
 
-`pax-web-jsp` however provides several JavaEE/JavaSE _entry points_:
+`pax-web-jsp` however provides several JakartaEE/JavaSE _entry points_:
 
-* `/META-INF/services/javax.el.ExpressionFactory` with `org.apache.el.ExpressionFactoryImpl` service
-* `/META-INF/services/javax.servlet.ServletContainerInitializer` with `org.apache.jasper.servlet.JasperInitializer` service (to check)
+* `/META-INF/services/jakarta.el.ExpressionFactory` with `org.apache.el.ExpressionFactoryImpl` service
+* `/META-INF/services/jakarta.servlet.ServletContainerInitializer` with `org.apache.jasper.servlet.JasperInitializer` service (to check)
 * `org.ops4j.pax.web.jsp.JasperInitializer` used directly by pax-web-runtime
 
 (I'll try to make it less confusing and more clear.)
 
 == Information about JSP / JSTL implementations
 
-Taking into account JavaEE 5 - 8 specifications, we have:
+Taking into account JakartaEE 5 - 8 specifications, we have:
 
-* JavaEE 5: JSP 2.1, JSTL 1.2
-* JavaEE 6: JSP 2.2, JSTL 1.2
-* JavaEE 7: JSP 2.3, JSTL 1.2
-* JavaEE 8 (and JakartaEE 8): JSP 2.3, JSTL 1.2
+* JakartaEE 5: JSP 2.1, JSTL 1.2
+* JakartaEE 6: JSP 2.2, JSTL 1.2
+* JakartaEE 7: JSP 2.3, JSTL 1.2
+* JakartaEE 8 (and JakartaEE 8): JSP 2.3, JSTL 1.2
 
 List of Maven artifacts providing APIs and implementations related to Servlets/JSP/EL/JSTL specifications.
 
-* Official JavaEE (recently repackaged under `jakarta` groupId) bundles for APIs (not for implementations!):
-** mvn:javax.servlet/javax.servlet-api/3.1.0
+* Official JakartaEE (recently repackaged under `jakarta` groupId) bundles for APIs (not for implementations!):
+** mvn:jakarta.servlet/jakarta.servlet-api/3.1.0
 +
 [options=nowrap]
 ----
 Contains:
-    javax.servlet
-    javax.servlet.annotation
-    javax.servlet.descriptor
-    javax.servlet.http
+    jakarta.servlet
+    jakarta.servlet.annotation
+    jakarta.servlet.descriptor
+    jakarta.servlet.http
 
 Export-Package:
-    javax.servlet;            version="3.1.0"; uses:="javax.servlet.annotation,javax.servlet.descriptor",
-    javax.servlet.annotation; version="3.1.0"; uses:="javax.servlet",
-    javax.servlet.descriptor; version="3.1.0",
-    javax.servlet.http;       version="3.1.0"; uses:="javax.servlet"
+    jakarta.servlet;            version="3.1.0"; uses:="jakarta.servlet.annotation,jakarta.servlet.descriptor",
+    jakarta.servlet.annotation; version="3.1.0"; uses:="jakarta.servlet",
+    jakarta.servlet.descriptor; version="3.1.0",
+    jakarta.servlet.http;       version="3.1.0"; uses:="jakarta.servlet"
 Import-Package:
-    javax.servlet;            version="3.1.0",
-    javax.servlet.annotation; version="3.1.0",
-    javax.servlet.descriptor; version="3.1.0",
-    javax.servlet.http;       version="3.1.0"
+    jakarta.servlet;            version="3.1.0",
+    jakarta.servlet.annotation; version="3.1.0",
+    jakarta.servlet.descriptor; version="3.1.0",
+    jakarta.servlet.http;       version="3.1.0"
 ----
-** mvn:javax.servlet/javax.servlet-api/4.0.1
+** mvn:jakarta.servlet/jakarta.servlet-api/4.0.1
 +
 [options=nowrap]
 ----
 Contains:
-    javax.servlet
-    javax.servlet.annotation
-    javax.servlet.descriptor
-    javax.servlet.http
+    jakarta.servlet
+    jakarta.servlet.annotation
+    jakarta.servlet.descriptor
+    jakarta.servlet.http
 
 Export-Package:
-    javax.servlet;            version="4.0.0"; uses:="javax.servlet.annotation,javax.servlet.descriptor",
-    javax.servlet.annotation; version="4.0.0"; uses:="javax.servlet",
-    javax.servlet.descriptor; version="4.0.0",
-    javax.servlet.http;       version="4.0.0"; uses:="javax.servlet"
+    jakarta.servlet;            version="4.0.0"; uses:="jakarta.servlet.annotation,jakarta.servlet.descriptor",
+    jakarta.servlet.annotation; version="4.0.0"; uses:="jakarta.servlet",
+    jakarta.servlet.descriptor; version="4.0.0",
+    jakarta.servlet.http;       version="4.0.0"; uses:="jakarta.servlet"
 Import-Package:
-    javax.servlet;            version="4.0.0",
-    javax.servlet.annotation; version="4.0.0",
-    javax.servlet.descriptor; version="4.0.0",
-    javax.servlet.http;       version="4.0.0"
+    jakarta.servlet;            version="4.0.0",
+    jakarta.servlet.annotation; version="4.0.0",
+    jakarta.servlet.descriptor; version="4.0.0",
+    jakarta.servlet.http;       version="4.0.0"
 ----
 ** mvn:jakarta.servlet/jakarta.servlet-api/4.0.3
 +
 [options=nowrap]
 ----
 Contains:
-    javax.servlet
-    javax.servlet.annotation
-    javax.servlet.descriptor
-    javax.servlet.http
+    jakarta.servlet
+    jakarta.servlet.annotation
+    jakarta.servlet.descriptor
+    jakarta.servlet.http
 
 Export-Package:
-    javax.servlet;            version="4.0.0"; uses:="javax.servlet.annotation,javax.servlet.descriptor",
-    javax.servlet.annotation; version="4.0.0"; uses:="javax.servlet",
-    javax.servlet.descriptor; version="4.0.0",
-    javax.servlet.http;       version="4.0.0"; uses:="javax.servlet"
+    jakarta.servlet;            version="4.0.0"; uses:="jakarta.servlet.annotation,jakarta.servlet.descriptor",
+    jakarta.servlet.annotation; version="4.0.0"; uses:="jakarta.servlet",
+    jakarta.servlet.descriptor; version="4.0.0",
+    jakarta.servlet.http;       version="4.0.0"; uses:="jakarta.servlet"
 Import-Package:
-    javax.servlet,
-    javax.servlet.annotation,
-    javax.servlet.descriptor
+    jakarta.servlet,
+    jakarta.servlet.annotation,
+    jakarta.servlet.descriptor
 ----
-** mvn:javax.servlet.jsp/javax.servlet.jsp-api/2.3.3
+** mvn:jakarta.servlet.jsp/jakarta.servlet.jsp-api/2.3.3
 +
 [options=nowrap]
 ----
 Contains:
-    javax.servlet.jsp
-    javax.servlet.jsp.el
-    javax.servlet.jsp.tagext
+    jakarta.servlet.jsp
+    jakarta.servlet.jsp.el
+    jakarta.servlet.jsp.tagext
 
 Export-Package:
-    javax.servlet.jsp;        version="2.3.3"; uses:="javax.servlet,javax.el,javax.servlet.jsp.el,javax.servlet.jsp.tagext,javax.servlet.http"
-    javax.servlet.jsp.el;     version="2.3.3"; uses:="javax.servlet,javax.el,javax.servlet.jsp,javax.servlet.http",
-    javax.servlet.jsp.tagext; version="2.3.3"; uses:="javax.servlet.jsp",
+    jakarta.servlet.jsp;        version="2.3.3"; uses:="jakarta.servlet,javax.el,jakarta.servlet.jsp.el,jakarta.servlet.jsp.tagext,jakarta.servlet.http"
+    jakarta.servlet.jsp.el;     version="2.3.3"; uses:="jakarta.servlet,javax.el,jakarta.servlet.jsp,jakarta.servlet.http",
+    jakarta.servlet.jsp.tagext; version="2.3.3"; uses:="jakarta.servlet.jsp",
 Import-Package:
     javax.el,
-    javax.servlet,
-    javax.servlet.http,
-    javax.servlet.jsp;        version="2.3.3",
-    javax.servlet.jsp.el;     version="2.3.3",
-    javax.servlet.jsp.tagext; version="2.3.3"
+    jakarta.servlet,
+    jakarta.servlet.http,
+    jakarta.servlet.jsp;        version="2.3.3",
+    jakarta.servlet.jsp.el;     version="2.3.3",
+    jakarta.servlet.jsp.tagext; version="2.3.3"
 ----
 ** mvn:jakarta.servlet.jsp/jakarta.servlet.jsp-api/2.3.6
 +
 [options=nowrap]
 ----
 Contains:
-    javax.servlet.jsp
-    javax.servlet.jsp.el
-    javax.servlet.jsp.tagext
+    jakarta.servlet.jsp
+    jakarta.servlet.jsp.el
+    jakarta.servlet.jsp.tagext
 
 Export-Package:
-    javax.servlet.jsp;        version="2.3.6"; uses:="javax.servlet,javax.el,javax.servlet.jsp.el,javax.servlet.jsp.tagext,javax.servlet.http",
-    javax.servlet.jsp.el;     version="2.3.6"; uses:="javax.servlet,javax.el,javax.servlet.jsp,javax.servlet.http",
-    javax.servlet.jsp.tagext; version="2.3.6"; uses:="javax.servlet.jsp"
+    jakarta.servlet.jsp;        version="2.3.6"; uses:="jakarta.servlet,javax.el,jakarta.servlet.jsp.el,jakarta.servlet.jsp.tagext,jakarta.servlet.http",
+    jakarta.servlet.jsp.el;     version="2.3.6"; uses:="jakarta.servlet,javax.el,jakarta.servlet.jsp,jakarta.servlet.http",
+    jakarta.servlet.jsp.tagext; version="2.3.6"; uses:="jakarta.servlet.jsp"
 Import-Package:
     javax.el,
-    javax.servlet,
-    javax.servlet.http,
-    javax.servlet.jsp;        version="2.3.6",
-    javax.servlet.jsp.el;     version="2.3.6",
-    javax.servlet.jsp.tagext; version="2.3.6"
+    jakarta.servlet,
+    jakarta.servlet.http,
+    jakarta.servlet.jsp;        version="2.3.6",
+    jakarta.servlet.jsp.el;     version="2.3.6",
+    jakarta.servlet.jsp.tagext; version="2.3.6"
 ----
-** mvn:javax.servlet.jsp.jstl/javax.servlet.jsp.jstl-api/1.2.2
+** mvn:jakarta.servlet.jsp.jstl/jakarta.servlet.jsp.jstl-api/1.2.2
 +
 [options=nowrap]
 ----
 Contains:
-    javax.servlet.jsp.jstl.core
-    javax.servlet.jsp.jstl.fmt
-    javax.servlet.jsp.jstl.sql
-    javax.servlet.jsp.jstl.tlv
+    jakarta.servlet.jsp.jstl.core
+    jakarta.servlet.jsp.jstl.fmt
+    jakarta.servlet.jsp.jstl.sql
+    jakarta.servlet.jsp.jstl.tlv
 
 Export-Package:
-    javax.servlet.jsp.jstl.core; version="1.2.2"; uses:="javax.servlet,javax.el,javax.servlet.jsp.tagext,javax.servlet.jsp,javax.servlet.http",
-    javax.servlet.jsp.jstl.fmt;  version="1.2.2"; uses:="javax.servlet,javax.servlet.jsp.jstl.core,javax.servlet.jsp,javax.servlet.http",
-    javax.servlet.jsp.jstl.sql;  version="1.2.2",
-    javax.servlet.jsp.jstl.tlv;  version="1.2.2"; uses:="javax.xml.parsers,javax.servlet.jsp.tagext,org.xml.sax.helpers,org.xml.sax"
+    jakarta.servlet.jsp.jstl.core; version="1.2.2"; uses:="jakarta.servlet,javax.el,jakarta.servlet.jsp.tagext,jakarta.servlet.jsp,jakarta.servlet.http",
+    jakarta.servlet.jsp.jstl.fmt;  version="1.2.2"; uses:="jakarta.servlet,jakarta.servlet.jsp.jstl.core,jakarta.servlet.jsp,jakarta.servlet.http",
+    jakarta.servlet.jsp.jstl.sql;  version="1.2.2",
+    jakarta.servlet.jsp.jstl.tlv;  version="1.2.2"; uses:="javax.xml.parsers,jakarta.servlet.jsp.tagext,org.xml.sax.helpers,org.xml.sax"
 Import-Package:
     javax.el,
-    javax.servlet,
-    javax.servlet.http,
-    javax.servlet.jsp,
-    javax.servlet.jsp.jstl.core; version="1.2.2",
-    javax.servlet.jsp.jstl.fmt;  version="1.2.2",
-    javax.servlet.jsp.jstl.sql;  version="1.2.2",
-    javax.servlet.jsp.jstl.tlv;  version="1.2.2",
-    javax.servlet.jsp.tagext,
+    jakarta.servlet,
+    jakarta.servlet.http,
+    jakarta.servlet.jsp,
+    jakarta.servlet.jsp.jstl.core; version="1.2.2",
+    jakarta.servlet.jsp.jstl.fmt;  version="1.2.2",
+    jakarta.servlet.jsp.jstl.sql;  version="1.2.2",
+    jakarta.servlet.jsp.jstl.tlv;  version="1.2.2",
+    jakarta.servlet.jsp.tagext,
     javax.xml.parsers,
     org.xml.sax,
     org.xml.sax.helpers
@@ -188,26 +189,26 @@ Import-Package:
 [options=nowrap]
 ----
 Contains:
-    javax.servlet.jsp.jstl.core
-    javax.servlet.jsp.jstl.fmt
-    javax.servlet.jsp.jstl.sql
-    javax.servlet.jsp.jstl.tlv
+    jakarta.servlet.jsp.jstl.core
+    jakarta.servlet.jsp.jstl.fmt
+    jakarta.servlet.jsp.jstl.sql
+    jakarta.servlet.jsp.jstl.tlv
 
 Export-Package:
-    javax.servlet.jsp.jstl.core; version="1.2.7";uses:="javax.servlet,javax.servlet.http,javax.servlet.jsp.tagext,javax.el,javax.servlet.jsp",
-    javax.servlet.jsp.jstl.fmt;  version="1.2.7";uses:="javax.servlet,javax.servlet.jsp.jstl.core,javax.servlet.http,javax.servlet.jsp",
-    javax.servlet.jsp.jstl.sql;  version="1.2.7",
-    javax.servlet.jsp.jstl.tlv;  version="1.2.7";uses:="org.xml.sax.helpers,org.xml.sax,javax.servlet.jsp.tagext,javax.xml.parsers"
+    jakarta.servlet.jsp.jstl.core; version="1.2.7";uses:="jakarta.servlet,jakarta.servlet.http,jakarta.servlet.jsp.tagext,javax.el,jakarta.servlet.jsp",
+    jakarta.servlet.jsp.jstl.fmt;  version="1.2.7";uses:="jakarta.servlet,jakarta.servlet.jsp.jstl.core,jakarta.servlet.http,jakarta.servlet.jsp",
+    jakarta.servlet.jsp.jstl.sql;  version="1.2.7",
+    jakarta.servlet.jsp.jstl.tlv;  version="1.2.7";uses:="org.xml.sax.helpers,org.xml.sax,jakarta.servlet.jsp.tagext,javax.xml.parsers"
 Import-Package:
     javax.el;                    version="3.0",
-    javax.servlet;               version="4.0",
-    javax.servlet.http;          version="4.0",
-    javax.servlet.jsp,
-    javax.servlet.jsp.jstl.core; version="1.2.7",
-    javax.servlet.jsp.jstl.fmt;  version="1.2.7",
-    javax.servlet.jsp.jstl.sql;  version="1.2.7",
-    javax.servlet.jsp.jstl.tlv;  version="1.2.7",
-    javax.servlet.jsp.tagext,
+    jakarta.servlet;               version="4.0",
+    jakarta.servlet.http;          version="4.0",
+    jakarta.servlet.jsp,
+    jakarta.servlet.jsp.jstl.core; version="1.2.7",
+    jakarta.servlet.jsp.jstl.fmt;  version="1.2.7",
+    jakarta.servlet.jsp.jstl.sql;  version="1.2.7",
+    jakarta.servlet.jsp.jstl.tlv;  version="1.2.7",
+    jakarta.servlet.jsp.tagext,
     javax.xml.parsers,
     org.xml.sax,
     org.xml.sax.helpers
@@ -237,19 +238,19 @@ Export-Package:
 ** mvn:org.apache.tomcat/tomcat-servlet-api - just Servlet API
 +
 ----
-javax.servlet
-javax.servlet.annotation
-javax.servlet.descriptor
-javax.servlet.http
-javax.servlet.resources
+jakarta.servlet
+jakarta.servlet.annotation
+jakarta.servlet.descriptor
+jakarta.servlet.http
+jakarta.servlet.resources
 ----
 ** mvn:org.apache.tomcat/tomcat-jsp-api - just JSP API
 +
 ----
-javax.servlet.jsp
-javax.servlet.jsp.el
-javax.servlet.jsp.resources
-javax.servlet.jsp.tagext
+jakarta.servlet.jsp
+jakarta.servlet.jsp.el
+jakarta.servlet.jsp.resources
+jakarta.servlet.jsp.tagext
 ----
 ** mvn:org.apache.tomcat/tomcat-el-api - just EL API
 +
@@ -273,26 +274,26 @@ org.apache.el.*
 +
 ----
 Contains:
-    javax.servlet.jsp.jstl.core
-    javax.servlet.jsp.jstl.fmt
-    javax.servlet.jsp.jstl.sql
-    javax.servlet.jsp.jstl.tlv
+    jakarta.servlet.jsp.jstl.core
+    jakarta.servlet.jsp.jstl.fmt
+    jakarta.servlet.jsp.jstl.sql
+    jakarta.servlet.jsp.jstl.tlv
 
 Export-Package:
-    javax.servlet.jsp.jstl.core; version="1.2"; uses:="javax.servlet.jsp.tagext,javax.servlet.jsp,javax.servlet,javax.servlet.http,javax.el",
-    javax.servlet.jsp.jstl.fmt;  version="1.2"; uses:="javax.servlet,javax.servlet.jsp.jstl.core,javax.servlet.jsp,javax.servlet.http",
-    javax.servlet.jsp.jstl.sql;  version="1.2",
-    javax.servlet.jsp.jstl.tlv;  version="1.2"; uses:="javax.xml.parsers,javax.servlet.jsp.tagext,org.xml.sax.helpers,org.xml.sax"
+    jakarta.servlet.jsp.jstl.core; version="1.2"; uses:="jakarta.servlet.jsp.tagext,jakarta.servlet.jsp,jakarta.servlet,jakarta.servlet.http,javax.el",
+    jakarta.servlet.jsp.jstl.fmt;  version="1.2"; uses:="jakarta.servlet,jakarta.servlet.jsp.jstl.core,jakarta.servlet.jsp,jakarta.servlet.http",
+    jakarta.servlet.jsp.jstl.sql;  version="1.2",
+    jakarta.servlet.jsp.jstl.tlv;  version="1.2"; uses:="javax.xml.parsers,jakarta.servlet.jsp.tagext,org.xml.sax.helpers,org.xml.sax"
 Import-Package:
     javax.el,
-    javax.servlet,
-    javax.servlet.http,
-    javax.servlet.jsp,
-    javax.servlet.jsp.jstl.core; version="1.2",
-    javax.servlet.jsp.jstl.fmt;  version="1.2",
-    javax.servlet.jsp.jstl.sql;  version="1.2",
-    javax.servlet.jsp.jstl.tlv;  version="1.2",
-    javax.servlet.jsp.tagext,
+    jakarta.servlet,
+    jakarta.servlet.http,
+    jakarta.servlet.jsp,
+    jakarta.servlet.jsp.jstl.core; version="1.2",
+    jakarta.servlet.jsp.jstl.fmt;  version="1.2",
+    jakarta.servlet.jsp.jstl.sql;  version="1.2",
+    jakarta.servlet.jsp.jstl.tlv;  version="1.2",
+    jakarta.servlet.jsp.tagext,
     javax.xml.parsers,
     org.xml.sax,
     org.xml.sax.helpers
@@ -322,25 +323,25 @@ org.apache.taglibs.standard.util
 ----
 
 * Jetty <9.2: Glassfish implementation
-** mvn:javax.servlet.jsp/javax.servlet.jsp-api
+** mvn:jakarta.servlet.jsp/jakarta.servlet.jsp-api
 ** mvn:org.glassfish/javax.el
-** mvn:org.glassfish.web/javax.servlet.jsp
-** mvn:org.glassfish.web/javax.servlet.jsp.jstl
+** mvn:org.glassfish.web/jakarta.servlet.jsp
+** mvn:org.glassfish.web/jakarta.servlet.jsp.jstl
 
 * Jetty >=9.2: Apache (Tomcat) implementation
 ** mvn:org.mortbay.jasper/apache-jsp - actually shaded mvn:org.apache.tomcat/tomcat-jasper
 
 * Undertow 1.4.x (https://github.com/undertow-io/jastow) - a fork (with Tomcat deps removed) of tomcat-jasper
 
-* Glassfish 5.1 (https://github.com/eclipse-ee4j/glassfish) - it uses many Jakarta-branded JavaEE APIs - mostly from
+* Glassfish 5.1 (https://github.com/eclipse-ee4j/glassfish) - it uses many Jakarta-branded JakartaEE APIs - mostly from
 `org.glassfish.web` groupId
-** Servlet API: mvn:javax.servlet/javax.servlet-api/4.0.1 → mvn:jakarta.servlet/jakarta.servlet-api/4.0.2
-** JSP API: mvn:javax.servlet.jsp/javax.servlet.jsp-api/2.3.4-SNAPSHOT → mvn:jakarta.servlet.jsp/jakarta.servlet.jsp-api/2.3.4-SNAPSHOT
-** JSP Impl: mvn:org.glassfish.web/javax.servlet.jsp/2.3.4 - based on org.apache.tomcat/tomcat-jasper
-** JSTL API: mvn:javax.servlet.jsp.jstl/javax.servlet.jsp.jstl-api/1.2.2 → mvn:jakarta.servlet.jsp.jstl/jakarta.servlet.jsp.jstl-api/1.2.7
-** JSTL Impl: mvn:org.glassfish.web/javax.servlet.jsp.jstl/1.2.6-SNAPSHOT → mvn:org.glassfish.web/jakarta.servlet.jsp.jstl/1.2.6 - based on org.apache.taglibs/taglibs-standard-impl
+** Servlet API: mvn:jakarta.servlet/jakarta.servlet-api/4.0.1 → mvn:jakarta.servlet/jakarta.servlet-api/4.0.2
+** JSP API: mvn:jakarta.servlet.jsp/jakarta.servlet.jsp-api/2.3.4-SNAPSHOT → mvn:jakarta.servlet.jsp/jakarta.servlet.jsp-api/2.3.4-SNAPSHOT
+** JSP Impl: mvn:org.glassfish.web/jakarta.servlet.jsp/2.3.4 - based on org.apache.tomcat/tomcat-jasper
+** JSTL API: mvn:jakarta.servlet.jsp.jstl/jakarta.servlet.jsp.jstl-api/1.2.2 → mvn:jakarta.servlet.jsp.jstl/jakarta.servlet.jsp.jstl-api/1.2.7
+** JSTL Impl: mvn:org.glassfish.web/jakarta.servlet.jsp.jstl/1.2.6-SNAPSHOT → mvn:org.glassfish.web/jakarta.servlet.jsp.jstl/1.2.6 - based on org.apache.taglibs/taglibs-standard-impl
 ** EL API: mvn:javax.el/javax.el-api/3.0.0 → mvn:jakarta.el/jakarta.el-api/3.0.2
-** EL Impl: mvn:org.glassfish/javax.el.impl/3.0.1-SNAPSHOT
+** EL Impl: mvn:org.glassfish/jakarta.el.impl/3.0.1-SNAPSHOT
 ** EL API + Impl: mvn:org.glassfish/javax.el/3.0.1-SNAPSHOT
 
 About JSTL (https://tomcat.apache.org/taglibs.html):
@@ -380,15 +381,14 @@ The goal of pax-web-jsp from Pax Web perspective is to add "JSP support" to all 
 By "JSP support" I don't mean actual Jasper Servlet (`org.apache.jasper.servlet.JspServlet`), but rather registration of `org.apache.jasper.servlet.JasperInitializer` in the context when pax-web-jsp is available.
 Original `org.apache.jasper.servlet.JasperInitializer` creates and runs `org.apache.jasper.servlet.TldScanner` which detects `*.tld` files and possibly reads `<taglib>/<listener>/<listener-class>` elements which are then called. For example, one of such listeners is `org.apache.myfaces.webapp.StartupServletContextListener`.
 
-Some well-known `javax.servlet.ServletContainerInitializer` services from `/META-INF/services/javax.servlet.ServletContainerInitializer`:
+Some well-known `jakarta.servlet.ServletContainerInitializer` services from `/META-INF/services/jakarta.servlet.ServletContainerInitializer`:
 
 * `org.apache.jasper.servlet.JasperInitializer`
 * `org.apache.tomcat.websocket.server.WsSci`
 * `org.apache.myfaces.ee6.MyFacesContainerInitializer`
 * `io.undertow.servlet.sse.ServerSentEventSCI`
 * `org.springframework.web.SpringServletContainerInitializer` (bridge to `org.springframework.web.WebApplicationInitializer` SPI)
-* `org.eclipse.jetty.websocket.server.NativeWebSocketServletContainerInitializer`
-* `org.eclipse.jetty.websocket.javax.server.config.JavaxWebSocketServletContainerInitializer`
+* `org.eclipse.jetty.ee10.websocket.jakarta.server.config.JakartaWebSocketServletContainerInitializer`
 * `com.sun.jersey.server.impl.container.servlet.JerseyServletContainerInitializer`
 
 What's most important for Jasper engine is that a JSP servlet requires one context attribute named `org.apache.tomcat.InstanceManager`. This implementation is used to create (and destroy) instances of classes - possibly with support for annotations like `@PostConstruct`. Such instance manager is set by `org.apache.jasper.servlet.JasperInitializer`. This initializer also sets `org.apache.jasper.compiler.TldCache` context attribute.

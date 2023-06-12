@@ -880,7 +880,7 @@ public interface WebContainer extends HttpService {
 	// methods used to register annotated web socket endpoints
 
 	/**
-	 * Registers a WebSocket endpoint annotated with {@code @javax.websocket.server.ServerEndpoint}. The actual
+	 * Registers a WebSocket endpoint annotated with {@code @jakarta.websocket.server.ServerEndpoint}. The actual
 	 * object passed may be both an actual instance or a {@link Class} object which will be instantiated when needed.
 	 * @param webSocket
 	 * @param httpContext
@@ -891,7 +891,7 @@ public interface WebContainer extends HttpService {
 
 	/**
 	 * Unregisters a previously registered WebSocket endpoint annotated with
-	 * {@code @javax.websocket.server.ServerEndpoint}
+	 * {@code @jakarta.websocket.server.ServerEndpoint}
 	 * @param webSocket
 	 * @param httpContext
 	 */

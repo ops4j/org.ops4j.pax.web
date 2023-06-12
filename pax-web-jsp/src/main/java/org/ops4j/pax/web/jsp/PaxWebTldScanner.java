@@ -25,7 +25,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 
 import org.apache.jasper.servlet.TldScanner;
 import org.apache.tomcat.util.descriptor.tld.TldResourcePath;
@@ -77,7 +77,7 @@ public class PaxWebTldScanner extends TldScanner {
 		LOG.info("Searching for TLDs in /WEB-INF/");
 		scanResourcePaths("/WEB-INF/");
 
-		// 4. Tomcat calls javax.servlet.ServletContext.getResourcePaths("/WEB-INF/lib/") and processes
+		// 4. Tomcat calls jakarta.servlet.ServletContext.getResourcePaths("/WEB-INF/lib/") and processes
 		//    all the JARs found, but because WEB-INF/lib/*.jar entries are added to Bundle-ClassPath entry of
 		//    WABs, we're not calling super.scanJars() (thus we don't actually need any JarScanner)
 
@@ -180,7 +180,7 @@ public class PaxWebTldScanner extends TldScanner {
 			processedBundles.add(b);
 		}
 
-		// and finally parse all TLDs - the ones from Bundle-ClassPath are parsed first - just as with JavaEE
+		// and finally parse all TLDs - the ones from Bundle-ClassPath are parsed first - just as with JakartaEE
 		for (URL tld : tldURLs) {
 			try {
 				parseTld(new TldResourcePath(tld, null));

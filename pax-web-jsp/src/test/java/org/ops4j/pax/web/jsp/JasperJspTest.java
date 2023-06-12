@@ -17,16 +17,16 @@
 package org.ops4j.pax.web.jsp;
 
 import java.io.File;
-import javax.servlet.Servlet;
-import javax.servlet.ServletContext;
-import javax.servlet.descriptor.JspConfigDescriptor;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.jsp.JspFactory;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.descriptor.JspConfigDescriptor;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.jsp.JspFactory;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,9 +36,8 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletConfig;
 import org.springframework.mock.web.MockServletContext;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class JasperJspTest {
 
@@ -50,7 +49,7 @@ public class JasperJspTest {
 	private ServletContext context;
 	private Bundle paxWebJsp;
 
-	@BeforeClass
+	@BeforeAll
 	public static void initStaticDirectly() throws Exception {
 		JspFactory.setDefaultFactory(new org.apache.jasper.runtime.JspFactoryImpl());
 
@@ -59,7 +58,7 @@ public class JasperJspTest {
 		scratchDir.mkdirs();
 	}
 
-	@Before
+	@BeforeEach
 	public void init() throws Exception {
 		jspServlet = new org.apache.jasper.servlet.JspServlet();
 
@@ -92,7 +91,7 @@ public class JasperJspTest {
 
 		jspServlet.service(req, res);
 
-		assertThat(res.getStatus(), equalTo(HttpServletResponse.SC_OK));
+		assertThat(res.getStatus()).isEqualTo(HttpServletResponse.SC_OK);
 		String response = res.getContentAsString();
 		log.info("Response: {}", response);
 
@@ -109,7 +108,7 @@ public class JasperJspTest {
 
 		jspServlet.service(req, res);
 
-		assertThat(res.getStatus(), equalTo(HttpServletResponse.SC_OK));
+		assertThat(res.getStatus()).isEqualTo(HttpServletResponse.SC_OK);
 		String response = res.getContentAsString();
 		log.info("Response: {}", response);
 
@@ -124,7 +123,7 @@ public class JasperJspTest {
 
 		jspServlet.service(req, res);
 
-		assertThat(res.getStatus(), equalTo(HttpServletResponse.SC_OK));
+		assertThat(res.getStatus()).isEqualTo(HttpServletResponse.SC_OK);
 		String response = res.getContentAsString();
 		log.info("Response: {}", response);
 
@@ -140,7 +139,7 @@ public class JasperJspTest {
 
 		jspServlet.service(req, res);
 
-		assertThat(res.getStatus(), equalTo(HttpServletResponse.SC_OK));
+		assertThat(res.getStatus()).isEqualTo(HttpServletResponse.SC_OK);
 		String response = res.getContentAsString();
 		log.info("Response: {}", response);
 
@@ -156,7 +155,7 @@ public class JasperJspTest {
 
 		jspServlet.service(req, res);
 
-		assertThat(res.getStatus(), equalTo(HttpServletResponse.SC_OK));
+		assertThat(res.getStatus()).isEqualTo(HttpServletResponse.SC_OK);
 		String response = res.getContentAsString();
 		log.info("Response: {}", response);
 
@@ -167,7 +166,7 @@ public class JasperJspTest {
 
 		jspServlet.service(req, res);
 
-		assertThat(res.getStatus(), equalTo(HttpServletResponse.SC_OK));
+		assertThat(res.getStatus()).isEqualTo(HttpServletResponse.SC_OK);
 		response = res.getContentAsString();
 		log.info("Response: {}", response);
 

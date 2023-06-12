@@ -248,10 +248,9 @@
 		<dependency.org.apache.ws.xmlschema>2.3.0</dependency.org.apache.ws.xmlschema>
 		<dependency.org.apache.xbean>4.22</dependency.org.apache.xbean>
 
+		<dependency.org.assertj>3.24.2</dependency.org.assertj>
 		<dependency.org.bouncycastle>1.73</dependency.org.bouncycastle>
-
 		<dependency.org.codehaus.woodstox.stax2-api>4.2.1</dependency.org.codehaus.woodstox.stax2-api>
-
 		<dependency.org.eclipse.jdt.ecj>3.32.0</dependency.org.eclipse.jdt.ecj>
 
 		<!-- Please keep Maven and OSGi version in sync -->
@@ -265,6 +264,7 @@
 		<dependency.org.glassfish.hk2>2.6.1</dependency.org.glassfish.hk2>
 		<dependency.org.glassfish.hk2.osgi-locator>1.0.3</dependency.org.glassfish.hk2.osgi-locator>
 		<dependency.org.glassfish.jersey>2.38</dependency.org.glassfish.jersey>
+		<dependency.org.glassfish.web.jsp.jstl>3.0.1</dependency.org.glassfish.web.jsp.jstl>
 
 		<dependency.org.javassist>3.29.2-GA</dependency.org.javassist>
 		<dependency.org.jasypt>1.9.3</dependency.org.jasypt>
@@ -278,6 +278,7 @@
 
 		<dependency.org.jline>3.21.0</dependency.org.jline>
 		<dependency.org.jsoup>1.15.4</dependency.org.jsoup>
+		<dependency.org.junit>5.9.3</dependency.org.junit>
 		<!-- Special version of Keycloak that will never exceed 18.0.x - the last version with OSGi/Karaf/PaxWeb support -->
 		<dependency.org.keycloak18>18.0.2</dependency.org.keycloak18>
 		<!-- Keycloak version newer than 18 - just the latest available upstream version -->
@@ -293,6 +294,7 @@
 
 		<dependency.org.osgi.annotation>8.1.0</dependency.org.osgi.annotation>
 		<dependency.org.osgi.core>8.0.0</dependency.org.osgi.core>
+		<dependency.org.osgi.namespace.extender>1.0.1</dependency.org.osgi.namespace.extender>
 		<!-- No more osgi.cmpn - services have own API bundles -->
 		<dependency.org.osgi.service.cdi>1.0.1</dependency.org.osgi.service.cdi>
 		<dependency.org.osgi.service.cm>1.6.1</dependency.org.osgi.service.cm>
@@ -311,8 +313,8 @@
 
 		<dependency.org.ow2.asm>9.5</dependency.org.ow2.asm>
 		<dependency.org.primefaces>12.0.0</dependency.org.primefaces>
-		<dependency.org.slf4j>1.7.36</dependency.org.slf4j>
-		<dependency.org.springframework>5.3.27</dependency.org.springframework>
+		<dependency.org.slf4j>2.0.7</dependency.org.slf4j>
+		<dependency.org.springframework>6.0.9</dependency.org.springframework>
 		<dependency.org.vaadin.artur>1.7.1</dependency.org.vaadin.artur>
 
 		<dependency.org.wildfly.client>1.0.1.Final</dependency.org.wildfly.client>
@@ -718,7 +720,7 @@
 				 - "pax-web own artifacts": org.ops4j.pax.web.* groups
 				 - "OPS4J dependencies": other org.ops4j.* groups
 				 - "OSGi" dependencies: OSGi core, cmpn, Felix, Eclipse OSGi libs, bnd, Karaf, Aries
-				 - "JavaEE": javax.* APIs (jakarta.* groups), Geronimo specs (to review)
+				 - "JakartaEE": javax.* APIs (jakarta.* groups), Geronimo specs (to review)
 				 - "SMX": org.apache.servicemix.bundles and specs groups
 				 - "Logging": logging libraries (excluding pax-logging)
 				 - "Jetty": org.eclipse.jetty.* groups and related dependencies
@@ -1675,13 +1677,29 @@
 			</dependency>
 			<dependency>
 				<groupId>org.osgi</groupId>
+				<artifactId>org.osgi.namespace.extender</artifactId>
+				<version>${dependency.org.osgi.namespace.extender}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>org.osgi.service.cdi</artifactId>
+				<version>${dependency.org.osgi.service.cdi}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>org.osgi.service.http</artifactId>
+				<version>${dependency.org.osgi.service.http}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.osgi</groupId>
 				<artifactId>org.osgi.service.jakartars</artifactId>
 				<version>${dependency.org.osgi.service.jaxrs}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.osgi</groupId>
-				<artifactId>org.osgi.service.cdi</artifactId>
-				<version>${dependency.org.osgi.service.cdi}</version>
+				<artifactId>org.osgi.service.servlet</artifactId>
+				<version>${dependency.org.osgi.service.servlet}</version>
 			</dependency>
 
 			<dependency>
@@ -2108,7 +2126,7 @@
 				<version>${dependency.org.apache.aries.util}</version>
 			</dependency>
 
-			<!-- JavaEE / JakartaEE -->
+			<!-- JakartaEE / JakartaEE -->
 
 			<dependency>
 				<groupId>jakarta.inject</groupId>
@@ -2204,6 +2222,11 @@
 				<version>${dependency.jakarta.websocket-api}</version>
 			</dependency>
 			<dependency>
+				<groupId>jakarta.websocket</groupId>
+				<artifactId>jakarta.websocket-client-api</artifactId>
+				<version>${dependency.jakarta.websocket-api}</version>
+			</dependency>
+			<dependency>
 				<groupId>jakarta.authentication</groupId>
 				<artifactId>jakarta.authentication-api</artifactId>
 				<version>${dependency.jakarta.authentication-api}</version>
@@ -2262,11 +2285,6 @@
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-jdk14</artifactId>
-				<version>${dependency.org.slf4j}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.slf4j</groupId>
 				<artifactId>jcl-over-slf4j</artifactId>
 				<version>${dependency.org.slf4j}</version>
 			</dependency>
@@ -2288,7 +2306,7 @@
 			</dependency>
 			<dependency>
 				<groupId>org.apache.logging.log4j</groupId>
-				<artifactId>log4j-slf4j-impl</artifactId>
+				<artifactId>log4j-slf4j2-impl</artifactId>
 				<version>${dependency.org.apache.logging.log4j}</version>
 			</dependency>
 
@@ -2431,9 +2449,12 @@
 			</dependency>
 
 			<dependency>
-				<groupId>org.apache.taglibs</groupId>
-				<artifactId>taglibs-standard-impl</artifactId>
-				<version>${dependency.org.apache.taglibs}</version>
+				<groupId>org.glassfish.web</groupId>
+				<artifactId>jakarta.servlet.jsp.jstl</artifactId>
+				<version>${dependency.org.glassfish.web.jsp.jstl}</version>
+<!--				<groupId>org.apache.taglibs</groupId>-->
+<!--				<artifactId>taglibs-standard-impl</artifactId>-->
+<!--				<version>${dependency.org.apache.taglibs}</version>-->
 			</dependency>
 
 			<!-- Undertow -->
@@ -3046,9 +3067,17 @@
 			<!-- Testing -->
 
 			<dependency>
-				<groupId>junit</groupId>
-				<artifactId>junit</artifactId>
-				<version>${dependency.junit}</version>
+				<groupId>org.junit</groupId>
+				<artifactId>junit-bom</artifactId>
+				<version>${dependency.org.junit}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.assertj</groupId>
+				<artifactId>assertj-core</artifactId>
+				<version>${dependency.org.assertj}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.mockito</groupId>
@@ -3151,13 +3180,13 @@
 <!-- 		<module>pax-web-jetty-bundle</module>-->
 
 		<!-- Tomcat 10 support -->
-<!--		<module>pax-web-tomcat</module>-->
-<!--		<module>pax-web-tomcat-websocket</module>-->
+		<module>pax-web-tomcat</module>
+		<module>pax-web-tomcat-websocket</module>
 <!--		<module>pax-web-tomcat-bundle</module>-->
 
 		<!-- Undertow 2.3 support -->
-<!--		<module>pax-web-undertow</module>-->
-<!--		<module>pax-web-undertow-websocket</module>-->
+		<module>pax-web-undertow</module>
+		<module>pax-web-undertow-websocket</module>
 <!--		<module>pax-web-undertow-bundle</module>-->
 
 <!--		<module>pax-web-features</module>-->

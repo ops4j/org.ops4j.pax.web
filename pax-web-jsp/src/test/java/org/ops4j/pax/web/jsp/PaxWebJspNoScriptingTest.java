@@ -20,17 +20,17 @@ import java.io.File;
 import java.lang.reflect.Constructor;
 import java.util.Collection;
 import java.util.Collections;
-import javax.servlet.Servlet;
-import javax.servlet.ServletContext;
-import javax.servlet.descriptor.JspConfigDescriptor;
-import javax.servlet.descriptor.JspPropertyGroupDescriptor;
-import javax.servlet.descriptor.TaglibDescriptor;
-import javax.servlet.jsp.JspFactory;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.descriptor.JspConfigDescriptor;
+import jakarta.servlet.descriptor.JspPropertyGroupDescriptor;
+import jakarta.servlet.descriptor.TaglibDescriptor;
+import jakarta.servlet.jsp.JspFactory;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -43,10 +43,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletConfig;
 import org.springframework.mock.web.MockServletContext;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -59,7 +56,7 @@ public class PaxWebJspNoScriptingTest {
 	private Servlet jspServlet;
 	private ServletContext context;
 
-	@BeforeClass
+	@BeforeAll
 	public static void initStaticDirectly() throws Exception {
 		JspFactory.setDefaultFactory(new org.apache.jasper.runtime.JspFactoryImpl());
 
@@ -68,7 +65,7 @@ public class PaxWebJspNoScriptingTest {
 		FileUtils.cleanDirectory(scratchDir);
 	}
 
-	@Before
+	@BeforeEach
 	public void init() throws Exception {
 		Class<?> servletClass = Class.forName("org.apache.jasper.servlet.JspServlet");
 		Constructor<?> c = servletClass.getConstructor();
@@ -144,6 +141,11 @@ public class PaxWebJspNoScriptingTest {
 
 							@Override
 							public String getErrorOnUndeclaredNamespace() {
+								return "false";
+							}
+
+							@Override
+							public String getErrorOnELNotFound() {
 								return "false";
 							}
 						});
