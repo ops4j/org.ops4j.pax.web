@@ -34,9 +34,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.servlet.ServletContainerInitializer;
-import javax.servlet.ServletContext;
-import javax.servlet.annotation.MultipartConfig;
+import jakarta.servlet.ServletContainerInitializer;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.annotation.MultipartConfig;
 
 import org.apache.tomcat.util.bcel.classfile.AnnotationElementValue;
 import org.apache.tomcat.util.bcel.classfile.AnnotationEntry;
@@ -69,8 +69,8 @@ import org.slf4j.LoggerFactory;
  *
  * <p>The aspects include web fragments, ordered jars and <em>reachable bundles</em> and are used to:<ul>
  *     <li>calculate final web descriptor from reachable fragments</li>
- *     <li>load {@link javax.servlet.ServletContainerInitializer ServletContainerInitializers (SCIs)}</li>
- *     <li>load annotated classes with annontations like {@link javax.servlet.annotation.WebServlet}.</li>
+ *     <li>load {@link jakarta.servlet.ServletContainerInitializer ServletContainerInitializers (SCIs)}</li>
+ *     <li>load annotated classes with annontations like {@link jakarta.servlet.annotation.WebServlet}.</li>
  * </ul></p>
  *
  * <p>It is important to distinguish {@code web-fragment.xml} fragments, JAR fragments and OSGi bundle fragments here.
@@ -261,7 +261,7 @@ public class BundleWebApplicationClassSpace {
 
 		// collect all the JARs and bundles that need to be scanned for web-fragments (if metadata-complete="false") or
 		// that may provide SCIs (regardles of metadata-complete)
-		// In JavaEE it's quite easy:
+		// In JakartaEE it's quite easy:
 		//  - /WEB-INF/lib/*.jar files
 		//  - the JARs from URLClassLoaders of the ClassLoader hierarchy starting from web context's ClassLoader
 		// (Tomcat doesn't scan WEB-INF/classes/META-INF for fragments)
@@ -303,7 +303,7 @@ public class BundleWebApplicationClassSpace {
 		}
 
 		// 2) The WAB itself may have attached bundle fragments, which should be treated (my decision) as webAppJars
-		// i.e., as /WEB-INF/lib/*.jar libs in JavaEE or (using Tomcat terms) shared libraries available to all webapps
+		// i.e., as /WEB-INF/lib/*.jar libs in JakartaEE or (using Tomcat terms) shared libraries available to all webapps
 
 		LOG.trace("Searching for web fragments in WAB bundle fragments");
 		BundleWiring wiring = wabBundle.adapt(BundleWiring.class);
@@ -331,7 +331,7 @@ public class BundleWebApplicationClassSpace {
 			}
 		}
 
-		// 3) Scan reachable bundles (ClassPath hierarchy in JavaEE) - without the WAB itself and only directly
+		// 3) Scan reachable bundles (ClassPath hierarchy in JakartaEE) - without the WAB itself and only directly
 		//    wired bundles. So if we have a situation that:
 		//     - our WAB has Import-Package (or Require-Bundle) for bundle-A
 		//     - bundle-A has Import-Package (or Require-Bundle) for bundle-B
@@ -420,7 +420,7 @@ public class BundleWebApplicationClassSpace {
 			}
 		}
 
-		// ServletContext, when passed is used to set important "javax.servlet.context.orderedLibs"
+		// ServletContext, when passed is used to set important "jakarta.servlet.context.orderedLibs"
 		// attribute, but at this stage, there's no real ServletContext yet. We should provide a mocked one
 		AttributeCollectingServletContext context = new AttributeCollectingServletContext();
 
@@ -661,22 +661,22 @@ public class BundleWebApplicationClassSpace {
 	 * @return
 	 */
 	public List<ServletContainerInitializer> loadSCIs() throws IOException {
-		// a list of URIs of /META-INF/service/javax.servlet.ServletContainerInitializer from reachable
+		// a list of URIs of /META-INF/service/jakarta.servlet.ServletContainerInitializer from reachable
 		// "container" bundles (ones without META-INF/web-fragment.xml) each has to be loaded using relevant bundle
 		Map<Bundle, List<URL>> containerSCIURLs = new LinkedHashMap<>();
-		// a list of URIs of /META-INF/service/javax.servlet.ServletContainerInitializer from reachable
+		// a list of URIs of /META-INF/service/jakarta.servlet.ServletContainerInitializer from reachable
 		// "application" bundles (ones with META-INF/web-fragment.xml)
 		Map<Bundle, List<URL>> applicationSCIURLs = new LinkedHashMap<>();
 
-		// a list of URIs of /META-INF/service/javax.servlet.ServletContainerInitializer from WAB's Bundle-ClassPath
+		// a list of URIs of /META-INF/service/jakarta.servlet.ServletContainerInitializer from WAB's Bundle-ClassPath
 		// each has to be loaded using WAB itself
 		List<URL> wabSCIURLs = new LinkedList<>();
 
 		// Tomcat loads:
-		// - all /META-INF/services/javax.servlet.ServletContainerInitializer files from
+		// - all /META-INF/services/jakarta.servlet.ServletContainerInitializer files from
 		//   the parent of webapp's class loader (the "container provided SCIs")
 		// - SCIs from the webapp and its /WEB-INF/lib/*.jars (each or those mentioned in
-		//   javax.servlet.context.orderedLibs context attribute)
+		//   jakarta.servlet.context.orderedLibs context attribute)
 		// - java.lang.ClassLoader.getResources() method is used
 		// see: org.apache.catalina.startup.WebappServiceLoader.load()
 
@@ -686,14 +686,14 @@ public class BundleWebApplicationClassSpace {
 		// 1. container libs
 		// 2. /WEB-INF/lib/*.jar libs (potentially filtered by the absolute ordering)
 		// Tomcat ensures that a WAR may override an SCI implementation by using single
-		// javax.servlet.ServletContext.getClassLoader() to load SCI implementations whether the
-		// /META-INF/service/javax.servlet.ServletContainerInitializer was loaded from container or webapp lib
+		// jakarta.servlet.ServletContext.getClassLoader() to load SCI implementations whether the
+		// /META-INF/service/jakarta.servlet.ServletContainerInitializer was loaded from container or webapp lib
 
 		// We can't load the services as entries (without using classloaders), because a bundle may have
 		// custom Bundle-ClassPath (potentially with many entries). So while META-INF/web-fragment.xml has
 		// fixed location in a bundle (or fragment of WAB's JAR),
-		// META-INF/services/javax.servlet.ServletContainerInitializer has to be found using classLoaders, to
-		// pick up for example WEB-INF/classes/META-INF/servcontainerSCIURLs = {java.util.LinkedHashMap@5634}  size = 13ices/javax.servlet.ServletContainerInitializer if
+		// META-INF/services/jakarta.servlet.ServletContainerInitializer has to be found using classLoaders, to
+		// pick up for example WEB-INF/classes/META-INF/servcontainerSCIURLs = {java.util.LinkedHashMap@5634}  size = 13ices/jakarta.servlet.ServletContainerInitializer if
 		// WEB-INF/classes is on a Bundle-ClassPath
 
 		String sciService = "META-INF/services/" + ServletContainerInitializer.class.getName();
@@ -740,7 +740,7 @@ public class BundleWebApplicationClassSpace {
 
 			// all entries from Bundle-ClassPath, so ClassLoader kind of access - we can't impact the order
 			// of Bundle-ClassPath entries, but it doesn't really matter. Tomcat uses
-			// javax.servlet.ServletContext.getClassLoader().getResources()
+			// jakarta.servlet.ServletContext.getClassLoader().getResources()
 			LOG.trace("Searching for ServletContainerInitializers in the WAB");
 			LOG.trace("  Scanning the WAB");
 			List<URL> urls = ClassPathUtil.getResources(Collections.singletonList(wabBundle), sciService);
@@ -754,7 +754,7 @@ public class BundleWebApplicationClassSpace {
 			// we can't use ClassPathUtil.getResources() because maybe we have to skip some JARs from Bundle-ClassPath
 
 			// before checking ORDERED_LIBS, we (and Tomcat) always checks WEB-INF/classes/META-INF/services
-			// Tomcat calls javax.servlet.ServletContext.getResource(), here we have to load the SCI service
+			// Tomcat calls jakarta.servlet.ServletContext.getResource(), here we have to load the SCI service
 			// from the WAB itself, but ensure (which isn't straightforward) that we skip embedded JARs and
 			// WAB bundle fragments)
 			// - ClassPathUtil.listResources() uses BundleWiring.listResources() which removes duplicates,
@@ -764,12 +764,12 @@ public class BundleWebApplicationClassSpace {
 			//   /WEB-INF/classes!) and (later) from jar entries listed in ORDERED_LIBS and even fragments
 			//   we (out of spec) list in ORDERED_LIST
 			//   Because we're checking roots from the WAB anyway (later), we can't use bundle.getResources(), as
-			//    - bundle://46.0:5/META-INF/services/javax.servlet.ServletContainerInitializer, and
-			//    - bundle://45.0:0/META-INF/services/javax.servlet.ServletContainerInitializer
+			//    - bundle://46.0:5/META-INF/services/jakarta.servlet.ServletContainerInitializer, and
+			//    - bundle://45.0:0/META-INF/services/jakarta.servlet.ServletContainerInitializer
 			//   are actually the same resources (first URL is WAB's fragemnt seen through WAB's classloader
 			//   and second is an URL of the fragment itself. Same for:
-			//    - bundle://46.0:2/META-INF/services/javax.servlet.ServletContainerInitializer, and
-			//    - jar:bundle://46.0:0/WEB-INF/lib/the-wab-jar-8.0.0-SNAPSHOT.jar!/META-INF/services/javax.servlet.ServletContainerInitializer
+			//    - bundle://46.0:2/META-INF/services/jakarta.servlet.ServletContainerInitializer, and
+			//    - jar:bundle://46.0:0/WEB-INF/lib/the-wab-jar-8.0.0-SNAPSHOT.jar!/META-INF/services/jakarta.servlet.ServletContainerInitializer
 
 			LOG.trace("Searching for ServletContainerInitializers in the WAB");
 			LOG.trace("  Scanning the WAB directory entries");
@@ -782,7 +782,7 @@ public class BundleWebApplicationClassSpace {
 				}
 			}
 
-			// selected (also: none) entries from Bundle-ClassPath - only JARs (JavaEE compliant) and
+			// selected (also: none) entries from Bundle-ClassPath - only JARs (JakartaEE compliant) and
 			// WAB-attached bundle fragments (Pax Web addition - we list them as "<bundle-sn>-<bundle-version>.bundle"
 			// entries)
 			// ORDERED_LIBS contains jar names, so we have to translate them back
@@ -890,18 +890,18 @@ public class BundleWebApplicationClassSpace {
 	 * <p>Multi-purpose method to detect two kinds of types from the class space:<ul>
 	 *     <li>Types annotated with annotations from "8.1 Annotations and pluggability" of the servlet spec (at least
 	 *         those mentioned in 8.1.1-8.1.5 (See {@code org.apache.catalina.startup.ContextConfig#processClass()}).</li>
-	 *     <li>Types matching the configuration from {@link javax.servlet.annotation.HandlesTypes} specified for SCIs.</li>
+	 *     <li>Types matching the configuration from {@link jakarta.servlet.annotation.HandlesTypes} specified for SCIs.</li>
 	 * </ul>
 	 * </p>
 	 *
-	 * @param htToSci populated mapping of values from {@link javax.servlet.annotation.HandlesTypes} to SCIs that
+	 * @param htToSci populated mapping of values from {@link jakarta.servlet.annotation.HandlesTypes} to SCIs that
 	 *        are interested in related types
 	 * @param sciToHt newly constructed mapping of previously detected SCIs to actual types that have to be passed to
 	 *        {@link ServletContainerInitializer#onStartup(Set, ServletContext)}.
 	 * @param thereAreHTClasses {@code true} if any of the SCIs has any non-annotation types among values of
-	 *        {@link javax.servlet.annotation.HandlesTypes}
+	 *        {@link jakarta.servlet.annotation.HandlesTypes}
 	 * @param thereAreHTAnnotations {@code true} if any of the SCIs has any annotation types among values of
-	 *        {@link javax.servlet.annotation.HandlesTypes}
+	 *        {@link jakarta.servlet.annotation.HandlesTypes}
 	 * @return
 	 */
 	public void scanClasses(Map<Class<?>, Set<ServletContainerInitializer>> htToSci,
@@ -940,7 +940,7 @@ public class BundleWebApplicationClassSpace {
 			}
 		}
 
-		// 2. scan all ordered jars - not only those from javax.servlet.ServletContext.ORDERED_LIBS, but really
+		// 2. scan all ordered jars - not only those from jakarta.servlet.ServletContext.ORDERED_LIBS, but really
 		//    all "web fragments" - both with and without web-fragment.xml descriptors.
 		//     - always for types from @HandlesTypes
 		//     - annotated types are NOT scanned if:
@@ -1016,8 +1016,8 @@ public class BundleWebApplicationClassSpace {
 	}
 
 	/**
-	 * Check the class whether it's one of the types mentioned in {@link javax.servlet.annotation.HandlesTypes}
-	 * and also potentially check it for annotations like {@link javax.servlet.annotation.WebServlet}.
+	 * Check the class whether it's one of the types mentioned in {@link jakarta.servlet.annotation.HandlesTypes}
+	 * and also potentially check it for annotations like {@link jakarta.servlet.annotation.WebServlet}.
 	 * @param url an URI for {@code *.class} file
 	 * @param fragment a {@link WebXml} representing a "web fragment" - whether or not it is associated with
 	 *        {@code web-fragment.xml}
@@ -1027,9 +1027,9 @@ public class BundleWebApplicationClassSpace {
 	 * @param sciToHt
 	 * @param javaClassCache
 	 * @param thereAreHTClasses {@code true} if any of the SCIs has any non-annotation types among values of
-	 *        {@link javax.servlet.annotation.HandlesTypes}
+	 *        {@link jakarta.servlet.annotation.HandlesTypes}
 	 * @param thereAreHTAnnotations {@code true} if any of the SCIs has any annotation types among values of
-	 *        {@link javax.servlet.annotation.HandlesTypes}
+	 *        {@link jakarta.servlet.annotation.HandlesTypes}
 	 */
 	private void processClass(URL url, WebXml fragment, Bundle bundle, boolean fragmentHtOnly,
 			Map<Class<?>, Set<ServletContainerInitializer>> htToSci,
@@ -1060,21 +1060,21 @@ public class BundleWebApplicationClassSpace {
 
 	/**
 	 * <p>Checks whether the passed {@link JavaClass} is <em>indirectly</em> referred to from an "interest list" of any
-	 * SCI that has {@link javax.servlet.annotation.HandlesTypes} annoation.</p>
+	 * SCI that has {@link jakarta.servlet.annotation.HandlesTypes} annoation.</p>
 	 *
-	 * <p>The goal is to turn the types mentioned in {@link javax.servlet.annotation.HandlesTypes} into actual types
-	 * that are either annotated, extend or implement the types from {@link javax.servlet.annotation.HandlesTypes}.</p>
+	 * <p>The goal is to turn the types mentioned in {@link jakarta.servlet.annotation.HandlesTypes} into actual types
+	 * that are either annotated, extend or implement the types from {@link jakarta.servlet.annotation.HandlesTypes}.</p>
 	 *
 	 * @param clazz
 	 * @param bundle
-	 * @param htToSci input map of types from {@link javax.servlet.annotation.HandlesTypes} to SCIs
+	 * @param htToSci input map of types from {@link jakarta.servlet.annotation.HandlesTypes} to SCIs
 	 * @param sciToHt map under construction of SCIs to actual types passed later to
 	 *        {@link ServletContainerInitializer#onStartup(Set, ServletContext)}
 	 * @param javaClassCache
 	 * @param thereAreHTClasses {@code true} if any of the SCIs has any non-annotation types among values of
-	 *        {@link javax.servlet.annotation.HandlesTypes}
+	 *        {@link jakarta.servlet.annotation.HandlesTypes}
 	 * @param thereAreHTAnnotations {@code true} if any of the SCIs has any annotation types among values of
-	 *        {@link javax.servlet.annotation.HandlesTypes}
+	 *        {@link jakarta.servlet.annotation.HandlesTypes}
 	 */
 	private void checkHandlesTypes(JavaClass clazz, Bundle bundle,
 			Map<Class<?>, Set<ServletContainerInitializer>> htToSci,
@@ -1088,10 +1088,10 @@ public class BundleWebApplicationClassSpace {
 			// check if this JavaClass:
 			//  - has a superclass mentioned in @HandlesTypes
 			//  - implements an interface mentioned in @HandlesTypes
-			// it's not that easy... for example, an SCI may have simply javax.servlet.Servlet in its @HandlesTypes
+			// it's not that easy... for example, an SCI may have simply jakarta.servlet.Servlet in its @HandlesTypes
 			// and passed JavaClass is a class loaded from bundle-A that extends a class loaded from bundle-B, which
 			// extends org.springframework.web.servlet.DispatcherServlet class loaded from spring-web, which
-			// *is* a javax.servlet.Servlet. we can get org/springframework/web/servlet/DispatcherServlet.class
+			// *is* a jakarta.servlet.Servlet. we can get org/springframework/web/servlet/DispatcherServlet.class
 			// resource (to analyze using BCEL/ASM) using only spring-web bundle and while bundle-B *should* be wired
 			// to spring-web, spring-B *doesn't have to*.
 
@@ -1138,7 +1138,7 @@ public class BundleWebApplicationClassSpace {
 				return;
 			}
 			for (AnnotationEntry ae : clazz.getAnnotationEntries()) {
-				// type is in "Ljavax/servlet/annotation/HandlesTypes;" form
+				// type is in "Ljakarta/servlet/annotation/HandlesTypes;" form
 				String annotationClassName = className(ae.getAnnotationType());
 				if (annotationClassName != null) {
 					// does any SCI have @HT with this exact annotation?
@@ -1198,15 +1198,15 @@ public class BundleWebApplicationClassSpace {
 
 		for (AnnotationEntry ann : ae) {
 			switch (className(ann.getAnnotationType())) {
-				case "javax.servlet.annotation.WebServlet":
+				case "jakarta.servlet.annotation.WebServlet":
 					LOG.trace("      Processing annotated servlet {}", webElementClassName);
 					processAnnotatedServletClass(webElementClassName, fragment, bundle, ann, clazz, javaClassCache);
 					return;
-				case "javax.servlet.annotation.WebFilter":
+				case "jakarta.servlet.annotation.WebFilter":
 					LOG.trace("      Processing annotated filter {}", webElementClassName);
 					processAnnotatedFilterClass(webElementClassName, fragment, bundle, ann, clazz);
 					return;
-				case "javax.servlet.annotation.WebListener":
+				case "jakarta.servlet.annotation.WebListener":
 					LOG.trace("      Processing annotated listener {}", webElementClassName);
 					fragment.addListener(webElementClassName);
 					return;
@@ -1223,14 +1223,14 @@ public class BundleWebApplicationClassSpace {
 			if ("java.lang.Object".equals(sc)) {
 				break;
 			}
-			if ("javax.servlet.http.HttpServlet".equals(sc)) {
+			if ("jakarta.servlet.http.HttpServlet".equals(sc)) {
 				extendsHttpServlet = true;
 				break;
 			}
 			sc = javaClassCache.get(sc).superClassName;
 		}
 		if (!extendsHttpServlet) {
-			LOG.warn("{} annotated with @WebServlet doesn't extend javax.servlet.http.HttpServlet."
+			LOG.warn("{} annotated with @WebServlet doesn't extend jakarta.servlet.http.HttpServlet."
 					+ " See chapter 8.1.1 of the Servlet specification.", className);
 			return;
 		}
@@ -1320,7 +1320,7 @@ public class BundleWebApplicationClassSpace {
 			}
 		}
 
-		// get remaining annotation entries to find @javax.servlet.annotation.MultipartConfig
+		// get remaining annotation entries to find @jakarta.servlet.annotation.MultipartConfig
 		AnnotationEntry[] ae = clazz.getAnnotationEntries();
 		for (AnnotationEntry e : ae) {
 			if (MultipartConfig.class.getName().equals(className(e.getAnnotationType()))) {
@@ -1370,14 +1370,14 @@ public class BundleWebApplicationClassSpace {
 		// no idea whether to process annotations on superclasses/interfaces...
 		boolean hasFilter = false;
 		for (String name : clazz.getInterfaceNames()) {
-			if ("javax.servlet.Filter".equals(name)) {
+			if ("jakarta.servlet.Filter".equals(name)) {
 				hasFilter = true;
 				break;
 			}
 		}
 
 		if (!hasFilter) {
-			LOG.warn("{} annotated with @WebFilter doesn't implement javax.servlet.Filter."
+			LOG.warn("{} annotated with @WebFilter doesn't implement jakarta.servlet.Filter."
 					+ " See chapter 8.1.2 of the Servlet specification.", className);
 			return;
 		}

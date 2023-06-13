@@ -45,21 +45,21 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
-import javax.annotation.security.DeclareRoles;
-import javax.annotation.security.RunAs;
-import javax.servlet.DispatcherType;
-import javax.servlet.Filter;
-import javax.servlet.MultipartConfigElement;
-import javax.servlet.Servlet;
-import javax.servlet.ServletContainerInitializer;
-import javax.servlet.ServletContext;
-import javax.servlet.SessionCookieConfig;
-import javax.servlet.annotation.HandlesTypes;
-import javax.servlet.annotation.HttpConstraint;
-import javax.servlet.annotation.HttpMethodConstraint;
-import javax.servlet.annotation.ServletSecurity;
-import javax.servlet.descriptor.JspConfigDescriptor;
-import javax.servlet.descriptor.JspPropertyGroupDescriptor;
+import jakarta.annotation.security.DeclareRoles;
+import jakarta.annotation.security.RunAs;
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.Filter;
+import jakarta.servlet.MultipartConfigElement;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletContainerInitializer;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.SessionCookieConfig;
+import jakarta.servlet.annotation.HandlesTypes;
+import jakarta.servlet.annotation.HttpConstraint;
+import jakarta.servlet.annotation.HttpMethodConstraint;
+import jakarta.servlet.annotation.ServletSecurity;
+import jakarta.servlet.descriptor.JspConfigDescriptor;
+import jakarta.servlet.descriptor.JspPropertyGroupDescriptor;
 
 import org.apache.felix.utils.extender.Extension;
 import org.apache.tomcat.util.descriptor.web.FilterMap;
@@ -102,7 +102,7 @@ import org.ops4j.pax.web.utils.ClassPathUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
+import org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -207,8 +207,8 @@ public class BundleWebApplication {
 	private Batch batch = null;
 
 	/**
-	 * Stored instance of {@link org.osgi.service.http.HttpContext} that wraps
-	 * {@link org.osgi.service.http.context.ServletContextHelper}, so we're able to reference this context
+	 * Stored instance of {@link org.ops4j.pax.web.service.http.HttpContext} that wraps
+	 * {@link org.osgi.service.servlet.context.ServletContextHelper}, so we're able to reference this context
 	 * both in Whiteboard and HttpService scenarios.
  	 */
 	private WebContainerContext httpContext = null;
@@ -866,13 +866,13 @@ public class BundleWebApplication {
 		//    WEB-INF/classes directory, or if they are packaged in a jar file located in WEB-INF/lib within the
 		//    application - in OSGi, we're processing jars (and locations) from Bundle-ClassPath
 		//  - Annotations that do not have equivalents in the deployment XSD include
-		//    javax.servlet.annotation.HandlesTypes and all of the CDI-related annotations. These annotations must be
+		//    jakarta.servlet.annotation.HandlesTypes and all of the CDI-related annotations. These annotations must be
 		//    processed during annotation scanning, regardless of the value of "metadata-complete".
 		//  - there are annotations to be processed from different packages:
-		//     - javax.servlet.annotation
-		//     - javax.annotation
-		//     - javax.annotation.security
-		//     - javax.annotation.sql
+		//     - jakarta.servlet.annotation
+		//     - jakarta.annotation
+		//     - jakarta.annotation.security
+		//     - jakarta.annotation.sql
 		//     - javax.ejb
 		//     - javax.jms
 		//     - javax.mail
@@ -880,6 +880,7 @@ public class BundleWebApplication {
 		//     - javax.resource
 		//     - javax.jws.*
 		//     - javax.xml.ws.*
+		// TODO: JakartaEE 10
 		//
 		// Servlet spec, 8.2.1 Modularity of web.xml:
 		//  - A web fragment is a part or all of the web.xml that can be specified and included in a library or
@@ -900,7 +901,7 @@ public class BundleWebApplication {
 		//    </listener>
 		//
 		// Servlet spec, 8.2.4 Shared libraries / runtimes pluggability:
-		//  - The ServletContainerInitializer class is looked up via the jar services API. In JavaEE env, it's
+		//  - The ServletContainerInitializer class is looked up via the jar services API. In JakartaEE env, it's
 		//    traversing up the ClassLoader hierarchy up to web container's top CL. But in OSGi there's no "top"
 		//
 		// There's something wrong with metadata-complete...:
@@ -954,7 +955,7 @@ public class BundleWebApplication {
 		//   - /WEB-INF/tomcat-web.xml from context (org.apache.catalina.WebResourceRoot.getResource())
 		//     - overridable=true, distributable=true, alwaysAddWelcomeFiles=false, replaceWelcomeFiles=true
 		//  3. "context web.xml"
-		//   - /WEB-INF/web.xml from context (javax.servlet.ServletContext.getResourceAsStream())
+		//   - /WEB-INF/web.xml from context (jakarta.servlet.ServletContext.getResourceAsStream())
 		//  4. ContextConfig.processJarsForWebFragments() - fragments from org.apache.tomcat.JarScanner.scan()
 		//   - META-INF/web-fragment.xml from each JAR in /WEB-INF/lib
 		//   - in Tomcat (standalone) 9.0.41, /examples context has /WEB-INF/lib/taglibs-standard-impl-1.2.5.jar
@@ -962,25 +963,25 @@ public class BundleWebApplication {
 		//     (org.apache.tomcat.util.scan.StandardJarScanFilter.defaultSkip)
 		//   - As per http://java.net/jira/browse/SERVLET_SPEC-36, if the main web.xml is marked as metadata-complete,
 		//     JARs are still processed for SCIs.
-		//   - Tomcat checks all classloaders starting from javax.servlet.ServletContext.getClassLoader() up to
+		//   - Tomcat checks all classloaders starting from jakarta.servlet.ServletContext.getClassLoader() up to
 		//     the parent of java.lang.ClassLoader.getSystemClassLoader()
 		//   - fragments are ordered using org.apache.tomcat.util.descriptor.web.WebXml.orderWebFragments()
 		//  5. org.apache.catalina.startup.ContextConfig.processServletContainerInitializers()
-		//   - /META-INF/services/javax.servlet.ServletContainerInitializer files are loaded from CL hierarchy
-		//   - order may be consulted from "javax.servlet.context.orderedLibs" attribute (see Servlet spec,
+		//   - /META-INF/services/jakarta.servlet.ServletContainerInitializer files are loaded from CL hierarchy
+		//   - order may be consulted from "jakarta.servlet.context.orderedLibs" attribute (see Servlet spec,
 		//     8.3 JSP container pluggability) - this order affects SCIs
 		//   - these are found in Tomcat 9.0.41 hierarchy:
-		//     - "jar:file:/data/servers/apache-tomcat-9.0.41/lib/tomcat-websocket.jar!/META-INF/services/javax.servlet.ServletContainerInitializer"
-		//     - "jar:file:/data/servers/apache-tomcat-9.0.41/lib/jasper.jar!/META-INF/services/javax.servlet.ServletContainerInitializer"
+		//     - "jar:file:/data/servers/apache-tomcat-9.0.41/lib/tomcat-websocket.jar!/META-INF/services/jakarta.servlet.ServletContainerInitializer"
+		//     - "jar:file:/data/servers/apache-tomcat-9.0.41/lib/jasper.jar!/META-INF/services/jakarta.servlet.ServletContainerInitializer"
 		//   - these provide the following SCIs:
 		//     - org.apache.tomcat.websocket.server.WsSci
-		//       - @javax.servlet.annotation.HandlesTypes is:
-		//         - interface javax.websocket.server.ServerEndpoint
-		//         - interface javax.websocket.server.ServerApplicationConfig
-		//         - class javax.websocket.Endpoint
+		//       - @jakarta.servlet.annotation.HandlesTypes is:
+		//         - interface jakarta.websocket.server.ServerEndpoint
+		//         - interface jakarta.websocket.server.ServerApplicationConfig
+		//         - class jakarta.websocket.Endpoint
 		//     - org.apache.jasper.servlet.JasperInitializer
 		//   - the HandlesTypes are not yet scanned for the classes to pass to SCIs
-		//   - META-INF/services/javax.servlet.ServletContainerInitializer is not loaded from the WAR itself, only from
+		//   - META-INF/services/jakarta.servlet.ServletContainerInitializer is not loaded from the WAR itself, only from
 		//     its JARs - because java.lang.ClassLoader.getResources() is used both for parent classloaders and
 		//     the WAR itself. When orderedLibs are present, direct JAR access is used for the non-excluded /WEB-INF/lib/*.jar
 		//  6. if metadata-complete == false, classes from /WEB-INF/classes are checked (Tomcat uses BCEL)
@@ -1061,12 +1062,12 @@ public class BundleWebApplication {
 			LOG.debug("Searching for web.xml descriptor in {}", bundle);
 			mainWebXml = extenderContext.findBundleWebXml(bundle);
 
-			// at this stage, we don't have javax.servlet.ServletContext available yet. We don't even know
+			// at this stage, we don't have jakarta.servlet.ServletContext available yet. We don't even know
 			// where this WAB is going to be deployed (Tomcat? Jetty? Undertow?). We don't even know whether
 			// the contextPath for this WAB is available.
 
 			// Let's start constructing WAB's "class path" which will eventually be transformed into complete
-			// WAB's ClassLoader accessible through javax.servlet.ServletContext.getClassLoader() - but this will
+			// WAB's ClassLoader accessible through jakarta.servlet.ServletContext.getClassLoader() - but this will
 			// happen later, after the WAB is really deployed
 			classSpace = new BundleWebApplicationClassSpace(bundle, extenderContext);
 
@@ -1097,7 +1098,7 @@ public class BundleWebApplication {
 				// is performed, each scanned class is either compared with @HandlesTypes or checked for
 				// @HandlesTypes annotation
 
-				// This is direct mapping from values of @javax.servlet.annotation.HandlesTypes to SCIs that
+				// This is direct mapping from values of @jakarta.servlet.annotation.HandlesTypes to SCIs that
 				// express their interest in these values
 				Map<Class<?>, Set<ServletContainerInitializer>> htToSci = new HashMap<>();
 
@@ -1185,12 +1186,12 @@ public class BundleWebApplication {
 				//    we'll check all the JARs from Bundle-ClassPath and those reachable (via Import-Package or Require-Bundle)
 				//    bundles that have META-INF/web-fragment.xml - all locations that contain META-INF/resources will be added
 				//    to org.ops4j.pax.web.extender.war.internal.WebApplicationHelper, so they're searched for web resources
-				// 2) /META-INF/**/*.taglib.xml to set up javax.faces.FACELETS_LIBRARIES context parameter
+				// 2) /META-INF/**/*.taglib.xml to set up jakarta.faces.FACELETS_LIBRARIES context parameter
 				//    First, I wanted to provide /META-INF/services/org.apache.myfaces.spi.FaceletConfigResourceProvider
 				//    in pax-web-jsp (or pax-web-extender-war), but it wouldn't really work for WABs embedding
 				//    myfaces + primefaces. Pax Web bundle would need optional import of org.apache.myfaces.spi package
 				//    or we'd have to for WAB creators to import our package with the class implementing this service...
-				//    That's why a better approach is to prepopulate javax.faces.FACELETS_LIBRARIES context init parameter
+				//    That's why a better approach is to prepopulate jakarta.faces.FACELETS_LIBRARIES context init parameter
 
 				try {
 					for (URL url : classSpace.getWabClassPath()) {
@@ -1270,7 +1271,7 @@ public class BundleWebApplication {
 	 * This method turns the raw data collected from descriptors and annotations into a model of elements from
 	 * {@code org.ops4j.pax.web.service.spi.model} package configured in a transactional {@link Batch}.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "removal"})
 	private void buildModel() {
 		final Batch wabBatch = new Batch("Deployment of " + this);
 		wabBatch.setShortDescription("deploy " + this.contextPath);
@@ -1407,7 +1408,7 @@ public class BundleWebApplication {
 						return path;
 					})
 					.collect(Collectors.joining(";"));
-			ocm.getContextParams().put("javax.faces.FACELETS_LIBRARIES", faceletsLibraries);
+			ocm.getContextParams().put("jakarta.faces.FACELETS_LIBRARIES", faceletsLibraries);
 			ocm.getInitialContextAttributes().put(PaxWebConstants.CONTEXT_PARAM_PAX_WEB_FACELETS_LIBRARIES, faceletsUrlMapping);
 		}
 
@@ -1540,7 +1541,7 @@ public class BundleWebApplication {
 		//  + login config
 		//  + metadata complete (a.k.a. "ignore annotations") - Tomcat calls org.apache.tomcat.InstanceManager.destroyInstance()
 		//    on an instance of filter/servlet after f.destroy()/s.destroy() if annotations are not ignored.
-		//    the annotations are javax.annotation.PostConstruct/javax.annotation.PreDestroy
+		//    the annotations are jakarta.annotation.PostConstruct/jakarta.annotation.PreDestroy
 		//  + mime mapping
 		//  + request character encoding
 		//  + response character encoding
@@ -1571,23 +1572,23 @@ public class BundleWebApplication {
 		// additional annotations on servlets/filters/listeners
 		// for all elements:
 		//  - class level:
-		//     - @javax.annotation.Resource -> org.apache.catalina.deploy.NamingResourcesImpl.addEnvironment()
+		//     - @jakarta.annotation.Resource -> org.apache.catalina.deploy.NamingResourcesImpl.addEnvironment()
 		//       or org.apache.catalina.deploy.NamingResourcesImpl.addService()
 		//       or org.apache.catalina.deploy.NamingResourcesImpl.addResource()
 		//       or org.apache.catalina.deploy.NamingResourcesImpl.addMessageDestinationRef()
 		//       or org.apache.catalina.deploy.NamingResourcesImpl.addResourceEnvRef()
-		//     - @javax.annotation.Resources
+		//     - @jakarta.annotation.Resources
 		//     - @EJB (commented out in Tomcat code)
 		//     - @WebServiceRef (commented out in Tomcat code)
-		//     - @javax.annotation.security.DeclareRoles -> org.apache.catalina.Context.addSecurityRole()
+		//     - @jakarta.annotation.security.DeclareRoles -> org.apache.catalina.Context.addSecurityRole()
 		//  - field level:
-		//     - @javax.annotation.Resource
+		//     - @jakarta.annotation.Resource
 		//  - method level:
-		//     - @javax.annotation.Resource
+		//     - @jakarta.annotation.Resource
 		// additionally for servlets:
 		//  - class level:
-		//     - @javax.annotation.security.RunAs -> org.apache.catalina.Wrapper.setRunAs() (only for EJB I guess)
-		//     - @javax.servlet.annotation.ServletSecurity -> org.apache.catalina.Context.addServletSecurity()
+		//     - @jakarta.annotation.security.RunAs -> org.apache.catalina.Wrapper.setRunAs() (only for EJB I guess)
+		//     - @jakarta.servlet.annotation.ServletSecurity -> org.apache.catalina.Context.addServletSecurity()
 		//
 		// we will add relevant information below
 
@@ -1665,16 +1666,16 @@ public class BundleWebApplication {
 
 			if (servletClass != null) {
 				// scan for annotations
-				// @javax.annotation.security.DeclareRoles
+				// @jakarta.annotation.security.DeclareRoles
 				collectDeclaredRoles(servletClass, securityConfiguration);
 
-				// @javax.annotation.security.RunAs
+				// @jakarta.annotation.security.RunAs
 				RunAs runAs = servletClass.getAnnotation(RunAs.class);
 				if (runAs != null) {
 					builder.setRunAs(runAs.value());
 				}
 
-				// @javax.servlet.annotation.ServletSecurity
+				// @jakarta.servlet.annotation.ServletSecurity
 				ServletSecurity servletSecurity = servletClass.getAnnotation(ServletSecurity.class);
 				if (servletSecurity != null) {
 					// similar to <security-constraint>, but with the URLs taken from servlet mapping
