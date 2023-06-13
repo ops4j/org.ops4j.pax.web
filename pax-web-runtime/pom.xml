@@ -43,28 +43,28 @@
 					<instructions>
 						<Bundle-Activator>org.ops4j.pax.web.service.internal.Activator</Bundle-Activator>
 						<Import-Package>
-							<!-- ranges indicate Servlet API 3.1+ (JavaEE 7+) -->
-							javax.servlet;version="[3.1,5)",
-							javax.servlet.annotation;version="[3.1,5)",
-							javax.servlet.descriptor;version="[3.1,5)",
-							javax.servlet.http;version="[3.1,5)",
+							<!-- ranges indicate Servlet API 6.0+ (JakartaEE 10+) -->
+							jakarta.servlet;version="[6,7)",
+							jakarta.servlet.annotation;version="[6,7)",
+							jakarta.servlet.descriptor;version="[6,7)",
+							jakarta.servlet.http;version="[6,7)",
 
-							<!-- ranges indicate we can work with OSGi Core R6+ -->
-							org.osgi.framework;version="[1.8,2)",
-							org.osgi.framework.dto;version="[1.0,2)",
+							<!-- OSGi Core R8+ -->
+							org.osgi.framework;version="[1.10,2)",
+							org.osgi.framework.dto;version="[1.8,2)",
 							org.osgi.framework.wiring;version="[1.2,2)",
 							org.osgi.util.tracker;version="[1.5,2)",
 
 							<!-- OSGi cmpn -->
-							org.osgi.service.cm;version="[1.0,2.0)";resolution:=optional,
-							org.osgi.service.event;resolution:=optional,
-							org.osgi.service.http;version="[1.2,2)",
-							org.osgi.service.http.context;version="[1.1,2)",
-							org.osgi.service.http.runtime;version="[1.1,2)",
-							org.osgi.service.http.runtime.dto;version="[1.1,2)",
+							org.osgi.service.cm;version="[1.6,2.0)";resolution:=optional,
+							org.osgi.service.event;version="[1.4,2.0)";resolution:=optional,
+							org.osgi.service.servlet.context;version="[2,3)",
+							org.osgi.service.servlet.runtime;version="[2,3)",
+							org.osgi.service.servlet.runtime.dto;version="[2,3)",
 
 							<!-- from pax-web-api -->
 							org.ops4j.pax.web.service;version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.service.http;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.service.views;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.service.whiteboard;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.utils;version="${pax-web.osgi.version}",
@@ -98,8 +98,8 @@
 							org.apache.tomcat.util.digester;version="${dependency.org.apache.tomcat}",
 
 							<!-- from pax-logging-api -->
-							org.slf4j;version="[1.7,2)",
-							org.osgi.service.log;version="[1.3,2)",
+							org.slf4j;version="[2,3)",
+							org.osgi.service.log;version="[1.5,2)",
 
 							<!-- other required packages -->
 							javax.xml.parsers,
@@ -117,21 +117,23 @@
 						</Import-Package>
 						<!-- Nothing is exported from pax-web-runtime -->
 						<Provide-Capability>
+							<!-- TODO: JakartaEE 10 -->
 							<!-- 140.12.1 osgi.implementation Capability -->
-							osgi.implementation;osgi.implementation="osgi.http";version:Version="1.1";uses:="javax.servlet,javax.servlet.http,org.osgi.service.http.context,org.osgi.service.http.whiteboard",
+							osgi.implementation;osgi.implementation="osgi.http";version:Version="1.1";uses:="jakarta.servlet,jakarta.servlet.http,org.osgi.service.http.context,org.osgi.service.http.whiteboard",
 							<!--
-								140.12.2 osgi.contract Capability - pax-web-runtime does NOT export javax.servlet.* packages...
+								140.12.2 osgi.contract Capability - pax-web-runtime does NOT export jakarta.servlet.* packages...
 								https://docs.osgi.org/reference/portable-java-contracts.html
+								TODO: JakartaEE 10
 							-->
-<!--							osgi.contract;osgi.contract=JavaServlet;version:Version="${dependency.jakarta.servlet-api}";uses:="javax.servlet,javax.servlet.http,javax.servlet.descriptor,javax.servlet.annotation",-->
+<!--							osgi.contract;osgi.contract=JavaServlet;version:Version="${dependency.jakarta.servlet-api}";uses:="jakarta.servlet,jakarta.servlet.http,jakarta.servlet.descriptor,jakarta.servlet.annotation",-->
 <!--							osgi.contract;osgi.contract=JavaWebSockets;version:Version="1";uses:="javax.websocket,javax.websocket.server"-->
 							<!-- 140.12.3 osgi.service Capability (135.4 osgi.service Namespace) -->
-							osgi.service;objectClass:List&lt;String&gt;="org.osgi.service.http.runtime.HttpServiceRuntime";uses:="org.osgi.service.http.runtime,org.osgi.service.http.runtime.dto",
+							osgi.service;objectClass:List&lt;String&gt;="org.osgi.service.servlet.runtime.HttpServiceRuntime";uses:="org.osgi.service.servlet.runtime,org.osgi.service.servlet.runtime.dto",
 							<!--
 								Not specified in 102 Http Service, but declared by pax-web-runtime.
 								OSGi Core R7, 10.3.3.5 public static final String EFFECTIVE_ACTIVE = "active"
 							-->
-							osgi.service;effective:=active;objectClass:List&lt;String&gt;="org.osgi.service.http.HttpService,org.ops4j.pax.web.service.WebContainer"
+							osgi.service;effective:=active;objectClass:List&lt;String&gt;="org.ops4j.pax.web.service.http.HttpService,org.ops4j.pax.web.service.WebContainer"
 						</Provide-Capability>
 						<Require-Capability>
 							<!-- ServerControllerFactory services are registered by pax-web-jetty, pax-web-tomcat and pax-web-undertow -->
@@ -144,8 +146,6 @@
 							ops4j-base-util-xml;inline=true,
 							pax-swissbox-property;inline=true,
 						</Embed-Dependency>
-<!--						<_dsannotations>*</_dsannotations>-->
-<!--						<_dsannotations-options>norequirements,nocapabilities,version;minimum=0.1</_dsannotations-options>-->
 					</instructions>
 				</configuration>
 			</plugin>
@@ -207,8 +207,23 @@
 			<artifactId>osgi.core</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.service.cm</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.service.event</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.service.servlet</artifactId>
+			<scope>provided</scope>
+		</dependency>
 
-		<!-- JavaEE -->
+		<!-- JakartaEE -->
 
 		<dependency>
 			<groupId>jakarta.servlet</groupId>
@@ -225,7 +240,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-slf4j-impl</artifactId>
+			<artifactId>log4j-slf4j2-impl</artifactId>
 			<scope>test</scope>
 		</dependency>
 
@@ -252,8 +267,18 @@
 		<!-- Testing -->
 
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-core</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

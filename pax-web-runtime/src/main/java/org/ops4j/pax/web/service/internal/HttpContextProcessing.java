@@ -34,7 +34,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import javax.servlet.annotation.ServletSecurity;
+import jakarta.servlet.annotation.ServletSecurity;
 
 import org.apache.tomcat.util.descriptor.web.LoginConfig;
 import org.apache.tomcat.util.descriptor.web.SecurityCollection;
@@ -68,7 +68,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * <p>Tracks CM factory configurations which, in declarative way, are used to provide additional configuration
- * for given bundle's instance of {@link org.osgi.service.http.HttpService}/{@link WebContainer}.</p>
+ * for given bundle's instance of {@link org.ops4j.pax.web.service.http.HttpService}/{@link WebContainer}.</p>
  */
 public class HttpContextProcessing implements ManagedServiceFactory {
 
@@ -145,7 +145,7 @@ public class HttpContextProcessing implements ManagedServiceFactory {
 	}
 
 	/**
-	 * <p>A class that operates on {@link org.osgi.service.http.HttpService}/{@link WebContainer} scoped
+	 * <p>A class that operates on {@link org.ops4j.pax.web.service.http.HttpService}/{@link WebContainer} scoped
 	 * for given, configured {@link Bundle}.</p>
 	 * <p>We don't have to operate on wirings/revisions - that's not required for
 	 * {@link org.osgi.framework.Constants#SCOPE_BUNDLE}.</p>

@@ -65,9 +65,9 @@ import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.dto.ServiceReferenceDTO;
-import org.osgi.service.http.HttpService;
-import org.osgi.service.http.runtime.HttpServiceRuntime;
-import org.osgi.service.http.runtime.HttpServiceRuntimeConstants;
+import org.ops4j.pax.web.service.http.HttpService;
+import org.osgi.service.servlet.runtime.HttpServiceRuntime;
+import org.osgi.service.servlet.runtime.HttpServiceRuntimeConstants;
 import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -278,7 +278,7 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 	}
 
 	/**
-	 * Registers a managed service factory to create {@link org.osgi.service.http.HttpContext} <em>processors</em>
+	 * Registers a managed service factory to create {@link org.ops4j.pax.web.service.http.HttpContext} <em>processors</em>
 	 * - these will possibly register additional web items (like login configurations or filters) for shared or
 	 * per-bundle http services.
 	 *
@@ -554,7 +554,7 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 			LOG.info("Starting server controller {}", serverController.getClass().getName());
 			serverController.start();
 
-			// this is where org.osgi.service.http.HttpService bundle-scoped service is registered in OSGi
+			// this is where org.ops4j.pax.web.service.http.HttpService bundle-scoped service is registered in OSGi
 			// this is the most fundamental operation related to Http Service specification
 			Dictionary<String, Object> props = determineServiceProperties(configuration);
 			ServiceFactory<StoppableHttpService> factory = new StoppableHttpServiceFactory(serverController, serverModel,
@@ -584,7 +584,7 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 			// we'll set this propery later through ServerListener
 			props.put(HttpServiceRuntimeConstants.HTTP_SERVICE_ENDPOINT, "/");
 			Long httpServiceId = (Long) httpServiceFactoryReg.getReference().getProperty(Constants.SERVICE_ID);
-			props.put(HttpServiceRuntimeConstants.HTTP_SERVICE_ID, Collections.singletonList(httpServiceId));
+			props.put(PaxWebConstants.HTTP_SERVICE_ID, Collections.singletonList(httpServiceId));
 			// SERVICE_CHANGECOUNT is 1.9 OSGi Core addition, so use literal please
 //			props.put(Constants.SERVICE_CHANGECOUNT, 0L);
 			props.put("service.changecount", 0L);
@@ -599,7 +599,7 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 			httpServiceRuntimeDTO.bundle = bundleContext.getBundle().getBundleId();
 			httpServiceRuntimeDTO.properties = new HashMap<>();
 			httpServiceRuntimeDTO.properties.put(HttpServiceRuntimeConstants.HTTP_SERVICE_ENDPOINT, "/");
-			httpServiceRuntimeDTO.properties.put(HttpServiceRuntimeConstants.HTTP_SERVICE_ID, Collections.singletonList(httpServiceId));
+			httpServiceRuntimeDTO.properties.put(PaxWebConstants.HTTP_SERVICE_ID, Collections.singletonList(httpServiceId));
 			httpServiceRuntimeDTO.properties.put("service.changecount", 0L);
 			// initially "usingBundles" is empty and we'll be setting it on every
 			httpServiceRuntimeDTO.usingBundles = new long[0];

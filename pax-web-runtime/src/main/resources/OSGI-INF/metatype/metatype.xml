@@ -31,7 +31,7 @@
 
 		<!-- Properties for entire Web server, empty strings will be changed to null values -->
 
-		<AD id="javax.servlet.context.tempdir" required="false" type="String" default="${java.io.tmpdir}"
+		<AD id="jakarta.servlet.context.tempdir" required="false" type="String" default="${java.io.tmpdir}"
 				name="Temp dir" description="Temporary directory for entire Pax Web runtime. Each servlet context should have own unique directory." />
 
 		<AD id="org.osgi.service.http.port" type="Integer" default="8080"

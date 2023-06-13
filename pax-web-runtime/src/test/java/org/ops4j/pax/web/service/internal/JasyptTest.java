@@ -22,8 +22,8 @@ import org.jasypt.encryption.pbe.StandardPBEByteEncryptor;
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.jasypt.encryption.pbe.config.EnvironmentStringPBEConfig;
 import org.jasypt.exceptions.EncryptionInitializationException;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +35,7 @@ public class JasyptTest {
 	private static String[] ivAlgorithms;
 	private static String[] saltAlgorithms;
 
-	@BeforeClass
+	@BeforeAll
 	public static void algorithms() {
 		// SecretKeyFactory algorithms for JDK 1.8, 11 and 17 that use javax.crypto.spec.PBEKeySpec
 		algorithms = new String[] {
