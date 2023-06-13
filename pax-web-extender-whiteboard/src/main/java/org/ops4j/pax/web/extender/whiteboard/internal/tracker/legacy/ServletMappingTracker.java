@@ -15,7 +15,7 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy;
 
-import javax.servlet.Servlet;
+import jakarta.servlet.Servlet;
 
 import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardExtenderContext;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;

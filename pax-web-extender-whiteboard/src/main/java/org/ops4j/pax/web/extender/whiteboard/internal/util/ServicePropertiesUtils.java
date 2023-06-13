@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
@@ -64,11 +63,14 @@ public class ServicePropertiesUtils {
 	 * @param key property key; cannot be null
 	 * @return property value; null if property is not set or property value is
 	 * not an Integer
-	 * @throws NullArgumentException - If service reference is null - If key is null
 	 */
 	public static Integer getIntegerProperty(final ServiceReference<?> serviceReference, final String key) {
-		NullArgumentException.validateNotNull(serviceReference, "Service reference");
-		NullArgumentException.validateNotEmpty(key, true, "Property key");
+		if (serviceReference == null) {
+			throw new IllegalArgumentException("Service reference is null.");
+		}
+		if (key == null || "".equals(key.trim())) {
+			throw new IllegalArgumentException("Property key is empty.");
+		}
 		final Object value = serviceReference.getProperty(key);
 		if (value instanceof Integer) {
 			return (Integer) value;

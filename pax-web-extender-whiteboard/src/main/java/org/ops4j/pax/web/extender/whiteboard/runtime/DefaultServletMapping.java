@@ -20,8 +20,8 @@ package org.ops4j.pax.web.extender.whiteboard.runtime;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import javax.servlet.MultipartConfigElement;
-import javax.servlet.Servlet;
+import jakarta.servlet.MultipartConfigElement;
+import jakarta.servlet.Servlet;
 
 import org.ops4j.pax.web.service.whiteboard.ServletMapping;
 

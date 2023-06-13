@@ -18,7 +18,7 @@ package org.ops4j.pax.web.extender.whiteboard.runtime;
 import org.ops4j.pax.web.service.spi.model.elements.SecurityConstraintModel;
 import org.ops4j.pax.web.service.whiteboard.SecurityConstraintMapping;
 
-import javax.servlet.annotation.ServletSecurity;
+import jakarta.servlet.annotation.ServletSecurity;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;

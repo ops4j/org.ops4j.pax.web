@@ -18,10 +18,10 @@ package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import javax.servlet.GenericServlet;
-import javax.servlet.MultipartConfigElement;
-import javax.servlet.Servlet;
-import javax.servlet.http.HttpServlet;
+import jakarta.servlet.GenericServlet;
+import jakarta.servlet.MultipartConfigElement;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.http.HttpServlet;
 
 import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardExtenderContext;
 import org.ops4j.pax.web.service.PaxWebConstants;
@@ -31,7 +31,7 @@ import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.service.spi.util.ServletAnnotationScanner;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
+import org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**

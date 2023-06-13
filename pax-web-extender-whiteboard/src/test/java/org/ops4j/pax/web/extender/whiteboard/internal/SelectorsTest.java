@@ -17,12 +17,12 @@ package org.ops4j.pax.web.extender.whiteboard.internal;
 
 import java.util.Hashtable;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkUtil;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SelectorsTest {
 

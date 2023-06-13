@@ -19,6 +19,7 @@ import java.util.Arrays;
 
 import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.AbstractContextTracker;
+import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.context.DefaultHttpContext;
 import org.ops4j.pax.web.service.spi.context.DefaultMultiBundleWebContainerContext;
@@ -29,16 +30,16 @@ import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
+import org.ops4j.pax.web.service.http.HttpContext;
+import org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * <p>Tracks {@link HttpContextMapping} - legacy Pax Web whiteboard service to allow users creating
- * {@link org.osgi.service.http.HttpContext} contexts from Http Service specification in a Whiteboard way.</p>
+ * {@link org.ops4j.pax.web.service.http.HttpContext} contexts from Http Service specification in a Whiteboard way.</p>
  *
  * <p>Note that CMPN R7 specification provides only one way to register a <em>context</em> - using
- * {@link org.osgi.service.http.context.ServletContextHelper}.</p>
+ * {@link org.osgi.service.servlet.context.ServletContextHelper}.</p>
  *
  * @author Alin Dreghiciu
  * @author Grzegorz Grzybek
@@ -86,7 +87,7 @@ public class HttpContextMappingTracker extends AbstractContextTracker<HttpContex
 			// ... create ones instead (service.id and service.rank are already there)
 			setupArtificialServiceRegistrationProperties(model, service, false);
 			// property to allow Whiteboard elements to be registered for HttpService-related context
-			model.getContextRegistrationProperties().put(HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY, name);
+			model.getContextRegistrationProperties().put(PaxWebConstants.HTTP_SERVICE_CONTEXT_PROPERTY, name);
 			// and additionally a whiteboard context path
 			model.getContextRegistrationProperties().put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, contextPath);
 

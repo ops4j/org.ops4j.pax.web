@@ -19,10 +19,10 @@
  * to translate <em>incoming</em> OSGi services into Pax Web internal representations. The internal representation
  * is used to construct web applications out of separate pieces.</p>
  *
- * <p>Remember that e.g., a {@link javax.servlet.Servlet} may be registered by user in two ways:<ul>
- *     <li>By registering {@link javax.servlet.Servlet} OSGi service with service properties/annotations</li>
- *     <li>By registering {@link javax.servlet.http.HttpServlet} OSGi service (which is usually the same as above,
- *     but could be missed if tracking only {@link javax.servlet.Servlet servlets}).</li>
+ * <p>Remember that e.g., a {@link jakarta.servlet.Servlet} may be registered by user in two ways:<ul>
+ *     <li>By registering {@link jakarta.servlet.Servlet} OSGi service with service properties/annotations</li>
+ *     <li>By registering {@link jakarta.servlet.http.HttpServlet} OSGi service (which is usually the same as above,
+ *     but could be missed if tracking only {@link jakarta.servlet.Servlet servlets}).</li>
  *     <li>By registering {@link org.ops4j.pax.web.service.whiteboard.ServletMapping}, where all the configuration
  *     is available inside the registered service itself.</li>
  * </ul>
@@ -30,7 +30,7 @@
  * one <em>incoming</em> interface for e.g., a <em>servlet</em>.</p>
  *
  * <p>To make things clear, this package contains trackers/customizers for <em>official</em> interfaces (like
- * {@link javax.servlet.Servlet}), while {@code legacy} subpackage contains trackers/customizers for Pax Web
+ * {@link jakarta.servlet.Servlet}), while {@code legacy} subpackage contains trackers/customizers for Pax Web
  * specific interfaces (like {@link org.ops4j.pax.web.service.whiteboard.FilterMapping}).</p>
  *
  * <p>Each "tracker" should have static method that actually creates an instance of

@@ -29,7 +29,7 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
+import org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
@@ -40,14 +40,14 @@ import org.slf4j.LoggerFactory;
  * filters, listeners, ....</p>
  *
  * <p>The biggest change comparing to Pax Web 7 is that incoming {@link ServiceReference references} are NOT
- * dereferenced immediately. Dereferencing happens when the target element (e.g., {@link javax.servlet.Servlet}) needs
+ * dereferenced immediately. Dereferencing happens when the target element (e.g., {@link jakarta.servlet.Servlet}) needs
  * to be registered in target runtime - sometimes in one, sometimes in more target servlet contexts. If the service is
  * actually a {@link org.osgi.framework.ServiceFactory} or {@link org.osgi.framework.PrototypeServiceFactory},
  * this is a must.</p>
  *
  * @param <S> as in {@link ServiceTrackerCustomizer} is the type of the <em>incoming</em> service as registered by user
  * @param <R> is the type parameter of {@link ElementModel}. It's separate type, because both
- *        {@link javax.servlet.Servlet} and {@link org.ops4j.pax.web.service.whiteboard.ServletMapping} should be
+ *        {@link jakarta.servlet.Servlet} and {@link org.ops4j.pax.web.service.whiteboard.ServletMapping} should be
  *        tracked as {@link org.ops4j.pax.web.service.spi.model.elements.ServletModel}, which is
  *        {@code ElementModel<Servlet>}.
  * @param <D> type of {@link WebElementEventData} representing DTO/read-only object carrying information about
@@ -107,8 +107,8 @@ public abstract class AbstractElementTracker<S, R, D extends WebElementEventData
 	 * <p>The point is to <em>transform</em> incoming {@link ServiceReference} into an object extending
 	 * {@link ElementModel} that can then be passed to currently available instance of
 	 * {@link org.ops4j.pax.web.service.WebContainer} together with <strong>all</strong> associated <em>contexts</em>,
-	 * which may be represented by {@link org.osgi.service.http.context.ServletContextHelper} and/or
-	 * {@link org.osgi.service.http.HttpContext}.</p>
+	 * which may be represented by {@link org.osgi.service.servlet.context.ServletContextHelper} and/or
+	 * {@link org.ops4j.pax.web.service.http.HttpContext}.</p>
 	 *
 	 * <p>If the registration cannot be created from the published service (e.g. not enough metadata) the register
 	 * method should return {@code null}, fact that will cancel the registration of the service. Additionally it can
@@ -116,7 +116,7 @@ public abstract class AbstractElementTracker<S, R, D extends WebElementEventData
 	 *
 	 * <p>In Pax Web 8 we try to keep the service in the form of {@link ServiceReference} as long as possible, because
 	 * it may be a {@link org.osgi.framework.PrototypeServiceFactory} to be dereferenced when needed (possibly to
-	 * install e.g., a {@link javax.servlet.Servlet} into more than one {@link javax.servlet.ServletContext}).</p>
+	 * install e.g., a {@link jakarta.servlet.Servlet} into more than one {@link jakarta.servlet.ServletContext}).</p>
 	 *
 	 * @param serviceReference service reference for published service
 	 * @param serviceId
@@ -133,7 +133,7 @@ public abstract class AbstractElementTracker<S, R, D extends WebElementEventData
 
 		// each "element" should _always_ be associated with some _context_. This association is expressed directly
 		// in case of Http Service spec and its
-		// org.osgi.service.http.HttpService.registerServlet(alias, servlet, params, _context_) invocation
+		// org.ops4j.pax.web.service.http.HttpService.registerServlet(alias, servlet, params, _context_) invocation
 		//
 		// in Whiteboard Service spec, the association is specified in different ways (in decreasing priority):
 		//  - "osgi.http.whiteboard.context.select" propery in OSGi CMPN R7 Whiteboard Service that points to one or
@@ -246,7 +246,7 @@ public abstract class AbstractElementTracker<S, R, D extends WebElementEventData
 		webElement.setContextSelectFilter(contextFilter);
 
 		// 2. get the actual contexts - only after creating actual element. Because failure to resolve target
-		//    contexts should result in specific FailureDTO (e.g., org.osgi.service.http.runtime.dto.FailedServletDTO)
+		//    contexts should result in specific FailureDTO (e.g., org.osgi.service.servlet.runtime.dto.FailedServletDTO)
 		List<OsgiContextModel> contexts = whiteboardExtenderContext.resolveContexts(serviceReference.getBundle(), contextFilter);
 
 		// now set the target context models
@@ -353,11 +353,11 @@ public abstract class AbstractElementTracker<S, R, D extends WebElementEventData
 			//    (osgi.http.whiteboard.context.httpservice=*)
 			//
 			// while we're doing this implementation-specific mechanism to target particular HttpContext
-			selector = String.format("(%s=%s)", HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY, legacyId);
+			selector = String.format("(%s=%s)", PaxWebConstants.HTTP_SERVICE_CONTEXT_PROPERTY, legacyId);
 		}
 
 		// I thought I could process annotations like
-		// @org.osgi.service.http.whiteboard.propertytypes.HttpWhiteboardContextSelect here, but these have
+		// @org.osgi.service.servlet.whiteboard.propertytypes.HttpWhiteboardContextSelect here, but these have
 		// retention=CLASS to be processed by tools, like these related to SCR. So I'll skip it
 
 		// fallback selector - but only if we're tracking object of class DIFFERENT than one from

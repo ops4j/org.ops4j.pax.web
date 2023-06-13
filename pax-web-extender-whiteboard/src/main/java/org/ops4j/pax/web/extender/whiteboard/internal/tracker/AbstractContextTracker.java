@@ -26,7 +26,7 @@ import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
+import org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
@@ -34,10 +34,10 @@ import org.slf4j.LoggerFactory;
 
 /**
  * <p>Tracks objects published as services, that represent <em>contexts</em> (not <em>elements</em>). These are:<ul>
- *     <li>{@link org.osgi.service.http.context.ServletContextHelper} - the OSGi CMPN R7 Whiteboard</li>
+ *     <li>{@link org.osgi.service.servlet.context.ServletContextHelper} - the OSGi CMPN R7 Whiteboard</li>
  *     <li>{@link org.ops4j.pax.web.service.whiteboard.ServletContextHelperMapping} - the Pax Web approach</li>
  *     <li>{@link HttpContextMapping} - the Pax Web approach for Http Service</li>
- *     <li>{@link org.osgi.service.http.HttpContext} ... - for completeness</li>
+ *     <li>{@link org.ops4j.pax.web.service.http.HttpContext} ... - for completeness</li>
  * </ul></p>
  *
  * <p>The <em>customized</em> object is always {@link OsgiContextModel}</p>
@@ -120,9 +120,9 @@ public abstract class AbstractContextTracker<S> implements ServiceTrackerCustomi
 		// the most important thing is - how WebContainerContext will be created within configured OsgiContextModel
 		//
 		// we support 4 service types to be _customized_ into OsgiContextModel:
-		// 1. org.osgi.service.http.HttpContext - standard interface, but not designed to be whiteboarded.
+		// 1. org.ops4j.pax.web.service.http.HttpContext - standard interface, but not designed to be whiteboarded.
 		//    Handled through Whiteboard for backward compatibility
-		// 2. org.osgi.service.http.context.ServletContextHelper - the standard from OSGi CMPN R7 Whiteboard spec
+		// 2. org.osgi.service.servlet.context.ServletContextHelper - the standard from OSGi CMPN R7 Whiteboard spec
 		// 3. org.ops4j.pax.web.service.whiteboard.HttpContextMapping - the legacy way to handle legacy _context_
 		// 4. org.ops4j.pax.web.service.whiteboard.ServletContextHelperMapping - the legacy way to handle
 		//    OSGi CMPN R7 Whiteboard context
@@ -139,7 +139,7 @@ public abstract class AbstractContextTracker<S> implements ServiceTrackerCustomi
 		//  - when registering #1 or #2, we should handle org.osgi.framework.ServiceFactory, so we never
 		//    dereference the service, but pass the ServiceReference to OsgiContextModel
 		//  - in #1 and #2, to get a service from the reference, we need a bundle context for the actual
-		//    Whiteboard service used (e.g., from a javax.servlet.Servlet)
+		//    Whiteboard service used (e.g., from a jakarta.servlet.Servlet)
 		//  - default implementation (which should always be available - unless overriden by same-named context
 		//    with higher rank) of ServletContextHelper must use proper bundle to implement methods like
 		//    getResource() or getResourcePaths(). Because custom version may do the same, it should always

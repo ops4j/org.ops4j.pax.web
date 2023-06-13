@@ -20,8 +20,8 @@ package org.ops4j.pax.web.extender.whiteboard.runtime;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import javax.servlet.DispatcherType;
-import javax.servlet.Filter;
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.Filter;
 
 import org.ops4j.pax.web.service.whiteboard.FilterMapping;
 
