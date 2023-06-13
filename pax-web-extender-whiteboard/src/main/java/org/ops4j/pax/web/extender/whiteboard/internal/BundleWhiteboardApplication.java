@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
  *
  * <p>Actual trackers (tracker customizers) add elements/contexts to this application via {@link WhiteboardExtenderContext}
  * <strong>only</strong> - because all Whiteboard elements have to be tracked in
- * {@link org.osgi.service.http.runtime.HttpServiceRuntime}, which is kind of <em>Whiteboard registry</em>.</p>
+ * {@link org.osgi.service.servlet.runtime.HttpServiceRuntime}, which is kind of <em>Whiteboard registry</em>.</p>
  *
  * <p>Also, before Pax Web 8, this class was calling {@link WebContainer} registration methods, while now, interaction
  * with {@link WebContainer} happens at {@link WhiteboardExtenderContext} level.</p>

@@ -28,8 +28,8 @@ import org.ops4j.pax.web.service.spi.util.Utils;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
+import org.ops4j.pax.web.service.http.HttpContext;
+import org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
@@ -106,7 +106,7 @@ public class HttpContextTracker extends AbstractContextTracker<HttpContext> {
 		model.getContextRegistrationProperties().put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID, name);
 		model.getContextRegistrationProperties().put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_PATH, contextPath);
 		// property to allow Whiteboard elements to be registered for HttpService-related context
-		model.getContextRegistrationProperties().put(HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY, name);
+		model.getContextRegistrationProperties().put(PaxWebConstants.HTTP_SERVICE_CONTEXT_PROPERTY, name);
 		// and additionally a whiteboard context path
 		model.getContextRegistrationProperties().put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, contextPath);
 

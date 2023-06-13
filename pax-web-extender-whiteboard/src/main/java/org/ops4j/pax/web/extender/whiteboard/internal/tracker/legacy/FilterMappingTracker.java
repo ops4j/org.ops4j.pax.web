@@ -16,7 +16,7 @@
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy;
 
 import java.util.Arrays;
-import javax.servlet.Filter;
+import jakarta.servlet.Filter;
 
 import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardExtenderContext;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;

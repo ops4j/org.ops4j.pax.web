@@ -15,7 +15,7 @@
  */
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
-import javax.servlet.Servlet;
+import jakarta.servlet.Servlet;
 
 import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardExtenderContext;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
@@ -23,11 +23,11 @@ import org.ops4j.pax.web.service.spi.model.events.ServletEventData;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
+import org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
- * Tracks OSGi services that should result in registration of a {@link javax.servlet.Servlet} acting as
+ * Tracks OSGi services that should result in registration of a {@link jakarta.servlet.Servlet} acting as
  * <em>default (resource) servlet - though mapped to any URL pattern(s).</em>
  *
  * @author Alin Dreghiciu

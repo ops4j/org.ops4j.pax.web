@@ -17,13 +17,14 @@ package org.ops4j.pax.web.extender.whiteboard.internal.tracker.legacy;
 
 import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardExtenderContext;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.AbstractElementTracker;
+import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.spi.model.elements.ElementModel;
 import org.ops4j.pax.web.service.spi.model.events.WebElementEventData;
 import org.ops4j.pax.web.service.whiteboard.ContextRelated;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
+import org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants;
 
 /**
  * Special tracker for those <em>incoming</em> we elements which extend {@link ContextRelated}
@@ -60,7 +61,7 @@ public abstract class AbstractMappingTracker<S extends ContextRelated, R, D exte
 
 			if (selector == null && legacyId != null) {
 				// 140.10 Integration with Http Service Contexts
-				selector = String.format("(%s=%s)", HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY, legacyId);
+				selector = String.format("(%s=%s)", PaxWebConstants.HTTP_SERVICE_CONTEXT_PROPERTY, legacyId);
 			}
 
 			if (selector == null) {

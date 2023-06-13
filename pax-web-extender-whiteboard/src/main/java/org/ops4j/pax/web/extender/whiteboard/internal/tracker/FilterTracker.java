@@ -18,9 +18,9 @@ package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import javax.servlet.Filter;
-import javax.servlet.GenericFilter;
-import javax.servlet.http.HttpFilter;
+import jakarta.servlet.Filter;
+import jakarta.servlet.GenericFilter;
+import jakarta.servlet.http.HttpFilter;
 
 import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardExtenderContext;
 import org.ops4j.pax.web.service.PaxWebConstants;
@@ -30,8 +30,8 @@ import org.ops4j.pax.web.service.spi.util.FilterAnnotationScanner;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
-import org.osgi.service.http.whiteboard.Preprocessor;
+import org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants;
+import org.osgi.service.servlet.whiteboard.Preprocessor;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**

@@ -21,8 +21,8 @@ import java.util.Dictionary;
 import java.util.EventListener;
 import java.util.Hashtable;
 import java.util.List;
-import javax.servlet.Filter;
-import javax.servlet.Servlet;
+import jakarta.servlet.Filter;
+import jakarta.servlet.Servlet;
 
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.FilterTracker;
 import org.ops4j.pax.web.extender.whiteboard.internal.tracker.HttpContextTracker;
@@ -69,9 +69,9 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.context.ServletContextHelper;
-import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
+import org.ops4j.pax.web.service.http.HttpContext;
+import org.osgi.service.servlet.context.ServletContextHelper;
+import org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,7 +114,7 @@ public class Activator implements BundleActivator {
 		//  - we have lot of customizers in org.ops4j.pax.web.extender.whiteboard.internal.tracker package ("tracker"
 		//    name was always used...)
 		//  - each such customizer has static method to create actual ServiceTracker with "this" as the customizer
-		//  - each customizer translates "incoming service" like javax.servlet.Servlet into "internal model" (a.k.a.
+		//  - each customizer translates "incoming service" like jakarta.servlet.Servlet into "internal model" (a.k.a.
 		//    "customized object")
 		//  - each tracker takes "bundle whiteboard application" (collection of web elements/contexts registered by
 		//    given bundle) from the extender context and registers/unregister such "customized object"
@@ -130,7 +130,7 @@ public class Activator implements BundleActivator {
 		// we immediately register "default" ServletContextHelper as OSGi service
 		// felix.http registers something like this:
 		//
-		//     objectClass = [org.osgi.service.http.context.ServletContextHelper]
+		//     objectClass = [org.osgi.service.servlet.context.ServletContextHelper]
 		//     osgi.http.whiteboard.context.name = default
 		//     osgi.http.whiteboard.context.path = /
 		//     service.bundleid = 44
@@ -147,7 +147,7 @@ public class Activator implements BundleActivator {
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, defaultContextModel.getContextPath());
 		// we'll add this special property to indicate that this _context_ is common for HttpService and
 		// Whiteboard service
-		properties.put(HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY, defaultContextModel.getName());
+		properties.put(PaxWebConstants.HTTP_SERVICE_CONTEXT_PROPERTY, defaultContextModel.getName());
 		properties.put(Constants.SERVICE_RANKING, defaultContextModel.getServiceRank());
 		properties.put(PaxWebConstants.SERVICE_PROPERTY_INTERNAL, true);
 		registration = bundleContext.registerService(ServletContextHelper.class,

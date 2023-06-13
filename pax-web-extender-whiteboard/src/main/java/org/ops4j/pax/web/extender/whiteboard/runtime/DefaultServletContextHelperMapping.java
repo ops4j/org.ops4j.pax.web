@@ -18,7 +18,7 @@ package org.ops4j.pax.web.extender.whiteboard.runtime;
 import java.util.Arrays;
 
 import org.ops4j.pax.web.service.whiteboard.ServletContextHelperMapping;
-import org.osgi.service.http.context.ServletContextHelper;
+import org.osgi.service.servlet.context.ServletContextHelper;
 
 public class DefaultServletContextHelperMapping extends AbstractContextMapping implements ServletContextHelperMapping {
 

@@ -20,7 +20,7 @@ package org.ops4j.pax.web.extender.whiteboard.runtime;
 import java.util.Arrays;
 
 import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
-import org.osgi.service.http.HttpContext;
+import org.ops4j.pax.web.service.http.HttpContext;
 
 /**
  * Default implementation of {@link HttpContextMapping}.

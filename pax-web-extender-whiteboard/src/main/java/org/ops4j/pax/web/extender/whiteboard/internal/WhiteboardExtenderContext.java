@@ -40,9 +40,9 @@ import org.osgi.framework.BundleListener;
 import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.http.context.ServletContextHelper;
-import org.osgi.service.http.runtime.dto.DTOConstants;
-import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
+import org.osgi.service.servlet.context.ServletContextHelper;
+import org.osgi.service.servlet.runtime.dto.DTOConstants;
+import org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,11 +50,11 @@ import org.slf4j.LoggerFactory;
  * <p>Whiteboard extender context.</p>
  *
  * <p>This class collects all the customized objects related to <em>whiteboard web elements</em> (like servlets,
- * filters, ...) and <em>whiteboard contexts</em> (like {@link org.osgi.service.http.HttpContext} or
- * {@link org.osgi.service.http.context.ServletContextHelper}). All such customized objects (internal
+ * filters, ...) and <em>whiteboard contexts</em> (like {@link org.ops4j.pax.web.service.http.HttpContext} or
+ * {@link org.osgi.service.servlet.context.ServletContextHelper}). All such customized objects (internal
  * representation of user-registered OSGi services) are then somehow passed to current
- * {@link org.osgi.service.http.HttpService} which should rather be Pax Web's
- * {@link WebContainer} extension of {@link org.osgi.service.http.HttpService}. It's not
+ * {@link org.ops4j.pax.web.service.http.HttpService} which should rather be Pax Web's
+ * {@link WebContainer} extension of {@link org.ops4j.pax.web.service.http.HttpService}. It's not
  * a requirement, but initially the tests focus on integrating pax-web-extender-whiteboard with pax-web-runtime.</p>
  *
  * <p>The biggest change in Pax Web 8 is that incoming <em>web elements</em> are not registered in <em>web
@@ -109,7 +109,7 @@ public class WhiteboardExtenderContext implements WebContainerListener, WebConte
 	 *
 	 * <p>With Whiteboard web element registration, target {@link OsgiContextModel} is <strong>always</strong>
 	 * referenced by name and there may be many <em>contexts</em> with the same name.
-	 * {@link javax.servlet.Servlet} registered to e.g., {@code default} <em>context</em> may be re-registered if
+	 * {@link jakarta.servlet.Servlet} registered to e.g., {@code default} <em>context</em> may be re-registered if
 	 * there's <em>better</em> context registered with the same {@code default} name and different ranking.</p>
 	 *
 	 * <p>The target <em>physical</em> servlet context (which in {@link org.ops4j.pax.web.service.spi.model.ServerModel}
@@ -237,7 +237,7 @@ public class WhiteboardExtenderContext implements WebContainerListener, WebConte
 	 *
 	 * @param bundle {@link Bundle} of the Whiteboard element for which we're looking for the associated contexts
 	 * @param selector
-	 * @return list of {@link OsgiContextModel} to associate the service (e.g., {@link javax.servlet.Servlet}) with.
+	 * @return list of {@link OsgiContextModel} to associate the service (e.g., {@link jakarta.servlet.Servlet}) with.
 	 */
 	public List<OsgiContextModel> resolveContexts(Bundle bundle, Filter selector) {
 		if (bundle == null) {
@@ -451,12 +451,12 @@ public class WhiteboardExtenderContext implements WebContainerListener, WebConte
 	 * to different conditions of registration for existing {@link ElementModel}s.</p>
 	 *
 	 * <p>This is the actual place where we implement a scenario:<ul>
-	 *     <li>{@link javax.servlet.Servlet} is registered with some selector matching for example "default" context
+	 *     <li>{@link jakarta.servlet.Servlet} is registered with some selector matching for example "default" context
 	 *         for "/" contextPath</li>
 	 *     <li>We change properties of existing "default" context or register different context with "default" name,
 	 *         higher ranking and different context (e.g., "/x")</li>
-	 *     <li>Existing {@link javax.servlet.Servlet} should be re-registered from "/" to "/x" path without bothering
-	 *         user who's registered the {@link javax.servlet.Servlet}.</li>
+	 *     <li>Existing {@link jakarta.servlet.Servlet} should be re-registered from "/" to "/x" path without bothering
+	 *         user who's registered the {@link jakarta.servlet.Servlet}.</li>
 	 * </ul></p>
 	 */
 	private void reRegisterWebElements() {
