@@ -16,10 +16,11 @@
  */
 package org.ops4j.pax.web.extender.war.internal.util;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.ops4j.pax.web.service.spi.util.Path;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class PathTest {
 
@@ -29,7 +30,7 @@ public class PathTest {
 	 */
 	@Test
 	public void replaceSlashesWithNull() {
-		assertEquals("Replaced", null, Path.replaceSlashes(null));
+		assertNull(Path.replaceSlashes(null), "Replaced");
 	}
 
 	/**
@@ -38,7 +39,7 @@ public class PathTest {
 	 */
 	@Test
 	public void replaceSlashes01() {
-		assertEquals("Replaced", "/foo/bar/", Path.replaceSlashes("/foo/bar/"));
+		assertEquals("/foo/bar/", Path.replaceSlashes("/foo/bar/"), "Replaced");
 	}
 
 	/**
@@ -46,7 +47,7 @@ public class PathTest {
 	 */
 	@Test
 	public void replaceSlashes02() {
-		assertEquals("Replaced", "/", Path.replaceSlashes("/"));
+		assertEquals("/", Path.replaceSlashes("/"), "Replaced");
 	}
 
 	/**
@@ -54,7 +55,7 @@ public class PathTest {
 	 */
 	@Test
 	public void replaceSlashes03() {
-		assertEquals("Replaced", "/", Path.replaceSlashes("/////"));
+		assertEquals("/", Path.replaceSlashes("/////"), "Replaced");
 	}
 
 	/**
@@ -62,7 +63,7 @@ public class PathTest {
 	 */
 	@Test
 	public void replaceSlashes04() {
-		assertEquals("Replaced", "/foo/bar", Path.replaceSlashes("///foo/bar"));
+		assertEquals("/foo/bar", Path.replaceSlashes("///foo/bar"), "Replaced");
 	}
 
 	/**
@@ -70,7 +71,7 @@ public class PathTest {
 	 */
 	@Test
 	public void replaceSlashes05() {
-		assertEquals("Replaced", "foo/bar/", Path.replaceSlashes("foo/bar///"));
+		assertEquals("foo/bar/", Path.replaceSlashes("foo/bar///"), "Replaced");
 	}
 
 	/**
@@ -78,7 +79,7 @@ public class PathTest {
 	 */
 	@Test
 	public void replaceSlashes06() {
-		assertEquals("Replaced", "foo/bar", Path.replaceSlashes("foo////bar"));
+		assertEquals("foo/bar", Path.replaceSlashes("foo////bar"), "Replaced");
 	}
 
 	/**
@@ -87,8 +88,7 @@ public class PathTest {
 	 */
 	@Test
 	public void replaceSlashes07() {
-		assertEquals("Replaced", "/foo/bar/car/",
-				Path.replaceSlashes("/foo////bar//car//"));
+		assertEquals("/foo/bar/car/", Path.replaceSlashes("/foo////bar//car//"), "Replaced");
 	}
 
 	/**
@@ -97,7 +97,7 @@ public class PathTest {
 	 */
 	@Test
 	public void normalizeResourcePathSlash01() {
-		assertEquals("Normalized", "/", Path.normalizeResourcePath("/"));
+		assertEquals("/", Path.normalizeResourcePath("/"), "Normalized");
 	}
 
 	/**
@@ -106,7 +106,7 @@ public class PathTest {
 	 */
 	@Test
 	public void normalizeResourcePathSlash02() {
-		assertEquals("Normalized", "/", Path.normalizeResourcePath("  /"));
+		assertEquals("/", Path.normalizeResourcePath("  /"), "Normalized");
 	}
 
 	/**
@@ -115,7 +115,7 @@ public class PathTest {
 	 */
 	@Test
 	public void normalizeResourcePathSlash03() {
-		assertEquals("Normalized", "/", Path.normalizeResourcePath("  /   "));
+		assertEquals("/", Path.normalizeResourcePath("  /   "), "Normalized");
 	}
 
 	/**
@@ -124,7 +124,7 @@ public class PathTest {
 	 */
 	@Test
 	public void normalizeResourcePathSlash04() {
-		assertEquals("Normalized", "/", Path.normalizeResourcePath("/   "));
+		assertEquals("/", Path.normalizeResourcePath("/   "), "Normalized");
 	}
 
 }

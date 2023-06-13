@@ -29,9 +29,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * <p>This class adjusts {@link org.osgi.service.http.context.ServletContextHelper} from the Whiteboard specification
+ * <p>This class adjusts {@link org.osgi.service.servlet.context.ServletContextHelper} from the Whiteboard specification
  * (chapter 140) to OSGi CMPN Web Applications specification (chapter 128). The most important thing is that
- * {@link org.osgi.service.http.context.ServletContextHelper#getResource} uses {@link Bundle#getEntry} method
+ * {@link org.osgi.service.servlet.context.ServletContextHelper#getResource} uses {@link Bundle#getEntry} method
  * which doesn't consider fragments, while chapter "128.3.5 Static Content" says:<blockquote>
  *     For a WAB, these resources must be found according to the findEntries method, this method includes fragments.
  * </blockquote></p>

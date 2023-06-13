@@ -343,7 +343,7 @@ public class WarExtenderContext implements WebContainerListener, ReportViewPlugi
 			return null;
 		}
 
-		// before Pax Web 8 there was a check whether the bundle can see javax.servlet.Servlet class. But
+		// before Pax Web 8 there was a check whether the bundle can see jakarta.servlet.Servlet class. But
 		// that's too harsh requirement, because a WAR can be used to serve static content only, without
 		// registration of any servlet (at least explicitly - as the "default" server should be added for free)
 
@@ -707,7 +707,7 @@ public class WarExtenderContext implements WebContainerListener, ReportViewPlugi
 	 * <p>The {@link Extension} representing a "WAB" (Web Application Bundle) which (according to 128.3 Web Application
 	 * Bundle) is a {@link Bundle} with {@code Web-ContextPath} manifest header.</p>
 	 *
-	 * <p>No other constraints are put onto the WAB (like visibility of {@link javax.servlet.Servlet} class or the
+	 * <p>No other constraints are put onto the WAB (like visibility of {@link jakarta.servlet.Servlet} class or the
 	 * content). Also it doesn't matter whether the bundle originally contained the required manifest header or
 	 * the header was applied using some URL handler (like pax-url-war).</p>
 	 *
