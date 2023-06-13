@@ -1716,6 +1716,18 @@
 			</dependency>
 			<dependency>
 				<groupId>org.osgi</groupId>
+				<artifactId>org.osgi.service.cm</artifactId>
+				<version>${dependency.org.osgi.service.cm}</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>org.osgi.service.event</artifactId>
+				<version>${dependency.org.osgi.service.event}</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.osgi</groupId>
 				<artifactId>org.osgi.service.http</artifactId>
 				<version>${dependency.org.osgi.service.http}</version>
 			</dependency>
