@@ -25,8 +25,8 @@ import org.ops4j.pax.web.service.WebContainer;
 public interface StoppableHttpService {
 
 	/**
-	 * Stop the {@link org.osgi.service.http.HttpService}. It doesn't directly mean <em>stop the underlying
-	 * HTTP server</em>, it's more like marking a {@link org.osgi.service.http.HttpService} as no longer open
+	 * Stop the {@link org.ops4j.pax.web.service.http.HttpService}. It doesn't directly mean <em>stop the underlying
+	 * HTTP server</em>, it's more like marking a {@link org.ops4j.pax.web.service.http.HttpService} as no longer open
 	 * for registration of web elements.
 	 */
 	void stop();

@@ -16,14 +16,14 @@
 package org.ops4j.pax.web.service.internal.views;
 
 import java.util.Collection;
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletException;
 
 import org.ops4j.pax.web.service.spi.model.elements.ErrorPageModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.views.PaxWebContainerView;
-import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.NamespaceException;
+import org.ops4j.pax.web.service.http.HttpContext;
+import org.ops4j.pax.web.service.http.NamespaceException;
 
 /**
  * <p>{@link org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView} equivalent for <em>direct

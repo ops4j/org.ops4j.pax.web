@@ -21,28 +21,26 @@ import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.ops4j.pax.web.service.PaxWebConfig;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.util.property.DictionaryPropertyResolver;
 import org.ops4j.util.property.PropertyResolver;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Fail.fail;
 
 public class ConfigurationImplTest {
     
-    @Rule
-    public TemporaryFolder testFolder = new TemporaryFolder(new File("target"));
+    @TempDir
+    public File testFolder;
 
 	@Test
 	public void immediateProperties() throws NoSuchFieldException, IllegalAccessException {
 		Dictionary<String, String> props = new Hashtable<>();
 		props.put(PaxWebConfig.PID_CFG_HTTP_PORT, "1234");
-		props.put(PaxWebConfig.PID_CFG_TEMP_DIR, testFolder.getRoot().getAbsolutePath());
+		props.put(PaxWebConfig.PID_CFG_TEMP_DIR, testFolder.getAbsolutePath());
 		PropertyResolver resolver = new DictionaryPropertyResolver(props);
 
 		Configuration config = ConfigurationBuilder.getConfiguration(resolver, new HashMap<>());
@@ -50,8 +48,8 @@ public class ConfigurationImplTest {
 		f.setAccessible(true);
 		f.set(config, null);
 
-		assertThat("Should be eagerly fetched and property resolver is not needed",
-				config.server().getHttpPort(), equalTo(1234));
+		assertThat(config.server().getHttpPort())
+				.withFailMessage("Should be eagerly fetched and property resolver is not needed").isEqualTo(1234);
 		try {
 			config.get("unknown property", String.class);
 			fail("Should fail on missing property resolver");

@@ -302,4 +302,9 @@ public interface PaxWebConstants {
 	 */
 	String HTTP_SERVICE_CONTEXT_PROPERTY = "osgi.http.whiteboard.context.httpservice";
 
+	/**
+	 * For compatibility purpose (OSGi CMPN 8: {@code org.osgi.service.http.runtime.HttpServiceRuntimeConstants#HTTP_SERVICE_ID})
+	 */
+	String HTTP_SERVICE_ID = "osgi.http.service.id";
+
 }

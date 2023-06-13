@@ -16,7 +16,6 @@
 package org.ops4j.pax.web.service.spi.model.elements;
 
 import java.io.File;
-import java.io.FilePermission;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;

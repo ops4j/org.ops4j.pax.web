@@ -24,7 +24,7 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
-import javax.servlet.SessionCookieConfig;
+import jakarta.servlet.SessionCookieConfig;
 
 import org.ops4j.pax.web.service.PaxWebConfig;
 import org.ops4j.pax.web.service.spi.config.Configuration;
