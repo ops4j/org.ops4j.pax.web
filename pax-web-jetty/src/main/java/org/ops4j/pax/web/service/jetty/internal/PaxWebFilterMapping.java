@@ -20,9 +20,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
-import javax.servlet.DispatcherType;
+import jakarta.servlet.DispatcherType;
 
-import org.eclipse.jetty.servlet.FilterMapping;
+import org.eclipse.jetty.ee10.servlet.FilterMapping;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 
 /**

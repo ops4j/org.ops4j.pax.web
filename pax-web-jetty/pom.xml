@@ -43,28 +43,28 @@
 					<instructions>
 						<Bundle-Activator>org.ops4j.pax.web.service.jetty.internal.Activator</Bundle-Activator>
 						<Import-Package>
-							<!-- ranges indicate Servlet API 3.1+ (JavaEE 7+) -->
-							javax.servlet;version="[3.1,5)",
-							javax.servlet.annotation;version="[3.1,5)",
-							javax.servlet.http;version="[3.1,5)",
+							<!-- ranges indicate Servlet API 6.0+ (JakartaEE 10+) -->
+							jakarta.servlet;version="[6,7)",
+							jakarta.servlet.annotation;version="[6,7)",
+							jakarta.servlet.http;version="[6,7)",
 
-							<!-- ranges indicate we can work with OSGi Core R6+ -->
-							org.osgi.framework;version="[1.8,2)",
+							<!-- OSGi Core R8+ -->
+							org.osgi.framework;version="[1.10,2)",
 							org.osgi.framework.wiring;version="[1.2,2)",
 							org.osgi.util.tracker;version="[1.5,2)",
 
 							<!-- OSGi cmpn -->
-							org.osgi.service.http;version="[1.2,2)",
-							org.osgi.service.http.whiteboard;version="[1.1,2)",
+							org.osgi.service.servlet.whiteboard;version="[2,3)",
 
 							<!-- from pax-web-api -->
 							org.ops4j.pax.web.service;version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.service.http;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.utils;version="${pax-web.osgi.version}",
 							<!-- from pax-web-spi -->
 							org.ops4j.pax.web.service.spi.*;version="${pax-web.osgi.version}",
 
 							<!-- from pax-logging-api -->
-							org.slf4j;version="[1.7,2)",
+							org.slf4j;version="[2,3)",
 
 							<!-- from Jetty bundles -->
 							org.eclipse.jetty.*,
@@ -76,7 +76,7 @@
 							org.eclipse.jetty.servlets;resolution:=optional,
 
 							<!-- other -->
-							javax.annotation;version="[1.2,2)";resolution:=optional,
+							jakarta.annotation;version="[2,3)";resolution:=optional,
 							javax.management,
 							javax.net.ssl,
 							javax.security.auth,
@@ -85,8 +85,9 @@
 							org.xml.sax
 						</Import-Package>
 						<Export-Package>
+							<!-- TODO: JakartaEE 10 -->
 							<!-- this is needed to satisfy unused (in Pax Web) requirement from org.eclipse.jetty.websocket.javax.server/10 -->
-							org.eclipse.jetty.webapp;version="${dependency.org.eclipse.jetty}"
+<!--							org.eclipse.jetty.webapp;version="${dependency.org.eclipse.jetty}"-->
 						</Export-Package>
 						<Provide-Capability>
 							osgi.service;effective:=active;objectClass:List&lt;String&gt;="org.ops4j.pax.web.service.spi.ServerControllerFactory"
@@ -121,19 +122,6 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<!-- OPS4J dependencies -->
-
-		<dependency>
-			<groupId>org.ops4j.base</groupId>
-			<artifactId>ops4j-base-lang</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.base</groupId>
-			<artifactId>ops4j-base-util-xml</artifactId>
-			<scope>provided</scope>
-		</dependency>
-
 		<!-- OSGi -->
 
 		<dependency>
@@ -141,8 +129,13 @@
 			<artifactId>osgi.core</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.service.servlet</artifactId>
+			<scope>provided</scope>
+		</dependency>
 
-		<!-- JavaEE -->
+		<!-- JakartaEE -->
 
 		<dependency>
 			<groupId>jakarta.servlet</groupId>
@@ -152,6 +145,11 @@
 		<dependency>
 			<groupId>jakarta.websocket</groupId>
 			<artifactId>jakarta.websocket-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.websocket</groupId>
+			<artifactId>jakarta.websocket-client-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 
@@ -280,7 +278,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-slf4j-impl</artifactId>
+			<artifactId>log4j-slf4j2-impl</artifactId>
 			<scope>test</scope>
 		</dependency>
 
@@ -311,8 +309,18 @@
 		<!-- Testing -->
 
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-core</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -322,24 +330,5 @@
 		</dependency>
 
 	</dependencies>
-
-	<profiles>
-		<profile>
-			<id>jdk11</id>
-			<activation>
-				<jdk>[9,)</jdk>
-			</activation>
-			<dependencies>
-
-				<dependency>
-					<groupId>org.eclipse.jetty</groupId>
-					<artifactId>jetty-alpn-java-server</artifactId>
-					<scope>provided</scope>
-					<optional>true</optional>
-				</dependency>
-
-			</dependencies>
-		</profile>
-	</profiles>
 
 </project>

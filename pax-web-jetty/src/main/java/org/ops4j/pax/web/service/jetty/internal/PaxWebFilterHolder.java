@@ -20,16 +20,16 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.UnavailableException;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.UnavailableException;
 
-import org.eclipse.jetty.servlet.BaseHolder;
-import org.eclipse.jetty.servlet.FilterHolder;
+import org.eclipse.jetty.ee10.servlet.BaseHolder;
+import org.eclipse.jetty.ee10.servlet.FilterHolder;
 import org.ops4j.pax.web.service.jetty.internal.web.PaxWebWebSocketUpgradeFilter;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
@@ -39,7 +39,7 @@ import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceObjects;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.http.runtime.dto.DTOConstants;
+import org.osgi.service.servlet.runtime.dto.DTOConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +55,7 @@ public class PaxWebFilterHolder extends FilterHolder {
 
 	private ServiceReference<Filter> filterReference;
 
-	/** This {@link ServletContext} is scoped to single {@link org.osgi.service.http.context.ServletContextHelper} */
+	/** This {@link ServletContext} is scoped to single {@link org.osgi.service.servlet.context.ServletContextHelper} */
 	private final OsgiServletContext osgiServletContext;
 	/** This {@link ServletContext} is scoped to particular Whiteboard filter */
 	private final OsgiScopedServletContext servletContext;

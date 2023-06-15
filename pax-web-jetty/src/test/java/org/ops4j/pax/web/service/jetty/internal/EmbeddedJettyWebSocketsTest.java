@@ -23,36 +23,35 @@ import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.Set;
-import javax.websocket.ClientEndpointConfig;
-import javax.websocket.ContainerProvider;
-import javax.websocket.Endpoint;
-import javax.websocket.EndpointConfig;
-import javax.websocket.MessageHandler;
-import javax.websocket.OnMessage;
-import javax.websocket.OnOpen;
-import javax.websocket.RemoteEndpoint;
-import javax.websocket.Session;
-import javax.websocket.WebSocketContainer;
-import javax.websocket.server.ServerApplicationConfig;
-import javax.websocket.server.ServerContainer;
-import javax.websocket.server.ServerEndpoint;
-import javax.websocket.server.ServerEndpointConfig;
+import jakarta.websocket.ClientEndpointConfig;
+import jakarta.websocket.ContainerProvider;
+import jakarta.websocket.Endpoint;
+import jakarta.websocket.EndpointConfig;
+import jakarta.websocket.MessageHandler;
+import jakarta.websocket.OnMessage;
+import jakarta.websocket.OnOpen;
+import jakarta.websocket.RemoteEndpoint;
+import jakarta.websocket.Session;
+import jakarta.websocket.WebSocketContainer;
+import jakarta.websocket.server.ServerApplicationConfig;
+import jakarta.websocket.server.ServerContainer;
+import jakarta.websocket.server.ServerEndpoint;
+import jakarta.websocket.server.ServerEndpointConfig;
 
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
-import org.eclipse.jetty.servlet.DefaultServlet;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.websocket.javax.server.config.JavaxWebSocketServletContainerInitializer;
-import org.junit.Test;
+import org.eclipse.jetty.ee10.servlet.DefaultServlet;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.websocket.jakarta.server.config.JakartaWebSocketServletContainerInitializer ;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class EmbeddedJettyWebSocketsTest {
 
@@ -78,9 +77,9 @@ public class EmbeddedJettyWebSocketsTest {
 		Set<Class<?>> classes = new HashSet<>();
 		classes.add(MyServerApplicationConfig.class);
 		classes.add(MyAnnotatedEndpoint.class);
-		// org.eclipse.jetty.websocket.javax.server.config.JavaxWebSocketServletContainerInitializer is from
-		// org.eclipse.jetty.websocket/websocket-javax-server
-		sch.addServletContainerInitializer(new JavaxWebSocketServletContainerInitializer(), classes.toArray(new Class[0]));
+		// org.eclipse.jetty.ee10.websocket.jakarta.server.config.JakartaWebSocketServletContainerInitializer is from
+		// org.eclipse.jetty.ee10.websocket/jetty-ee10-websocket-jakarta-server
+		sch.addServletContainerInitializer(new JakartaWebSocketServletContainerInitializer(), classes.toArray(new Class[0]));
 
 		server.start();
 
@@ -104,9 +103,8 @@ public class EmbeddedJettyWebSocketsTest {
 		container.connectToServer(new MyClientEndpoint("c1"), config,
 				URI.create("ws://localhost:" + port + "/endpoint1"));
 
-		// org.eclipse.jetty.websocket.javax.server.internal.JavaxWebSocketServerContainer
 		ServerContainer sc = (ServerContainer) sch.getServletContext().getAttribute(ServerContainer.class.getName());
-		assertThat(sc.getClass().getName(), equalTo("org.eclipse.jetty.websocket.javax.server.internal.JavaxWebSocketServerContainer"));
+		assertThat(sc.getClass().getName()).isEqualTo("org.eclipse.jetty.ee10.websocket.jakarta.server.JakartaWebSocketServerContainer");
 		sc.addEndpoint(MyAnnotatedEndpoint.class);
 
 		container.connectToServer(new MyClientEndpoint("c2"), config,
@@ -126,7 +124,6 @@ public class EmbeddedJettyWebSocketsTest {
 			// to which the developer may add MessageHandler implementations in order to intercept incoming websocket
 			// messages.
 			System.out.println("[s1] Session opened: " + session + ", with config: " + config);
-			// can't use javax.websocket 1.1 API with Jetty
 			session.addMessageHandler(new MessageHandler.Whole<String>() {
 				@Override
 				public void onMessage(String message) {
@@ -158,7 +155,6 @@ public class EmbeddedJettyWebSocketsTest {
 			System.out.println("[" + client + "] Session opened: " + session + ", with config: " + config);
 //			session.getUserProperties().put(Constants.IO_TIMEOUT_MS_PROPERTY, "3600000");
 			RemoteEndpoint.Basic remote = session.getBasicRemote();
-			// can't use javax.websocket 1.1 API with Jetty
 			session.addMessageHandler(new MessageHandler.Whole<String>() {
 				@Override
 				public void onMessage(String message) {

@@ -36,7 +36,7 @@ public class SecurityConstraintModel {
 	/** {@code <auth-constraint>/<role-name>} elements */
 	private final List<String> authRoles = new ArrayList<>();
 
-	/** Flag distinguishing no auth roles ({$code true} - deny all) and auth roles not set at all ({$code false} - allow all) */
+	/** Flag distinguishing no auth roles ({@code true} - deny all) and auth roles not set at all ({@code false} - allow all) */
 	private boolean authRolesSet = true;
 
 	/** {@code <transport-guarantee><user-data-constraint>}. INTEGRAL and CONFIDENTIAL are in practice equivalent */

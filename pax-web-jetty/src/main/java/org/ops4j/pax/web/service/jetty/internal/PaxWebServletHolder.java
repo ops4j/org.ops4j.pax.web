@@ -16,16 +16,15 @@
 package org.ops4j.pax.web.service.jetty.internal;
 
 import java.lang.reflect.InvocationTargetException;
-import javax.servlet.Servlet;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.UnavailableException;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.UnavailableException;
 
-import org.eclipse.jetty.server.Request;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.eclipse.jetty.servlet.ServletMapping;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
+import org.eclipse.jetty.ee10.servlet.ServletMapping;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.jetty.internal.web.JettyResourceServlet;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
@@ -37,7 +36,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceObjects;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.http.runtime.dto.DTOConstants;
+import org.osgi.service.servlet.runtime.dto.DTOConstants;
 
 /**
  * <p>Jetty {@link ServletHolder} that can perform tasks described in Http Service and Whiteboard Service
@@ -56,7 +55,7 @@ public class PaxWebServletHolder extends ServletHolder {
 
 	private ServiceReference<Servlet> servletReference;
 
-	/** This {@link ServletContext} is scoped to single {@link org.osgi.service.http.context.ServletContextHelper} */
+	/** This {@link ServletContext} is scoped to single {@link org.osgi.service.servlet.context.ServletContextHelper} */
 	private final OsgiServletContext osgiServletContext;
 	/** This {@link ServletContext} is scoped to particular Whiteboard servlet */
 	private final OsgiScopedServletContext servletContext;
@@ -99,7 +98,7 @@ public class PaxWebServletHolder extends ServletHolder {
 	 *
 	 * @param servletModel
 	 * @param osgiContextModel
-	 * @param osgiServletContext {@link org.osgi.service.http.context.ServletContextHelper} specific
+	 * @param osgiServletContext {@link org.osgi.service.servlet.context.ServletContextHelper} specific
 	 *        {@link ServletContext}
 	 */
 	public PaxWebServletHolder(ServletModel servletModel, OsgiContextModel osgiContextModel,
@@ -200,7 +199,7 @@ public class PaxWebServletHolder extends ServletHolder {
 	 * of existing {@link Servlet} instance.</p>
 	 *
 	 * <p>Http Service / Whiteboard Service specification describe scenario where server instance (and also
-	 * other Whiteboard instances, including {@link org.osgi.service.http.context.ServletContextHelper} itself) are
+	 * other Whiteboard instances, including {@link org.osgi.service.servlet.context.ServletContextHelper} itself) are
 	 * obtained from OSGi Service Registry - knowing that {@link Servlet} may come from
 	 * {@link org.osgi.framework.ServiceFactory}. That's why we override this method for this special purpose.</p>
 	 *
@@ -281,18 +280,18 @@ public class PaxWebServletHolder extends ServletHolder {
 		return new OsgiInitializedServlet(super.newInstance(), servletContext, whiteboardTCCL);
 	}
 
+
 	/**
 	 * An override only to make it public, so it can be called from {@link PaxWebServletHandler}.
 	 *
-	 * @param baseRequest
 	 * @param request
 	 * @param response
 	 * @throws ServletException
 	 * @throws UnavailableException
 	 */
 	@Override
-	public void prepare(Request baseRequest, ServletRequest request, ServletResponse response) throws ServletException, UnavailableException {
-		super.prepare(baseRequest, request, response);
+	public void prepare(ServletRequest request, ServletResponse response) throws ServletException, UnavailableException {
+		super.prepare(request, response);
 	}
 
 	/**

@@ -16,11 +16,15 @@
 package org.ops4j.pax.web.service.jetty.internal.web;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
-import javax.servlet.ServletContext;
-import javax.servlet.UnavailableException;
 
-import org.eclipse.jetty.server.handler.ContextHandler;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.http.content.ValidatingCachingHttpContentFactory;
+import org.eclipse.jetty.server.ResourceService;
 import org.eclipse.jetty.util.resource.PathResource;
 import org.eclipse.jetty.util.resource.Resource;
 import org.ops4j.pax.web.service.jetty.internal.PaxWebServletContextHandler;
@@ -42,12 +46,12 @@ public class JettyResourceServlet extends DefaultServlet {
 
 	/**
 	 * If {@link #baseUrlResource} is not specified, this is resource prefix to prepend when calling
-	 * {@link org.osgi.service.http.context.ServletContextHelper#getResource(String)}
+	 * {@link org.osgi.service.servlet.context.ServletContextHelper#getResource(String)}
 	 */
 	private final String chroot;
 
-	// super._welcomes can be cleared after super.init()...
-	private String[] welcomeFiles;
+//	// super._welcomes can be cleared after super.init()...
+//	private String[] welcomeFiles;
 
 	public JettyResourceServlet(PathResource baseUrlResource, String chroot) {
 		this.baseUrlResource = baseUrlResource;
@@ -55,9 +59,9 @@ public class JettyResourceServlet extends DefaultServlet {
 	}
 
 	@Override
-	public void init() throws UnavailableException {
+	public void init() throws ServletException {
 		super.init();
-		_welcomes = welcomeFiles;
+//		_welcomes = welcomeFiles;
 
 		String maxCacheSize = getInitParameter("maxCacheSize");
 		String maxCachedFileSize = getInitParameter("maxCachedFileSize");
@@ -79,34 +83,39 @@ public class JettyResourceServlet extends DefaultServlet {
 				maxCachedFiles);
 	}
 
+	@Override
+	protected Resource configureBaseResource() {
+		return baseUrlResource;
+	}
+
 	/**
-	 * By making {@link DefaultServlet#_welcomes} protected, we can set those files without reinitializing the
+	 * By making {@code DefaultServlet#_welcomes} protected, we can set those files without reinitializing the
 	 * servlet
 	 * @param welcomeFiles
 	 */
 	public void setWelcomeFiles(String[] welcomeFiles) {
-		this.welcomeFiles = welcomeFiles;
-		_welcomes = welcomeFiles;
-		if (_cache != null) {
-			_cache.flushCache();
+		if (getResourceService() != null && getResourceService().getHttpContentFactory() instanceof ValidatingCachingHttpContentFactory cache) {
+			cache.flushCache();
 		}
 	}
 
 	public void setWelcomeFilesRedirect(boolean welcomeFilesRedirect) {
-		_resourceService.setRedirectWelcome(welcomeFilesRedirect);
+		getResourceService().setWelcomeMode(welcomeFilesRedirect
+				? ResourceService.WelcomeMode.REDIRECT : ResourceService.WelcomeMode.SERVE);
 	}
 
 	@Override
-	protected ContextHandler initContextHandler(ServletContext servletContext) {
+	protected ServletContextHandler initContextHandler(ServletContext servletContext) {
 		// necessary for super.init()
-		if (servletContext instanceof ContextHandler.Context) {
-			return ((ContextHandler.Context) servletContext).getContextHandler();
+		if (servletContext instanceof OsgiScopedServletContext osgiScopedServletContext) {
+			return super.initContextHandler(osgiScopedServletContext.getContainerServletContext());
 		}
-		return ((ContextHandler.Context)((OsgiScopedServletContext)servletContext).getContainerServletContext()).getContextHandler();
+		return super.initContextHandler(servletContext);
 	}
 
 	@Override
-	public Resource getResource(String pathInContext) {
+	public Resource getResource(URI uri) {
+		String pathInContext = uri.getPath();
 		// our (commons-io) normalized path
 		String childPath = Path.securePath(pathInContext);
 		if (childPath == null) {
@@ -124,7 +133,7 @@ public class JettyResourceServlet extends DefaultServlet {
 					// root directory access. Just return base resource and let super class handle welcome files
 					return baseUrlResource;
 				}
-				return baseUrlResource.addPath(childPath);
+				return baseUrlResource.resolve(childPath);
 			} else {
 				// HttpService/Whiteboard behavior - resourceBase is prepended to argument for context resource
 				// remember - under ServletContext there should be WebContainerContext that wraps

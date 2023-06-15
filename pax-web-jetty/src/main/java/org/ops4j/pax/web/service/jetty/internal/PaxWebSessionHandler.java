@@ -15,16 +15,9 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
-import javax.servlet.http.HttpSession;
-
-import org.eclipse.jetty.server.session.SessionHandler;
+import org.eclipse.jetty.ee10.servlet.SessionHandler;
 
 public class PaxWebSessionHandler extends SessionHandler {
-
-	@Override
-	public HttpSession getHttpSession(String extendedId) {
-		return super.getHttpSession(extendedId);
-	}
 
 	@Override
 	public void renewSessionId(String oldId, String oldExtendedId, String newId, String newExtendedId) {
@@ -41,20 +34,20 @@ public class PaxWebSessionHandler extends SessionHandler {
 		}
 	}
 
-	@Override
-	public String getExtendedId(HttpSession session) {
-		String eid = super.getExtendedId(session);
-		int tilde = eid.indexOf("~");
-		if (tilde == -1) {
-			return eid;
-		}
-		// org.eclipse.jetty.server.session.DefaultSessionIdManager.setWorkerName()
-		// ensures that there should be no dot in worker name appended to session id
-		int dot = eid.lastIndexOf(".");
-		if (dot == -1) {
-			return eid.substring(0, tilde);
-		}
-		return eid.substring(0, tilde) + eid.substring(dot);
-	}
+//	@Override
+//	public String getExtendedId(HttpSession session) {
+//		String eid = super.getExtendedId(session);
+//		int tilde = eid.indexOf("~");
+//		if (tilde == -1) {
+//			return eid;
+//		}
+//		// org.eclipse.jetty.server.session.DefaultSessionIdManager.setWorkerName()
+//		// ensures that there should be no dot in worker name appended to session id
+//		int dot = eid.lastIndexOf(".");
+//		if (dot == -1) {
+//			return eid.substring(0, tilde);
+//		}
+//		return eid.substring(0, tilde) + eid.substring(dot);
+//	}
 
 }
