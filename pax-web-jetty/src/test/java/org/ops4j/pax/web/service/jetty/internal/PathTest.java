@@ -16,32 +16,30 @@
 package org.ops4j.pax.web.service.jetty.internal;
 
 import org.eclipse.jetty.util.URIUtil;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class PathTest {
 
 	@Test
 	public void securePaths() {
-		assertThat(URIUtil.canonicalPath(""), equalTo(""));
-		assertThat(URIUtil.canonicalPath("/"), equalTo("/"));
-		assertThat(URIUtil.canonicalPath("c:"), equalTo("c:"));
-		assertThat(URIUtil.canonicalPath("c:/"), equalTo("c:/"));
-		assertThat(URIUtil.canonicalPath("c:\\"), equalTo("c:\\"));
-		assertThat(URIUtil.canonicalPath("//"), equalTo("//"));
-		assertThat(URIUtil.canonicalPath("."), equalTo(""));
-		assertThat(URIUtil.canonicalPath(".."), nullValue());
-		assertThat(URIUtil.canonicalPath("../.."), nullValue());
-		assertThat(URIUtil.canonicalPath("./././././././."), equalTo(""));
-		assertThat(URIUtil.canonicalPath("../../../../../etc/passwd"), nullValue());
-		assertThat(URIUtil.canonicalPath("path1"), equalTo("path1"));
-		assertThat(URIUtil.canonicalPath("./path1"), equalTo("path1"));
-		assertThat(URIUtil.canonicalPath("../path1"), nullValue());
-		assertThat(URIUtil.canonicalPath("path1/path2"), equalTo("path1/path2"));
-		assertThat(URIUtil.canonicalPath("path1/../path2"), equalTo("path2"));
+		assertThat(URIUtil.canonicalPath("")).isEqualTo("");
+		assertThat(URIUtil.canonicalPath("/")).isEqualTo("/");
+		assertThat(URIUtil.canonicalPath("c:")).isEqualTo("c:");
+		assertThat(URIUtil.canonicalPath("c:/")).isEqualTo("c:/");
+		assertThat(URIUtil.canonicalPath("c:\\")).isEqualTo("c:%5C");
+		assertThat(URIUtil.canonicalPath("//")).isEqualTo("//");
+		assertThat(URIUtil.canonicalPath(".")).isEqualTo("");
+		assertThat(URIUtil.canonicalPath("..")).isNull();
+		assertThat(URIUtil.canonicalPath("../..")).isNull();
+		assertThat(URIUtil.canonicalPath("./././././././.")).isEqualTo("");
+		assertThat(URIUtil.canonicalPath("../../../../../etc/passwd")).isNull();
+		assertThat(URIUtil.canonicalPath("path1")).isEqualTo("path1");
+		assertThat(URIUtil.canonicalPath("./path1")).isEqualTo("path1");
+		assertThat(URIUtil.canonicalPath("../path1")).isNull();
+		assertThat(URIUtil.canonicalPath("path1/path2")).isEqualTo("path1/path2");
+		assertThat(URIUtil.canonicalPath("path1/../path2")).isEqualTo("path2");
 	}
 
 }

@@ -16,7 +16,7 @@
     limitations under the License.
 
 -->
-<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "http://www.eclipse.org/jetty/configure_9_3.dtd">
+<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "https://www.eclipse.org/jetty/configure_10_0.dtd">
 <Configure id="threadPool" class="org.eclipse.jetty.util.thread.QueuedThreadPool">
 	<Set name="minThreads" type="int">8</Set>
 	<Set name="maxThreads" type="int">200</Set>

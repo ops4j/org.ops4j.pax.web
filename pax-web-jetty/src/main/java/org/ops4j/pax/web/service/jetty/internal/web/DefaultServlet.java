@@ -11,8 +11,9 @@
 // ========================================================================
 //
 
-package org.eclipse.jetty.ee10.servlet;
+package org.ops4j.pax.web.service.jetty.internal.web;
 
+//CHECKSTYLE:OFF
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -46,6 +47,12 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpServletResponseWrapper;
+import org.eclipse.jetty.ee10.servlet.ServletApiRequest;
+import org.eclipse.jetty.ee10.servlet.ServletApiResponse;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletContextRequest;
+import org.eclipse.jetty.ee10.servlet.ServletContextResponse;
+import org.eclipse.jetty.ee10.servlet.ServletHandler;
 import org.eclipse.jetty.http.CompressedContentFormat;
 import org.eclipse.jetty.http.HttpException;
 import org.eclipse.jetty.http.HttpField;
@@ -70,11 +77,7 @@ import org.eclipse.jetty.server.ResourceService;
 import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ContextHandler;
-import org.eclipse.jetty.util.Blocker;
-import org.eclipse.jetty.util.BufferUtil;
-import org.eclipse.jetty.util.Callback;
-import org.eclipse.jetty.util.IO;
-import org.eclipse.jetty.util.URIUtil;
+import org.eclipse.jetty.util.*;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.resource.ResourceFactory;
 import org.eclipse.jetty.util.resource.Resources;
@@ -222,6 +225,9 @@ public class DefaultServlet extends HttpServlet
             }
         }
 
+        // for welcome file handling we need some _baseResource
+        _baseResource = configureBaseResource();
+
         List<CompressedContentFormat> precompressedFormats = parsePrecompressedFormats(getInitParameter("precompressed"),
             getInitBoolean("gzip"), _resourceService.getPrecompressedFormats());
 
@@ -230,7 +236,11 @@ public class DefaultServlet extends HttpServlet
         if (contentFactory == null)
         {
             MimeTypes mimeTypes = _contextHandler.getMimeTypes();
-            ResourceFactory resourceFactory = _baseResource != null ? ResourceFactory.of(_baseResource) : this::getResource;
+            // we need to translate "" to "/", so this::getResource is not enough
+            // also we want to use LaxResourceFactory whether or not _baseResource is set (it has to be set for
+            // proper welcome file handling)
+//            ResourceFactory resourceFactory = _baseResource != null ? ResourceFactory.of(_baseResource) : this::getResource;
+            ResourceFactory resourceFactory = new LaxResourceFactory();
             contentFactory = new ResourceHttpContentFactory(resourceFactory, mimeTypes);
 
             // Use the servers default stylesheet unless there is one explicitly set by an init param.
@@ -341,6 +351,10 @@ public class DefaultServlet extends HttpServlet
             LOG.debug("  .isPathInfoOnly = {}", _isPathInfoOnly);
             LOG.debug("  .welcomeServletMode = {}", _welcomeServletMode);
         }
+    }
+
+    protected Resource configureBaseResource() {
+        return new EmptyResource();
     }
 
     private static ByteBufferPool getByteBufferPool(ContextHandler contextHandler)
@@ -547,7 +561,7 @@ public class DefaultServlet extends HttpServlet
         doGet(req, resp);
     }
 
-    private Resource getResource(URI uri)
+    protected Resource getResource(URI uri)
     {
         String uriPath = uri.getRawPath();
         Resource result = null;
@@ -1299,4 +1313,22 @@ public class DefaultServlet extends HttpServlet
          */
         EXACT
     }
+
+    private class LaxResourceFactory implements ResourceFactory {
+
+        @Override
+        public Resource newResource(String resource) {
+            if (StringUtil.isBlank(resource)) {
+                resource = "/";
+            }
+            return newResource(URIUtil.toURI(resource));
+        }
+
+        @Override
+        public Resource newResource(URI uri) {
+            return DefaultServlet.this.getResource(uri);
+        }
+    }
+
 }
+//CHECKSTYLE:ON

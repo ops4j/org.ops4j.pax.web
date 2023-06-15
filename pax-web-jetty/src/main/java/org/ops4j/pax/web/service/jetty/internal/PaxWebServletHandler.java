@@ -21,28 +21,26 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
-import javax.servlet.DispatcherType;
-import javax.servlet.FilterChain;
-import javax.servlet.Servlet;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
+import org.eclipse.jetty.ee10.servlet.ServletContextRequest;
+import org.eclipse.jetty.ee10.servlet.ServletContextResponse;
 import org.eclipse.jetty.server.Request;
-import org.eclipse.jetty.server.ServletRequestHttpWrapper;
-import org.eclipse.jetty.server.ServletResponseHttpWrapper;
-import org.eclipse.jetty.servlet.FilterHolder;
-import org.eclipse.jetty.servlet.FilterMapping;
-import org.eclipse.jetty.servlet.ListenerHolder;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.eclipse.jetty.servlet.ServletMapping;
+import org.eclipse.jetty.ee10.servlet.FilterHolder;
+import org.eclipse.jetty.ee10.servlet.FilterMapping;
+import org.eclipse.jetty.ee10.servlet.ListenerHolder;
+import org.eclipse.jetty.ee10.servlet.ServletHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
+import org.eclipse.jetty.ee10.servlet.ServletMapping;
+import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.util.ArrayUtil;
-import org.eclipse.jetty.util.MultiException;
+import org.eclipse.jetty.util.Callback;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
@@ -50,18 +48,18 @@ import org.ops4j.pax.web.service.spi.servlet.OsgiFilterChain;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiSessionAttributeListener;
 import org.ops4j.pax.web.service.spi.servlet.PreprocessorFilterConfig;
-import org.osgi.service.http.whiteboard.Preprocessor;
+import org.osgi.service.servlet.whiteboard.Preprocessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * <p>Specialized {@link ServletHandler} to be used inside specialized
- * {@link org.eclipse.jetty.servlet.ServletContextHandler} for Pax Web specific invocation and management of
+ * {@link org.eclipse.jetty.ee10.servlet.ServletContextHandler} for Pax Web specific invocation and management of
  * servlets.</p>
  *
  * <p>Remember (a note to myself as well), {@link ServletHandler} in Jetty is not for handling single servlet, it's
  * for handling <strong>all</strong> the servlets within single
- * {@link org.eclipse.jetty.servlet.ServletContextHandler}.</p>
+ * {@link org.eclipse.jetty.ee10.servlet.ServletContextHandler}.</p>
  */
 public class PaxWebServletHandler extends ServletHandler {
 
@@ -92,7 +90,7 @@ public class PaxWebServletHandler extends ServletHandler {
 	private final ThreadLocal<PaxWebServletHolder> currentServletHolder = new ThreadLocal<>();
 
 	/**
-	 * Create new {@link ServletHandler} for given {@link org.eclipse.jetty.servlet.ServletContextHandler}
+	 * Create new {@link ServletHandler} for given {@link org.eclipse.jetty.ee10.servlet.ServletContextHandler}
 	 * @param default404Servlet this servlet will be used when there's no mapped servlet
 	 */
 	PaxWebServletHandler(Servlet default404Servlet, OsgiSessionAttributeListener osgiSessionsBridge) {
@@ -154,10 +152,10 @@ public class PaxWebServletHandler extends ServletHandler {
 
 		try {
 			super.initialize();
-		} catch (MultiException e) {
+		} catch (Exception e) {
 			// See https://github.com/ops4j/org.ops4j.pax.web/issues/1725
 			// we don't want entire context to become UNAVAILABLE just because some servlets/filters
-			// thrown javax.servlet.UnavailableException
+			// thrown jakarta.servlet.UnavailableException
 			// in OSGi it is quite common and we should handle exceptions like ClassNotFoundException
 			// in less fatal way
 			LOG.error(e.getMessage(), e);
@@ -173,8 +171,7 @@ public class PaxWebServletHandler extends ServletHandler {
 		List<PaxWebFilterHolder> newFilters = new ArrayList<>();
 		List<PaxWebFilterMapping> newFilterMappings = new ArrayList<>();
 		for (FilterHolder fh : getFilters()) {
-			if (fh instanceof PaxWebFilterHolder) {
-				PaxWebFilterHolder pwfh = (PaxWebFilterHolder) fh;
+			if (fh instanceof PaxWebFilterHolder pwfh) {
 				if (pwfh.getFilterModel() == null || pwfh.getFilterModel().isDynamic()) {
 					continue;
 				}
@@ -232,8 +229,8 @@ public class PaxWebServletHandler extends ServletHandler {
 	}
 
 	/**
-	 * Override the method from {@link org.eclipse.jetty.servlet.ServletContextHandler} just because
-	 * {@code org.eclipse.jetty.websocket.javax.server.config.JavaxWebSocketServletContainerInitializer} adds
+	 * Override the method from {@link org.eclipse.jetty.ee10.servlet.ServletContextHandler} just because
+	 * {@code org.eclipse.jetty.ee10.websocket.jakarta.server.config.JakartaWebSocketServletContainerInitializer} adds
 	 * {@link FilterHolder} directly, while we use {@link PaxWebFilterHolder} array.
 	 * @param holder
 	 * @param pathSpec
@@ -299,65 +296,63 @@ public class PaxWebServletHandler extends ServletHandler {
 	}
 
 	/**
-	 * Jetty {@link ServletHandler#doHandle(String, Request, HttpServletRequest, HttpServletResponse)} is not just
+	 * Jetty {@link ServletHandler#handle(Request, Response, Callback)} is not just
 	 * about calling a servlet. It's about preparation of entire chain of invocation and mapping of incoming request
 	 * into some target servlet + associated filters.
 	 *
-	 * @param target
-	 * @param baseRequest
 	 * @param request
 	 * @param response
+	 * @param callback
 	 * @throws IOException
 	 * @throws ServletException
 	 */
 	@Override
-	public void doHandle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
-			throws IOException, ServletException {
-
+	public boolean handle(Request request, Response response, Callback callback) throws Exception {
+		ServletContextRequest req = Request.as(request, ServletContextRequest.class);
+		ServletContextResponse res = req.getResponse();
 		if ("TRACE".equals(request.getMethod())) {
 			// PAXWEB-229 - prevent https://owasp.org/www-community/attacks/Cross_Site_Tracing
-			response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-			baseRequest.setHandled(true);
-			return;
+			response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+			return true;
 		}
 
 		// whether there are filters or not, we *copy* code from super.doHandle() to ensure that
 		// getOsgiFilterChain() is called
 
 		// this should never be null because of ServletHandler.setEnsureDefaultServlet(true)
-		PaxWebServletHolder servletHolder = (PaxWebServletHolder)baseRequest.getUserIdentityScope();
+		PaxWebServletHolder servletHolder = (PaxWebServletHolder) req.getMappedServlet().getServletHolder();
 
 		try {
 			// we always create the chain, because we have to call handleSecurity()/finishSecurity()
-			FilterChain chain = getOsgiFilterChain(baseRequest, target, servletHolder);
+			String target = Request.getPathInContext(req);
+			FilterChain chain = getOsgiFilterChain(req, target, servletHolder);
 
 			// unwrap any tunnelling of base Servlet request/responses
-			ServletRequest req = request;
-			if (req instanceof ServletRequestHttpWrapper) {
-				req = ((ServletRequestHttpWrapper) req).getRequest();
-			}
-			ServletResponse res = response;
-			if (res instanceof ServletResponseHttpWrapper) {
-				res = ((ServletResponseHttpWrapper) res).getResponse();
-			}
+//			if (req.getServletApiRequest() instanceof ServletRequestHttpWrapper) {
+//				req = ((ServletRequestHttpWrapper) req).getRequest();
+//			}
+//			if (res instanceof ServletResponseHttpWrapper) {
+//				res = ((ServletResponseHttpWrapper) res).getResponse();
+//			}
 
 			// set some attributes in the request
-			servletHolder.prepare(baseRequest, req, res);
+			servletHolder.prepare(req.getServletApiRequest(), res.getServletApiResponse());
 
 			// chain still can be null if the servlet is default404Servlet
 			if (chain != null) {
-				chain.doFilter(req, res);
+				chain.doFilter(req.getServletApiRequest(), res.getServletApiResponse());
 			} else {
-				servletHolder.handle(baseRequest, req, res);
+				servletHolder.handle(req.getServletApiRequest(), res.getServletApiResponse());
 			}
 		} finally {
-			if (servletHolder != null) {
-				baseRequest.setHandled(true);
-			}
+//			if (servletHolder != null) {
+//				baseRequest.setHandled(true);
+//			}
 		}
+		return true;
 	}
 
-	protected FilterChain getOsgiFilterChain(final Request baseRequest, String pathInContext, ServletHolder servletHolder) {
+	protected FilterChain getOsgiFilterChain(final ServletContextRequest baseRequest, String pathInContext, ServletHolder servletHolder) {
 		PaxWebServletHolder holder = (PaxWebServletHolder) servletHolder;
 
 		// either super.getFilterChain() will return a chain that should be invoked once (which will provide
@@ -374,7 +369,7 @@ public class PaxWebServletHandler extends ServletHandler {
 		// otherwise we'd have to construct the chain on every call.
 		// also, we have to handle case where filters are called in a chain that doesn't have a target servlet at all
 
-		FilterChain chain = getFilterChain(baseRequest, pathInContext, servletHolder);
+		FilterChain chain = getFilterChain(baseRequest.getServletApiRequest(), pathInContext, servletHolder);
 
 		// 140.5.1 Servlet Pre-Processors
 		// A Preprocessor is invoked before request dispatching is performed. If multiple pre-processors
@@ -391,9 +386,9 @@ public class PaxWebServletHandler extends ServletHandler {
 		if (chain == null) {
 			// 3a. even if there's only a ServletHolder there == null chain
 			// 3b. if the holder is for known 404 servlet, we still need a chain that calls 404 servlet
-			chain = (request, response) -> holder.handle(baseRequest, request, response);
+			chain = holder::handle;
 		}
-		List<Preprocessor> preprocessorInstances = preprocessors.stream().map(PreprocessorFilterConfig::getInstance).collect(Collectors.toList());
+		List<Preprocessor> preprocessorInstances = preprocessors.stream().map(PreprocessorFilterConfig::getInstance).toList();
 		if (!holder.is404()) {
 			return new OsgiFilterChain(new ArrayList<>(preprocessorInstances), holder.getOsgiServletContext(),
 					holder.getWebContainerContext(), chain, osgiSessionsBridge);
@@ -411,7 +406,7 @@ public class PaxWebServletHandler extends ServletHandler {
 	 * @return
 	 */
 	@Override
-	protected FilterChain getFilterChain(Request baseRequest, String pathInContext, ServletHolder servletHolder) {
+	protected FilterChain getFilterChain(HttpServletRequest baseRequest, String pathInContext, ServletHolder servletHolder) {
 		PaxWebServletHolder holder = (PaxWebServletHolder) servletHolder;
 
 		// calculate caching key for filter chain

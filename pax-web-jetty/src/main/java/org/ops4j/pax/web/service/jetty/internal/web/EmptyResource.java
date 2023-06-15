@@ -15,77 +15,51 @@
  */
 package org.ops4j.pax.web.service.jetty.internal.web;
 
-import java.net.URI;
-import java.nio.file.Path;
-import java.time.Instant;
-
 import org.eclipse.jetty.util.resource.Resource;
 
-/**
- * Special wrapper for {@link Resource} to handle URLs representing roots of the bundles.
- */
-public class RootBundleURLResource extends Resource {
+import java.net.URI;
+import java.nio.file.Path;
 
-	private final Resource delegate;
+public class EmptyResource extends Resource {
 
-	public RootBundleURLResource(Resource delegate) {
-		this.delegate = delegate;
+	@Override
+	public Path getPath() {
+		return null;
 	}
 
 	@Override
 	public boolean isContainedIn(Resource r) {
-		return delegate.isContainedIn(r);
-	}
-
-	@Override
-	public boolean exists() {
-		// root of the bundle always exists
-		return true;
+		return false;
 	}
 
 	@Override
 	public boolean isDirectory() {
-		return true;
-	}
-
-	@Override
-	public Instant lastModified() {
-		return Instant.ofEpochMilli(0);
-	}
-
-	@Override
-	public long length() {
-		return 0;
-	}
-
-	@Override
-	public URI getURI() {
-		return delegate.getURI();
-	}
-
-	@Override
-	public Path getPath() {
-		return delegate.getPath();
-	}
-
-	@Override
-	public String getName() {
-		return delegate.getName();
+		return false;
 	}
 
 	@Override
 	public boolean isReadable() {
-		return delegate.isReadable();
+		return false;
+	}
+
+	@Override
+	public URI getURI() {
+		return null;
+	}
+
+	@Override
+	public String getName() {
+		return null;
 	}
 
 	@Override
 	public String getFileName() {
-		return delegate.getFileName();
+		return null;
 	}
 
 	@Override
 	public Resource resolve(String subUriPath) {
-		return delegate.resolve(subUriPath);
+		return null;
 	}
 
 }

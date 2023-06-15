@@ -15,6 +15,38 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.PushBuilder;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
+import org.eclipse.jetty.http.HostPortHttpField;
+import org.eclipse.jetty.http.HttpField;
+import org.eclipse.jetty.http.HttpFields;
+import org.eclipse.jetty.http.HttpHeader;
+import org.eclipse.jetty.http.HttpVersion;
+import org.eclipse.jetty.http.MetaData;
+import org.eclipse.jetty.http2.hpack.HpackDecoder;
+import org.eclipse.jetty.http2.hpack.HpackEncoder;
+import org.eclipse.jetty.http2.hpack.HpackException;
+import org.eclipse.jetty.http2.server.HTTP2CServerConnectionFactory;
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.HttpConfiguration;
+import org.eclipse.jetty.server.HttpConnectionFactory;
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.Response;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.util.BufferUtil;
+import org.eclipse.jetty.util.Callback;
+import org.eclipse.jetty.util.thread.QueuedThreadPool;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -30,38 +62,13 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.PushBuilder;
 
-import org.eclipse.jetty.http.HostPortHttpField;
-import org.eclipse.jetty.http.HttpField;
-import org.eclipse.jetty.http.HttpFields;
-import org.eclipse.jetty.http.HttpVersion;
-import org.eclipse.jetty.http.MetaData;
-import org.eclipse.jetty.http2.hpack.HpackDecoder;
-import org.eclipse.jetty.http2.hpack.HpackEncoder;
-import org.eclipse.jetty.http2.hpack.HpackException;
-import org.eclipse.jetty.http2.server.HTTP2CServerConnectionFactory;
-import org.eclipse.jetty.server.Connector;
-import org.eclipse.jetty.server.HttpConfiguration;
-import org.eclipse.jetty.server.HttpConnectionFactory;
-import org.eclipse.jetty.server.Request;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.server.handler.AbstractHandler;
-import org.eclipse.jetty.util.thread.QueuedThreadPool;
-import org.junit.Before;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.startsWith;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class EmbeddedJettyHttp2Test {
 
@@ -73,7 +80,7 @@ public class EmbeddedJettyHttp2Test {
 	private HpackDecoder decoder;
 	private Map<Integer, String> responses;
 
-	@Before
+	@BeforeEach
 	public void resetState() {
 		decoder = new HpackDecoder(4096, 8192);
 		responses = new HashMap<>();
@@ -96,14 +103,16 @@ public class EmbeddedJettyHttp2Test {
 
 		server.setConnectors(new Connector[] { connector });
 
-		server.setHandler(new AbstractHandler() {
+		server.setHandler(new Handler.Abstract() {
 			@Override
-			public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException {
-				LOG.info("Handling request {} from {}:{}", target, request.getRemoteAddr(), request.getRemotePort());
-				response.setContentType("text/plain");
-				response.setCharacterEncoding("UTF-8");
-				response.getWriter().write("OK\n");
-				response.getWriter().close();
+			public boolean handle(Request request, Response response, Callback callback) {
+				InetSocketAddress a = (InetSocketAddress) request.getConnectionMetaData().getRemoteSocketAddress();
+				LOG.info("Handling request {} from {}:{}", request.getHttpURI().asString(), a.getHostName(), a.getPort());
+				response.setStatus(200);
+				response.getHeaders().add(HttpHeader.CONTENT_TYPE, "text/plain; charset=UTF-8");
+				response.write(true, BufferUtil.toBuffer("OK\n"), callback);
+				callback.succeeded();
+				return true;
 			}
 		});
 
@@ -241,9 +250,14 @@ public class EmbeddedJettyHttp2Test {
 
 		server.setConnectors(new Connector[] { connector });
 
-		server.setHandler(new AbstractHandler() {
+		final CountDownLatch latch = new CountDownLatch(3);
+
+		ServletContextHandler handler = new ServletContextHandler("/");
+		handler.setAllowNullPathInfo(true);
+		handler.setAllowNullPathInContext(true);
+		handler.addServlet(new ServletHolder("default-servlet", new HttpServlet() {
 			@Override
-			public void handle(String target, Request baseRequest, HttpServletRequest req, HttpServletResponse resp) throws IOException {
+			protected void service(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 				LOG.info("Handling request {} from {}:{}", req.getRequestURI(), req.getRemoteAddr(), req.getRemotePort());
 				if (!"/test/index.html".equals(req.getPathInfo())) {
 					// normal request
@@ -258,6 +272,7 @@ public class EmbeddedJettyHttp2Test {
 						resp.getWriter().write("window.alert(\"hello world\");\n");
 					}
 					resp.getWriter().close();
+					latch.countDown();
 				} else {
 					// first - normal data
 					resp.setContentType("text/plain");
@@ -271,17 +286,16 @@ public class EmbeddedJettyHttp2Test {
 						pushBuilder.path("/test/app.js").removeHeader("X-Request-P1").addHeader("X-Request-P2", req.getRequestURI()).push();
 					}
 					resp.getWriter().close();
+					latch.countDown();
 				}
 			}
-		});
+		}), "/*");
+		server.setHandler(handler);
 
 		server.start();
 
 		int port = connector.getLocalPort();
 		LOG.info("Local port after start: {}", port);
-
-		AtomicInteger count = new AtomicInteger(1);
-		ExecutorService pool = Executors.newFixedThreadPool(4, r -> new Thread(r, "pool-thread-" + count.getAndIncrement()));
 
 		Selector selector = Selector.open();
 
@@ -369,7 +383,7 @@ public class EmbeddedJettyHttp2Test {
 			response = response.substring(0, rnrn + 4);
 		}
 		LOG.info("Response\n{}", response);
-		assertThat(fullResponse, startsWith("HTTP/1.1 101 Switching Protocols\r\n"));
+		assertThat(fullResponse).startsWith("HTTP/1.1 101 Switching Protocols\r\n");
 		buffer.position(rnrn + 4);
 		boolean remains = true;
 		while (remains) {
@@ -409,6 +423,8 @@ public class EmbeddedJettyHttp2Test {
 		LOG.info("===== Sending ACK for sid=0 with SETTINGS response");
 		send(selector, key, buffer);
 
+		latch.await(2, TimeUnit.SECONDS);
+
 		LOG.info("===== Receiving response");
 		receive(selector, key, buffer);
 		remains = true;
@@ -425,9 +441,9 @@ public class EmbeddedJettyHttp2Test {
 		server.join();
 
 		// indexed by HTTP/2 Stream ID
-		assertThat(responses.get(1), equalTo("OK\n"));
-		assertThat(responses.get(2), equalTo("body { margin: 0 }\n"));
-		assertThat(responses.get(4), equalTo("window.alert(\"hello world\");\n"));
+		assertThat(responses.get(1)).isEqualTo("OK\n");
+		assertThat(responses.get(2)).isEqualTo("body { margin: 0 }\n");
+		assertThat(responses.get(4)).isEqualTo("window.alert(\"hello world\");\n");
 	}
 
 	@Test
@@ -449,9 +465,14 @@ public class EmbeddedJettyHttp2Test {
 
 		server.setConnectors(new Connector[] { connector });
 
-		server.setHandler(new AbstractHandler() {
+		final CountDownLatch latch = new CountDownLatch(3);
+
+		ServletContextHandler handler = new ServletContextHandler("/");
+		handler.setAllowNullPathInfo(true);
+		handler.setAllowNullPathInContext(true);
+		handler.addServlet(new ServletHolder("default-servlet", new HttpServlet() {
 			@Override
-			public void handle(String target, Request baseRequest, HttpServletRequest req, HttpServletResponse resp) throws IOException {
+			protected void service(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 				LOG.info("Handling request {} from {}:{}", req.getRequestURI(), req.getRemoteAddr(), req.getRemotePort());
 				if (!"/test/index.html".equals(req.getPathInfo())) {
 					// normal request
@@ -466,6 +487,7 @@ public class EmbeddedJettyHttp2Test {
 						resp.getWriter().write("window.alert(\"hello world\");\n");
 					}
 					resp.getWriter().close();
+					latch.countDown();
 				} else {
 					// first - normal data
 					resp.setContentType("text/plain");
@@ -479,17 +501,16 @@ public class EmbeddedJettyHttp2Test {
 						pushBuilder.path("/test/app.js").removeHeader("X-Request-P1").addHeader("X-Request-P2", req.getRequestURI()).push();
 					}
 					resp.getWriter().close();
+					latch.countDown();
 				}
 			}
-		});
+		}), "/*");
+		server.setHandler(handler);
 
 		server.start();
 
 		int port = connector.getLocalPort();
 		LOG.info("Local port after start: {}", port);
-
-		AtomicInteger count = new AtomicInteger(1);
-		ExecutorService pool = Executors.newFixedThreadPool(4, r -> new Thread(r, "pool-thread-" + count.getAndIncrement()));
 
 		Selector selector = Selector.open();
 
@@ -611,14 +632,20 @@ public class EmbeddedJettyHttp2Test {
 		// assume it's one byte
 		buffer.array()[2] = (byte) (buffer.position() - p1);
 
+		LOG.info("Sending");
 		send(selector, key, buffer);
 
+		LOG.info("Awaiting");
+		latch.await(2, TimeUnit.SECONDS);
+
+		LOG.info("Receiving");
 		receive(selector, key, buffer);
 		remains = true;
 		while (remains) {
 			remains = decodeFrame(buffer, true);
 		}
 
+		LOG.info("End of processing");
 		// end of processing
 		key.cancel();
 
@@ -628,9 +655,9 @@ public class EmbeddedJettyHttp2Test {
 		server.join();
 
 		// indexed by HTTP/2 Stream ID
-		assertThat(responses.get(1), equalTo("OK\n"));
-		assertThat(responses.get(2), equalTo("body { margin: 0 }\n"));
-		assertThat(responses.get(4), equalTo("window.alert(\"hello world\");\n"));
+		assertThat(responses.get(1)).isEqualTo("OK\n");
+		assertThat(responses.get(2)).isEqualTo("body { margin: 0 }\n");
+		assertThat(responses.get(4)).isEqualTo("window.alert(\"hello world\");\n");
 	}
 
 	private void send(Selector selector, SelectionKey key, ByteBuffer buffer) throws IOException {
@@ -638,7 +665,7 @@ public class EmbeddedJettyHttp2Test {
 		key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);
 		while (true) {
 			boolean done = false;
-			selected = selector.select(100L);
+			selected = selector.select(200L);
 			if (selected > 0) {
 				Set<SelectionKey> keys = selector.selectedKeys();
 				for (SelectionKey k : keys) {
@@ -664,7 +691,7 @@ public class EmbeddedJettyHttp2Test {
 		key.interestOps(SelectionKey.OP_READ);
 
 		while (true) {
-			selected = selector.select(200L);
+			selected = selector.select(300L);
 			if (selected > 0) {
 				Set<SelectionKey> keys = selector.selectedKeys();
 				for (SelectionKey k : keys) {
@@ -711,7 +738,7 @@ public class EmbeddedJettyHttp2Test {
 		byte[] payload = new byte[length];
 		int read = dis.read(payload, 0, length);
 		if (read >= 0) {
-			assertThat(read, equalTo(length));
+			assertThat(read).isEqualTo(length);
 		}
 		buffer.position(buffer.position() + 3 + 1 + 1 + 4 + length);
 
@@ -759,7 +786,7 @@ public class EmbeddedJettyHttp2Test {
 				}
 				MetaData md = decoder.decode(ByteBuffer.wrap(payload, offset, length - offset));
 				LOG.info(" - HEADERS::HTTP version: {}", md.getHttpVersion());
-				for (HttpField f : md.getFields()) {
+				for (HttpField f : md.getHttpFields()) {
 					LOG.info(" - HEADERS::{}: {}", f.getName(), f.getValue());
 				}
 				break;
@@ -839,7 +866,7 @@ public class EmbeddedJettyHttp2Test {
 				}
 				MetaData md = decoder.decode(ByteBuffer.wrap(payload, offset, length - offset));
 				LOG.info(" - HEADERS::HTTP version: {}", md.getHttpVersion());
-				for (HttpField f : md.getFields()) {
+				for (HttpField f : md.getHttpFields()) {
 					LOG.info(" - HEADERS::{}: {}", f.getName(), f.getValue());
 				}
 				break;
