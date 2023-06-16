@@ -46,16 +46,16 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.function.Supplier;
-import javax.servlet.DispatcherType;
-import javax.servlet.Servlet;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletContextAttributeListener;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-import javax.servlet.ServletException;
-import javax.servlet.SessionCookieConfig;
-import javax.servlet.annotation.ServletSecurity;
-import javax.servlet.http.HttpSessionAttributeListener;
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletContextAttributeListener;
+import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.ServletContextListener;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.SessionCookieConfig;
+import jakarta.servlet.annotation.ServletSecurity;
+import jakarta.servlet.http.HttpSessionAttributeListener;
 import javax.xml.XMLConstants;
 import javax.xml.parsers.SAXParserFactory;
 
@@ -182,7 +182,7 @@ import org.ops4j.pax.web.service.undertow.internal.web.UndertowResourceServlet;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.wiring.BundleWiring;
-import org.osgi.service.http.whiteboard.Preprocessor;
+import org.osgi.service.servlet.whiteboard.Preprocessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
@@ -304,8 +304,8 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 	private final Map<String, PaxWebPreprocessorsHandler> preprocessorsHandlers = new HashMap<>();
 
 	/**
-	 * Handlers that call {@link org.osgi.service.http.HttpContext#handleSecurity} and/or
-	 * {@link org.osgi.service.http.context.ServletContextHelper#handleSecurity}.
+	 * Handlers that call {@link org.ops4j.pax.web.service.http.HttpContext#handleSecurity} and/or
+	 * {@link org.osgi.service.servlet.context.ServletContextHelper#handleSecurity}.
 	 */
 	private final Map<String, PaxWebSecurityHandler> securityHandlers = new HashMap<>();
 
@@ -318,14 +318,14 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 	private final Map<String, DeploymentInfo> deploymentInfos = new HashMap<>();
 
 	/**
-	 * 1:1 mapping between {@link OsgiContextModel} and {@link org.osgi.service.http.context.ServletContextHelper}'s
-	 * specific {@link javax.servlet.ServletContext}.
+	 * 1:1 mapping between {@link OsgiContextModel} and {@link org.osgi.service.servlet.context.ServletContextHelper}'s
+	 * specific {@link jakarta.servlet.ServletContext}.
 	 */
 	private final Map<OsgiContextModel, OsgiServletContext> osgiServletContexts = new HashMap<>();
 
 	/**
 	 * 1:N mapping between context path and sorted (by ranking rules) set of {@link OsgiContextModel}. This helps
-	 * finding proper {@link org.osgi.service.http.context.ServletContextHelper} (1:1 with {@link OsgiContextModel})
+	 * finding proper {@link org.osgi.service.servlet.context.ServletContextHelper} (1:1 with {@link OsgiContextModel})
 	 * to use for filters, when the invocation chain doesn't contain target servlet (which otherwise would
 	 * determine the ServletContextHelper to use).
 	 */
@@ -1561,7 +1561,7 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 				info.setRunAs(model.getRunAs());
 
 				// when only adding new servlet, we can simply alter existing deployment
-				// because this is possible (as required by methods like javax.servlet.ServletContext.addServlet())
+				// because this is possible (as required by methods like jakarta.servlet.ServletContext.addServlet())
 				// we can't go the easy way when _removing_ servlets
 				deploymentInfo.addServlet(info);
 				if (deployment != null) {
@@ -2337,7 +2337,7 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 					if (initializers != null) {
 						// just remove the ServletContainerInitializerInfo without _cleaning_ it, because it was
 						// _cleaned_ just after io.undertow.servlet.core.DeploymentManagerImpl.deploy() called
-						// javax.servlet.ServletContainerInitializer.onStartup()
+						// jakarta.servlet.ServletContainerInitializer.onStartup()
 						initializers.removeIf(i -> i.getModel() == model);
 					}
 				});
@@ -2615,7 +2615,7 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 			deployment.addServletExtension(new ContextLinkingServletExtension(contextPath, highestRankedContext, highestRankedDynamicContext));
 
 			// first thing - only NOW we can set ServletContext's class loader! It affects many things, including
-			// the TCCL used for example by javax.el.ExpressionFactory.newInstance()
+			// the TCCL used for example by jakarta.el.ExpressionFactory.newInstance()
 			if (highestRankedContext.getClassLoader() != null) {
 				deployment.setClassLoader(highestRankedContext.getClassLoader());
 			}
@@ -2890,7 +2890,7 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 
 			manager = servletContainer.addDeployment(deployment);
 
-			// here's where Undertow-specific instance of javax.servlet.ServletContext is created
+			// here's where Undertow-specific instance of jakarta.servlet.ServletContext is created
 			manager.deploy();
 
 			HttpHandler handler = manager.start();

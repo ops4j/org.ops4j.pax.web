@@ -34,10 +34,10 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.PushBuilder;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.PushBuilder;
 
 import io.undertow.Handlers;
 import io.undertow.Undertow;
@@ -56,14 +56,12 @@ import io.undertow.servlet.api.ServletInfo;
 import io.undertow.servlet.util.ImmediateInstanceFactory;
 import io.undertow.util.HeaderMap;
 import io.undertow.util.Headers;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.startsWith;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class EmbeddedUndertowHttp2Test {
 
@@ -75,7 +73,7 @@ public class EmbeddedUndertowHttp2Test {
 	private HpackDecoder decoder;
 	private Map<Integer, String> responses;
 
-	@Before
+	@BeforeEach
 	public void resetState() {
 		decoder = new HpackDecoder();
 		responses = new HashMap<>();
@@ -392,7 +390,7 @@ public class EmbeddedUndertowHttp2Test {
 			response = response.substring(0, rnrn + 4);
 		}
 		LOG.info("Response\n{}", response);
-		assertThat(fullResponse, startsWith("HTTP/1.1 101 Switching Protocols\r\n"));
+		assertThat(fullResponse).startsWith("HTTP/1.1 101 Switching Protocols\r\n");
 		buffer.position(rnrn + 4);
 		boolean remains = true;
 		while (remains) {
@@ -449,9 +447,9 @@ public class EmbeddedUndertowHttp2Test {
 		server.stop();
 
 		// indexed by HTTP/2 Stream ID
-		assertThat(responses.get(1), equalTo("OK\n"));
-		assertThat(responses.get(2), equalTo("body { margin: 0 }\n"));
-		assertThat(responses.get(4), equalTo("window.alert(\"hello world\");\n"));
+		assertThat(responses.get(1)).isEqualTo("OK\n");
+		assertThat(responses.get(2)).isEqualTo("body { margin: 0 }\n");
+		assertThat(responses.get(4)).isEqualTo("window.alert(\"hello world\");\n");
 	}
 
 	@Test
@@ -660,9 +658,9 @@ public class EmbeddedUndertowHttp2Test {
 		server.stop();
 
 		// indexed by HTTP/2 Stream ID
-		assertThat(responses.get(1), equalTo("OK\n"));
-		assertThat(responses.get(2), equalTo("body { margin: 0 }\n"));
-		assertThat(responses.get(4), equalTo("window.alert(\"hello world\");\n"));
+		assertThat(responses.get(1)).isEqualTo("OK\n");
+		assertThat(responses.get(2)).isEqualTo("body { margin: 0 }\n");
+		assertThat(responses.get(4)).isEqualTo("window.alert(\"hello world\");\n");
 	}
 
 	private void send(Selector selector, SelectionKey key, ByteBuffer buffer) throws IOException {
@@ -743,7 +741,7 @@ public class EmbeddedUndertowHttp2Test {
 		byte[] payload = new byte[length];
 		int read = dis.read(payload, 0, length);
 		if (read >= 0) {
-			assertThat(read, equalTo(length));
+			assertThat(read).isEqualTo(length);
 		}
 		buffer.position(buffer.position() + 3 + 1 + 1 + 4 + length);
 

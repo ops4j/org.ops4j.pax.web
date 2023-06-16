@@ -410,7 +410,7 @@ public class UndertowSubsystem {
 
 		@Override
 		public HttpHandler configure(HttpHandler handler, Predicate predicate) {
-			// TODO: use javax.servlet filters or just generic io.undertow.server.HttpHandler?
+			// TODO: use jakarta.servlet filters or just generic io.undertow.server.HttpHandler?
 			return handler;
 		}
 

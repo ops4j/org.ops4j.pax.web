@@ -15,9 +15,9 @@
  */
 package org.ops4j.pax.web.service.undertow.internal;
 
-import javax.servlet.Servlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import io.undertow.server.HandlerWrapper;
 import io.undertow.server.HttpHandler;

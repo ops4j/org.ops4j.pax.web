@@ -16,7 +16,7 @@
 package org.ops4j.pax.web.service.undertow.internal;
 
 import java.util.Dictionary;
-import javax.servlet.Servlet;
+import jakarta.servlet.Servlet;
 
 import io.undertow.Handlers;
 import io.undertow.server.HttpHandler;
@@ -25,13 +25,13 @@ import io.undertow.server.handlers.PathHandler;
 import io.undertow.server.handlers.ResponseCodeHandler;
 import io.undertow.server.handlers.cache.LRUCache;
 import org.ops4j.pax.web.annotations.Review;
-import org.osgi.service.http.HttpContext;
+import org.ops4j.pax.web.service.http.HttpContext;
 
 /**
  * <p>A {@link PathHandler} that can (try to) resolve conflicts when registering multiple contexts under
  * the same path.</p>
  * <p>The problem is that when using {@code etc/undertow.xml} with {@code <location>} handlers <strong>and</strong>
- * when using normal WARs and {@link org.osgi.service.http.HttpService#registerServlet(String, Servlet, Dictionary, HttpContext)} we may
+ * when using normal WARs and {@link org.ops4j.pax.web.service.http.HttpService#registerServlet(String, Servlet, Dictionary, HttpContext)} we may
  * end up with multiple {@link io.undertow.server.HttpHandler handlers} handling {@code "/"} path. We should always prefer
  * the path from {@code etc/undertow.xml} configuration - assuming it's configured and user know what (s)he's
  * doing.</p>

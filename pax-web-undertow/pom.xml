@@ -43,61 +43,61 @@
 					<instructions>
 						<Bundle-Activator>org.ops4j.pax.web.service.undertow.internal.Activator</Bundle-Activator>
 						<Import-Package>
-							<!-- ranges indicate Servlet API 3.1+ (JavaEE 7+) -->
-							javax.servlet;version="[3.1,5)",
-							javax.servlet.annotation;version="[3.1,5)",
-							javax.servlet.descriptor;version="[3.1,5)",
-							javax.servlet.http;version="[3.1,5)",
+							<!-- ranges indicate Servlet API 6.0+ (JakartaEE 10+) -->
+							jakarta.servlet;version="[6,7)",
+							jakarta.servlet.annotation;version="[6,7)",
+							jakarta.servlet.descriptor;version="[6,7)",
+							jakarta.servlet.http;version="[6,7)",
 
-							<!-- ranges indicate we can work with OSGi Core R6+ -->
-							org.osgi.framework;version="[1.8,2)",
+							<!-- OSGi Core R8+ -->
+							org.osgi.framework;version="[1.10,2)",
 							org.osgi.framework.wiring;version="[1.2,2)",
 							org.osgi.util.tracker;version="[1.5,2)",
 
 							<!-- OSGi cmpn -->
-							org.osgi.service.http;version="[1.2,2)",
-							org.osgi.service.http.whiteboard;version="[1.1,2)",
+							org.osgi.service.servlet.whiteboard;version="[2,3)",
 
 							<!-- from pax-web-api -->
 							org.ops4j.pax.web.service;version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.service.http;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.utils;version="${pax-web.osgi.version}",
 							<!-- from pax-web-spi -->
 							org.ops4j.pax.web.service.spi.*;version="${pax-web.osgi.version}",
 
 							<!-- from pax-logging-api -->
-							org.slf4j;version="[1.7,2)",
+							org.slf4j;version="[2,3)",
 							org.jboss.logging;version="[3.4,4)",
 
 							<!-- undertow and xnio packages -->
 							org.xnio;version="[3.8,4)",
 							org.xnio.channels;version="[3.8,4)",
-							io.undertow;version="[2.2,3)",
-							io.undertow.connector;version="[2.2,3)",
-							io.undertow.io;version="[2.2,3)",
-							io.undertow.predicate;version="[2.2,3)",
-							io.undertow.protocols.ssl;version="[2.2,3)",
-							io.undertow.security.api;version="[2.2,3)",
-							io.undertow.security.idm;version="[2.2,3)",
-							io.undertow.server;version="[2.2,3)",
-							io.undertow.server.handlers;version="[2.2,3)",
-							io.undertow.server.handlers.accesslog;version="[2.2,3)",
-							io.undertow.server.handlers.builder;version="[2.2,3)",
-							io.undertow.server.handlers.cache;version="[2.2,3)",
-							io.undertow.server.handlers.encoding;version="[2.2,3)",
-							io.undertow.server.handlers.resource;version="[2.2,3)",
-							io.undertow.server.protocol.http;version="[2.2,3)",
-							io.undertow.server.protocol.http2;version="[2.2,3)",
-							io.undertow.server.session;version="[2.2,3)",
-							io.undertow.servlet;version="[2.2,3)",
-							io.undertow.servlet.api;version="[2.2,3)",
-							io.undertow.servlet.core;version="[2.2,3)",
-							io.undertow.servlet.handlers;version="[2.2,3)",
-							io.undertow.servlet.spec;version="[2.2,3)",
-							io.undertow.servlet.util;version="[2.2,3)",
-							io.undertow.util;version="[2.2,3)",
+							io.undertow;version="[2.3,3)",
+							io.undertow.connector;version="[2.3,3)",
+							io.undertow.io;version="[2.3,3)",
+							io.undertow.predicate;version="[2.3,3)",
+							io.undertow.protocols.ssl;version="[2.3,3)",
+							io.undertow.security.api;version="[2.3,3)",
+							io.undertow.security.idm;version="[2.3,3)",
+							io.undertow.server;version="[2.3,3)",
+							io.undertow.server.handlers;version="[2.3,3)",
+							io.undertow.server.handlers.accesslog;version="[2.3,3)",
+							io.undertow.server.handlers.builder;version="[2.3,3)",
+							io.undertow.server.handlers.cache;version="[2.3,3)",
+							io.undertow.server.handlers.encoding;version="[2.3,3)",
+							io.undertow.server.handlers.resource;version="[2.3,3)",
+							io.undertow.server.protocol.http;version="[2.3,3)",
+							io.undertow.server.protocol.http2;version="[2.3,3)",
+							io.undertow.server.session;version="[2.3,3)",
+							io.undertow.servlet;version="[2.3,3)",
+							io.undertow.servlet.api;version="[2.3,3)",
+							io.undertow.servlet.core;version="[2.3,3)",
+							io.undertow.servlet.handlers;version="[2.3,3)",
+							io.undertow.servlet.spec;version="[2.3,3)",
+							io.undertow.servlet.util;version="[2.3,3)",
+							io.undertow.util;version="[2.3,3)",
 
 							<!-- other -->
-							javax.annotation;version="[1.2,2)";resolution:=optional,
+							jakarta.annotation;version="[2,3)";resolution:=optional,
 							javax.net.ssl,
 							javax.security.auth,
 							javax.security.auth.callback,
@@ -163,11 +163,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>
-			<artifactId>osgi.cmpn</artifactId>
+			<artifactId>org.osgi.service.servlet</artifactId>
 			<scope>provided</scope>
 		</dependency>
 
-		<!-- JavaEE -->
+		<!-- JakartaEE -->
 
 		<dependency>
 			<groupId>jakarta.annotation</groupId>
@@ -226,8 +226,13 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-slf4j-impl</artifactId>
+			<artifactId>log4j-slf4j2-impl</artifactId>
 			<scope>test</scope>
 		</dependency>
 
@@ -258,8 +263,13 @@
 		<!-- Testing -->
 
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

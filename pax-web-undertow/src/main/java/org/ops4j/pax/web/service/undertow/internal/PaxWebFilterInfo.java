@@ -16,8 +16,8 @@
 package org.ops4j.pax.web.service.undertow.internal;
 
 import java.util.Map;
-import javax.servlet.Filter;
-import javax.servlet.ServletContext;
+import jakarta.servlet.Filter;
+import jakarta.servlet.ServletContext;
 
 import io.undertow.servlet.api.FilterInfo;
 import io.undertow.servlet.api.InstanceFactory;
@@ -31,7 +31,7 @@ import org.ops4j.pax.web.service.spi.servlet.ScopedFilter;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceObjects;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.http.runtime.dto.DTOConstants;
+import org.osgi.service.servlet.runtime.dto.DTOConstants;
 
 /**
  * Special {@link FilterInfo} that can be configured from {@link FilterModel}.
@@ -40,7 +40,7 @@ public class PaxWebFilterInfo extends FilterInfo {
 
 	private final FilterModel filterModel;
 
-	/** This {@link ServletContext} is scoped to single {@link org.osgi.service.http.context.ServletContextHelper} */
+	/** This {@link ServletContext} is scoped to single {@link org.osgi.service.servlet.context.ServletContextHelper} */
 	private final OsgiServletContext osgiServletContext;
 
 	private ServiceReference<? extends Filter> serviceReference;
