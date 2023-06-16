@@ -57,7 +57,7 @@ QueuedNioTcpServer@10249 = "TCP server (NIO) <b75f502>"
 <2> This is default handler invoked when nothing is matched using <4>
 <3> PathHandler will be drilled down later
 <4> These 4 welcome pages are defaults from `io.undertow.server.handlers.resource.ResourceHandler.welcomeFiles`
-<5> Standard javax.servlet context mapping
+<5> Standard jakarta.servlet context mapping
 
 Here's how `io.undertow.Undertow` (Wildfly's version is `org.wildfly.extension.undertow.Server`)
 instance can be found (there's one instance of this class):
@@ -149,7 +149,7 @@ next: {io.undertow.server.handlers.PathHandler@10199}
 <2> Path matching within single web application
 <3> Servlets of web application
 <4> The actual instance of one of the the servlets
-<5> Resource manager for calls to e.g., `javax.servlet.ServletContext.getResource()`
+<5> Resource manager for calls to e.g., `jakarta.servlet.ServletContext.getResource()`
 
 Here's what really is invoked by `io.undertow.servlet.handlers.ServletDispatchingHandler`:
 

@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.ops4j.pax.web.service.PaxWebConfig;
 import org.ops4j.pax.web.service.undertow.internal.configuration.ResolvingContentHandler;
 import org.ops4j.pax.web.service.undertow.internal.configuration.UnmarshallingContentHandler;
@@ -28,8 +28,7 @@ import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ConfigurationParserTest {
 
@@ -59,13 +58,13 @@ public class ConfigurationParserTest {
 		cfg.init();
 		LOG.info("Configuration: {}", cfg);
 
-		assertThat(cfg.getSocketBindings().get(0).getPort(), equalTo(8123));
-		assertThat(cfg.getSocketBindings().get(0).getName(), equalTo("http"));
-		assertThat(cfg.getSocketBindings().get(1).getPort(), equalTo(8423));
-		assertThat(cfg.getSocketBindings().get(1).getName(), equalTo("https"));
+		assertThat(cfg.getSocketBindings().get(0).getPort()).isEqualTo(8123);
+		assertThat(cfg.getSocketBindings().get(0).getName()).isEqualTo("http");
+		assertThat(cfg.getSocketBindings().get(1).getPort()).isEqualTo(8423);
+		assertThat(cfg.getSocketBindings().get(1).getName()).isEqualTo("https");
 
-		assertThat(cfg.getSecurityRealms().get(1).getIdentities().getSsl().getKeystore().getPath(),
-				equalTo("/data/tmp/certs/server.keystore"));
+		assertThat(cfg.getSecurityRealms().get(1).getIdentities().getSsl().getKeystore().getPath())
+				.isEqualTo("/data/tmp/certs/server.keystore");
 	}
 
 }

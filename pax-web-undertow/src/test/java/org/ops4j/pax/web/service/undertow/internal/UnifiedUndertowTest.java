@@ -26,11 +26,11 @@ import java.net.Socket;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import io.undertow.Handlers;
 import io.undertow.Undertow;
@@ -48,16 +48,14 @@ import io.undertow.servlet.handlers.DefaultServlet;
 import io.undertow.servlet.util.ImmediateInstanceFactory;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.ops4j.pax.web.service.undertow.internal.web.UndertowResourceServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.hamcrest.CoreMatchers.endsWith;
-import static org.hamcrest.CoreMatchers.startsWith;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Test that has matching tests in pax-web-jetty and pax-web-tomcat
@@ -227,11 +225,11 @@ public class UnifiedUndertowTest {
 		int port = ((InetSocketAddress) server.getListenerInfo().get(0).getAddress()).getPort();
 
 		String response = send(port, "/");
-		assertThat(response, endsWith("'indexx'"));
+		assertThat(response).endsWith("'indexx'");
 		response = send(port, "/sub/");
-		assertThat(response, endsWith("'sub/index'"));
+		assertThat(response).endsWith("'sub/index'");
 		response = send(port, "/sub");
-		assertThat(response, startsWith("HTTP/1.1 302"));
+		assertThat(response).startsWith("HTTP/1.1 302");
 
 		server.stop();
 	}
@@ -290,20 +288,20 @@ public class UnifiedUndertowTest {
 		int port = ((InetSocketAddress) server.getListenerInfo().get(0).getAddress()).getPort();
 
 		String response = send(port, "/");
-		assertThat(response, startsWith("HTTP/1.1 404"));
+		assertThat(response).startsWith("HTTP/1.1 404");
 		response = send(port, "/sub/");
-		assertThat(response, startsWith("HTTP/1.1 404"));
+		assertThat(response).startsWith("HTTP/1.1 404");
 		response = send(port, "/sub");
-		assertThat(response, startsWith("HTTP/1.1 404"));
+		assertThat(response).startsWith("HTTP/1.1 404");
 
 		response = send(port, "/c");
-		assertThat(response, startsWith("HTTP/1.1 302"));
+		assertThat(response).startsWith("HTTP/1.1 302");
 		response = send(port, "/c/");
-		assertThat(response, endsWith("'indexx'"));
+		assertThat(response).endsWith("'indexx'");
 		response = send(port, "/c/sub/");
-		assertThat(response, endsWith("'sub/index'"));
+		assertThat(response).endsWith("'sub/index'");
 		response = send(port, "/c/sub");
-		assertThat(response, startsWith("HTTP/1.1 302"));
+		assertThat(response).startsWith("HTTP/1.1 302");
 
 		server.stop();
 	}
@@ -373,25 +371,25 @@ public class UnifiedUndertowTest {
 		assertTrue(response.contains("HTTP/1.1 404"));
 
 		response = send(port, "/d1/hello.txt");
-		assertThat(response, endsWith("'hello.txt'"));
+		assertThat(response).endsWith("'hello.txt'");
 		response = send(port, "/d1/sub/hello.txt");
-		assertThat(response, endsWith("'sub/hello.txt'"));
+		assertThat(response).endsWith("'sub/hello.txt'");
 
 		response = send(port, "/d1/../hello.txt");
 		// because Undertow canonicalizes the path without returning "bad request"
-		assertThat(response, endsWith("'hello.txt'"));
+		assertThat(response).endsWith("'hello.txt'");
 
 		// here's where problems started. Jetty's default servlet itself handles welcome files, while in
 		// Tomcat and Undertow, such support has to be added.
 
 		response = send(port, "/d1/");
-		assertThat(response, endsWith("'index.txt'"));
+		assertThat(response).endsWith("'index.txt'");
 		response = send(port, "/d1/sub/");
-		assertThat(response, endsWith("'sub/index.txt'"));
+		assertThat(response).endsWith("'sub/index.txt'");
 		response = send(port, "/d1");
-		assertThat(response, startsWith("HTTP/1.1 302"));
+		assertThat(response).startsWith("HTTP/1.1 302");
 		response = send(port, "/d1/sub");
-		assertThat(response, startsWith("HTTP/1.1 302"));
+		assertThat(response).startsWith("HTTP/1.1 302");
 
 		server.stop();
 	}
@@ -478,18 +476,18 @@ public class UnifiedUndertowTest {
 				resp.getWriter().println("req.servlet_path=\"" + req.getServletPath() + "\"");
 				resp.getWriter().println("req.path_info=\"" + req.getPathInfo() + "\"");
 				resp.getWriter().println("req.query_string=\"" + req.getQueryString() + "\"");
-				resp.getWriter().println("javax.servlet.forward.mapping=\"" + req.getAttribute("javax.servlet.forward.mapping") + "\"");
-				resp.getWriter().println("javax.servlet.forward.request_uri=\"" + req.getAttribute("javax.servlet.forward.request_uri") + "\"");
-				resp.getWriter().println("javax.servlet.forward.context_path=\"" + req.getAttribute("javax.servlet.forward.context_path") + "\"");
-				resp.getWriter().println("javax.servlet.forward.servlet_path=\"" + req.getAttribute("javax.servlet.forward.servlet_path") + "\"");
-				resp.getWriter().println("javax.servlet.forward.path_info=\"" + req.getAttribute("javax.servlet.forward.path_info") + "\"");
-				resp.getWriter().println("javax.servlet.forward.query_string=\"" + req.getAttribute("javax.servlet.forward.query_string") + "\"");
-				resp.getWriter().println("javax.servlet.include.mapping=\"" + req.getAttribute("javax.servlet.include.mapping") + "\"");
-				resp.getWriter().println("javax.servlet.include.request_uri=\"" + req.getAttribute("javax.servlet.include.request_uri") + "\"");
-				resp.getWriter().println("javax.servlet.include.context_path=\"" + req.getAttribute("javax.servlet.include.context_path") + "\"");
-				resp.getWriter().println("javax.servlet.include.servlet_path=\"" + req.getAttribute("javax.servlet.include.servlet_path") + "\"");
-				resp.getWriter().println("javax.servlet.include.path_info=\"" + req.getAttribute("javax.servlet.include.path_info") + "\"");
-				resp.getWriter().println("javax.servlet.include.query_string=\"" + req.getAttribute("javax.servlet.include.query_string") + "\"");
+				resp.getWriter().println("jakarta.servlet.forward.mapping=\"" + req.getAttribute("jakarta.servlet.forward.mapping") + "\"");
+				resp.getWriter().println("jakarta.servlet.forward.request_uri=\"" + req.getAttribute("jakarta.servlet.forward.request_uri") + "\"");
+				resp.getWriter().println("jakarta.servlet.forward.context_path=\"" + req.getAttribute("jakarta.servlet.forward.context_path") + "\"");
+				resp.getWriter().println("jakarta.servlet.forward.servlet_path=\"" + req.getAttribute("jakarta.servlet.forward.servlet_path") + "\"");
+				resp.getWriter().println("jakarta.servlet.forward.path_info=\"" + req.getAttribute("jakarta.servlet.forward.path_info") + "\"");
+				resp.getWriter().println("jakarta.servlet.forward.query_string=\"" + req.getAttribute("jakarta.servlet.forward.query_string") + "\"");
+				resp.getWriter().println("jakarta.servlet.include.mapping=\"" + req.getAttribute("jakarta.servlet.include.mapping") + "\"");
+				resp.getWriter().println("jakarta.servlet.include.request_uri=\"" + req.getAttribute("jakarta.servlet.include.request_uri") + "\"");
+				resp.getWriter().println("jakarta.servlet.include.context_path=\"" + req.getAttribute("jakarta.servlet.include.context_path") + "\"");
+				resp.getWriter().println("jakarta.servlet.include.servlet_path=\"" + req.getAttribute("jakarta.servlet.include.servlet_path") + "\"");
+				resp.getWriter().println("jakarta.servlet.include.path_info=\"" + req.getAttribute("jakarta.servlet.include.path_info") + "\"");
+				resp.getWriter().println("jakarta.servlet.include.query_string=\"" + req.getAttribute("jakarta.servlet.include.query_string") + "\"");
 			}
 		};
 		ServletInfo indexxServletInfo = Servlets.servlet("indexx", indexxServlet.getClass(), new ImmediateInstanceFactory<HttpServlet>(indexxServlet));
@@ -551,15 +549,15 @@ public class UnifiedUndertowTest {
 		response = send(port, "/");
 		assertTrue(response.contains("req.context_path=\"\""));
 		assertTrue(response.contains("req.request_uri=\"/index.y\""));
-		assertTrue(response.contains("javax.servlet.forward.request_uri=\"/\""));
+		assertTrue(response.contains("jakarta.servlet.forward.request_uri=\"/\""));
 
 		// Forward vs. Include:
 		// in forward method:
-		//  - original servletPath, pathInfo, requestURI are available ONLY through javax.servlet.forward.* attributes
+		//  - original servletPath, pathInfo, requestURI are available ONLY through jakarta.servlet.forward.* attributes
 		//  - values used to obtain the dispatcher are available through request object
 		// in include method:
 		//  - original servletPath, pathInfo, requestURI are available through request object
-		//  - values used to obtain the dispatcher are available through javax.servlet.include.* attributes
+		//  - values used to obtain the dispatcher are available through jakarta.servlet.include.* attributes
 
 		// "/" (but through gateway) - similar forward, but performed explicitly by gateway servlet
 		// 9.4 The Forward Method:
@@ -569,20 +567,20 @@ public class UnifiedUndertowTest {
 		response = send(port, "/gateway/x?what=forward&where=/");
 		assertTrue(response.contains("req.context_path=\"\""));
 		assertTrue(response.contains("req.request_uri=\"/index.y\""));
-		assertTrue(response.contains("javax.servlet.forward.context_path=\"\""));
-		assertTrue(response.contains("javax.servlet.forward.request_uri=\"/gateway/x\""));
-		assertTrue(response.contains("javax.servlet.forward.servlet_path=\"/gateway\""));
-		assertTrue(response.contains("javax.servlet.forward.path_info=\"/x\""));
+		assertTrue(response.contains("jakarta.servlet.forward.context_path=\"\""));
+		assertTrue(response.contains("jakarta.servlet.forward.request_uri=\"/gateway/x\""));
+		assertTrue(response.contains("jakarta.servlet.forward.servlet_path=\"/gateway\""));
+		assertTrue(response.contains("jakarta.servlet.forward.path_info=\"/x\""));
 
 		// "/", but included by gateway servlet
 		// "gateway" includes "/" which includes "/index.y"
 		response = send(port, "/gateway/x?what=include&where=/");
 		assertTrue(response.contains("req.context_path=\"\""));
 		assertTrue(response.contains("req.request_uri=\"/gateway/x\""));
-		assertTrue(response.contains("javax.servlet.include.context_path=\"\""));
-		assertTrue(response.contains("javax.servlet.include.request_uri=\"/index.y\""));
-		assertTrue(response.contains("javax.servlet.include.servlet_path=\"/index.y\""));
-		assertTrue(response.contains("javax.servlet.include.path_info=\"null\""));
+		assertTrue(response.contains("jakarta.servlet.include.context_path=\"\""));
+		assertTrue(response.contains("jakarta.servlet.include.request_uri=\"/index.y\""));
+		assertTrue(response.contains("jakarta.servlet.include.servlet_path=\"/index.y\""));
+		assertTrue(response.contains("jakarta.servlet.include.path_info=\"null\""));
 
 		response = send(port, "/sub");
 		assertTrue(response.startsWith("HTTP/1.1 302"));
@@ -608,26 +606,26 @@ public class UnifiedUndertowTest {
 		response = send(port, "/sub/");
 		assertTrue(response.contains("req.context_path=\"\""));
 		assertTrue(response.contains("req.request_uri=\"/sub/index.x\""));
-		assertTrue(response.contains("javax.servlet.forward.context_path=\"\""));
-		assertTrue(response.contains("javax.servlet.forward.request_uri=\"/sub/\""));
-		assertTrue(response.contains("javax.servlet.forward.servlet_path=\"/sub/\""));
-		assertTrue(response.contains("javax.servlet.forward.path_info=\"null\""));
+		assertTrue(response.contains("jakarta.servlet.forward.context_path=\"\""));
+		assertTrue(response.contains("jakarta.servlet.forward.request_uri=\"/sub/\""));
+		assertTrue(response.contains("jakarta.servlet.forward.servlet_path=\"/sub/\""));
+		assertTrue(response.contains("jakarta.servlet.forward.path_info=\"null\""));
 
 		response = send(port, "/gateway/x?what=forward&where=/sub/");
 		assertTrue(response.contains("req.context_path=\"\""));
 		assertTrue(response.contains("req.request_uri=\"/sub/index.x\""));
-		assertTrue(response.contains("javax.servlet.forward.context_path=\"\""));
-		assertTrue(response.contains("javax.servlet.forward.request_uri=\"/gateway/x\""));
-		assertTrue(response.contains("javax.servlet.forward.servlet_path=\"/gateway\""));
-		assertTrue(response.contains("javax.servlet.forward.path_info=\"/x\""));
+		assertTrue(response.contains("jakarta.servlet.forward.context_path=\"\""));
+		assertTrue(response.contains("jakarta.servlet.forward.request_uri=\"/gateway/x\""));
+		assertTrue(response.contains("jakarta.servlet.forward.servlet_path=\"/gateway\""));
+		assertTrue(response.contains("jakarta.servlet.forward.path_info=\"/x\""));
 
 		response = send(port, "/gateway/x?what=include&where=/sub/");
 		assertTrue(response.contains("req.context_path=\"\""));
 		assertTrue(response.contains("req.request_uri=\"/gateway/x\""));
-		assertTrue(response.contains("javax.servlet.include.context_path=\"\""));
-		assertTrue(response.contains("javax.servlet.include.request_uri=\"/sub/index.x\""));
-		assertTrue(response.contains("javax.servlet.include.servlet_path=\"/sub/index.x\""));
-		assertTrue(response.contains("javax.servlet.include.path_info=\"null\""));
+		assertTrue(response.contains("jakarta.servlet.include.context_path=\"\""));
+		assertTrue(response.contains("jakarta.servlet.include.request_uri=\"/sub/index.x\""));
+		assertTrue(response.contains("jakarta.servlet.include.servlet_path=\"/sub/index.x\""));
+		assertTrue(response.contains("jakarta.servlet.include.path_info=\"null\""));
 
 		// --- resource access through "/r" servlet
 
@@ -795,18 +793,18 @@ public class UnifiedUndertowTest {
 				resp.getWriter().println("req.servlet_path=\"" + req.getServletPath() + "\"");
 				resp.getWriter().println("req.path_info=\"" + req.getPathInfo() + "\"");
 				resp.getWriter().println("req.query_string=\"" + req.getQueryString() + "\"");
-				resp.getWriter().println("javax.servlet.forward.mapping=\"" + req.getAttribute("javax.servlet.forward.mapping") + "\"");
-				resp.getWriter().println("javax.servlet.forward.request_uri=\"" + req.getAttribute("javax.servlet.forward.request_uri") + "\"");
-				resp.getWriter().println("javax.servlet.forward.context_path=\"" + req.getAttribute("javax.servlet.forward.context_path") + "\"");
-				resp.getWriter().println("javax.servlet.forward.servlet_path=\"" + req.getAttribute("javax.servlet.forward.servlet_path") + "\"");
-				resp.getWriter().println("javax.servlet.forward.path_info=\"" + req.getAttribute("javax.servlet.forward.path_info") + "\"");
-				resp.getWriter().println("javax.servlet.forward.query_string=\"" + req.getAttribute("javax.servlet.forward.query_string") + "\"");
-				resp.getWriter().println("javax.servlet.include.mapping=\"" + req.getAttribute("javax.servlet.include.mapping") + "\"");
-				resp.getWriter().println("javax.servlet.include.request_uri=\"" + req.getAttribute("javax.servlet.include.request_uri") + "\"");
-				resp.getWriter().println("javax.servlet.include.context_path=\"" + req.getAttribute("javax.servlet.include.context_path") + "\"");
-				resp.getWriter().println("javax.servlet.include.servlet_path=\"" + req.getAttribute("javax.servlet.include.servlet_path") + "\"");
-				resp.getWriter().println("javax.servlet.include.path_info=\"" + req.getAttribute("javax.servlet.include.path_info") + "\"");
-				resp.getWriter().println("javax.servlet.include.query_string=\"" + req.getAttribute("javax.servlet.include.query_string") + "\"");
+				resp.getWriter().println("jakarta.servlet.forward.mapping=\"" + req.getAttribute("jakarta.servlet.forward.mapping") + "\"");
+				resp.getWriter().println("jakarta.servlet.forward.request_uri=\"" + req.getAttribute("jakarta.servlet.forward.request_uri") + "\"");
+				resp.getWriter().println("jakarta.servlet.forward.context_path=\"" + req.getAttribute("jakarta.servlet.forward.context_path") + "\"");
+				resp.getWriter().println("jakarta.servlet.forward.servlet_path=\"" + req.getAttribute("jakarta.servlet.forward.servlet_path") + "\"");
+				resp.getWriter().println("jakarta.servlet.forward.path_info=\"" + req.getAttribute("jakarta.servlet.forward.path_info") + "\"");
+				resp.getWriter().println("jakarta.servlet.forward.query_string=\"" + req.getAttribute("jakarta.servlet.forward.query_string") + "\"");
+				resp.getWriter().println("jakarta.servlet.include.mapping=\"" + req.getAttribute("jakarta.servlet.include.mapping") + "\"");
+				resp.getWriter().println("jakarta.servlet.include.request_uri=\"" + req.getAttribute("jakarta.servlet.include.request_uri") + "\"");
+				resp.getWriter().println("jakarta.servlet.include.context_path=\"" + req.getAttribute("jakarta.servlet.include.context_path") + "\"");
+				resp.getWriter().println("jakarta.servlet.include.servlet_path=\"" + req.getAttribute("jakarta.servlet.include.servlet_path") + "\"");
+				resp.getWriter().println("jakarta.servlet.include.path_info=\"" + req.getAttribute("jakarta.servlet.include.path_info") + "\"");
+				resp.getWriter().println("jakarta.servlet.include.query_string=\"" + req.getAttribute("jakarta.servlet.include.query_string") + "\"");
 			}
 		};
 		ServletInfo indexxServletInfo = Servlets.servlet("indexx", indexxServlet.getClass(), new ImmediateInstanceFactory<HttpServlet>(indexxServlet));
@@ -868,15 +866,15 @@ public class UnifiedUndertowTest {
 		response = send(port, "/c/");
 		assertTrue(response.contains("req.context_path=\"/c\""));
 		assertTrue(response.contains("req.request_uri=\"/c/index.y\""));
-		assertTrue(response.contains("javax.servlet.forward.request_uri=\"/c/\""));
+		assertTrue(response.contains("jakarta.servlet.forward.request_uri=\"/c/\""));
 
 		// Forward vs. Include:
 		// in forward method:
-		//  - original servletPath, pathInfo, requestURI are available ONLY through javax.servlet.forward.* attributes
+		//  - original servletPath, pathInfo, requestURI are available ONLY through jakarta.servlet.forward.* attributes
 		//  - values used to obtain the dispatcher are available through request object
 		// in include method:
 		//  - original servletPath, pathInfo, requestURI are available through request object
-		//  - values used to obtain the dispatcher are available through javax.servlet.include.* attributes
+		//  - values used to obtain the dispatcher are available through jakarta.servlet.include.* attributes
 
 		// "/" (but through gateway) - similar forward, but performed explicitly by gateway servlet
 		// 9.4 The Forward Method:
@@ -886,20 +884,20 @@ public class UnifiedUndertowTest {
 		response = send(port, "/c/gateway/x?what=forward&where=/");
 		assertTrue(response.contains("req.context_path=\"/c\""));
 		assertTrue(response.contains("req.request_uri=\"/c/index.y\""));
-		assertTrue(response.contains("javax.servlet.forward.context_path=\"/c\""));
-		assertTrue(response.contains("javax.servlet.forward.request_uri=\"/c/gateway/x\""));
-		assertTrue(response.contains("javax.servlet.forward.servlet_path=\"/gateway\""));
-		assertTrue(response.contains("javax.servlet.forward.path_info=\"/x\""));
+		assertTrue(response.contains("jakarta.servlet.forward.context_path=\"/c\""));
+		assertTrue(response.contains("jakarta.servlet.forward.request_uri=\"/c/gateway/x\""));
+		assertTrue(response.contains("jakarta.servlet.forward.servlet_path=\"/gateway\""));
+		assertTrue(response.contains("jakarta.servlet.forward.path_info=\"/x\""));
 
 		// "/", but included by gateway servlet
 		// "gateway" includes "/" which includes "/index.y"
 		response = send(port, "/c/gateway/x?what=include&where=/");
 		assertTrue(response.contains("req.context_path=\"/c\""));
 		assertTrue(response.contains("req.request_uri=\"/c/gateway/x\""));
-		assertTrue(response.contains("javax.servlet.include.context_path=\"/c\""));
-		assertTrue(response.contains("javax.servlet.include.request_uri=\"/c/index.y\""));
-		assertTrue(response.contains("javax.servlet.include.servlet_path=\"/index.y\""));
-		assertTrue(response.contains("javax.servlet.include.path_info=\"null\""));
+		assertTrue(response.contains("jakarta.servlet.include.context_path=\"/c\""));
+		assertTrue(response.contains("jakarta.servlet.include.request_uri=\"/c/index.y\""));
+		assertTrue(response.contains("jakarta.servlet.include.servlet_path=\"/index.y\""));
+		assertTrue(response.contains("jakarta.servlet.include.path_info=\"null\""));
 
 		response = send(port, "/c/sub");
 		assertTrue(response.startsWith("HTTP/1.1 302"));
@@ -925,26 +923,26 @@ public class UnifiedUndertowTest {
 		response = send(port, "/c/sub/");
 		assertTrue(response.contains("req.context_path=\"/c\""));
 		assertTrue(response.contains("req.request_uri=\"/c/sub/index.x\""));
-		assertTrue(response.contains("javax.servlet.forward.context_path=\"/c\""));
-		assertTrue(response.contains("javax.servlet.forward.request_uri=\"/c/sub/\""));
-		assertTrue(response.contains("javax.servlet.forward.servlet_path=\"/sub/\""));
-		assertTrue(response.contains("javax.servlet.forward.path_info=\"null\""));
+		assertTrue(response.contains("jakarta.servlet.forward.context_path=\"/c\""));
+		assertTrue(response.contains("jakarta.servlet.forward.request_uri=\"/c/sub/\""));
+		assertTrue(response.contains("jakarta.servlet.forward.servlet_path=\"/sub/\""));
+		assertTrue(response.contains("jakarta.servlet.forward.path_info=\"null\""));
 
 		response = send(port, "/c/gateway/x?what=forward&where=/sub/");
 		assertTrue(response.contains("req.context_path=\"/c\""));
 		assertTrue(response.contains("req.request_uri=\"/c/sub/index.x\""));
-		assertTrue(response.contains("javax.servlet.forward.context_path=\"/c\""));
-		assertTrue(response.contains("javax.servlet.forward.request_uri=\"/c/gateway/x\""));
-		assertTrue(response.contains("javax.servlet.forward.servlet_path=\"/gateway\""));
-		assertTrue(response.contains("javax.servlet.forward.path_info=\"/x\""));
+		assertTrue(response.contains("jakarta.servlet.forward.context_path=\"/c\""));
+		assertTrue(response.contains("jakarta.servlet.forward.request_uri=\"/c/gateway/x\""));
+		assertTrue(response.contains("jakarta.servlet.forward.servlet_path=\"/gateway\""));
+		assertTrue(response.contains("jakarta.servlet.forward.path_info=\"/x\""));
 
 		response = send(port, "/c/gateway/x?what=include&where=/sub/");
 		assertTrue(response.contains("req.context_path=\"/c\""));
 		assertTrue(response.contains("req.request_uri=\"/c/gateway/x\""));
-		assertTrue(response.contains("javax.servlet.include.context_path=\"/c\""));
-		assertTrue(response.contains("javax.servlet.include.request_uri=\"/c/sub/index.x\""));
-		assertTrue(response.contains("javax.servlet.include.servlet_path=\"/sub/index.x\""));
-		assertTrue(response.contains("javax.servlet.include.path_info=\"null\""));
+		assertTrue(response.contains("jakarta.servlet.include.context_path=\"/c\""));
+		assertTrue(response.contains("jakarta.servlet.include.request_uri=\"/c/sub/index.x\""));
+		assertTrue(response.contains("jakarta.servlet.include.servlet_path=\"/sub/index.x\""));
+		assertTrue(response.contains("jakarta.servlet.include.path_info=\"null\""));
 
 		// --- resource access through "/r" servlet
 
@@ -1137,7 +1135,7 @@ public class UnifiedUndertowTest {
 		//      and calls io.undertow.servlet.handlers.ServletChain.handler.handleRequest()
 		//    - the above handler calls init() if needed (for the first time) and passes to
 		//      io.undertow.servlet.handlers.ServletHandler.handleRequest()
-		//    - javax.servlet.Servlet.service() is called
+		//    - jakarta.servlet.Servlet.service() is called
 
 		String response;
 
@@ -1149,7 +1147,7 @@ public class UnifiedUndertowTest {
 		// just can't send `GET  HTTP/1.1` request
 //		response = send(port, "");
 		response = send(port, "/");
-		assertTrue("Special, strange Servlet API 4 mapping rule", response.endsWith("|  | / | null |"));
+		assertTrue(response.endsWith("|  | / | null |"), "Special, strange Servlet API 4 mapping rule");
 		response = send(port, "/x");
 		assertTrue(response.endsWith("|  | /x | null |"));
 		response = send(port, "/y");
@@ -1166,7 +1164,7 @@ public class UnifiedUndertowTest {
 		assertTrue(response.contains("HTTP/1.1 404"));
 		response = send(port, "/c1/");
 		// https://bz.apache.org/bugzilla/show_bug.cgi?id=64109
-		assertTrue("Special, strange Servlet API 4 mapping rule", response.endsWith("| /c1 | / | null |"));
+		assertTrue(response.endsWith("| /c1 | / | null |"), "Special, strange Servlet API 4 mapping rule");
 		response = send(port, "/c1/x");
 		assertTrue(response.endsWith("| /c1 | /x | null |"));
 		response = send(port, "/c1/y");

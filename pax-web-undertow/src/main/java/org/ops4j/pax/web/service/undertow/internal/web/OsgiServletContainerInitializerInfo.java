@@ -15,7 +15,7 @@
  */
 package org.ops4j.pax.web.service.undertow.internal.web;
 
-import javax.servlet.ServletContainerInitializer;
+import jakarta.servlet.ServletContainerInitializer;
 
 import io.undertow.servlet.api.InstanceFactory;
 import io.undertow.servlet.api.InstanceHandle;

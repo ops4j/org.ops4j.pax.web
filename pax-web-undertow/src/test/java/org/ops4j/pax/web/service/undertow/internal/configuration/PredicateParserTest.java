@@ -21,11 +21,10 @@ import io.undertow.predicate.Predicates;
 import io.undertow.server.HandlerWrapper;
 import io.undertow.server.handlers.IPAddressAccessControlHandler;
 import io.undertow.server.handlers.builder.HandlerParser;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class PredicateParserTest {
 
@@ -33,14 +32,14 @@ public class PredicateParserTest {
 	public void parseExpression() {
 		HandlerWrapper wrapper = HandlerParser.parse("ip-access-control(default-allow=false, acl={'127.0.0.1 allow', '127.0.0.2 allow'})", this.getClass().getClassLoader());
 		assertNotNull(wrapper);
-		assertThat(wrapper.wrap(null).getClass(), equalTo(IPAddressAccessControlHandler.class));
+		assertThat(wrapper.wrap(null).getClass()).isEqualTo(IPAddressAccessControlHandler.class);
 	}
 
 	@Test
 	public void parsePredicate() {
 		Predicate predicate = Predicates.parse("path-prefix('/cxf')", this.getClass().getClassLoader());
 		assertNotNull(predicate);
-		assertThat(predicate.getClass(), equalTo(PathPrefixPredicate.class));
+		assertThat(predicate.getClass()).isEqualTo(PathPrefixPredicate.class);
 	}
 
 }

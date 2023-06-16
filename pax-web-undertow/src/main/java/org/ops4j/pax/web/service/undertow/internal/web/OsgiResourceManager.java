@@ -23,7 +23,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 
 import io.undertow.server.handlers.resource.PathResource;
 import io.undertow.server.handlers.resource.PathResourceManager;
@@ -31,7 +31,7 @@ import io.undertow.server.handlers.resource.Resource;
 import io.undertow.server.handlers.resource.ResourceChangeListener;
 import io.undertow.server.handlers.resource.ResourceManager;
 import io.undertow.server.handlers.resource.URLResource;
-import org.osgi.service.http.HttpContext;
+import org.ops4j.pax.web.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,14 +40,14 @@ public class OsgiResourceManager implements ResourceManager {
 	public static final Logger LOG = LoggerFactory.getLogger(OsgiResourceManager.class);
 
 	/**
-	 * The {@link javax.servlet.ServletContext} which (according to OSGi CMPN web specifications) should delegate
-	 * to {@link org.osgi.service.http.HttpContext} / {@link org.osgi.service.http.context.ServletContextHelper}.
+	 * The {@link jakarta.servlet.ServletContext} which (according to OSGi CMPN web specifications) should delegate
+	 * to {@link org.ops4j.pax.web.service.http.HttpContext} / {@link org.osgi.service.servlet.context.ServletContextHelper}.
 	 */
 	private final ServletContext osgiScopedServletContext;
 
 	/**
-	 * 2nd parameter of {@link org.osgi.service.http.HttpService#registerResources(String, String, HttpContext)}
-	 * or {@link org.osgi.service.http.whiteboard.HttpWhiteboardConstants#HTTP_WHITEBOARD_RESOURCE_PREFIX}
+	 * 2nd parameter of {@link org.ops4j.pax.web.service.http.HttpService#registerResources(String, String, HttpContext)}
+	 * or {@link org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants#HTTP_WHITEBOARD_RESOURCE_PREFIX}
 	 */
 	private final String chroot;
 

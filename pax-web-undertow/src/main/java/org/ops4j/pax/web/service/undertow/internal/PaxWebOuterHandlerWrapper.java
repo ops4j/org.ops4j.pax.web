@@ -15,8 +15,8 @@
  */
 package org.ops4j.pax.web.service.undertow.internal;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
 
 import io.undertow.server.HandlerWrapper;
 import io.undertow.server.HttpHandler;
@@ -32,7 +32,7 @@ import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiSessionAttributeListener;
 
 /**
- * This {@link HandlerWrapper} ensures that {@link org.osgi.service.http.whiteboard.Preprocessor preprocessors},
+ * This {@link HandlerWrapper} ensures that {@link org.osgi.service.servlet.whiteboard.Preprocessor preprocessors},
  * filters and target servlet use proper request wrapper that returns proper {@link ServletContext}.
  */
 public class PaxWebOuterHandlerWrapper implements HandlerWrapper {

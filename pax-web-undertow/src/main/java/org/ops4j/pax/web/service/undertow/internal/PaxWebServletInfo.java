@@ -15,8 +15,8 @@
  */
 package org.ops4j.pax.web.service.undertow.internal;
 
-import javax.servlet.Servlet;
-import javax.servlet.ServletContext;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletContext;
 
 import io.undertow.servlet.api.InstanceFactory;
 import io.undertow.servlet.api.InstanceHandle;
@@ -33,7 +33,7 @@ import org.ops4j.pax.web.service.undertow.internal.web.UndertowResourceServlet;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceObjects;
-import org.osgi.service.http.runtime.dto.DTOConstants;
+import org.osgi.service.servlet.runtime.dto.DTOConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +52,7 @@ public class PaxWebServletInfo extends ServletInfo {
 
 	private Class<? extends Servlet> servletClass;
 
-	/** This {@link ServletContext} is scoped to single {@link org.osgi.service.http.context.ServletContextHelper} */
+	/** This {@link ServletContext} is scoped to single {@link org.osgi.service.servlet.context.ServletContextHelper} */
 	private final OsgiServletContext osgiServletContext;
 	/** This {@link ServletContext} is scoped to particular Whiteboard servlet */
 	private final OsgiScopedServletContext servletContext;

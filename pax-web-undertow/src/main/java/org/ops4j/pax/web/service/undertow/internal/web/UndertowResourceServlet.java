@@ -19,13 +19,13 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Enumeration;
-import javax.servlet.DispatcherType;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.cache.DirectBufferCache;
@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
  *
  * <p>Due to caching infrastructure of Undertow, we need this servlet to implement {@link ResourceManager}, because
  * {@link io.undertow.server.handlers.resource.CachingResourceManager} should be created up front. The details
- * of {@link ResourceManager} will be set up in {@link javax.servlet.Servlet#init(ServletConfig)}.</p>
+ * of {@link ResourceManager} will be set up in {@link jakarta.servlet.Servlet#init(ServletConfig)}.</p>
  *
  * <p>This servlet extends forked version of oroginal {@link io.undertow.servlet.handlers.DefaultServlet} and
  * is implemented as if the original version was more extensible. After forking I could implement everything
@@ -64,11 +64,11 @@ public class UndertowResourceServlet extends DefaultServlet implements ResourceM
 
 	/**
 	 * If {@link #baseDirectory} is not specified, this is resource prefix to prepend when calling
-	 * {@link org.osgi.service.http.context.ServletContextHelper#getResource(String)}
+	 * {@link org.osgi.service.servlet.context.ServletContextHelper#getResource(String)}
 	 */
 	private final String chroot;
 
-	/** The real {@link ResourceManager} configured in {@link javax.servlet.Servlet#init(ServletConfig)} */
+	/** The real {@link ResourceManager} configured in {@link jakarta.servlet.Servlet#init(ServletConfig)} */
 	private ResourceManager resourceManager;
 
 	private String[] welcomeFiles;
@@ -338,7 +338,7 @@ public class UndertowResourceServlet extends DefaultServlet implements ResourceM
 	protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		// https://github.com/ops4j/org.ops4j.pax.web/issues/1664
 		//
-		// instead of relying on reflection used in javax.servlet.http.HttpServlet.doOptions()
+		// instead of relying on reflection used in jakarta.servlet.http.HttpServlet.doOptions()
 		// we simply return fixed set of methods (to be compatible with Jetty and Tomcat)
 		resp.setHeader("Allow", "OPTIONS, GET, HEAD, POST");
 	}

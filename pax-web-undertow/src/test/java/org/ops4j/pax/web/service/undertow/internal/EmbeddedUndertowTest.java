@@ -29,19 +29,19 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.servlet.DispatcherType;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContainerInitializer;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpFilter;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletContainerInitializer;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.ServletContextListener;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpFilter;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import io.undertow.Handlers;
 import io.undertow.Undertow;
@@ -70,7 +70,7 @@ import io.undertow.servlet.handlers.ServletRequestContext;
 import io.undertow.servlet.util.ImmediateInstanceFactory;
 import io.undertow.util.ETag;
 import io.undertow.util.StatusCodes;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xnio.ChannelListener;
@@ -83,10 +83,9 @@ import org.xnio.Xnio;
 import org.xnio.XnioWorker;
 import org.xnio.channels.AcceptingChannel;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class EmbeddedUndertowTest {
 
@@ -102,7 +101,7 @@ public class EmbeddedUndertowTest {
 
 		HttpServlet servletInstance = new HttpServlet() {
 			@Override
-			protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+			protected void service(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 				LOG.info("Handling request: {}", req.toString());
 				resp.setContentType("text/plain");
 				resp.setCharacterEncoding("UTF-8");
@@ -113,7 +112,7 @@ public class EmbeddedUndertowTest {
 			}
 		};
 
-		ServletInfo servlet = Servlets.servlet("s1", servletInstance.getClass(), new ImmediateInstanceFactory<HttpServlet>(servletInstance));
+		ServletInfo servlet = Servlets.servlet("s1", servletInstance.getClass(), new ImmediateInstanceFactory<>(servletInstance));
 		servlet.addMapping("/s1/*");
 
 		DeploymentInfo deploymentInfo = Servlets.deployment()
@@ -160,7 +159,7 @@ public class EmbeddedUndertowTest {
 
 		HttpServlet servletInstance = new DefaultServlet();
 
-		ServletInfo servlet = Servlets.servlet("default", servletInstance.getClass(), new ImmediateInstanceFactory<HttpServlet>(servletInstance));
+		ServletInfo servlet = Servlets.servlet("default", servletInstance.getClass(), new ImmediateInstanceFactory<>(servletInstance));
 		servlet.addInitParam("directory-listing", "true");
 
 		// with "/" mapping, io.undertow.servlet.handlers.ServletPathMatch is used with
@@ -231,7 +230,7 @@ public class EmbeddedUndertowTest {
 
 		HttpServlet servletInstance = new HttpServlet() {
 			@Override
-			protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+			protected void service(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 				LOG.info("Handling request: {}", req.toString());
 				resp.setContentType("text/plain");
 				resp.setCharacterEncoding("UTF-8");
@@ -251,7 +250,7 @@ public class EmbeddedUndertowTest {
 			}
 		};
 
-		ServletInfo servlet = Servlets.servlet("default", servletInstance.getClass(), new ImmediateInstanceFactory<HttpServlet>(servletInstance));
+		ServletInfo servlet = Servlets.servlet("default", servletInstance.getClass(), new ImmediateInstanceFactory<>(servletInstance));
 		servlet.addMapping("/s1");
 
 		DeploymentInfo deploymentInfo = Servlets.deployment()
@@ -282,7 +281,7 @@ public class EmbeddedUndertowTest {
 				.addServletContainerInitializer(new ServletContainerInitializerInfo(ServletContainerInitializer.class,
 						new ImmediateInstanceFactory<ServletContainerInitializer>(new ServletContainerInitializer() {
 							@Override
-							public void onStartup(Set<Class<?>> c, ServletContext ctx) throws ServletException {
+							public void onStartup(Set<Class<?>> c, ServletContext ctx) {
 								// ServletContextListener added from SCI - this is real "programmatic listener"
 								ctx.addListener(new ServletContextListener() {
 									@Override
@@ -354,7 +353,7 @@ public class EmbeddedUndertowTest {
 
 		HttpServlet servletInstance = new HttpServlet() {
 			@Override
-			protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+			protected void service(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 				LOG.info("Handling request: {}", req.toString());
 				resp.setContentType("text/plain");
 				resp.setCharacterEncoding("UTF-8");
@@ -372,7 +371,7 @@ public class EmbeddedUndertowTest {
 			}
 		};
 
-		ServletInfo servlet = Servlets.servlet("s1", servletInstance.getClass(), new ImmediateInstanceFactory<HttpServlet>(servletInstance));
+		ServletInfo servlet = Servlets.servlet("s1", servletInstance.getClass(), new ImmediateInstanceFactory<>(servletInstance));
 		servlet.addMapping("/s1/*");
 
 		FilterInfo filter = Servlets.filter("f1", filterInstance.getClass(), new ImmediateInstanceFactory<>(filterInstance));
@@ -434,7 +433,7 @@ public class EmbeddedUndertowTest {
 		// "XNIO-1 task-1@2434" prio=5 tid=0x17 nid=NA runnable
 		//  java.lang.Thread.State: RUNNABLE
 		//      at org.ops4j.pax.web.service.undertow.internal.EmbeddedUndertowTest$2.service(EmbeddedUndertowTest.java:139)
-		//      at javax.servlet.http.HttpServlet.service(HttpServlet.java:590)
+		//      at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590)
 		//      at io.undertow.servlet.handlers.ServletHandler.handleRequest(ServletHandler.java:74)
 		//      at io.undertow.servlet.handlers.security.ServletSecurityRoleHandler.handleRequest(ServletSecurityRoleHandler.java:62)
 		//      at io.undertow.servlet.handlers.ServletChain$1.handleRequest(ServletChain.java:68)
@@ -559,7 +558,7 @@ public class EmbeddedUndertowTest {
 
 		HttpServlet servletInstance = new HttpServlet() {
 			@Override
-			protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+			protected void service(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 				LOG.info("Handling request: {}", req.toString());
 				resp.setContentType("text/plain");
 				resp.setCharacterEncoding("UTF-8");
@@ -570,7 +569,7 @@ public class EmbeddedUndertowTest {
 			}
 		};
 
-		ServletInfo servlet = Servlets.servlet("s1", servletInstance.getClass(), new ImmediateInstanceFactory<HttpServlet>(servletInstance));
+		ServletInfo servlet = Servlets.servlet("s1", servletInstance.getClass(), new ImmediateInstanceFactory<>(servletInstance));
 		servlet.addMapping("/s1/*");
 
 		DeploymentInfo deploymentInfo = Servlets.deployment()
@@ -606,7 +605,7 @@ public class EmbeddedUndertowTest {
 		response = send(port, "/c1/s2");
 		assertTrue(response.contains("HTTP/1.1 404"));
 
-		ServletInfo servlet2 = Servlets.servlet("s2", servletInstance.getClass(), new ImmediateInstanceFactory<HttpServlet>(servletInstance));
+		ServletInfo servlet2 = Servlets.servlet("s2", servletInstance.getClass(), new ImmediateInstanceFactory<>(servletInstance));
 		servlet2.addMapping("/s2/*");
 		// this is not necessary. Not even reasonable, because the deployment info is originally cloned inside
 		// the deployment
@@ -963,7 +962,7 @@ public class EmbeddedUndertowTest {
 			}
 
 			@Override
-			protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+			protected void service(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 				LOG.info("Handling request: {}", req.toString());
 				resp.setContentType("text/plain");
 				resp.setCharacterEncoding("UTF-8");
@@ -983,11 +982,11 @@ public class EmbeddedUndertowTest {
 
 		// another example of "info" like class. "servlet info" is added to "deployment info" (directly, not as clone)
 		// which means "servlet is registered inside servlet context"
-		ServletInfo servlet = Servlets.servlet("c1s1", servletInstance.getClass(), new ImmediateInstanceFactory<HttpServlet>(servletInstance));
+		ServletInfo servlet = Servlets.servlet("c1s1", servletInstance.getClass(), new ImmediateInstanceFactory<>(servletInstance));
 		servlet.addMapping("/s1/*");
 
 		// "deployment info" represents a full information about single "servlet context" which can simply be
-		// treated as "JavaEE web application" with single context path
+		// treated as "JakartaEE web application" with single context path
 		// this info is in 1:1 relation with single web.xml descriptor
 		DeploymentInfo deploymentInfo1 = Servlets.deployment()
 				.setClassLoader(this.getClass().getClassLoader())
@@ -1011,7 +1010,7 @@ public class EmbeddedUndertowTest {
 		//  - returned as io.undertow.servlet.api.DeploymentManager object that controls the lifecycle of
 		//    associated "physical deployment"
 		DeploymentManager dm1 = container.addDeployment(deploymentInfo1);
-		assertThat(dm1.getState(), equalTo(DeploymentManager.State.UNDEPLOYED));
+		assertThat(dm1.getState()).isEqualTo(DeploymentManager.State.UNDEPLOYED);
 
 		// "deploying" clones the already cloned "deployment info" again and turns it into "physical deployment"
 		// represented by io.undertow.servlet.api.Deployment, which allows read access to various aspects
@@ -1019,7 +1018,7 @@ public class EmbeddedUndertowTest {
 		// the problem with Undertow is that while we can add new servlets to existing "deployment", we can't
 		// remove them...
 		// "deploy" does few important things:
-		//  - creates instance of io.undertow.servlet.spec.ServletContextImpl (THE javax.servlet.ServletContext)
+		//  - creates instance of io.undertow.servlet.spec.ServletContextImpl (THE jakarta.servlet.ServletContext)
 		//  - creates instance of io.undertow.servlet.core.DeploymentImpl
 		//  - prepares all the "web elements" by turning "info" into "physical representation" of e.g., servlet
 		//     - e.g., io.undertow.servlet.api.ServletInfo is turned into io.undertow.servlet.core.ManagedServlet
@@ -1032,11 +1031,11 @@ public class EmbeddedUndertowTest {
 		//  - the final handler is put as io.undertow.servlet.core.DeploymentImpl.initialHandler and then
 		//    returned from (as-is) io.undertow.servlet.api.DeploymentManager.start()
 		dm1.deploy();
-		assertThat(dm1.getState(), equalTo(DeploymentManager.State.DEPLOYED));
+		assertThat(dm1.getState()).isEqualTo(DeploymentManager.State.DEPLOYED);
 
 		// "start" starts all lifecycle objects (servlets, filters, listeners)
 		HttpHandler handler = dm1.start();
-		assertThat(dm1.getState(), equalTo(DeploymentManager.State.STARTED));
+		assertThat(dm1.getState()).isEqualTo(DeploymentManager.State.STARTED);
 
 		path.addPrefixPath("/c1", handler);
 
@@ -1056,7 +1055,7 @@ public class EmbeddedUndertowTest {
 
 		// add new context
 
-		ServletInfo servlet2 = Servlets.servlet("c2s1", servletInstance.getClass(), new ImmediateInstanceFactory<HttpServlet>(servletInstance));
+		ServletInfo servlet2 = Servlets.servlet("c2s1", servletInstance.getClass(), new ImmediateInstanceFactory<>(servletInstance));
 		servlet2.addMapping("/s1/*");
 
 		DeploymentInfo deploymentInfo2 = Servlets.deployment()
@@ -1076,7 +1075,7 @@ public class EmbeddedUndertowTest {
 
 		// add new servlet to existing context
 
-		ServletInfo servlet3 = Servlets.servlet("c1s2", servletInstance.getClass(), new ImmediateInstanceFactory<HttpServlet>(servletInstance));
+		ServletInfo servlet3 = Servlets.servlet("c1s2", servletInstance.getClass(), new ImmediateInstanceFactory<>(servletInstance));
 		servlet3.addMapping("/s2/*");
 
 		response = send(port, "/c1/s2");
@@ -1122,7 +1121,7 @@ public class EmbeddedUndertowTest {
 		s.getOutputStream().write(("Connection: close\r\n\r\n").getBytes());
 
 		byte[] buf = new byte[64];
-		int read = -1;
+		int read;
 		StringWriter sw = new StringWriter();
 		while ((read = s.getInputStream().read(buf)) > 0) {
 			sw.append(new String(buf, 0, read));
@@ -1135,7 +1134,7 @@ public class EmbeddedUndertowTest {
 	private Map<String, String> extractHeaders(String response) throws IOException {
 		Map<String, String> headers = new LinkedHashMap<>();
 		try (BufferedReader reader = new BufferedReader(new StringReader(response))) {
-			String line = null;
+			String line;
 			while ((line = reader.readLine()) != null) {
 				if (line.trim().equals("")) {
 					break;
