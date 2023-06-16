@@ -30,22 +30,22 @@ import java.util.Map;
 import java.util.Set;
 import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
-import javax.servlet.DispatcherType;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.GenericFilter;
-import javax.servlet.Servlet;
-import javax.servlet.ServletContainerInitializer;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.GenericFilter;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletContainerInitializer;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.ServletContextListener;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.catalina.Context;
 import org.apache.catalina.Engine;
@@ -80,29 +80,28 @@ import org.apache.tomcat.SimpleInstanceManager;
 import org.apache.tomcat.util.descriptor.web.FilterDef;
 import org.apache.tomcat.util.descriptor.web.FilterMap;
 import org.apache.tomcat.util.digester.Digester;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class EmbeddedTomcatTest {
 
 	public static final Logger LOG = LoggerFactory.getLogger(EmbeddedTomcatTest.class);
 
-	@BeforeClass
+	@BeforeAll
 	public static void initClass() {
 		SLF4JBridgeHandler.removeHandlersForRootLogger();
 		SLF4JBridgeHandler.install();
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void cleanupClass() {
 		SLF4JBridgeHandler.uninstall();
 	}
@@ -311,8 +310,8 @@ public class EmbeddedTomcatTest {
 		// listener class names from web.xml, web-fragment.xml and @WebListener are added to the context using this
 		// method.
 		context.addApplicationListener("org.ops4j.pax.web.service.tomcat.internal.ServletContextListenerAddedFromWebXml");
-		// this method is called from dynamic sc.addListener() IF the listener implements javax.servlet.http.HttpSessionListener
-		// or javax.servlet.ServletContextListener (the latter ONLY when org.apache.catalina.core.ApplicationContext.newServletContextListenerAllowed==true)
+		// this method is called from dynamic sc.addListener() IF the listener implements jakarta.servlet.http.HttpSessionListener
+		// or jakarta.servlet.ServletContextListener (the latter ONLY when org.apache.catalina.core.ApplicationContext.newServletContextListenerAllowed==true)
 		// when ApplicationContext.newServletContextListenerAllowed==false, ServletContextListener is treated
 		// as programmatic, so Tomcat throws
 		// IllegalArgumentException("Once the first ServletContextListener has been called, no more ServletContextListeners may be added.")
@@ -718,7 +717,7 @@ public class EmbeddedTomcatTest {
 		StandardServer server = (StandardServer) holder.getServer();
 		Service catalina = server.findService("Catalina");
 		Connector connector = catalina.findConnectors()[0];
-		assertThat(((StandardThreadExecutor) catalina.getExecutor("default")).getNamePrefix(), equalTo("tomcat-pool-"));
+		assertThat(((StandardThreadExecutor) catalina.getExecutor("default")).getNamePrefix()).isEqualTo("tomcat-pool-");
 
 		server.start();
 
@@ -781,7 +780,7 @@ public class EmbeddedTomcatTest {
 		StandardServer server = (StandardServer) holder.getServer();
 		Service catalina = server.findService("Catalina");
 		Connector connector = catalina.findConnectors()[0];
-		assertThat(((StandardThreadExecutor) catalina.getExecutor("default")).getNamePrefix(), equalTo("tomcat-pool-"));
+		assertThat(((StandardThreadExecutor) catalina.getExecutor("default")).getNamePrefix()).isEqualTo("tomcat-pool-");
 
 		server.start();
 

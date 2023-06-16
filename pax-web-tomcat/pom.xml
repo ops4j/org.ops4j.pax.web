@@ -43,23 +43,23 @@
 					<instructions>
 						<Bundle-Activator>org.ops4j.pax.web.service.tomcat.internal.Activator</Bundle-Activator>
 						<Import-Package>
-							<!-- ranges indicate Servlet API 3.1+ (JavaEE 7+) -->
-							javax.servlet;version="[3.1,5)",
-							javax.servlet.annotation;version="[3.1,5)",
-							javax.servlet.descriptor;version="[3.1,5)",
-							javax.servlet.http;version="[3.1,5)",
+							<!-- ranges indicate Servlet API 6.0+ (JakartaEE 10+) -->
+							jakarta.servlet;version="[6,7)",
+							jakarta.servlet.annotation;version="[6,7)",
+							jakarta.servlet.descriptor;version="[6,7)",
+							jakarta.servlet.http;version="[6,7)",
 
-							<!-- ranges indicate we can work with OSGi Core R6+ -->
-							org.osgi.framework;version="[1.8,2)",
+							<!-- OSGi Core R8+ -->
+							org.osgi.framework;version="[1.10,2)",
 							org.osgi.framework.wiring;version="[1.2,2)",
 							org.osgi.util.tracker;version="[1.5,2)",
 
 							<!-- OSGi cmpn -->
-							org.osgi.service.http;version="[1.2,2)",
-							org.osgi.service.http.whiteboard;version="[1.1,2)",
+							org.osgi.service.servlet.whiteboard;version="[2,3)",
 
 							<!-- from pax-web-api -->
 							org.ops4j.pax.web.service;version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.service.http;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.utils;version="${pax-web.osgi.version}",
 							<!-- from pax-web-spi -->
 							org.ops4j.pax.web.service.spi.*;version="${pax-web.osgi.version}",
@@ -67,7 +67,7 @@
 							org.ops4j.pax.web.jsp;version="${pax-web.osgi.version}";resolution:=optional,
 
 							<!-- from pax-logging-api -->
-							org.slf4j;version="[1.7,2)",
+							org.slf4j;version="[2,3)",
 							org.apache.juli.logging,
 
 							<!-- pax-web-tomcat-common / tomcat-api -->
@@ -100,19 +100,19 @@
 							org.apache.juli;version="${dependency.org.apache.tomcat}",
 
 							<!-- other -->
-							javax.annotation;version="[1.2,2)";resolution:=optional,
+							jakarta.annotation;version="[2,3)";resolution:=optional,
 							javax.management,
 							javax.management.modelmbean,
 							javax.naming,
 							javax.naming.spi,
 							javax.net.ssl,
-							javax.security.auth,
-							javax.security.auth.callback,
-							javax.security.auth.login,
-							javax.security.auth.message,
-							javax.security.auth.message.callback,
-							javax.security.auth.message.config,
-							javax.security.auth.message.module,
+							jakarta.security.auth,
+							jakarta.security.auth.callback,
+							jakarta.security.auth.login,
+							jakarta.security.auth.message,
+							jakarta.security.auth.message.callback,
+							jakarta.security.auth.message.config,
+							jakarta.security.auth.message.module,
 							javax.xml.parsers,
 							javax.xml.transform,
 							org.w3c.dom,
@@ -268,11 +268,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>
-			<artifactId>osgi.cmpn</artifactId>
+			<artifactId>org.osgi.service.servlet</artifactId>
 			<scope>provided</scope>
 		</dependency>
 
-		<!-- JavaEE -->
+		<!-- JakartaEE -->
 
 		<dependency>
 			<groupId>jakarta.annotation</groupId>
@@ -284,14 +284,19 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>jakarta.authentication</groupId>
-			<artifactId>jakarta.authentication-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
 			<groupId>jakarta.websocket</groupId>
 			<artifactId>jakarta.websocket-api</artifactId>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.websocket</groupId>
+			<artifactId>jakarta.websocket-client-api</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.authentication</groupId>
+			<artifactId>jakarta.authentication-api</artifactId>
+			<scope>provided</scope>
 		</dependency>
 
 		<!-- Tomcat -->
@@ -321,7 +326,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-slf4j-impl</artifactId>
+			<artifactId>log4j-slf4j2-impl</artifactId>
 			<scope>test</scope>
 		</dependency>
 
@@ -352,8 +357,18 @@
 		<!-- Testing -->
 
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-core</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

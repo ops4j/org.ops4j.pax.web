@@ -16,8 +16,8 @@
 package org.ops4j.pax.web.service.tomcat.internal;
 
 import java.io.IOException;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.catalina.Wrapper;
 import org.apache.catalina.connector.Request;

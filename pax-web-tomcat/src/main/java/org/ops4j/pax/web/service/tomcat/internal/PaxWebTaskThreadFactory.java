@@ -15,11 +15,6 @@
  */
 package org.ops4j.pax.web.service.tomcat.internal;
 
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-
-import org.apache.tomcat.util.security.PrivilegedSetTccl;
-import org.apache.tomcat.util.threads.Constants;
 import org.apache.tomcat.util.threads.TaskThreadFactory;
 
 public class PaxWebTaskThreadFactory extends TaskThreadFactory {
@@ -35,12 +30,7 @@ public class PaxWebTaskThreadFactory extends TaskThreadFactory {
 		// and this is it - we need TCCL of the thread to be a CL from pax-web-tomcat, not
 		// from pax-web-tomcat-common which would be used because org.apache.tomcat.util.threads.TaskThreadFactory
 		// is container in pax-web-tomcat-common bundle
-		if (Constants.IS_SECURITY_ENABLED) {
-			PrivilegedAction<Void> pa = new PrivilegedSetTccl(t, TomcatFactory.class.getClassLoader());
-			AccessController.doPrivileged(pa);
-		} else {
-			t.setContextClassLoader(TomcatFactory.class.getClassLoader());
-		}
+		t.setContextClassLoader(TomcatFactory.class.getClassLoader());
 
 		return t;
 	}

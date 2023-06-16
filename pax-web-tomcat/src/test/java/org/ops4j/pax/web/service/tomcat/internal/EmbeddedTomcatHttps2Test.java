@@ -29,11 +29,11 @@ import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManagerFactory;
-import javax.servlet.Servlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.PushBuilder;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.PushBuilder;
 
 import org.apache.catalina.Context;
 import org.apache.catalina.Engine;
@@ -84,11 +84,13 @@ import org.apache.hc.core5.http2.HttpVersionPolicy;
 import org.apache.hc.core5.http2.config.H2Config;
 import org.apache.hc.core5.io.CloseMode;
 import org.apache.tomcat.util.file.ConfigFileLoader;
-import org.junit.Test;
+import org.apache.tomcat.util.net.SSLHostConfig;
+import org.apache.tomcat.util.net.SSLHostConfigCertificate;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class EmbeddedTomcatHttps2Test {
 
@@ -122,28 +124,33 @@ public class EmbeddedTomcatHttps2Test {
 		AbstractHttp11JsseProtocol<?> protocol = (AbstractHttp11JsseProtocol<?>) connector.getProtocolHandler();
 		protocol.setSslImplementationName("org.apache.tomcat.util.net.jsse.JSSEImplementation");
 
-		protocol.setKeystoreFile("../../pax-web-itest/etc/security/server.jks");
-		protocol.setKeystorePass("passw0rd");
-		protocol.setKeystoreType("JKS");
-		protocol.setKeystoreProvider("SUN");
-		protocol.setKeyPass("passw0rd");
-		protocol.setKeyAlias("server");
+		SSLHostConfig sslConfig = new SSLHostConfig();
+		protocol.addSslHostConfig(sslConfig);
+		SSLHostConfigCertificate sslHostCertificate = new SSLHostConfigCertificate(sslConfig, SSLHostConfigCertificate.Type.UNDEFINED);
+		sslConfig.addCertificate(sslHostCertificate);
 
-		protocol.setTruststoreFile("../../pax-web-itest/etc/security/server.jks");
-		protocol.setTruststorePass("passw0rd");
-		protocol.setTruststoreType("JKS");
-		protocol.setTruststoreProvider("SUN");
-		protocol.setTruststoreAlgorithm("SunX509");
+		sslHostCertificate.setCertificateKeystoreFile("../../pax-web-itest/etc/security/server.jks");
+		sslHostCertificate.setCertificateKeystorePassword("passw0rd");
+		sslHostCertificate.setCertificateKeystoreType("JKS");
+		sslHostCertificate.setCertificateKeystoreProvider("SUN");
+		sslHostCertificate.setCertificateKeyPassword("passw0rd");
+		sslHostCertificate.setCertificateKeyAlias("server");
 
-		protocol.setSslEnabledProtocols("TLSv1.3");
+		sslConfig.setTruststoreFile("../../pax-web-itest/etc/security/server.jks");
+		sslConfig.setTruststorePassword("passw0rd");
+		sslConfig.setTruststoreType("JKS");
+		sslConfig.setTruststoreProvider("SUN");
+		sslConfig.setTruststoreAlgorithm("SunX509");
+
+		sslConfig.setEnabledProtocols(new String[] { "TLSv1.3" });
 		// only TWO ciphers are supported on JDK8 for TLSv1.3
 		//  - sun.security.ssl.ProtocolVersion.PROTOCOLS_OF_13 is used only in TLS_AES_256_GCM_SHA384 and
 		//    TLS_AES_128_GCM_SHA256 in sun.security.ssl.CipherSuite
 		//  - sun.security.ssl.ProtocolVersion.PROTOCOLS_12_13 is not used at all
 		//  - sun.security.ssl.ProtocolVersion.PROTOCOLS_TO_13 is not used at all
-		protocol.setSSLCipherSuite("TLS_AES_256_GCM_SHA384");
-		protocol.setSSLProtocol("TLSv1.3");
-		protocol.setUseServerCipherSuitesOrder(true);
+		sslConfig.setCiphers("TLS_AES_256_GCM_SHA384");
+		sslConfig.setSslProtocol("TLSv1.3");
+		sslConfig.setHonorCipherOrder(true);
 
 		connector.addUpgradeProtocol(new Http2Protocol());
 		service.addConnector(connector);

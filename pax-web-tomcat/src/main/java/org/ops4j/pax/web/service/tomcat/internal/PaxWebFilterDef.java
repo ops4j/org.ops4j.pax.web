@@ -16,14 +16,14 @@
 package org.ops4j.pax.web.service.tomcat.internal;
 
 import java.io.IOException;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.GenericFilter;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.GenericFilter;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 
 import org.apache.tomcat.util.descriptor.web.FilterDef;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
@@ -35,7 +35,7 @@ import org.ops4j.pax.web.service.spi.servlet.ScopedFilter;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceObjects;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.http.runtime.dto.DTOConstants;
+import org.osgi.service.servlet.runtime.dto.DTOConstants;
 
 /**
  * Extension of Tomcat's {@link FilterDef} which can tell if it's suitable for a chain with given target

@@ -36,13 +36,13 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.function.Supplier;
-import javax.servlet.Servlet;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletContextAttributeListener;
-import javax.servlet.ServletContextListener;
-import javax.servlet.SessionCookieConfig;
-import javax.servlet.http.HttpSessionAttributeListener;
-import javax.servlet.http.HttpSessionListener;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletContextAttributeListener;
+import jakarta.servlet.ServletContextListener;
+import jakarta.servlet.SessionCookieConfig;
+import jakarta.servlet.http.HttpSessionAttributeListener;
+import jakarta.servlet.http.HttpSessionListener;
 
 import org.apache.catalina.AccessLog;
 import org.apache.catalina.Container;
@@ -215,8 +215,8 @@ class TomcatServerWrapper implements BatchVisitor {
 	private final Map<String, PaxWebStandardContext> contextHandlers = new HashMap<>();
 
 	/**
-	 * 1:1 mapping between {@link OsgiContextModel} and {@link org.osgi.service.http.context.ServletContextHelper}'s
-	 * specific {@link javax.servlet.ServletContext}.
+	 * 1:1 mapping between {@link OsgiContextModel} and {@link org.osgi.service.servlet.context.ServletContextHelper}'s
+	 * specific {@link jakarta.servlet.ServletContext}.
 	 */
 	private final Map<OsgiContextModel, OsgiServletContext> osgiServletContexts = new HashMap<>();
 
@@ -229,7 +229,7 @@ class TomcatServerWrapper implements BatchVisitor {
 
 	/**
 	 * 1:N mapping between context path and sorted (by ranking rules) set of {@link OsgiContextModel}. This helps
-	 * finding proper {@link org.osgi.service.http.context.ServletContextHelper} (1:1 with {@link OsgiContextModel})
+	 * finding proper {@link org.osgi.service.servlet.context.ServletContextHelper} (1:1 with {@link OsgiContextModel})
 	 * to use for filters, when the invocation chain doesn't contain target servlet (which otherwise would
 	 * determine the ServletContextHelper to use).
 	 */
@@ -2076,7 +2076,7 @@ class TomcatServerWrapper implements BatchVisitor {
 			LOG.info("Starting Tomcat context \"{}\" with default Osgi Context {}", context, highestRanked);
 
 			// first thing - only NOW we can set ServletContext's class loader! It affects many things, including
-			// the TCCL used for example by javax.el.ExpressionFactory.newInstance()
+			// the TCCL used for example by jakarta.el.ExpressionFactory.newInstance()
 
 			// org.apache.catalina.core.ContainerBase.setParentClassLoader() sets the parent that
 			// will be used as parent of org.apache.catalina.loader.ParallelWebappClassLoader returned

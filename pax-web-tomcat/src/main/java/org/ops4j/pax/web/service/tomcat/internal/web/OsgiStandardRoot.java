@@ -27,7 +27,7 @@ import java.security.cert.Certificate;
 import java.util.Collections;
 import java.util.Set;
 import java.util.jar.Manifest;
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.WebResource;

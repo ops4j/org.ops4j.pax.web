@@ -25,15 +25,15 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import javax.servlet.DispatcherType;
-import javax.servlet.Filter;
-import javax.servlet.Servlet;
-import javax.servlet.ServletContainerInitializer;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletContextListener;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSessionListener;
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.Filter;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletContainerInitializer;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletContextListener;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSessionListener;
 
 import org.apache.catalina.Container;
 import org.apache.catalina.LifecycleException;
@@ -57,15 +57,15 @@ import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiSessionAttributeListener;
 import org.ops4j.pax.web.service.spi.servlet.PreprocessorFilterConfig;
 import org.ops4j.pax.web.service.spi.servlet.SCIWrapper;
-import org.osgi.service.http.context.ServletContextHelper;
-import org.osgi.service.http.whiteboard.Preprocessor;
+import org.osgi.service.servlet.context.ServletContextHelper;
+import org.osgi.service.servlet.whiteboard.Preprocessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Extension of {@link StandardContext} that keeps track of default
  * {@link org.ops4j.pax.web.service.spi.model.OsgiContextModel} and
- * {@link javax.servlet.ServletContext} to use for chains that do not have target servlet mapped. These are
+ * {@link jakarta.servlet.ServletContext} to use for chains that do not have target servlet mapped. These are
  * required by filters which may be associated with such servlet-less chains.
  */
 public class PaxWebStandardContext extends StandardContext {
@@ -225,7 +225,7 @@ public class PaxWebStandardContext extends StandardContext {
 
 	/**
 	 * We have to ensure that this {@link StandardContext} will always return
-	 * proper instance of {@link javax.servlet.ServletContext} - especially in the events passed to listeners
+	 * proper instance of {@link jakarta.servlet.ServletContext} - especially in the events passed to listeners
 	 *
 	 * @param osgiServletContext
 	 */

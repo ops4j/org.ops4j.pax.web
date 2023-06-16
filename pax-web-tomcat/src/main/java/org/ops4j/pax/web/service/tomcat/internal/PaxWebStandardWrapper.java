@@ -15,9 +15,9 @@
  */
 package org.ops4j.pax.web.service.tomcat.internal;
 
-import javax.servlet.Servlet;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
 
 import org.apache.catalina.Container;
 import org.apache.catalina.LifecycleException;
@@ -34,7 +34,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceObjects;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.http.runtime.dto.DTOConstants;
+import org.osgi.service.servlet.runtime.dto.DTOConstants;
 
 /**
  * Tomcat's version of Jetty's {@code org.ops4j.pax.web.service.jetty.internal.PaxWebServletHolder} which
@@ -49,7 +49,7 @@ public class PaxWebStandardWrapper extends StandardWrapper {
 	private Class<? extends Servlet> servletClass;
 	private ServiceReference<Servlet> serviceReference;
 
-	/** This {@link ServletContext} is scoped to single {@link org.osgi.service.http.context.ServletContextHelper} */
+	/** This {@link ServletContext} is scoped to single {@link org.osgi.service.servlet.context.ServletContextHelper} */
 	private final OsgiServletContext osgiServletContext;
 	/** This {@link ServletContext} is scoped to particular Whiteboard servlet */
 	private final OsgiScopedServletContext servletContext;
@@ -104,7 +104,7 @@ public class PaxWebStandardWrapper extends StandardWrapper {
 	 * in which' context we're adding given servlet to Jetty.
 	 * @param servletModel
 	 * @param osgiContextModel
-	 * @param osgiServletContext {@link org.osgi.service.http.context.ServletContextHelper} specific {@link ServletContext}
+	 * @param osgiServletContext {@link org.osgi.service.servlet.context.ServletContextHelper} specific {@link ServletContext}
 	 * @param realContext
 	 */
 	public PaxWebStandardWrapper(ServletModel servletModel, OsgiContextModel osgiContextModel,
@@ -174,7 +174,7 @@ public class PaxWebStandardWrapper extends StandardWrapper {
 	}
 
 	/**
-	 * This method is called from {@link javax.servlet.ServletConfig} passed to the servlet instance of this wrapper.
+	 * This method is called from {@link jakarta.servlet.ServletConfig} passed to the servlet instance of this wrapper.
 	 * Thus there's no need to create {@link OsgiInitializedServlet} wrapper around the servlet.
 	 * @return
 	 */
