@@ -24,20 +24,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.Set;
-import javax.servlet.http.HttpServlet;
-import javax.websocket.ClientEndpointConfig;
-import javax.websocket.ContainerProvider;
-import javax.websocket.Endpoint;
-import javax.websocket.EndpointConfig;
-import javax.websocket.OnMessage;
-import javax.websocket.OnOpen;
-import javax.websocket.RemoteEndpoint;
-import javax.websocket.Session;
-import javax.websocket.WebSocketContainer;
-import javax.websocket.server.ServerApplicationConfig;
-import javax.websocket.server.ServerContainer;
-import javax.websocket.server.ServerEndpoint;
-import javax.websocket.server.ServerEndpointConfig;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.websocket.ClientEndpointConfig;
+import jakarta.websocket.ContainerProvider;
+import jakarta.websocket.Endpoint;
+import jakarta.websocket.EndpointConfig;
+import jakarta.websocket.OnMessage;
+import jakarta.websocket.OnOpen;
+import jakarta.websocket.RemoteEndpoint;
+import jakarta.websocket.Session;
+import jakarta.websocket.WebSocketContainer;
+import jakarta.websocket.server.ServerApplicationConfig;
+import jakarta.websocket.server.ServerContainer;
+import jakarta.websocket.server.ServerEndpoint;
+import jakarta.websocket.server.ServerEndpointConfig;
 
 import io.undertow.Handlers;
 import io.undertow.Undertow;
@@ -52,13 +52,12 @@ import io.undertow.servlet.handlers.DefaultServlet;
 import io.undertow.servlet.util.ImmediateInstanceFactory;
 import io.undertow.websockets.jsr.ServerWebSocketContainer;
 import io.undertow.websockets.jsr.WebSocketDeploymentInfo;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class EmbeddedUndertowWebSocketsTest {
 
@@ -115,7 +114,7 @@ public class EmbeddedUndertowWebSocketsTest {
 
 		// we can add more endpoints only before io.undertow.websockets.jsr.JsrWebSocketFilter.init() is called
 		ServerContainer sc = (ServerContainer) dm.getDeployment().getServletContext().getAttribute(ServerContainer.class.getName());
-		assertThat(sc.getClass().getName(), equalTo("io.undertow.websockets.jsr.ServerWebSocketContainer"));
+		assertThat(sc.getClass().getName()).isEqualTo("io.undertow.websockets.jsr.ServerWebSocketContainer");
 		sc.addEndpoint(MyAnnotatedEndpoint.class);
 
 		ClientEndpointConfig config = ClientEndpointConfig.Builder.create()
