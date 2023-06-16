@@ -19,16 +19,16 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.HashSet;
 import java.util.Set;
-import javax.servlet.ServletContainerInitializer;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.HandlesTypes;
-import javax.websocket.DeploymentException;
-import javax.websocket.Endpoint;
-import javax.websocket.server.ServerApplicationConfig;
-import javax.websocket.server.ServerContainer;
-import javax.websocket.server.ServerEndpoint;
-import javax.websocket.server.ServerEndpointConfig;
+import jakarta.servlet.ServletContainerInitializer;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.HandlesTypes;
+import jakarta.websocket.DeploymentException;
+import jakarta.websocket.Endpoint;
+import jakarta.websocket.server.ServerApplicationConfig;
+import jakarta.websocket.server.ServerContainer;
+import jakarta.websocket.server.ServerEndpoint;
+import jakarta.websocket.server.ServerEndpointConfig;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,13 +49,13 @@ public class WebSocketsInitializer implements ServletContainerInitializer {
         ServerContainer wsContainer = (ServerContainer) ctx.getAttribute(ServerContainer.class.getName());
 
         if (wsContainer == null) {
-            LOG.warn("[dev error] No javax.websocket.server.ServerContainer available in servlet context." +
+            LOG.warn("[dev error] No jakarta.websocket.server.ServerContainer available in servlet context." +
                     " Skipping WebSocket registration.");
             return;
         }
 
         // inspired by Tomcat's org.apache.tomcat.websocket.server.WsSci and
-        // Jetty's org.eclipse.jetty.websocket.javax.server.config.JavaxWebSocketServletContainerInitializer
+        // Jetty's org.eclipse.jetty.ee10.websocket.jakarta.server.config.JakartaWebSocketServletContainerInitializer
 
         Set<Class<?>> annotatedEndpointClasses = new HashSet<>();
         Set<Class<? extends Endpoint>> conigurableEndpoints = new HashSet<>();
@@ -67,15 +67,16 @@ public class WebSocketsInitializer implements ServletContainerInitializer {
             if (!Modifier.isPublic(modifiers) || Modifier.isAbstract(modifiers) || Modifier.isInterface(modifiers)) {
                 continue;
             }
-            if (potentialEndpointClass.getPackage().getName().startsWith("javax.")) {
+            if (potentialEndpointClass.getPackage().getName().startsWith("javax.")
+                    || potentialEndpointClass.getPackage().getName().startsWith("jakarta.")) {
                 continue;
             }
             if (Endpoint.class.isAssignableFrom(potentialEndpointClass)) {
-                // a class to be processed by javax.websocket.server.ServerApplicationConfig
+                // a class to be processed by jakarta.websocket.server.ServerApplicationConfig
                 conigurableEndpoints.add((Class<? extends Endpoint>) potentialEndpointClass);
             }
             if (ServerApplicationConfig.class.isAssignableFrom(potentialEndpointClass)) {
-                // a class that processes javax.websocket.Endpoints
+                // a class that processes jakarta.websocket.Endpoints
                 try {
                     configs.add((ServerApplicationConfig) potentialEndpointClass.getConstructor().newInstance());
                 } catch (InstantiationException | IllegalAccessException | NoSuchMethodException |
@@ -93,7 +94,7 @@ public class WebSocketsInitializer implements ServletContainerInitializer {
         Set<Class<?>> configuredAnnotatedEndpointClasses = new HashSet<>();
 
         if (configs.isEmpty()) {
-            // no javax.websocket.server.ServerApplicationConfigs available - consider only annotated endpoints
+            // no jakarta.websocket.server.ServerApplicationConfigs available - consider only annotated endpoints
             configuredAnnotatedEndpointClasses.addAll(annotatedEndpointClasses);
         } else {
             for (ServerApplicationConfig config : configs) {
