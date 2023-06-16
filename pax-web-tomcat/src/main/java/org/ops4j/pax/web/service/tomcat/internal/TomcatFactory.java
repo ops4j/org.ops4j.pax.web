@@ -32,9 +32,10 @@ import org.apache.catalina.startup.Catalina;
 import org.apache.catalina.startup.ConnectorCreateRule;
 import org.apache.catalina.startup.ContextConfig;
 import org.apache.coyote.http2.Http2Protocol;
-import org.apache.tomcat.util.compat.JreCompat;
 import org.apache.tomcat.util.digester.Digester;
 import org.apache.tomcat.util.digester.Rule;
+import org.apache.tomcat.util.net.SSLHostConfig;
+import org.apache.tomcat.util.net.SSLHostConfigCertificate;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.config.SecurityConfiguration;
 import org.ops4j.pax.web.service.spi.config.ServerConfiguration;
@@ -69,8 +70,7 @@ public class TomcatFactory {
 	 * Performs environmental discovery to check if we have some classes available on {@code CLASSPATH}.
 	 */
 	private void discovery() {
-		// that's how it's done in Tomcat. We may try to use Jetty ALPN bootclasspath approach later
-		alpnAvailable = JreCompat.isJre9Available();
+		alpnAvailable = true;
 
 		try {
 			classLoader.loadClass("org.apache.coyote.http2.Http2Protocol");
@@ -225,54 +225,59 @@ public class TomcatFactory {
 
 		// --- server keystore for server's own identity
 
+		SSLHostConfig sslConfig = new SSLHostConfig();
+		protocol.addSslHostConfig(sslConfig);
+		SSLHostConfigCertificate sslHostCertificate = new SSLHostConfigCertificate(sslConfig, SSLHostConfigCertificate.Type.UNDEFINED);
+		sslConfig.addCertificate(sslHostCertificate);
+
 		String sslKeystore = secc.getSslKeystore();
 		if (sslKeystore != null) {
-			protocol.setKeystoreFile(sslKeystore);
+			sslHostCertificate.setCertificateKeyFile(sslKeystore);
 		}
 		if (secc.getSslKeystorePassword() != null) {
-			protocol.setKeystorePass(secc.getSslKeystorePassword());
+			sslHostCertificate.setCertificateKeystorePassword(secc.getSslKeystorePassword());
 		}
 		if (secc.getSslKeyPassword() != null) {
-			protocol.setKeyPass(secc.getSslKeyPassword());
+			sslHostCertificate.setCertificateKeyPassword(secc.getSslKeyPassword());
 		}
 
 		if (secc.getSslKeyManagerFactoryAlgorithm() != null) {
 			LOG.debug("Not supported SSL Key Algorithm parameter");
 		}
 		if (secc.getSslKeyAlias() != null) {
-			protocol.setKeyAlias(secc.getSslKeyAlias());
+			sslHostCertificate.setCertificateKeyAlias(secc.getSslKeyAlias());
 		}
 		if (secc.getSslKeystoreType() != null) {
-			protocol.setKeystoreType(secc.getSslKeystoreType());
+			sslHostCertificate.setCertificateKeystoreType(secc.getSslKeystoreType());
 		}
 		if (secc.getSslKeystoreProvider() != null && !"".equals(secc.getSslKeystoreProvider().trim())) {
-			protocol.setKeystoreProvider(secc.getSslKeystoreProvider());
+			sslHostCertificate.setCertificateKeystoreProvider(secc.getSslKeystoreProvider());
 		}
 
 		// --- server truststore for client validation
 
 		String sslTruststore = secc.getTruststore();
 		if (sslTruststore != null) {
-			protocol.setTruststoreFile(sslTruststore);
+			sslConfig.setTruststoreFile(sslTruststore);
 		}
 		if (secc.getTruststorePassword() != null) {
-			protocol.setTruststorePass(secc.getTruststorePassword());
+			sslConfig.setTruststorePassword(secc.getTruststorePassword());
 		}
 		if (secc.getTruststoreType() != null) {
-			protocol.setTruststoreType(secc.getTruststoreType());
+			sslConfig.setTruststoreType(secc.getTruststoreType());
 		}
 		if (secc.getTruststoreProvider() != null && !"".equals(secc.getTruststoreProvider().trim())) {
-			protocol.setTruststoreProvider(secc.getTruststoreProvider());
+			sslConfig.setTruststoreProvider(secc.getTruststoreProvider());
 		}
 		if (secc.getTrustManagerFactoryAlgorithm() != null) {
-			protocol.setTruststoreAlgorithm(secc.getTrustManagerFactoryAlgorithm());
+			sslConfig.setTruststoreAlgorithm(secc.getTrustManagerFactoryAlgorithm());
 		}
 
 		if (secc.isClientAuthWanted() != null && secc.isClientAuthWanted()) {
-			protocol.setClientAuth("want");
+			sslConfig.setCertificateVerification("want"); // same as "optional"
 		}
 		if (secc.isClientAuthNeeded() != null && secc.isClientAuthNeeded()) {
-			protocol.setClientAuth("require");
+			sslConfig.setCertificateVerification("require");
 		}
 
 		// --- protocols and cipher suites
@@ -290,14 +295,14 @@ public class TomcatFactory {
 		}
 
 		if (secc.getProtocolsIncluded().length > 0) {
-			protocol.setSslEnabledProtocols(String.join(",", secc.getProtocolsIncluded()));
+			sslConfig.setEnabledProtocols(secc.getProtocolsIncluded());
 		}
 		if (secc.getCiphersuiteIncluded().length > 0) {
-			protocol.setSSLCipherSuite(String.join(":", secc.getCiphersuiteIncluded()));
+			sslConfig.setCiphers(String.join(":", secc.getCiphersuiteIncluded()));
 		}
 
 		if (secc.getSslProtocol() != null) {
-			protocol.setSSLProtocol(secc.getSslProtocol());
+			sslConfig.setSslProtocol(secc.getSslProtocol());
 		}
 
 		if (secc.getSecureRandomAlgorithm() != null) {
@@ -305,7 +310,7 @@ public class TomcatFactory {
 		}
 
 		// javax.net.ssl.SSLParameters.setUseCipherSuitesOrder()
-		protocol.setUseServerCipherSuitesOrder(true);
+		sslConfig.setHonorCipherOrder(true);
 
 		// --- SSL session and renegotiation
 
@@ -317,12 +322,12 @@ public class TomcatFactory {
 		}
 
 		if (secc.getSslSessionsEnabled() != null && !secc.getSslSessionsEnabled()) {
-			protocol.setSessionCacheSize(0);
+			sslConfig.setSessionCacheSize(0);
 		} else if (secc.getSslSessionCacheSize() != null) {
-			protocol.setSessionCacheSize(secc.getSslSessionCacheSize());
+			sslConfig.setSessionCacheSize(secc.getSslSessionCacheSize());
 		}
 		if (secc.getSslSessionTimeout() != null) {
-			protocol.setSessionTimeout(secc.getSslSessionTimeout());
+			sslConfig.setSessionTimeout(secc.getSslSessionTimeout());
 		}
 
 		// TODO: certificate validation in Tomcat

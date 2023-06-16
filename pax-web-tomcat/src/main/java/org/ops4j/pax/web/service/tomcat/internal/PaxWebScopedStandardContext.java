@@ -17,7 +17,7 @@ package org.ops4j.pax.web.service.tomcat.internal;
 
 import java.util.LinkedList;
 import java.util.List;
-import javax.servlet.FilterConfig;
+import jakarta.servlet.FilterConfig;
 
 import org.apache.catalina.Container;
 import org.apache.catalina.LifecycleState;

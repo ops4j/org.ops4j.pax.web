@@ -16,32 +16,30 @@
 package org.ops4j.pax.web.service.tomcat.internal;
 
 import org.apache.tomcat.util.http.RequestUtil;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class PathTest {
 
 	@Test
 	public void securePaths() {
-		assertThat(RequestUtil.normalize(""), equalTo("/"));
-		assertThat(RequestUtil.normalize("/"), equalTo("/"));
-		assertThat(RequestUtil.normalize("c:"), equalTo("/c:"));
-		assertThat(RequestUtil.normalize("c:/"), equalTo("/c:/"));
-		assertThat(RequestUtil.normalize("c:\\"), equalTo("/c:/"));
-		assertThat(RequestUtil.normalize("//"), equalTo("/"));
-		assertThat(RequestUtil.normalize("."), equalTo("/"));
-		assertThat(RequestUtil.normalize(".."), nullValue());
-		assertThat(RequestUtil.normalize("../.."), nullValue());
-		assertThat(RequestUtil.normalize("./././././././."), equalTo("/"));
-		assertThat(RequestUtil.normalize("../../../../../etc/passwd"), nullValue());
-		assertThat(RequestUtil.normalize("path1"), equalTo("/path1"));
-		assertThat(RequestUtil.normalize("./path1"), equalTo("/path1"));
-		assertThat(RequestUtil.normalize("../path1"), nullValue());
-		assertThat(RequestUtil.normalize("path1/path2"), equalTo("/path1/path2"));
-		assertThat(RequestUtil.normalize("path1/../path2"), equalTo("/path2"));
+		assertThat(RequestUtil.normalize("")).isEqualTo("/");
+		assertThat(RequestUtil.normalize("/")).isEqualTo("/");
+		assertThat(RequestUtil.normalize("c:")).isEqualTo("/c:");
+		assertThat(RequestUtil.normalize("c:/")).isEqualTo("/c:/");
+		assertThat(RequestUtil.normalize("c:\\")).isEqualTo("/c:/");
+		assertThat(RequestUtil.normalize("//")).isEqualTo("/");
+		assertThat(RequestUtil.normalize(".")).isEqualTo("/");
+		assertThat(RequestUtil.normalize("..")).isNull();
+		assertThat(RequestUtil.normalize("../..")).isNull();
+		assertThat(RequestUtil.normalize("./././././././.")).isEqualTo("/");
+		assertThat(RequestUtil.normalize("../../../../../etc/passwd")).isNull();
+		assertThat(RequestUtil.normalize("path1")).isEqualTo("/path1");
+		assertThat(RequestUtil.normalize("./path1")).isEqualTo("/path1");
+		assertThat(RequestUtil.normalize("../path1")).isNull();
+		assertThat(RequestUtil.normalize("path1/path2")).isEqualTo("/path1/path2");
+		assertThat(RequestUtil.normalize("path1/../path2")).isEqualTo("/path2");
 	}
 
 }

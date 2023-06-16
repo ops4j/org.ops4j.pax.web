@@ -21,7 +21,7 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import javax.servlet.Servlet;
+import jakarta.servlet.Servlet;
 
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerState;

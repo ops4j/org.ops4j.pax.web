@@ -15,7 +15,7 @@
  */
 package org.ops4j.pax.web.service.tomcat.internal;
 
-import javax.servlet.DispatcherType;
+import jakarta.servlet.DispatcherType;
 
 import org.apache.tomcat.util.descriptor.web.FilterMap;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;

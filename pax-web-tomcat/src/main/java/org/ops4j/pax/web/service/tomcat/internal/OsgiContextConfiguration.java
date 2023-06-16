@@ -56,7 +56,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
-import javax.servlet.SessionCookieConfig;
+import jakarta.servlet.SessionCookieConfig;
 
 /**
  * A {@link LifecycleListener} that configures {@link PaxWebStandardContext} with highest-ranked

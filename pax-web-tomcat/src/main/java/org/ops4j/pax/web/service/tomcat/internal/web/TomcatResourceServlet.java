@@ -17,13 +17,13 @@ package org.ops4j.pax.web.service.tomcat.internal.web;
 
 import java.io.File;
 import java.io.IOException;
-import javax.servlet.DispatcherType;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.UnavailableException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.UnavailableException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.catalina.Globals;
 import org.apache.catalina.LifecycleException;
@@ -50,7 +50,7 @@ public class TomcatResourceServlet extends DefaultServlet {
 
 	/**
 	 * If {@link #baseDirectory} is not specified, this is resource prefix to prepend when calling
-	 * {@link org.osgi.service.http.context.ServletContextHelper#getResource(String)}
+	 * {@link org.osgi.service.servlet.context.ServletContextHelper#getResource(String)}
 	 */
 	private final String chroot;
 
