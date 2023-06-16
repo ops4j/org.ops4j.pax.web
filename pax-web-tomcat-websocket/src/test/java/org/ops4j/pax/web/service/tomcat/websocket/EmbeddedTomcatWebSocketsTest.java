@@ -24,19 +24,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.Set;
-import javax.websocket.ClientEndpointConfig;
-import javax.websocket.ContainerProvider;
-import javax.websocket.Endpoint;
-import javax.websocket.EndpointConfig;
-import javax.websocket.OnMessage;
-import javax.websocket.OnOpen;
-import javax.websocket.RemoteEndpoint;
-import javax.websocket.Session;
-import javax.websocket.WebSocketContainer;
-import javax.websocket.server.ServerApplicationConfig;
-import javax.websocket.server.ServerContainer;
-import javax.websocket.server.ServerEndpoint;
-import javax.websocket.server.ServerEndpointConfig;
+import jakarta.websocket.ClientEndpointConfig;
+import jakarta.websocket.ContainerProvider;
+import jakarta.websocket.Endpoint;
+import jakarta.websocket.EndpointConfig;
+import jakarta.websocket.OnMessage;
+import jakarta.websocket.OnOpen;
+import jakarta.websocket.RemoteEndpoint;
+import jakarta.websocket.Session;
+import jakarta.websocket.WebSocketContainer;
+import jakarta.websocket.server.ServerApplicationConfig;
+import jakarta.websocket.server.ServerContainer;
+import jakarta.websocket.server.ServerEndpoint;
+import jakarta.websocket.server.ServerEndpointConfig;
 
 import org.apache.catalina.Context;
 import org.apache.catalina.Engine;
@@ -58,28 +58,27 @@ import org.apache.catalina.servlets.DefaultServlet;
 import org.apache.commons.io.FileUtils;
 import org.apache.tomcat.websocket.Constants;
 import org.apache.tomcat.websocket.server.WsSci;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class EmbeddedTomcatWebSocketsTest {
 
 	public static final Logger LOG = LoggerFactory.getLogger(EmbeddedTomcatWebSocketsTest.class);
 
-	@BeforeClass
+	@BeforeAll
 	public static void initClass() {
 		SLF4JBridgeHandler.removeHandlersForRootLogger();
 		SLF4JBridgeHandler.install();
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void cleanupClass() {
 		SLF4JBridgeHandler.uninstall();
 	}
@@ -143,24 +142,24 @@ public class EmbeddedTomcatWebSocketsTest {
 
 		LOG.info("Local port after start: {}", connector.getLocalPort());
 
-		// javax.websocket.Endpoint - A logical websocket endpoint to handle endpoint's lifecycle endpoints
+		// jakarta.websocket.Endpoint - A logical websocket endpoint to handle endpoint's lifecycle endpoints
 		// There is one instance per application per VM of the Endpoint class to represent the logical endpoint
 		// per connected peer (unless special configuration is specified by
-		// javax.websocket.server.ServerEndpointConfig.Configurator.getEndpointInstance()) implementation
+		// jakarta.websocket.server.ServerEndpointConfig.Configurator.getEndpointInstance()) implementation
 		//
-		// javax.websocket.Session - models the sequence of interactions between an endpoint and each of its peers
+		// jakarta.websocket.Session - models the sequence of interactions between an endpoint and each of its peers
 		// the interaction begins with onOpen() method called on an Endpoint
 		//
-		// javax.websocket.MessageHandler - is registered on a Session object to handle messages between open and
+		// jakarta.websocket.MessageHandler - is registered on a Session object to handle messages between open and
 		// close events. There may be only one MessageHandler per type of message (text, binary, pong)
 		// The API forces implementations to get the MessageHandler’s type parameter in runtime, so it's
 		// not possible to pass lambdas
 		//
-		// javax.websocket.RemoteEndpoint - models a peer of a Session for an Endpoint
+		// jakarta.websocket.RemoteEndpoint - models a peer of a Session for an Endpoint
 		//
-		// javax.websocket.WebSocketContainer - websocket implementation used to deploy endpoints. In server
+		// jakarta.websocket.WebSocketContainer - websocket implementation used to deploy endpoints. In server
 		// deployments, there's one instance per application per VM. In client deployments, an instance is
-		// obtained using ServiceLocator and javax.websocket.ContainerProvider.class service
+		// obtained using ServiceLocator and jakarta.websocket.ContainerProvider.class service
 		// (in Tomcat it's org.apache.tomcat.websocket.WsContainerProvider)
 
 		// coniguration (chapter 3) includes:
@@ -190,7 +189,7 @@ public class EmbeddedTomcatWebSocketsTest {
 				URI.create("ws://localhost:" + connector.getLocalPort() + "/endpoint1"));
 
 		ServerContainer sc = (ServerContainer) context.getServletContext().getAttribute(ServerContainer.class.getName());
-		assertThat(sc.getClass().getName(), equalTo("org.apache.tomcat.websocket.server.WsServerContainer"));
+		assertThat(sc.getClass().getName()).isEqualTo("org.apache.tomcat.websocket.server.WsServerContainer");
 		sc.addEndpoint(MyAnnotatedEndpoint.class);
 
 		container.connectToServer(new MyClientEndpoint("c2"), config,
