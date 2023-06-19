@@ -22,12 +22,12 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.UUID;
-import javax.servlet.Servlet;
-import javax.servlet.ServletContainerInitializer;
-import javax.servlet.ServletContext;
-import javax.servlet.descriptor.JspConfigDescriptor;
-import javax.servlet.descriptor.JspPropertyGroupDescriptor;
-import javax.servlet.descriptor.TaglibDescriptor;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletContainerInitializer;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.descriptor.JspConfigDescriptor;
+import jakarta.servlet.descriptor.JspPropertyGroupDescriptor;
+import jakarta.servlet.descriptor.TaglibDescriptor;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -61,7 +61,7 @@ public class PaxWebJspNoScriptingIntegrationTest {
 
 	@BeforeClass
 	public static void initStatic() throws Exception {
-		Class<?> jspFactoryClass = Class.forName("javax.servlet.jsp.JspFactory");
+		Class<?> jspFactoryClass = Class.forName("jakarta.servlet.jsp.JspFactory");
 		Method setDefaultFactory = jspFactoryClass.getDeclaredMethod("setDefaultFactory", jspFactoryClass);
 		Class<?> jspFactoryImplClass = Class.forName("org.apache.jasper.runtime.JspFactoryImpl");
 		setDefaultFactory.invoke(null, jspFactoryClass.cast(jspFactoryImplClass.getConstructor().newInstance()));
@@ -145,6 +145,11 @@ public class PaxWebJspNoScriptingIntegrationTest {
 
 							@Override
 							public String getErrorOnUndeclaredNamespace() {
+								return "false";
+							}
+
+							@Override
+							public String getErrorOnELNotFound() {
 								return "false";
 							}
 						});

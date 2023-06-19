@@ -21,13 +21,13 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Collections;
-import javax.servlet.Servlet;
-import javax.servlet.ServletContainerInitializer;
-import javax.servlet.ServletContext;
-import javax.servlet.descriptor.JspConfigDescriptor;
-import javax.servlet.descriptor.JspPropertyGroupDescriptor;
-import javax.servlet.descriptor.TaglibDescriptor;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletContainerInitializer;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.descriptor.JspConfigDescriptor;
+import jakarta.servlet.descriptor.JspPropertyGroupDescriptor;
+import jakarta.servlet.descriptor.TaglibDescriptor;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
@@ -68,7 +68,7 @@ public class PaxWebCustomTldIntegrationTest {
 	@BeforeClass
 	@SuppressWarnings("JavaReflectionInvocation")
 	public static void initStatic() throws Exception {
-		Class<?> jspFactoryClass = Class.forName("javax.servlet.jsp.JspFactory");
+		Class<?> jspFactoryClass = Class.forName("jakarta.servlet.jsp.JspFactory");
 		Method setDefaultFactory = jspFactoryClass.getDeclaredMethod("setDefaultFactory", jspFactoryClass);
 		Class<?> jspFactoryImplClass = Class.forName("org.apache.jasper.runtime.JspFactoryImpl");
 		setDefaultFactory.invoke(null, jspFactoryClass.cast(jspFactoryImplClass.getConstructor().newInstance()));
@@ -166,6 +166,11 @@ public class PaxWebCustomTldIntegrationTest {
 
 							@Override
 							public String getErrorOnUndeclaredNamespace() {
+								return "false";
+							}
+
+							@Override
+							public String getErrorOnELNotFound() {
 								return "false";
 							}
 						});

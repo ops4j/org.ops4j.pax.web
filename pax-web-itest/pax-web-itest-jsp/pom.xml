@@ -128,7 +128,7 @@
 			<artifactId>osgi.core</artifactId>
 		</dependency>
 
-		<!-- JavaEE (the packages not re-exported by pax-web-jsp) -->
+		<!-- JakartaEE (the packages not re-exported by pax-web-jsp) -->
 
 		<dependency>
 			<groupId>jakarta.el</groupId>

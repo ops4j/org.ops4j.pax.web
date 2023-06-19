@@ -200,7 +200,7 @@
 							{maven-dependencies}
 						</Include-Resource>
 						<Embed-Dependency>
-							artifactId=taglibs-standard-impl;inline=**/*.tld
+							artifactId=jakarta.servlet.jsp.jstl;inline=**/*.tld
 						</Embed-Dependency>
 						<_nouses>true</_nouses>
 						<_contract>!*</_contract>

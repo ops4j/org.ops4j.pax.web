@@ -19,11 +19,11 @@ package org.ops4j.pax.web.test.jsp;
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import javax.servlet.Servlet;
-import javax.servlet.ServletContainerInitializer;
-import javax.servlet.ServletContext;
-import javax.servlet.descriptor.JspConfigDescriptor;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletContainerInitializer;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.descriptor.JspConfigDescriptor;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
@@ -64,7 +64,7 @@ public class PaxWebJspIntegrationTest {
 	@BeforeClass
 	@SuppressWarnings("JavaReflectionInvocation")
 	public static void initStatic() throws Exception {
-		Class<?> jspFactoryClass = Class.forName("javax.servlet.jsp.JspFactory");
+		Class<?> jspFactoryClass = Class.forName("jakarta.servlet.jsp.JspFactory");
 		Method setDefaultFactory = jspFactoryClass.getDeclaredMethod("setDefaultFactory", jspFactoryClass);
 		Class<?> jspFactoryImplClass = Class.forName("org.apache.jasper.runtime.JspFactoryImpl");
 		setDefaultFactory.invoke(null, jspFactoryClass.cast(jspFactoryImplClass.getConstructor().newInstance()));
