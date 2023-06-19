@@ -1,7 +1,5 @@
-org.apache.el.ExpressionFactoryImpl
-
 #
-# Copyright 2019 OPS4J.
+# Copyright 2021 OPS4J.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +14,4 @@ org.apache.el.ExpressionFactoryImpl
 # limitations under the License.
 #
 
-# The service-impl-first in this file is because it's required by jakarta.el:jakarta.el-api:3.0.3 and we treat
-# it as _canonical_ EL API Jar
-# Its jakarta.el.FactoryFinder class reads only the first line of this file...
-# org.apache.tomcat:tomcat-el skips the comments correctly because it's using generic java.util.ServiceLoader API
+org.ops4j.pax.web.jsp.JasperInitializer

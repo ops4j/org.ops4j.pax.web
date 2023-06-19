@@ -15,7 +15,7 @@
  */
 package org.ops4j.pax.web.itest.server.support.war.cb3.utils;
 
-import javax.servlet.ServletRegistration;
+import jakarta.servlet.ServletRegistration;
 
 /**
  * An interface not loadable directly from {@code the-wab-itself}, but which implements an interface which is visible

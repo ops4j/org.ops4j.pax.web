@@ -24,7 +24,7 @@
 	<meta charset="UTF-8">
 </head>
 <body>
-	<div id="code">${requestScope["javax.servlet.error.status_code"]}</div>
-	<div id="exception">${requestScope["javax.servlet.error.exception_type"].name}</div>
+	<div id="code">${requestScope["jakarta.servlet.error.status_code"]}</div>
+	<div id="exception">${requestScope["jakarta.servlet.error.exception_type"].name}</div>
 </body>
 </html>

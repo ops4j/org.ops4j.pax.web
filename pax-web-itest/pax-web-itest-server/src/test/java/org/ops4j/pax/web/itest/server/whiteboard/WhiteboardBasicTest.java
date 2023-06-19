@@ -21,17 +21,17 @@ import java.util.Deque;
 import java.util.IdentityHashMap;
 import java.util.LinkedList;
 import java.util.Map;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.Servlet;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.annotation.WebFilter;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.annotation.WebFilter;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -176,7 +176,7 @@ public class WhiteboardBasicTest extends MultiContainerTestSupport {
 		Bundle sample1 = mockBundle("sample1");
 
 		// Filters are a bit problematic. When new filter is registered, it has to be added to server's internal
-		// structures in correct order (web.xml order in JavaEE and service rank order in OSGi Whiteboard).
+		// structures in correct order (web.xml order in JakartaEE and service rank order in OSGi Whiteboard).
 		// If simply new filter is registered, ONLY if this filter should be added last, we can attempt optimized
 		// registration. Otherwise, we have to recreate the filter list, which SHOULD lead to destroy() + init()
 		// of these filters again.

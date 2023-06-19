@@ -16,9 +16,9 @@
 package org.ops4j.pax.web.itest.server.support.war.cb2.scis;
 
 import java.util.Set;
-import javax.servlet.ServletContainerInitializer;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletContainerInitializer;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
 
 public class SCIFromContainerBundle2 implements ServletContainerInitializer {
 

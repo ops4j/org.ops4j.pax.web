@@ -44,10 +44,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import javax.servlet.Filter;
-import javax.servlet.Servlet;
-import javax.servlet.ServletContainerInitializer;
-import javax.servlet.ServletContext;
+import jakarta.servlet.Filter;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletContainerInitializer;
+import jakarta.servlet.ServletContext;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
@@ -55,7 +55,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.felix.utils.extender.Extension;
 import org.apache.jasper.servlet.JspServlet;
 import org.apache.tomcat.websocket.server.WsSci;
-import org.eclipse.jetty.websocket.javax.server.config.JavaxWebSocketServletContainerInitializer;
+import org.eclipse.jetty.ee10.websocket.jakarta.server.config.JakartaWebSocketServletContainerInitializer;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -133,10 +133,10 @@ import org.osgi.framework.wiring.BundleRequirement;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.BundleWire;
 import org.osgi.framework.wiring.BundleWiring;
-import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.context.ServletContextHelper;
-import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
-import org.osgi.service.http.whiteboard.Preprocessor;
+import org.ops4j.pax.web.service.http.HttpContext;
+import org.osgi.service.servlet.context.ServletContextHelper;
+import org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants;
+import org.osgi.service.servlet.whiteboard.Preprocessor;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
@@ -257,13 +257,13 @@ public class MultiContainerTestSupport {
 			when(jspBundle.getBundleId()).thenReturn(101L);
 			when(jspBundle.getState()).thenReturn(Bundle.ACTIVE);
 			when(jspBundle.getEntry("/")).thenReturn(new URL("bundle://101.0:0/"));
-			when(jspBundle.getResources("META-INF/services/javax.el.ExpressionFactory"))
+			when(jspBundle.getResources("META-INF/services/jakarta.el.ExpressionFactory"))
 					.thenReturn(Collections.enumeration(Collections.singletonList(
-							org.ops4j.pax.web.jsp.JspServlet.class.getResource("/META-INF/services/javax.el.ExpressionFactory")))
+							org.ops4j.pax.web.jsp.JspServlet.class.getResource("/META-INF/services/jakarta.el.ExpressionFactory")))
 					);
-			when(jspBundle.getResources("META-INF/services/javax.servlet.ServletContainerInitializer"))
+			when(jspBundle.getResources("META-INF/services/jakarta.servlet.ServletContainerInitializer"))
 					.thenReturn(Collections.enumeration(Collections.singletonList(
-							org.ops4j.pax.web.jsp.JspServlet.class.getResource("/META-INF/services/javax.servlet.ServletContainerInitializer")))
+							org.ops4j.pax.web.jsp.JspServlet.class.getResource("/META-INF/services/jakarta.servlet.ServletContainerInitializer")))
 					);
 			when(jspBundle.loadClass(anyString()))
 					.thenAnswer(i -> JspServlet.class.getClassLoader().loadClass(i.getArgument(0, String.class)));
@@ -337,7 +337,7 @@ public class MultiContainerTestSupport {
 
 		if (enableWebSockets()) {
 			wsGenericBundle = mockBundle("org.ops4j.pax.web.pax-web-websocket", null, false);
-			wsJettyBundle = mockBundle("org.eclipse.jetty.websocket.javax.server", null, false);
+			wsJettyBundle = mockBundle("org.eclipse.jetty.ee10.websocket.jakarta.server", null, false);
 			wsTomcatBundle = mockBundle("org.ops4j.pax.web.pax-web-tomcat-websocket", null, false);
 			wsUndertowBundle = mockBundle("org.ops4j.pax.web.pax-web-undertow-websocket", null, false);
 
@@ -353,7 +353,7 @@ public class MultiContainerTestSupport {
 			when(wsGenericBundle.loadClass(anyString()))
 					.thenAnswer(i -> PaxWebWebSocketsServletContainerInitializer.class.getClassLoader().loadClass(i.getArgument(0, String.class)));
 			when(wsJettyBundle.loadClass(anyString()))
-					.thenAnswer(i -> JavaxWebSocketServletContainerInitializer.class.getClassLoader().loadClass(i.getArgument(0, String.class)));
+					.thenAnswer(i -> JakartaWebSocketServletContainerInitializer.class.getClassLoader().loadClass(i.getArgument(0, String.class)));
 			when(wsTomcatBundle.loadClass(anyString()))
 					.thenAnswer(i -> WsSci.class.getClassLoader().loadClass(i.getArgument(0, String.class)));
 			when(wsUndertowBundle.loadClass(anyString()))
@@ -482,7 +482,7 @@ public class MultiContainerTestSupport {
 		}
 
 		try {
-			when(bundle.getResources("META-INF/services/javax.servlet.ServletContainerInitializer"))
+			when(bundle.getResources("META-INF/services/jakarta.servlet.ServletContainerInitializer"))
 					.thenReturn(Collections.emptyEnumeration());
 		} catch (IOException ignored) {
 		}

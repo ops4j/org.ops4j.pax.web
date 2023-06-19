@@ -1581,7 +1581,7 @@ class JettyServerWrapper implements BatchVisitor {
 				sch.getServletHandler().setFilterMappings(new FilterMapping[0]);
 
 				for (PaxWebFilterHolder fh : newFilterHolders) {
-					if ("org.eclipse.jetty.websocket.servlet.WebSocketUpgradeFilter".equals(fh.getName())) {
+					if ("org.eclipse.jetty.ee10.websocket.servlet.WebSocketUpgradeFilter".equals(fh.getName())) {
 						sch.getServletContext().removeAttribute("org.eclipse.jetty.websocket.server.WebSocketUpgradeFilter");
 					}
 					sch.getServletHandler().addFilter(fh);

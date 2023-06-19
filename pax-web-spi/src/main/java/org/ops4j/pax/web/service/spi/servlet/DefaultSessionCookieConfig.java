@@ -17,6 +17,8 @@ package org.ops4j.pax.web.service.spi.servlet;
 
 import jakarta.servlet.SessionCookieConfig;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class DefaultSessionCookieConfig implements SessionCookieConfig {
@@ -28,6 +30,7 @@ public class DefaultSessionCookieConfig implements SessionCookieConfig {
 	private boolean secure = false;
 	private boolean httpOnly = true;
 	private int maxAge = -1;
+	private Map<String, String> attributes = new LinkedHashMap();
 
 	@Override
 	public String getName() {
@@ -103,19 +106,17 @@ public class DefaultSessionCookieConfig implements SessionCookieConfig {
 
 	@Override
 	public void setAttribute(String name, String value) {
-		// TODO: JakartaEE 10
+		attributes.put(name, value);
 	}
 
 	@Override
 	public String getAttribute(String name) {
-		// TODO: JakartaEE 10
-		return null;
+		return attributes.get(name);
 	}
 
 	@Override
 	public Map<String, String> getAttributes() {
-		// TODO: JakartaEE 10
-		return null;
+		return Collections.unmodifiableMap(attributes);
 	}
 
 }

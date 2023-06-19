@@ -33,8 +33,8 @@ import org.ops4j.pax.web.service.whiteboard.ResourceMapping;
 import org.ops4j.pax.web.service.whiteboard.WelcomeFileMapping;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.http.context.ServletContextHelper;
-import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
+import org.osgi.service.servlet.context.ServletContextHelper;
+import org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants;
 
 import static org.hamcrest.CoreMatchers.endsWith;
 import static org.hamcrest.CoreMatchers.startsWith;

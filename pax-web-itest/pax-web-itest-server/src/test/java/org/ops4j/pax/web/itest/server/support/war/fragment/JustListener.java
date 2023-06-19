@@ -15,8 +15,8 @@
  */
 package org.ops4j.pax.web.itest.server.support.war.fragment;
 
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
+import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.ServletContextListener;
 
 public class JustListener implements ServletContextListener {
 

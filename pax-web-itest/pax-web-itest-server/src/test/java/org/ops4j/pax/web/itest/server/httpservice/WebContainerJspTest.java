@@ -29,7 +29,7 @@ import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.http.HttpContext;
+import org.ops4j.pax.web.service.http.HttpContext;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.startsWith;

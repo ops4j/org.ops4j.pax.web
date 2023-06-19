@@ -19,7 +19,7 @@ import java.io.File;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
-import javax.servlet.ServletContainerInitializer;
+import jakarta.servlet.ServletContainerInitializer;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

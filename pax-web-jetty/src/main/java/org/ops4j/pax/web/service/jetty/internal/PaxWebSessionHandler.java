@@ -16,8 +16,20 @@
 package org.ops4j.pax.web.service.jetty.internal;
 
 import org.eclipse.jetty.ee10.servlet.SessionHandler;
+import org.eclipse.jetty.http.HttpCookie;
+import org.eclipse.jetty.session.ManagedSession;
 
 public class PaxWebSessionHandler extends SessionHandler {
+
+	@Override
+	public HttpCookie getSessionCookie(ManagedSession session, boolean requestIsSecure) {
+		HttpCookie cookie = super.getSessionCookie(session, requestIsSecure);
+		if (cookie != null) {
+			String id = getExtendedId(cookie.getValue());
+			return HttpCookie.from(cookie.getName(), id, getSessionAttributes());
+		}
+		return cookie;
+	}
 
 	@Override
 	public void renewSessionId(String oldId, String oldExtendedId, String newId, String newExtendedId) {
@@ -34,18 +46,16 @@ public class PaxWebSessionHandler extends SessionHandler {
 		}
 	}
 
-//	@Override
-//	public String getExtendedId(HttpSession session) {
-//		String eid = super.getExtendedId(session);
-//		int tilde = eid.indexOf("~");
-//		if (tilde == -1) {
-//			return eid;
-//		}
-//		int dot = eid.indexOf(".", tilde);
-//		if (dot == -1) {
-//			return eid.substring(0, tilde);
-//		}
-//		return eid.substring(0, tilde) + eid.substring(dot);
-//	}
+	public String getExtendedId(String eid) {
+		int tilde = eid.indexOf("~");
+		if (tilde == -1) {
+			return eid;
+		}
+		int dot = eid.indexOf(".", tilde);
+		if (dot == -1) {
+			return eid.substring(0, tilde);
+		}
+		return eid.substring(0, tilde) + eid.substring(dot);
+	}
 
 }

@@ -18,7 +18,7 @@ package org.ops4j.pax.web.itest.server.controller;
 import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.Collections;
-import javax.servlet.Servlet;
+import jakarta.servlet.Servlet;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

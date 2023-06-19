@@ -17,7 +17,7 @@ package org.ops4j.pax.web.itest.server.support.war.servlets;
 
 import org.ops4j.pax.web.itest.server.support.war.StaticList;
 
-import javax.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServlet;
 
 public class ServletAddedInWebXml extends HttpServlet {
 
