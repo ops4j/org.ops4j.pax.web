@@ -58,8 +58,14 @@ public class PrioritizedHandlerCollection extends ContextHandlerCollection {
 				handlersAfter.add(pv);
 			}
 		});
-		handlerCollectionBefore.setHandlers(handlersBefore.stream().map(PriorityValue::getValue).toArray(Handler[]::new));
-		handlerCollectionAfter.setHandlers(handlersAfter.stream().map(PriorityValue::getValue).toArray(Handler[]::new));
+		Handler[] handlersA = handlersBefore.stream().map(PriorityValue::getValue).toArray(Handler[]::new);
+		if (handlersA.length > 0) {
+			handlerCollectionBefore.setHandlers(handlersA);
+		}
+		Handler[] handlersZ = handlersAfter.stream().map(PriorityValue::getValue).toArray(Handler[]::new);
+		if (handlersZ.length > 0) {
+			handlerCollectionAfter.setHandlers(handlersZ);
+		}
 	}
 
 	@Override
@@ -93,10 +99,11 @@ public class PrioritizedHandlerCollection extends ContextHandlerCollection {
 					}
 					// User should know what (s)he's doing - if a handler marks the request as handled, there's
 					// no need to call real context handlers.
-					super.handle(request, response, callback);
+					handled = super.handle(request, response, callback);
 				}
 				// however, let's allow the "after" handlers to run - whatever they are
-				return handlerCollectionAfter.handle(request, response, callback);
+				handled |= handlerCollectionAfter.handle(request, response, callback);
+				return handled;
 			} catch (IOException | RuntimeException e) {
 				throw e;
 			} catch (Exception e) {

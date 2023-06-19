@@ -17,9 +17,9 @@ package org.ops4j.pax.web.itest.server.controller;
 
 import java.util.Arrays;
 import java.util.Collections;
-import javax.servlet.Filter;
-import javax.servlet.Servlet;
-import javax.servlet.ServletContext;
+import jakarta.servlet.Filter;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletContext;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -65,7 +65,7 @@ public class ServerControllerScopesTest extends MultiContainerTestSupport {
 	}
 
 	/**
-	 * {@link Servlet}, {@link Filter} and {@link org.osgi.service.http.context.ServletContextHelper}
+	 * {@link Servlet}, {@link Filter} and {@link org.osgi.service.servlet.context.ServletContextHelper}
 	 * are registered from single {@link Bundle} and associated with each other.
 	 * @throws Exception
 	 */
@@ -162,7 +162,7 @@ public class ServerControllerScopesTest extends MultiContainerTestSupport {
 	}
 
 	/**
-	 * {@link Servlet}, {@link Filter} and {@link org.osgi.service.http.context.ServletContextHelper}
+	 * {@link Servlet}, {@link Filter} and {@link org.osgi.service.servlet.context.ServletContextHelper}
 	 * are registered through different bundle-scoped instances of {@link WebContainerContext}.
 	 * @throws Exception
 	 */

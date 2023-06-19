@@ -21,12 +21,18 @@
 	<Get name="threadPool">
 		<Set name="name">different-prefix</Set>
 	</Get>
+	<Call id="ResourceFactory" class="org.eclipse.jetty.util.resource.ResourceFactory" name="of">
+		<Arg><Ref refid="Server" /></Arg>
+		<Call id="realmResource" name="newResource">
+			<!-- File will be loaded relatively to pax-web-itest-jetty module -->
+			<Arg>target/test-classes/jetty-realm.properties</Arg>
+		</Call>
+	</Call>
 	<Call name="addBean">
 		<Arg>
 			<New class="org.eclipse.jetty.security.HashLoginService">
 				<Set name="name">test</Set>
-				<!-- File will be loaded relatively to pax-web-itest-jetty module -->
-				<Set name="config">target/test-classes/jetty-realm.properties</Set>
+				<Set name="config"><Ref refid="realmResource" /></Set>
 			</New>
 		</Arg>
 	</Call>

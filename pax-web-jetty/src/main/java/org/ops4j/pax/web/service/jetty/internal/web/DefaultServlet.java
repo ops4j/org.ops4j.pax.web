@@ -198,6 +198,8 @@ public class DefaultServlet extends HttpServlet
     private Resource _baseResource;
     private boolean _isPathInfoOnly;
 
+    protected boolean redirectWelcome = false;
+
     public ResourceService getResourceService()
     {
         return _resourceService;
@@ -297,7 +299,7 @@ public class DefaultServlet extends HttpServlet
 
         _resourceService.setAcceptRanges(getInitBoolean("acceptRanges", _resourceService.isAcceptRanges()));
         _resourceService.setDirAllowed(getInitBoolean("dirAllowed", _resourceService.isDirAllowed()));
-        boolean redirectWelcome = getInitBoolean("redirectWelcome", false);
+        boolean redirectWelcome = getInitBoolean("redirectWelcome", this.redirectWelcome);
         _resourceService.setWelcomeMode(redirectWelcome ? ResourceService.WelcomeMode.REDIRECT : ResourceService.WelcomeMode.SERVE);
         _resourceService.setPrecompressedFormats(precompressedFormats);
         _resourceService.setEtags(getInitBoolean("etags", _resourceService.isEtags()));

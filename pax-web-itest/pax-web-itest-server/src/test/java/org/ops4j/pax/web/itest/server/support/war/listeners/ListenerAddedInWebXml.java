@@ -17,15 +17,15 @@ package org.ops4j.pax.web.itest.server.support.war.listeners;
 
 import org.ops4j.pax.web.itest.server.support.war.StaticList;
 
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
+import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.ServletContextListener;
 
 public class ListenerAddedInWebXml implements ServletContextListener {
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         try {
-            // It should be possible to add a listener OTHER than javax.servlet.ServletContextListener
+            // It should be possible to add a listener OTHER than jakarta.servlet.ServletContextListener
             // from a listener added in web.xml/web-fragment.xml/@WebListener. But only Jetty allow adding new
             // ServletContextListeners IF ContextHandler.Context._extendedListenerTypes == true
             // that's because Jetty invokes SCIs wrapped in listeners...

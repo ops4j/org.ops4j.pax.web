@@ -321,48 +321,44 @@ public class PaxWebServletHandler extends ServletHandler {
 	 */
 	@Override
 	public boolean handle(Request request, Response response, Callback callback) throws Exception {
-		ServletContextRequest req = Request.as(request, ServletContextRequest.class);
-		ServletContextResponse res = req.getResponse();
-		if ("TRACE".equals(request.getMethod())) {
-			// PAXWEB-229 - prevent https://owasp.org/www-community/attacks/Cross_Site_Tracing
-			response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-			return true;
-		}
-
-		// whether there are filters or not, we *copy* code from super.doHandle() to ensure that
-		// getOsgiFilterChain() is called
-
-		// this should never be null because of ServletHandler.setEnsureDefaultServlet(true)
-		PaxWebServletHolder servletHolder = (PaxWebServletHolder) req.getMappedServlet().getServletHolder();
-
-		try {
-			// we always create the chain, because we have to call handleSecurity()/finishSecurity()
-			String target = Request.getPathInContext(req);
-			FilterChain chain = getOsgiFilterChain(req, target, servletHolder);
-
-			// unwrap any tunnelling of base Servlet request/responses
-//			if (req.getServletApiRequest() instanceof ServletRequestHttpWrapper) {
-//				req = ((ServletRequestHttpWrapper) req).getRequest();
+		return super.handle(request, response, callback);
+//		ServletContextRequest req = Request.as(request, ServletContextRequest.class);
+//		ServletContextResponse res = req.getResponse();
+//
+//		// whether there are filters or not, we *copy* code from super.doHandle() to ensure that
+//		// getOsgiFilterChain() is called
+//
+//		// this should never be null because of ServletHandler.setEnsureDefaultServlet(true)
+//		PaxWebServletHolder servletHolder = (PaxWebServletHolder) req.getMappedServlet().getServletHolder();
+//
+//		try {
+//			// we always create the chain, because we have to call handleSecurity()/finishSecurity()
+//			String target = Request.getPathInContext(req);
+//			FilterChain chain = getOsgiFilterChain(req, target, servletHolder);
+//
+//			// unwrap any tunnelling of base Servlet request/responses
+////			if (req.getServletApiRequest() instanceof ServletRequestHttpWrapper) {
+////				req = ((ServletRequestHttpWrapper) req).getRequest();
+////			}
+////			if (res instanceof ServletResponseHttpWrapper) {
+////				res = ((ServletResponseHttpWrapper) res).getResponse();
+////			}
+//
+//			// set some attributes in the request
+//			servletHolder.prepare(req.getServletApiRequest(), res.getServletApiResponse());
+//
+//			// chain still can be null if the servlet is default404Servlet
+//			if (chain != null) {
+//				chain.doFilter(req.getServletApiRequest(), res.getServletApiResponse());
+//			} else {
+//				servletHolder.handle(req.getServletApiRequest(), res.getServletApiResponse());
 //			}
-//			if (res instanceof ServletResponseHttpWrapper) {
-//				res = ((ServletResponseHttpWrapper) res).getResponse();
-//			}
-
-			// set some attributes in the request
-			servletHolder.prepare(req.getServletApiRequest(), res.getServletApiResponse());
-
-			// chain still can be null if the servlet is default404Servlet
-			if (chain != null) {
-				chain.doFilter(req.getServletApiRequest(), res.getServletApiResponse());
-			} else {
-				servletHolder.handle(req.getServletApiRequest(), res.getServletApiResponse());
-			}
-		} finally {
-//			if (servletHolder != null) {
-//				baseRequest.setHandled(true);
-//			}
-		}
-		return true;
+//		} finally {
+////			if (servletHolder != null) {
+////				baseRequest.setHandled(true);
+////			}
+//		}
+//		return true;
 	}
 
 	protected FilterChain getOsgiFilterChain(final ServletContextRequest baseRequest, String pathInContext, ServletHolder servletHolder) {
@@ -453,7 +449,14 @@ public class PaxWebServletHandler extends ServletHandler {
 
 		FilterChain chain = _chainCache[dispatch].get(key);
 		if (chain != null) {
-			return chain;
+			List<Preprocessor> preprocessorInstances = preprocessors.stream().map(PreprocessorFilterConfig::getInstance).toList();
+			if (!holder.is404()) {
+				return new OsgiFilterChain(new ArrayList<>(preprocessorInstances), holder.getOsgiServletContext(),
+						holder.getWebContainerContext(), chain, osgiSessionsBridge);
+			} else {
+				return new OsgiFilterChain(new ArrayList<>(preprocessorInstances), defaultServletContext,
+						defaultWebContainerContext, chain, osgiSessionsBridge);
+			}
 		}
 
 		// always clear contextlessKey in parent cache, so super.getFilterChain will create new filter chain
@@ -478,7 +481,23 @@ public class PaxWebServletHandler extends ServletHandler {
 			_chainCache[dispatch].put(key, chain);
 		}
 
-		return chain;
+		// We need different FilterChain that will invoke (in this order):
+		// 1. all org.osgi.service.http.whiteboard.Preprocessors
+		// 2. handleSecurity() (on HttpContext or ServletContextHelper)
+		// 3. original chain
+		if (chain == null) {
+			// 3a. even if there's only a ServletHolder there == null chain
+			// 3b. if the holder is for known 404 servlet, we still need a chain that calls 404 servlet
+			chain = holder::handle;
+		}
+		List<Preprocessor> preprocessorInstances = preprocessors.stream().map(PreprocessorFilterConfig::getInstance).toList();
+		if (!holder.is404()) {
+			return new OsgiFilterChain(new ArrayList<>(preprocessorInstances), holder.getOsgiServletContext(),
+					holder.getWebContainerContext(), chain, osgiSessionsBridge);
+		} else {
+			return new OsgiFilterChain(new ArrayList<>(preprocessorInstances), defaultServletContext,
+					defaultWebContainerContext, chain, osgiSessionsBridge);
+		}
 	}
 
 	@Override

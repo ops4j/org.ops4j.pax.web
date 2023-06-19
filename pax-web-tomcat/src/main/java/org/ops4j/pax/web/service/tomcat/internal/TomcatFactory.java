@@ -232,7 +232,7 @@ public class TomcatFactory {
 
 		String sslKeystore = secc.getSslKeystore();
 		if (sslKeystore != null) {
-			sslHostCertificate.setCertificateKeyFile(sslKeystore);
+			sslHostCertificate.setCertificateKeystoreFile(sslKeystore);
 		}
 		if (secc.getSslKeystorePassword() != null) {
 			sslHostCertificate.setCertificateKeystorePassword(secc.getSslKeystorePassword());

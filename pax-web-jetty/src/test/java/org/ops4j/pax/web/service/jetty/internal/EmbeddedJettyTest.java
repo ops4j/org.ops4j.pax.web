@@ -380,6 +380,48 @@ public class EmbeddedJettyTest {
 	}
 
 	@Test
+	public void embeddedServerWithServletContextHandlerAnd404Servlet() throws Exception {
+		Server server = new Server();
+		ServerConnector connector = new ServerConnector(server, 1, 1, new HttpConnectionFactory());
+		connector.setPort(0);
+		server.setConnectors(new Connector[] { connector });
+
+		ContextHandlerCollection chc = new ContextHandlerCollection();
+
+		ServletContextHandler h = new ServletContextHandler(null, "/c1", ServletContextHandler.NO_SESSIONS);
+		h.setAllowNullPathInContext(false);
+		h.addServlet(new ServletHolder("default-servlet", new ServletHandler.Default404Servlet()), "/*");
+
+		chc.addHandler(h);
+
+		server.setHandler(chc);
+		server.start();
+
+		int port = connector.getLocalPort();
+
+		Socket s1 = new Socket();
+		s1.connect(new InetSocketAddress("127.0.0.1", port));
+
+		s1.getOutputStream().write((
+				"GET /c1/anything HTTP/1.1\r\n" +
+				"Host: 127.0.0.1:" + connector.getLocalPort() + "\r\n" +
+				"Connection: close\r\n\r\n").getBytes());
+
+		byte[] buf = new byte[64];
+		int read;
+		StringWriter sw = new StringWriter();
+		while ((read = s1.getInputStream().read(buf)) > 0) {
+			sw.append(new String(buf, 0, read));
+		}
+		s1.close();
+
+		assertTrue(sw.toString().startsWith("HTTP/1.1 404"));
+
+		server.stop();
+		server.join();
+	}
+
+	@Test
 	public void embeddedServerWithServletContextHandlerAndDynamicInitializers() throws Exception {
 		Server server = new Server();
 		ServerConnector connector = new ServerConnector(server, 1, 1, new HttpConnectionFactory());

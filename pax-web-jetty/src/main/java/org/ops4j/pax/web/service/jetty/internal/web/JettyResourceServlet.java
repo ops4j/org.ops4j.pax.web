@@ -16,6 +16,7 @@
 package org.ops4j.pax.web.service.jetty.internal.web;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 
@@ -85,7 +86,15 @@ public class JettyResourceServlet extends DefaultServlet {
 
 	@Override
 	protected Resource configureBaseResource() {
-		return baseUrlResource;
+		if (chroot != null) {
+			return new EmptyResource() {
+				@Override
+				public Resource resolve(String subUriPath) {
+					return getResource(URI.create(subUriPath));
+				}
+			};
+		}
+		return baseUrlResource == null ? new EmptyResource() : baseUrlResource;
 	}
 
 	/**
@@ -100,8 +109,12 @@ public class JettyResourceServlet extends DefaultServlet {
 	}
 
 	public void setWelcomeFilesRedirect(boolean welcomeFilesRedirect) {
-		getResourceService().setWelcomeMode(welcomeFilesRedirect
-				? ResourceService.WelcomeMode.REDIRECT : ResourceService.WelcomeMode.SERVE);
+		redirectWelcome = welcomeFilesRedirect;
+		if (getResourceService() != null) {
+			// already init()ed
+			getResourceService().setWelcomeMode(welcomeFilesRedirect
+					? ResourceService.WelcomeMode.REDIRECT : ResourceService.WelcomeMode.SERVE);
+		}
 	}
 
 	@Override

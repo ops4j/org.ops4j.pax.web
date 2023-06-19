@@ -18,15 +18,15 @@ package org.ops4j.pax.web.itest.server.whiteboard;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,9 +39,9 @@ import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.whiteboard.FilterMapping;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.http.context.ServletContextHelper;
-import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
-import org.osgi.service.http.whiteboard.Preprocessor;
+import org.osgi.service.servlet.context.ServletContextHelper;
+import org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants;
+import org.osgi.service.servlet.whiteboard.Preprocessor;
 
 import static org.hamcrest.CoreMatchers.endsWith;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -58,7 +58,7 @@ public class WhiteboardFiltersTest extends MultiContainerTestSupport {
 	public void twoWaysToRegisterFilter() throws Exception {
 		Bundle sample1 = mockBundle("sample1");
 
-		// 1. Whiteboard registration as javax.servlet.Filter OSGi service
+		// 1. Whiteboard registration as jakarta.servlet.Filter OSGi service
 
 		ServiceReference<Filter> filterRef = mockFilterReference(sample1, "filter1",
 				() -> new Utils.MyIdFilter("1"), 0L, 0, "/s");

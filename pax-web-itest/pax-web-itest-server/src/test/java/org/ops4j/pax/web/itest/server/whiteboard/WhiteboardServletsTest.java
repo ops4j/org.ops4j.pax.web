@@ -15,7 +15,7 @@
  */
 package org.ops4j.pax.web.itest.server.whiteboard;
 
-import javax.servlet.Servlet;
+import jakarta.servlet.Servlet;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -41,7 +41,7 @@ public class WhiteboardServletsTest extends MultiContainerTestSupport {
 	public void twoWaysToRegisterServlet() throws Exception {
 		Bundle sample1 = mockBundle("sample1");
 
-		// 1. Whiteboard registration as javax.servlet.Servlet OSGi service
+		// 1. Whiteboard registration as jakarta.servlet.Servlet OSGi service
 
 		ServiceReference<Servlet> servletRef = mockServletReference(sample1, "servlet1",
 				() -> new Utils.MyIdServlet("1"), 0L, 0, "/s");

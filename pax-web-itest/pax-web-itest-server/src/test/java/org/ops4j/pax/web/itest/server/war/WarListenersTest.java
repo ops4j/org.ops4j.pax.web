@@ -22,7 +22,7 @@ import org.ops4j.pax.web.itest.server.MultiContainerTestSupport;
 import org.ops4j.pax.web.itest.server.support.war.StaticList;
 import org.osgi.framework.Bundle;
 
-import javax.servlet.ServletContainerInitializer;
+import jakarta.servlet.ServletContainerInitializer;
 import java.io.File;
 import java.net.URL;
 import java.util.Collections;

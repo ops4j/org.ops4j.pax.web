@@ -20,12 +20,12 @@ import java.net.URL;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -43,9 +43,9 @@ import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.context.ServletContextHelper;
-import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
+import org.ops4j.pax.web.service.http.HttpContext;
+import org.osgi.service.servlet.context.ServletContextHelper;
+import org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants;
 
 import static org.hamcrest.CoreMatchers.endsWith;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -107,7 +107,7 @@ public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 		// UPDATE: I made it possible with special tracking of contexts that are EXACTLY the same contexts which are
 		// already used for name+bundle combination in HttpService/WebContainer. So if we Whiteboard-register
 		// a context that comes from org.ops4j.pax.web.service.WebContainer.createDefaultHttpContext()
-		// (or org.osgi.service.http.HttpService.createDefaultHttpContext()), whiteboard tracker will detect that
+		// (or org.ops4j.pax.web.service.http.HttpService.createDefaultHttpContext()), whiteboard tracker will detect that
 		// it's the same/existing instance and will updated existing, associated OsgiContextModel, so we:
 		// - can install different OsgiContextModel with proper httpContext that will lower the rank of existing
 		//   OsgiContextModel related to the httpxContext, so we can later register DIFFERENT OsgiContextModel
@@ -129,7 +129,7 @@ public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 		//    service ranking.
 //		wc.registerResources("/", "/", null);
 
-		// 2. registration of org.osgi.service.http.HttpContext service, but ensuring it has higher rank than
+		// 2. registration of org.ops4j.pax.web.service.http.HttpContext service, but ensuring it has higher rank than
 		//    "default" context registered for pax-web-extender-whiteboard bundle
 //		Hashtable<String, Object> properties = new Hashtable<>();
 //		properties.put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID, "default");
@@ -137,7 +137,7 @@ public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 //		getHttpContextCustomizer().addingService(mockReference(sample1,
 //				HttpContext.class, properties, () -> new DefaultHttpContext(sample1), 0L, 1));
 
-		// 3. Just call org.osgi.service.http.HttpService.createDefaultHttpContext() - the "default" context for "/"
+		// 3. Just call org.ops4j.pax.web.service.http.HttpService.createDefaultHttpContext() - the "default" context for "/"
 		//    path and bundle for which the WebContainer instance is scoped will be created and properly sent to
 		//    ServerController and configured in ServerModel. Underneath, an OsgiContextModel will be created
 		//    with Integer.MAX_VALUE service ranking.
@@ -165,7 +165,7 @@ public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 		//  - (rank MAX_VALUE) OsgiContextModel{HS,id=OCM-4,name='default',path='/',bundle=sample1,context=DefaultHttpContext{bundle=Bundle "sample1",contextId='default'}}
 		Hashtable<String, Object> props = models.get(0).getContextRegistrationProperties();
 		assertThat("It should be HttpService context",
-				props.get(HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY), equalTo("default"));
+				props.get(PaxWebConstants.HTTP_SERVICE_CONTEXT_PROPERTY), equalTo("default"));
 		assertNull("It should not be the Whiteboard context",
 				props.get(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME));
 		assertThat("It should be the \"/\" context specified using Whiteboard property",
@@ -187,7 +187,7 @@ public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 		// now, we've explicitly said to register Whiteboard servlet to Whiteboard "default" context
 		props = models.get(0).getContextRegistrationProperties();
 		assertNull("It should not be HttpService context",
-				props.get(HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY));
+				props.get(PaxWebConstants.HTTP_SERVICE_CONTEXT_PROPERTY));
 		assertThat("It should be the Whiteboard context",
 				props.get(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME), equalTo("default"));
 		assertThat("It should be the \"/\" context specified using Whiteboard property",
@@ -258,7 +258,7 @@ public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 
 		// servlet should be associated with HttpService context
 		Hashtable<String, Object> props = models.get(0).getContextRegistrationProperties();
-		assertThat(props.get(HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY), equalTo("default"));
+		assertThat(props.get(PaxWebConstants.HTTP_SERVICE_CONTEXT_PROPERTY), equalTo("default"));
 		assertNull(props.get(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME));
 		assertThat(props.get(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH), equalTo("/"));
 
@@ -274,7 +274,7 @@ public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 		getServletCustomizer().removedService(servletRef, model);
 
 		props = models.get(0).getContextRegistrationProperties();
-		assertNull(props.get(HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY));
+		assertNull(props.get(PaxWebConstants.HTTP_SERVICE_CONTEXT_PROPERTY));
 		assertThat(props.get(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME), equalTo("default"));
 		assertThat(props.get(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH), equalTo("/"));
 
@@ -355,7 +355,7 @@ public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 
 		// servlet should be associated with HttpService context
 		Hashtable<String, Object> props = models.get(0).getContextRegistrationProperties();
-		assertThat(props.get(HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY), equalTo("default"));
+		assertThat(props.get(PaxWebConstants.HTTP_SERVICE_CONTEXT_PROPERTY), equalTo("default"));
 		assertNull(props.get(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME));
 		assertThat(props.get(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH), equalTo("/"));
 
@@ -436,12 +436,12 @@ public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 		assertThat(httpGET(port, "/new-path/s"), startsWith("HTTP/1.1 404"));
 
 		Hashtable<String, Object> props = models.get(0).getContextRegistrationProperties();
-		assertThat(props.get(HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY), equalTo("default"));
+		assertThat(props.get(PaxWebConstants.HTTP_SERVICE_CONTEXT_PROPERTY), equalTo("default"));
 		assertNull(props.get(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME));
 		assertThat(props.get(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH), equalTo("/"));
 
 		// register HttpContext with ANY rank, but using the same INSTANCE we've got from
-		// org.osgi.service.http.HttpService.createDefaultHttpContext() - this should replace the default "default"
+		// org.ops4j.pax.web.service.http.HttpService.createDefaultHttpContext() - this should replace the default "default"
 		// context - so we have a method to configure context path of the default context for example
 		// also, existing, HttpService-registered servlet should immediately switch to new context path!
 		Hashtable<String, Object> properties = new Hashtable<>();
@@ -456,7 +456,7 @@ public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 		assertThat(httpGET(port, "/s"), startsWith("HTTP/1.1 404"));
 
 		props = models.get(0).getContextRegistrationProperties();
-		assertThat(props.get(HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY), equalTo("default"));
+		assertThat(props.get(PaxWebConstants.HTTP_SERVICE_CONTEXT_PROPERTY), equalTo("default"));
 		assertNull(props.get(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME));
 		assertThat(props.get(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH), equalTo("/new-path"));
 
@@ -477,7 +477,7 @@ public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 		assertThat(httpGET(port, "/s"), startsWith("HTTP/1.1 404"));
 
 		props = models.get(0).getContextRegistrationProperties();
-		assertThat(props.get(HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY), equalTo("default"));
+		assertThat(props.get(PaxWebConstants.HTTP_SERVICE_CONTEXT_PROPERTY), equalTo("default"));
 		assertNull(props.get(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME));
 		assertThat(props.get(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH), equalTo("/new-path"));
 
@@ -490,7 +490,7 @@ public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 		assertThat(httpGET(port, "/s"), startsWith("HTTP/1.1 404"));
 
 		props = models.get(0).getContextRegistrationProperties();
-		assertThat(props.get(HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY), equalTo("default"));
+		assertThat(props.get(PaxWebConstants.HTTP_SERVICE_CONTEXT_PROPERTY), equalTo("default"));
 		assertNull(props.get(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME));
 		assertThat(props.get(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH), equalTo("/new-path2"));
 
@@ -503,7 +503,7 @@ public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 		assertThat(httpGET(port, "/s"), endsWith("S(1)"));
 
 		props = models.get(0).getContextRegistrationProperties();
-		assertThat(props.get(HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY), equalTo("default"));
+		assertThat(props.get(PaxWebConstants.HTTP_SERVICE_CONTEXT_PROPERTY), equalTo("default"));
 		assertNull(props.get(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME));
 		assertThat(props.get(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH), equalTo("/"));
 
@@ -534,10 +534,10 @@ public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 
 		assertThat(models.size(), equalTo(1));
 		Hashtable<String, Object> props = models.get(0).getContextRegistrationProperties();
-		assertThat(props.get(HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY), equalTo("default"));
+		assertThat(props.get(PaxWebConstants.HTTP_SERVICE_CONTEXT_PROPERTY), equalTo("default"));
 
 		// register HttpContext with ANY rank, but using the same INSTANCE we've got from
-		// org.osgi.service.http.HttpService.createDefaultHttpContext() - this should replace the default "default"
+		// org.ops4j.pax.web.service.http.HttpService.createDefaultHttpContext() - this should replace the default "default"
 		// context
 		Hashtable<String, Object> properties = new Hashtable<>();
 		properties.put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID, "default");
@@ -612,7 +612,7 @@ public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 
 		assertThat(models.size(), equalTo(1));
 		props = models.get(0).getContextRegistrationProperties();
-		assertThat(props.get(HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY), equalTo("default"));
+		assertThat(props.get(PaxWebConstants.HTTP_SERVICE_CONTEXT_PROPERTY), equalTo("default"));
 
 		wc.unregisterFilter(filter);
 
@@ -702,7 +702,7 @@ public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 
 		// servlet should be associated with HttpService context
 		Hashtable<String, Object> props = models.get(0).getContextRegistrationProperties();
-		assertThat(props.get(HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY), equalTo("default"));
+		assertThat(props.get(PaxWebConstants.HTTP_SERVICE_CONTEXT_PROPERTY), equalTo("default"));
 		assertNull(props.get(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME));
 		assertThat(props.get(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH), equalTo("/"));
 		assertThat(props.get(Constants.SERVICE_RANKING), equalTo(42));
@@ -774,7 +774,7 @@ public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 
 		// servlet should be associated with HttpService context
 		Hashtable<String, Object> props = models.get(0).getContextRegistrationProperties();
-		assertThat(props.get(HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY), equalTo("default"));
+		assertThat(props.get(PaxWebConstants.HTTP_SERVICE_CONTEXT_PROPERTY), equalTo("default"));
 		assertNull(props.get(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME));
 		assertThat(props.get(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH), equalTo("/c"));
 
@@ -936,7 +936,7 @@ public class WhiteboardAndHttpServiceTest extends MultiContainerTestSupport {
 		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 			// result = {org.ops4j.pax.web.service.spi.servlet.OsgiScopedServletContext@4038}
 			// osgiContext: org.ops4j.pax.web.service.spi.servlet.OsgiServletContext  = {org.ops4j.pax.web.service.spi.servlet.OsgiServletContext@4041}
-			//  containerServletContext: javax.servlet.ServletContext  = {org.eclipse.jetty.servlet.ServletContextHandler$Context@4046} "ServletContext@o.e.j.s.ServletContextHandler@2dd29a59{/,null,AVAILABLE}"
+			//  containerServletContext: jakarta.servlet.ServletContext  = {org.eclipse.jetty.servlet.ServletContextHandler$Context@4046} "ServletContext@o.e.j.s.ServletContextHandler@2dd29a59{/,null,AVAILABLE}"
 			//  osgiContextModel: org.ops4j.pax.web.service.spi.model.OsgiContextModel  = {org.ops4j.pax.web.service.spi.model.OsgiContextModel@4047} "OsgiContextModel{id=OsgiContextModel-3,name='default',contextPath='/',context=null,bundle=Bundle "org.ops4j.pax.web.pax-web-extender-whiteboard"}"
 			//   LOG: org.slf4j.Logger  = {org.apache.logging.slf4j.Log4jLogger@4065}
 			//   DEFAULT_CONTEXT_MODEL: org.ops4j.pax.web.service.spi.model.OsgiContextModel  = {org.ops4j.pax.web.service.spi.model.OsgiContextModel@4047} "OsgiContextModel{id=OsgiContextModel-3,name='default',contextPath='/',context=null,bundle=Bundle "org.ops4j.pax.web.pax-web-extender-whiteboard"}"

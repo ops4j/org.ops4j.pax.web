@@ -26,18 +26,29 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+
+import jakarta.servlet.DispatcherType;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.eclipse.jetty.ee10.servlet.ServletContextRequest;
 import org.eclipse.jetty.ee10.servlet.SessionHandler;
+import org.eclipse.jetty.http.HttpField;
+import org.eclipse.jetty.http.HttpHeader;
+import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.server.handler.ContextRequest;
+import org.eclipse.jetty.session.ManagedSession;
+import org.eclipse.jetty.util.Callback;
 import org.eclipse.jetty.util.resource.PathResourceFactory;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.thread.ScheduledExecutorScheduler;
@@ -252,8 +263,7 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 		servletContainerInitializers.forEach(wrapper -> {
 			ClassLoader tccl = Thread.currentThread().getContextClassLoader();
 			try {
-				// setExtendedListenerTypes() is no longer used in Jetty 12
-//				getServletContext().setExtendedListenerTypes(true);
+				getContext().setExtendedListenerTypes(true);
 				Thread.currentThread().setContextClassLoader(getClassLoader());
 				isCallingSCI.set(true);
 				wrapper.onStartup();
@@ -262,7 +272,7 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 			} finally {
 				isCallingSCI.remove();
 				Thread.currentThread().setContextClassLoader(tccl);
-//				getServletContext().setExtendedListenerTypes(false);
+				getContext().setExtendedListenerTypes(false);
 			}
 		});
 
@@ -343,18 +353,42 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 			String sid = request.getRequestedSessionId();
 			if (sid != null && baseRequest.getSession(false) == null) {
 				String baseSid = sessionHandler.getSessionIdManager().getId(sid);
-//				baseSid += PaxWebSessionIdManager.getSessionIdSuffix(request);
+				baseSid += PaxWebSessionIdManager.getSessionIdSuffix(baseRequest);
 				sid = sessionHandler.getSessionIdManager().getExtendedId(baseSid, baseRequest);
-//				HttpSession session = sessionHandler.getManagedSession(sid);
+				ManagedSession session = sessionHandler.getManagedSession(sid);
 
-//				if (session != null && sessionHandler.isValid(session)) {
-//					baseRequest.enterSession(session);
-//					baseRequest.setSession(session);
-//				}
+				if (session != null && session.isValid()) {
+					scr.setManagedSession(session);
+				}
 			}
 		}
 
 		super.requestInitialized(baseRequest, request);
+	}
+
+	@Override
+	protected boolean handleByContextHandler(String pathInContext, ContextRequest request, Response response, Callback callback) {
+		if ("TRACE".equals(request.getMethod())) {
+			// PAXWEB-229 - prevent https://owasp.org/www-community/attacks/Cross_Site_Tracing
+			Response.writeError(request, response, callback, HttpServletResponse.SC_METHOD_NOT_ALLOWED, null);
+			return true;
+		}
+
+		return super.handleByContextHandler(pathInContext, request, response, callback);
+	}
+
+	@Override
+	protected void handleMovedPermanently(Request request, Response response, Callback callback) {
+		// Pax Web - copied original code, but switching 301 to 302 (just as for Tomcat and Undertow)
+		String location = getContextPath() + "/";
+		if (request.getHttpURI().getParam() != null)
+			location += ";" + request.getHttpURI().getParam();
+		if (request.getHttpURI().getQuery() != null)
+			location += ";" + request.getHttpURI().getQuery();
+
+		response.setStatus(HttpStatus.MOVED_TEMPORARILY_302);
+		response.getHeaders().add(new HttpField(HttpHeader.LOCATION, location));
+		callback.succeeded();
 	}
 
 	/**

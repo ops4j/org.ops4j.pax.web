@@ -30,6 +30,6 @@
 	<h2><%= application.getAttribute("generated-attribute") %></h2>
 	<h4>${applicationScope['osgi-bundlecontext']}</h4>
 	<h5>${applicationScope['org.springframework.osgi.web.org.osgi.framework.BundleContext']}</h5>
-	<h6>${fn:length(applicationScope['javax.servlet.context.orderedLibs'])}</h6>
+	<h6>${fn:length(applicationScope['jakarta.servlet.context.orderedLibs'])}</h6>
 </body>
 </html>

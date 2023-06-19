@@ -23,9 +23,9 @@ import org.ops4j.pax.web.itest.server.support.war.cb1.utils.Cb1IFace3;
 
 /**
  * A concrete class that implements and interface from container-bundle-1, which extends an interface from
- * container-bundle-3, which extends {@link javax.servlet.ServletRegistration}.
- * And I want to have a {@link javax.servlet.ServletContainerInitializer} which has {@link javax.servlet.ServletRegistration}
- * among values of {@link javax.servlet.annotation.HandlesTypes}.
+ * container-bundle-3, which extends {@link jakarta.servlet.ServletRegistration}.
+ * And I want to have a {@link jakarta.servlet.ServletContainerInitializer} which has {@link jakarta.servlet.ServletRegistration}
+ * among values of {@link jakarta.servlet.annotation.HandlesTypes}.
  */
 public class Cb1IFace3Impl implements Cb1IFace3 {
 
