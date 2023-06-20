@@ -82,6 +82,7 @@ import org.xnio.Option;
 import org.xnio.OptionMap;
 import org.xnio.Options;
 import org.xnio.Sequence;
+import org.xnio.SslClientAuthMode;
 import org.xnio.StreamConnection;
 import org.xnio.Xnio;
 import org.xnio.XnioProvider;
@@ -378,6 +379,12 @@ public class UndertowFactory {
 			sslParametersBuilder.addAll(listenerOptions);
 			if (https.getVerifyClient() != null) {
 				sslParametersBuilder.set(Options.SSL_CLIENT_AUTH_MODE, https.getVerifyClient());
+			}
+			if (config.security().isClientAuthWanted()) {
+				sslParametersBuilder.set(Options.SSL_CLIENT_AUTH_MODE, SslClientAuthMode.REQUESTED);
+			}
+			if (config.security().isClientAuthNeeded()) {
+				sslParametersBuilder.set(Options.SSL_CLIENT_AUTH_MODE, SslClientAuthMode.REQUIRED);
 			}
 			if (https.getSslSessionCacheSize() > 0) {
 				sslParametersBuilder.set(Options.SSL_ENABLE_SESSION_CREATION, true);
