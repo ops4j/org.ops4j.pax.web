@@ -233,25 +233,25 @@ public class SSLUtils {
 		ASN1InputStream caPublicKeyASN1InputStream = new ASN1InputStream(caPublicKey.getEncoded());
 		ASN1Sequence s = (ASN1Sequence) caPublicKeyASN1InputStream.readObject();
 		DERBitString bitString = (DERBitString) s.getObjectAt(1);
-		MessageDigest sha1 = MessageDigest.getInstance("SHA1");
-		byte[] caKeyId = sha1.digest(bitString.getBytes());
+		MessageDigest sha512 = MessageDigest.getInstance("SHA-512");
+		byte[] caKeyId = sha512.digest(bitString.getBytes());
 		builder.addExtension(Extension.subjectKeyIdentifier, false, new SubjectKeyIdentifier(caKeyId));
 
 		ASN1InputStream server1PublicKeyASN1InputStream = new ASN1InputStream(server1PublicKey.getEncoded());
 		s = (ASN1Sequence) server1PublicKeyASN1InputStream.readObject();
 		bitString = (DERBitString) s.getObjectAt(1);
-		sha1.reset();
-		byte[] server1KeyId = sha1.digest(bitString.getBytes());
+		sha512.reset();
+		byte[] server1KeyId = sha512.digest(bitString.getBytes());
 		ASN1InputStream server2PublicKeyASN1InputStream = new ASN1InputStream(server2PublicKey.getEncoded());
 		s = (ASN1Sequence) server2PublicKeyASN1InputStream.readObject();
 		bitString = (DERBitString) s.getObjectAt(1);
-		sha1.reset();
-		byte[] server2KeyId = sha1.digest(bitString.getBytes());
+		sha512.reset();
+		byte[] server2KeyId = sha512.digest(bitString.getBytes());
 		ASN1InputStream client2PublicKeyASN1InputStream = new ASN1InputStream(client2PublicKey.getEncoded());
 		s = (ASN1Sequence) client2PublicKeyASN1InputStream.readObject();
 		bitString = (DERBitString) s.getObjectAt(1);
-		sha1.reset();
-		byte[] client2KeyId = sha1.digest(bitString.getBytes());
+		sha512.reset();
+		byte[] client2KeyId = sha512.digest(bitString.getBytes());
 
 		// authority key identifier: https://tools.ietf.org/html/rfc5280#section-4.2.1.1
 		// it's used to identify the public key matching the private key used to sign some certificate.
@@ -270,9 +270,9 @@ public class SSLUtils {
 
 		// org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder
 		// openssl by default uses "sha256WithRSAEncryption"
-		ContentSigner caContentSigner = new JcaContentSignerBuilder("SHA1WITHRSA").build(caPrivateKey);
-		ContentSigner server2ContentSigner = new JcaContentSignerBuilder("SHA1WITHRSA").build(server2PrivateKey);
-		ContentSigner client2ContentSigner = new JcaContentSignerBuilder("SHA1WITHRSA").build(client2PrivateKey);
+		ContentSigner caContentSigner = new JcaContentSignerBuilder("SHA512WITHRSA").build(caPrivateKey);
+		ContentSigner server2ContentSigner = new JcaContentSignerBuilder("SHA512WITHRSA").build(server2PrivateKey);
+		ContentSigner client2ContentSigner = new JcaContentSignerBuilder("SHA512WITHRSA").build(client2PrivateKey);
 
 		JcaX509CertificateConverter converter = new JcaX509CertificateConverter();
 
