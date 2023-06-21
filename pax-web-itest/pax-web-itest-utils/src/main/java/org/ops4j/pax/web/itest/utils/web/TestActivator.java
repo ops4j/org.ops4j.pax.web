@@ -19,12 +19,12 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.osgi.framework.BundleActivator;
