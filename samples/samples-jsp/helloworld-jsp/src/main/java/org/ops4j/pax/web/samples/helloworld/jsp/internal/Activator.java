@@ -15,14 +15,14 @@
  */
 package org.ops4j.pax.web.samples.helloworld.jsp.internal;
 
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletException;
 
 import org.ops4j.pax.web.service.WebContainer;
+import org.ops4j.pax.web.service.http.NamespaceException;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
