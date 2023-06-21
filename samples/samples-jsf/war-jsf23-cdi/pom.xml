@@ -49,7 +49,7 @@
 						<Import-Package>
 							javax.enterprise.context,
 							javax.inject,
-							javax.servlet.*;version="[3.1,5)",
+							jakarta.servlet.*;version="[3.1,5)",
 							javax.faces.annotation,
 							javax.faces.bean,
 							javax.faces.view,
@@ -92,8 +92,8 @@
 								org.apache.aries.cdi.extension.el.jsp.ELJSPExtension CDI extension
 								which registers anonymous ServletContextListener
 								which calls:
-								 - javax.servlet.jsp.JspApplicationContext.addELResolver(javax.enterprise.inject.spi.BeanManager.getELResolver())
-								 - javax.servlet.jsp.JspApplicationContext.addELContextListener(new org.jboss.weld.module.web.el.WeldELContextListener())
+								 - jakarta.servlet.jsp.JspApplicationContext.addELResolver(javax.enterprise.inject.spi.BeanManager.getELResolver())
+								 - jakarta.servlet.jsp.JspApplicationContext.addELContextListener(new org.jboss.weld.module.web.el.WeldELContextListener())
 							-->
 							osgi.cdi.extension;filter:="(osgi.cdi.extension=aries.cdi.el.jsp)"
 						</Require-Capability>
@@ -136,7 +136,7 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<!-- JavaEE -->
+		<!-- JakartaEE -->
 
 		<dependency>
 			<groupId>jakarta.servlet</groupId>
