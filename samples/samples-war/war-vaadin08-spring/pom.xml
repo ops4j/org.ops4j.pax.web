@@ -76,12 +76,12 @@
 					</supportedProjectTypes>
 					<instructions>
 						<Import-Package>
-							javax.servlet.jsp.jstl.*;version="1.2",
-							javax.servlet.jsp.*;version="2.3",
-							javax.servlet.*;version="[3.1,5)",
+							jakarta.servlet.jsp.jstl.*;version="3.0",
+							jakarta.servlet.jsp.*;version="3.1",
+							jakarta.servlet.*;version="[6,7)",
 
-							javax.websocket,
-							javax.websocket.server,
+							jakarta.websocket,
+							jakarta.websocket.server,
 
 							javax.management,
 							javax.management.modelmbean,
@@ -171,7 +171,7 @@
 
 	<dependencies>
 
-		<!-- JavaEE -->
+		<!-- JakartaEE -->
 
 		<dependency>
 			<groupId>jakarta.servlet</groupId>

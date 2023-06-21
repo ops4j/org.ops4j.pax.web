@@ -17,17 +17,17 @@ package org.ops4j.pax.web.samples.war.security;
 
 import java.io.IOException;
 import java.util.Collections;
-import javax.servlet.HttpConstraintElement;
-import javax.servlet.HttpMethodConstraintElement;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRegistration;
-import javax.servlet.ServletSecurityElement;
-import javax.servlet.annotation.ServletSecurity;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.HttpConstraintElement;
+import jakarta.servlet.HttpMethodConstraintElement;
+import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.ServletContextListener;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRegistration;
+import jakarta.servlet.ServletSecurityElement;
+import jakarta.servlet.annotation.ServletSecurity;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 public class RegisteringListener implements ServletContextListener {
 
@@ -61,7 +61,7 @@ public class RegisteringListener implements ServletContextListener {
 		});
 		reg1.addMapping("/s1/*");
 		// 13.4.2
-		//     The javax.servlet.ServletSecurityElement argument to
+		//     The jakarta.servlet.ServletSecurityElement argument to
 		//     setServletSecurity is analogous in structure and model to the
 		//     ServletSecurity interface of the @ServletSecurity annotation.
 		reg1.setServletSecurity(new ServletSecurityElement(

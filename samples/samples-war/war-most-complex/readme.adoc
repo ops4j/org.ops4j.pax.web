@@ -2,7 +2,7 @@
 
 This directory contains flat strucure of Maven modules, which (together) show the most complex WAB imaginable (and still handled well by Pax Web 8).
 
-== OSGi and JavaEE perspective
+== OSGi and JakartaEE perspective
 
 From OSGi perspective, a WAB (which is a normal bundle with `Web-ContextPath` header) should _reach out_ to:
 
@@ -11,7 +11,7 @@ From OSGi perspective, a WAB (which is a normal bundle with `Web-ContextPath` he
 * bundles reachable from the WAB itself using `Import-Package` (wire from `osgi.wiring.package` namespace) and `Require-Bundle` (`osgi.wiring.bundle` namespace)
 * fragments of the reachable bundles
 
-From JavaEE perspective, a WAR should _reach out_ to:
+From JakartaEE perspective, a WAR should _reach out_ to:
 
 * JARs from `/WEB-INF/lib` and `/WEB-INF/classes` directory of a WAR (the `/WEB-INF/classes` directory is scanned for TLDs but not for `META-INF/web-fragment.xml` files)
 * JARs from _shared class loader_ (Tomcat specific) which are still treated as application (non-container) libraries
@@ -21,7 +21,7 @@ From JavaEE perspective, a WAR should _reach out_ to:
 
 There are 4 different resources to scan in reachable libraries/locations:
 
-* `/META-INF/services/javax.servlet.ServletContainerInitializer` service descriptors - according to Servlet spec 4, "8.2.2 Ordering of web.xml and web-fragment.xml", SCIs from ignored JARs (only if absolute ordering is declared) are also ignored. Non-ignored SCIs with `@HandlesTypes` are not being passed the classes from the ignored JARs. Only absolute ordering may _disable_ some SCIs or related classes declared in `@HandlesTypes` - it is independent from the setting of `metadata-complete`.
+* `/META-INF/services/jakarta.servlet.ServletContainerInitializer` service descriptors - according to Servlet spec 4, "8.2.2 Ordering of web.xml and web-fragment.xml", SCIs from ignored JARs (only if absolute ordering is declared) are also ignored. Non-ignored SCIs with `@HandlesTypes` are not being passed the classes from the ignored JARs. Only absolute ordering may _disable_ some SCIs or related classes declared in `@HandlesTypes` - it is independent from the setting of `metadata-complete`.
 * `*.class` files annotated with `@WebServlet`, `@WebFilter` or `@WebListener` or any class mentioned in `@HandlesTypes` from not ignored SCIs.
 * `web-fragment.xml` descriptors. According to "8.2.1 Modularity of web.xml", "only JAR files bundled in a web application's `WEB-INF/lib` directory, but not those higher up in the class loading delegation chain, need to be scanned for web-fragment.xml"
 * `*.tld` files - this is NOT a responsiblity of pure Servlet container, but if there's a _JSP container_ inside the Servlet container, it is its responsibility. In Tomcat, it happens in `org.apache.jasper.servlet.JasperInitializer.onStartup()` (which is an SCI implementation). These are loaded from:
@@ -33,16 +33,16 @@ There are 4 different resources to scan in reachable libraries/locations:
 ** `web.xml` defined TLDs (`<taglib>`)
 
 There's an interesting question about `/META-INF` directory wrt _service loading_.
-`java.util.ServiceLoader.load(java.lang.Class<S>)` effectively leads to java.lang.ClassLoader.getResources() invocation, so from CL perspective, `/META-INF/services/javax.servlet.ServletContainerInitializer` should be placed (in WAR) in one of:
+`java.util.ServiceLoader.load(java.lang.Class<S>)` effectively leads to java.lang.ClassLoader.getResources() invocation, so from CL perspective, `/META-INF/services/jakarta.servlet.ServletContainerInitializer` should be placed (in WAR) in one of:
 
-* `/WEB-INF/classes/META-INF/services/javax.servlet.ServletContainerInitializer`
-* `/WEB-INF/lib/*.jar!/META-INF/services/javax.servlet.ServletContainerInitializer`
+* `/WEB-INF/classes/META-INF/services/jakarta.servlet.ServletContainerInitializer`
+* `/WEB-INF/lib/*.jar!/META-INF/services/jakarta.servlet.ServletContainerInitializer`
 
-But from JAR specification perspective, WAR itself may contain `/META-INF/services/javax.servlet.ServletContainerInitializer` file.
+But from JAR specification perspective, WAR itself may contain `/META-INF/services/jakarta.servlet.ServletContainerInitializer` file.
 
 "8.2 Persistence Unit Packaging" chapter of JSR 338 (JPA 2.2) says that in case of WARs, the `persistence.xml` file should be placed inside `WEB-INF/classes/META-INF`, so again it's matching the ClassLoader scenario of `java.util.ServiceLoader`.
 
-So here's a little investigation to check why there are two `/META-INF/services/javax.servlet.ServletContainerInitializer` files in a WAR produced by maven-bundle-plugin even if maven-war-plugin itself includes proper `/WEB-INF/classes/META-INF/services/javax.servlet.ServletContainerInitializer` because there's only `src/main/resources/META-INF/services/javax.servlet.ServletContainerInitializer`.
+So here's a little investigation to check why there are two `/META-INF/services/jakarta.servlet.ServletContainerInitializer` files in a WAR produced by maven-bundle-plugin even if maven-war-plugin itself includes proper `/WEB-INF/classes/META-INF/services/jakarta.servlet.ServletContainerInitializer` because there's only `src/main/resources/META-INF/services/jakarta.servlet.ServletContainerInitializer`.
 
 .First, a preparation of the _classpath_
 
@@ -72,7 +72,7 @@ So here's a little investigation to check why there are two `/META-INF/services/
 ** `org.apache.maven.project.MavenProject.getResources()` and `org.apache.maven.project.MavenProject.getTestResources()` are taken and for each of them, source path (`org.apache.maven.model.FileSet.getDirectory()`) and target path (`org.apache.maven.model.Resource.getTargetPath()`)
 ** maven-bundle-plugin, in addition to `src/main/resources` (and test equivalents) adds: `src/main/java` (with `includes: {\*\*/packageinfo}` and `target/generated-sources/annotations` with `includes: {\*\*/packageinfo}`
 ** `org.codehaus.plexus.util.DirectoryScanner.scan()` recursively scans source dir (optionally with excludes and includes)
-** each recursive element is changed to `entry=location`, where entry is project-relative value. For example, `META-INF/services/javax.servlet.ServletContainerInitializer=src/main/resources/META-INF/services/javax.servlet.ServletContainerInitializer`. If `org.apache.maven.model.Resource.isFiltering()`, the path is wrapped inside `{...}`.
+** each recursive element is changed to `entry=location`, where entry is project-relative value. For example, `META-INF/services/jakarta.servlet.ServletContainerInitializer=src/main/resources/META-INF/services/jakarta.servlet.ServletContainerInitializer`. If `org.apache.maven.model.Resource.isFiltering()`, the path is wrapped inside `{...}`.
 2. Only now `Include-Resource` is checked. If it's present, `\{maven-resources}` and `\{maven-test-resources}` are replaced with the above generated lists.
 3. `org.apache.felix.bundleplugin.BundlePlugin.addLocalPackages()`
 ** Plexus directory scanner scans `${project.build.outputDirectory}` with `*.class` filter to collect local packages (in order to determine export and private packages).
@@ -136,7 +136,7 @@ to:
 +
 ....
 "META-INF/<<EMPTY>>"
-"WEB-INF/classes/META-INF/services/javax.servlet.ServletContainerInitializer"
+"WEB-INF/classes/META-INF/services/jakarta.servlet.ServletContainerInitializer"
 "WEB-INF/classes/org/ops4j/pax/web/samples/war/SimplestServlet.class"
 "WEB-INF/classes/org/ops4j/pax/web/samples/war/scis/SCIFromTheFragment1.class"
 "WEB-INF/classes/org/ops4j/pax/web/samples/war/scis/SCIFromTheFragment2.class"
@@ -154,25 +154,25 @@ Finally new artifact is written using `aQute.bnd.osgi.Jar.write(java.io.File)`.
 
 So why the WAB contains both:
 
-* `/META-INF/services/javax.servlet.ServletContainerInitializer`, and
-* `/WEB-INF/classes/META-INF/services/javax.servlet.ServletContainerInitializer`?
+* `/META-INF/services/jakarta.servlet.ServletContainerInitializer`, and
+* `/WEB-INF/classes/META-INF/services/jakarta.servlet.ServletContainerInitializer`?
 
 The problem is with `<_wab>` instruction.
 By default, maven-bundle-plugin uses `Include-Resource=\{maven-resources}` which contains mappings between project and target resources. This includes:
 ....
-META-INF/services/javax.servlet.ServletContainerInitializer -> {aQute.bnd.osgi.FileResource@5715} "/data/sources/github.com/ops4j/org.ops4j.pax.web/samples/samples-war/war-most-complex/the-wab-itself/src/main/resources/META-INF/services/javax.servlet.ServletContainerInitializer"
+META-INF/services/jakarta.servlet.ServletContainerInitializer -> {aQute.bnd.osgi.FileResource@5715} "/data/sources/github.com/ops4j/org.ops4j.pax.web/samples/samples-war/war-most-complex/the-wab-itself/src/main/resources/META-INF/services/jakarta.servlet.ServletContainerInitializer"
 ....
 This is fine. but `doWab()` filters he resources and prepends all BUT the ones with `META-INF` prefix with `WEB-INF/classes`. So eventually we have:
 ....
-META-INF/services/javax.servlet.ServletContainerInitializer=src/main/resources/META-INF/services/javax.servlet.ServletContainerInitializer
+META-INF/services/jakarta.servlet.ServletContainerInitializer=src/main/resources/META-INF/services/jakarta.servlet.ServletContainerInitializer
 ....
 
 Instead of:
 ....
-WEB-INF/classes/META-INF/services/javax.servlet.ServletContainerInitializer=src/main/resources/META-INF/services/javax.servlet.ServletContainerInitializer
+WEB-INF/classes/META-INF/services/jakarta.servlet.ServletContainerInitializer=src/main/resources/META-INF/services/jakarta.servlet.ServletContainerInitializer
 ....
 
-We still have `WEB-INF/classes/META-INF/services/javax.servlet.ServletContainerInitializer` in the WAB, because I pointed `<_wab>` to expanded WAR from the maven-war-plugin.
+We still have `WEB-INF/classes/META-INF/services/jakarta.servlet.ServletContainerInitializer` in the WAB, because I pointed `<_wab>` to expanded WAR from the maven-war-plugin.
 
 == The most complex WAB
 
@@ -182,7 +182,7 @@ So, the most complex WAB will have:
 * a bundle with import-export package wiring and a bundle fragment
 * jars and directories (more than one) on `Bundle-ClassPath`
 
-Each JAR, bundle and bundle fragment will have `/META-INF/services/javax.servlet.ServletContainerInitializer` with `@HandlesTypes`.
+Each JAR, bundle and bundle fragment will have `/META-INF/services/jakarta.servlet.ServletContainerInitializer` with `@HandlesTypes`.
 Each JAR, bundle and bundle fragment will have a `/META-INF/web-fragment.xml` - because all reachable JARs should be considered web application libraries.
 Each JAR, bundle and bundle fragment will have annotated servlets.
 

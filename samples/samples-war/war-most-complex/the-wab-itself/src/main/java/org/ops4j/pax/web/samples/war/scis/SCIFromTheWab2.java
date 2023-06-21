@@ -17,10 +17,10 @@ package org.ops4j.pax.web.samples.war.scis;
 
 import java.util.EventListener;
 import java.util.Set;
-import javax.servlet.ServletContainerInitializer;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.HandlesTypes;
+import jakarta.servlet.ServletContainerInitializer;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.HandlesTypes;
 
 @HandlesTypes({ EventListener.class })
 public class SCIFromTheWab2 implements ServletContainerInitializer {

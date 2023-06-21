@@ -15,8 +15,8 @@
  */
 package org.ops4j.pax.web.extender.samples.war.internal;
 
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
+import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.ServletContextListener;
 
 public class ExampleServletContextListener implements ServletContextListener {
 

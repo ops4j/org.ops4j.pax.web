@@ -18,7 +18,7 @@ package org.ops4j.pax.web.samples.vaadin08;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
-import javax.servlet.annotation.WebServlet;
+import jakarta.servlet.annotation.WebServlet;
 
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;

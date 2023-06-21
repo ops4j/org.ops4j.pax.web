@@ -45,7 +45,7 @@
 							org.apache.catalina;resolution:=optional,
 							org.apache.catalina.connector;resolution:=optional,
 							org.apache.catalina.valves;resolution:=optional,
-							javax.servlet.http
+							jakarta.servlet.http
 						</Import-Package>
 						<Web-ContextPath>/wab-container-context-config</Web-ContextPath>
 						<_wab>src/main/webapp</_wab>

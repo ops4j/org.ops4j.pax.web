@@ -47,10 +47,10 @@
 					</supportedProjectTypes>
 					<instructions>
 						<Import-Package>
-							org.osgi.framework;version="[1.8,2)",
+							org.osgi.framework;version="[1.10,2)",
 
-							javax.websocket;version="[1.1,2)",
-							javax.websocket.server;version="[1.1,2)",
+							jakarta.websocket;version="[2.1,3)",
+							jakarta.websocket.server;version="[2.1,3)",
 
 							javax.xml.datatype,
 							javax.xml.namespace,
@@ -77,7 +77,7 @@
 
 	<dependencies>
 
-		<!-- JavaEE -->
+		<!-- JakartaEE -->
 
 		<dependency>
 			<groupId>jakarta.servlet</groupId>
@@ -87,6 +87,11 @@
 		<dependency>
 			<groupId>jakarta.websocket</groupId>
 			<artifactId>jakarta.websocket-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.websocket</groupId>
+			<artifactId>jakarta.websocket-client-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 

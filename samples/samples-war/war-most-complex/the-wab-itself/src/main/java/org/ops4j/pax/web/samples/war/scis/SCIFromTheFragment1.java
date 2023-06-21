@@ -16,11 +16,11 @@
 package org.ops4j.pax.web.samples.war.scis;
 
 import java.util.Set;
-import javax.servlet.Servlet;
-import javax.servlet.ServletContainerInitializer;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.HandlesTypes;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletContainerInitializer;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.HandlesTypes;
 
 /**
  * This SCI is available inside the WAB itself, but declared as /META-INF/service in the fragment. So without a

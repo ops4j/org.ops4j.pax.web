@@ -42,7 +42,7 @@
 			<artifactId>wc-helloworld</artifactId>
 		</dependency>
 
-		<!-- JavaEE -->
+		<!-- JakartaEE -->
 
 		<dependency>
 			<groupId>jakarta.servlet</groupId>

@@ -42,8 +42,8 @@
 				<configuration>
 					<instructions>
 						<Import-Package>
-							org.osgi.framework;version="[1.8,2)",
-							javax.servlet.*;version="[3.1,5)"
+							org.osgi.framework;version="[1.10,2)",
+							jakarta.servlet.*;version="[6,7)"
 						</Import-Package>
 						<Private-Package>
 							org.ops4j.pax.web.extender.samples.war.internal
@@ -83,7 +83,7 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<!-- JavaEE -->
+		<!-- JakartaEE -->
 
 		<dependency>
 			<groupId>jakarta.servlet</groupId>
