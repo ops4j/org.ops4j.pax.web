@@ -47,7 +47,7 @@
 					</supportedProjectTypes>
 					<instructions>
 						<Import-Package>
-							javax.servlet.*;version="[3.1,5)",
+							jakarta.servlet.*;version="[6,7)",
 
 							javax.naming,
 							javax.xml.parsers,
@@ -60,11 +60,11 @@
 							org.w3c.dom,
 							org.xml.sax,
 
-							org.springframework.stereotype;version="[5,6)",
-							org.springframework.web.bind.annotation;version="[5,6)",
-							org.springframework.web.servlet;version="[5,6)",
-							org.springframework.web.servlet.mvc;version="[5,6)",
-							org.springframework.web.servlet.view;version="[5,6)"
+							org.springframework.stereotype;version="[6,7)",
+							org.springframework.web.bind.annotation;version="[6,7)",
+							org.springframework.web.servlet;version="[6,7)",
+							org.springframework.web.servlet.mvc;version="[6,7)",
+							org.springframework.web.servlet.view;version="[6,7)"
 						</Import-Package>
 						<Export-Package />
 						<Private-Package>
@@ -80,7 +80,7 @@
 
 	<dependencies>
 
-		<!-- JavaEE -->
+		<!-- JakartaEE -->
 
 		<dependency>
 			<groupId>jakarta.servlet</groupId>

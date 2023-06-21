@@ -70,8 +70,8 @@
 						<configuration>
 							<instructions>
 								<Import-Package>
-									javax.servlet;version="[3.1,5)",
-									javax.servlet.http;version="[3.1,5)"
+									jakarta.servlet;version="[6,7)",
+									jakarta.servlet.http;version="[6,7)"
 								</Import-Package>
 								<_wab>${project.build.directory}/war-introspection-bundle-${project.version}</_wab>
 								<Web-ContextPath>/war-bundle</Web-ContextPath>
@@ -103,7 +103,7 @@
 			<classifier>classes</classifier>
 		</dependency>
 
-		<!-- JavaEE -->
+		<!-- JakartaEE -->
 
 		<dependency>
 			<groupId>jakarta.servlet</groupId>

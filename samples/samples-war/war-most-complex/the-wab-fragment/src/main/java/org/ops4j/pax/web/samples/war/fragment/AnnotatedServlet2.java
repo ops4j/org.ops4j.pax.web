@@ -16,15 +16,15 @@
 package org.ops4j.pax.web.samples.war.fragment;
 
 import java.io.IOException;
-import javax.servlet.GenericServlet;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.annotation.WebServlet;
+import jakarta.servlet.GenericServlet;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.annotation.WebServlet;
 
 @WebServlet(name = "annotatedServlet2", urlPatterns = { "/as2", "/as2*" })
 // according to "8.1.1 @WebServlet", Classes annotated with @WebServlet class MUST extend the
-// javax.servlet.http.HttpServlet class.
+// jakarta.servlet.http.HttpServlet class.
 public class AnnotatedServlet2 extends GenericServlet {
 
 	@Override

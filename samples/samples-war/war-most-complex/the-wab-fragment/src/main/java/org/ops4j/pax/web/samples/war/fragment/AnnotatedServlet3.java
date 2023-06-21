@@ -15,9 +15,9 @@
  */
 package org.ops4j.pax.web.samples.war.fragment;
 
-import javax.servlet.annotation.WebInitParam;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
+import jakarta.servlet.annotation.WebInitParam;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
 
 @WebServlet(name = "annotatedServlet3", urlPatterns = "/as3", initParams = @WebInitParam(name = "param3", value = "value3"))
 public class AnnotatedServlet3 extends HttpServlet {

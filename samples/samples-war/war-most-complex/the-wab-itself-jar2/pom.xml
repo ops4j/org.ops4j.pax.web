@@ -69,8 +69,8 @@
 					<manifestLocation>${project.build.directory}/classes</manifestLocation>
 					<instructions>
 						<Import-Package>
-							org.osgi.framework;version="[1.8,2)",
-							javax.servlet.*;version="[3.1,5)",
+							org.osgi.framework;version="[1.10,2)",
+							jakarta.servlet.*;version="[6,7)",
 							org.ops4j.pax.web.samples.war.cb1.utils
 						</Import-Package>
 						<!-- We can't use obvious private packages, because they're now prefixed with "WEB-INF.classes-not-javaee." -->
@@ -116,7 +116,7 @@
 			<artifactId>the-wab-jar</artifactId>
 		</dependency>
 
-		<!-- JavaEE -->
+		<!-- JakartaEE -->
 
 		<dependency>
 			<groupId>jakarta.servlet</groupId>

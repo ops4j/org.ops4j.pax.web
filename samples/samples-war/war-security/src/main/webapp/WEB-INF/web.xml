@@ -84,7 +84,7 @@
 		<role-name>role-admin</role-name>
 	</security-role>
 	<!--
-		Declared using @javax.annotation.security.DeclareRoles
+		Declared using @jakarta.annotation.security.DeclareRoles
 		on org.ops4j.pax.web.samples.war.security.FullyAnnotatedServlet
 	-->
 	<!--

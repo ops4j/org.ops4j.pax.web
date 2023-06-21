@@ -42,8 +42,8 @@
 				<configuration>
 					<instructions>
 						<Import-Package>
-							org.osgi.framework;version="[1.8,2)",
-							javax.servlet.*;version="[3.1,5)",
+							org.osgi.framework;version="[1.10,2)",
+							jakarta.servlet.*;version="[6,7)",
 							org.ops4j.pax.web.samples.war.cb1.utils
 						</Import-Package>
 						<!--
@@ -64,7 +64,7 @@
 							We explicitly remove {maven-resources} from Include-Resource, and instead we map
 							entire ${project.build.outputDirectory} to /WEB-INF/classes-not-javaee, otherwise src/main/resources
 							copied by Maven to ${project.build.outputDirectory} would to to the root of the bundle and we'd have
-							top-level /META-INF/services/javax.servlet.ServletContainerInitializer, but we want it to
+							top-level /META-INF/services/jakarta.servlet.ServletContainerInitializer, but we want it to
 							be available only from one of Bundle-ClassPath entries
 						-->
 						<Include-Resource>
@@ -94,7 +94,7 @@
 			<artifactId>the-wab-jar</artifactId>
 		</dependency>
 
-		<!-- JavaEE -->
+		<!-- JakartaEE -->
 
 		<dependency>
 			<groupId>jakarta.servlet</groupId>

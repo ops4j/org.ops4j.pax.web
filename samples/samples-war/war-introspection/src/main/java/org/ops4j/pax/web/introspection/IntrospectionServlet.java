@@ -16,9 +16,9 @@
  */
 package org.ops4j.pax.web.introspection;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
 
 public class IntrospectionServlet extends HttpServlet {
 

@@ -67,7 +67,7 @@
 			<artifactId>container-bundle-2</artifactId>
 		</dependency>
 
-		<!-- JavaEE / JakartaEE -->
+		<!-- JakartaEE / JakartaEE -->
 
 		<dependency>
 			<groupId>jakarta.servlet</groupId>

@@ -47,7 +47,7 @@
 					</supportedProjectTypes>
 					<instructions>
 						<Import-Package>
-							org.osgi.framework;version="[1.8,2)",
+							org.osgi.framework;version="[1.10,2)",
 							org.ops4j.pax.web.samples.helloworld,
 							*
 						</Import-Package>
@@ -63,7 +63,7 @@
 
 	<dependencies>
 
-		<!-- JavaEE -->
+		<!-- JakartaEE -->
 
 		<dependency>
 			<groupId>jakarta.servlet</groupId>
