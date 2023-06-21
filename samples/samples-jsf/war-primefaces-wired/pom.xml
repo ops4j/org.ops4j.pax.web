@@ -90,7 +90,7 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<!-- JavaEE -->
+		<!-- JakartaEE -->
 
 		<dependency>
 			<groupId>jakarta.servlet</groupId>
