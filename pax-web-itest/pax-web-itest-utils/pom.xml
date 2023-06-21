@@ -61,15 +61,16 @@
 				<configuration>
 					<instructions>
 						<Import-Package>
-							<!-- ranges indicate Servlet API 3.1+ (JavaEE 7+) -->
-							javax.servlet;version="[3.1,5)",
-							javax.servlet.annotation;version="[3.1,5)",
-							javax.servlet.http;version="[3.1,5)",
-							javax.websocket;resolution:=optional,
-							javax.websocket.server;resolution:=optional,
+							<!-- ranges indicate Servlet API 6.0+ (JakartaEE 10+) -->
+							jakarta.servlet;version="[6,7)",
+							jakarta.servlet.annotation;version="[6,7)",
+							jakarta.servlet.http;version="[6,7)",
 
-							<!-- ranges indicate we can work with OSGi Core R6+ -->
-							org.osgi.framework;version="[1.8,2)",
+							jakarta.websocket;version="[2.1,3)",
+							jakarta.websocket.server;version="[2.1,3)",
+
+							<!-- OSGi Core R8+ -->
+							org.osgi.framework;version="[1.10,2)",
 							org.osgi.framework.wiring;version="[1.2,2)",
 							org.osgi.util.tracker;version="[1.5,2)",
 
@@ -77,7 +78,7 @@
 							org.ops4j.pax.web.service;version="${pax-web.osgi.version}",
 
 							<!-- from pax-logging-api -->
-							org.slf4j;version="[1.7,2)",
+							org.slf4j;version="[2,3)",
 
 							<!-- other -->
 							javax.net,
@@ -85,8 +86,8 @@
 							javax.security.auth.x500
 						</Import-Package>
 						<Dynamic-ImportPackage>
-							javax.websocket,
-							javax.websocket.*
+							jakarta.websocket,
+							jakarta.websocket.*
 						</Dynamic-ImportPackage>
 						<Export-Package>
 							org.ops4j.pax.web.itest.utils.*,
@@ -124,11 +125,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>
-			<artifactId>osgi.cmpn</artifactId>
+			<artifactId>org.osgi.service.servlet</artifactId>
 			<scope>provided</scope>
 		</dependency>
 
-		<!-- JavaEE -->
+		<!-- JakartaEE -->
 
 		<dependency>
 			<groupId>jakarta.servlet</groupId>
@@ -138,6 +139,11 @@
 		<dependency>
 			<groupId>jakarta.websocket</groupId>
 			<artifactId>jakarta.websocket-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.websocket</groupId>
+			<artifactId>jakarta.websocket-client-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 

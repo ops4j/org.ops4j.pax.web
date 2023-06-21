@@ -16,7 +16,7 @@
 package org.ops4j.pax.web.itest.utils.web;
 
 import java.util.Hashtable;
-import javax.servlet.Filter;
+import jakarta.servlet.Filter;
 
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.osgi.framework.BundleActivator;

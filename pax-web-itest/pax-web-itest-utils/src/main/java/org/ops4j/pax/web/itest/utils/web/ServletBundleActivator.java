@@ -16,7 +16,7 @@
 package org.ops4j.pax.web.itest.utils.web;
 
 import java.util.Hashtable;
-import javax.servlet.Servlet;
+import jakarta.servlet.Servlet;
 
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainer;
