@@ -21,12 +21,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.ops4j.pax.web.service.PaxWebConstants;
+import org.ops4j.pax.web.service.http.HttpContext;
+import org.ops4j.pax.web.service.http.HttpService;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 
 public class Activator implements BundleActivator {

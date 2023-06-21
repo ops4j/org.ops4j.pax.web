@@ -39,7 +39,7 @@
 		<module>wc-helloworld</module>
 		<module>authentication</module>
 		<module>http-custom-context</module>
-		<module>hs-jersey</module>
+<!--		<module>hs-jersey</module>-->
 		<module>hs-1</module>
 		<module>hs-2</module>
 		<module>hs-for-war-default</module>

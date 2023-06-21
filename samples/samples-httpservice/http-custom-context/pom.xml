@@ -45,16 +45,16 @@
 <!--						<Embed-Dependency>*; artifactId=!org.osgi.compendium; scope=compile; type=!pom; inline=true</Embed-Dependency>-->
 <!--						<Embed-Transitive>true</Embed-Transitive>-->
 						<Import-Package>
-							<!-- ranges indicate Servlet API 3.1+ (JavaEE 7+) -->
-							javax.servlet;version="[3.1,5)",
-							javax.servlet.http;version="[3.1,5)",
+							<!-- ranges indicate Servlet API 6.0+ (JakartaEE 10+) -->
+							jakarta.servlet;version="[6,7)",
+							jakarta.servlet.http;version="[6,7)",
 
-							<!-- ranges indicate we can work with OSGi Core R6+ -->
-							org.osgi.framework;version="[1.8,2)",
+							<!-- OSGi Core R8+ -->
+							org.osgi.framework;version="[1.10,2)",
 							org.osgi.util.tracker;version="[1.5,2)",
 
-							<!-- OSGi cmpn -->
-							org.osgi.service.http;version="[1.2,2)"
+							<!-- pax-web-api -->
+							org.ops4j.pax.web.service.http;version="${pax-web.osgi.version}"
 						</Import-Package>
 						<Export-Package />
 						<Private-Package>org.ops4j.pax.web.samples.custom.context</Private-Package>
@@ -83,11 +83,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>
-			<artifactId>osgi.cmpn</artifactId>
+			<artifactId>org.osgi.service.servlet</artifactId>
 			<scope>provided</scope>
 		</dependency>
 
-		<!-- JavaEE -->
+		<!-- JakartaEE -->
 
 		<dependency>
 			<groupId>jakarta.servlet</groupId>

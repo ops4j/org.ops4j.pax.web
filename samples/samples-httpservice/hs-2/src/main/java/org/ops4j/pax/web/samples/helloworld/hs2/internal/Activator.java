@@ -15,10 +15,10 @@
  */
 package org.ops4j.pax.web.samples.helloworld.hs2.internal;
 
+import org.ops4j.pax.web.service.http.HttpService;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 

@@ -16,8 +16,8 @@
  */
 package org.ops4j.pax.web.samples.helloworld.wc.internal;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
 
 /**
  * Hello World Servlet.

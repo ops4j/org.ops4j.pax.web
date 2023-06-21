@@ -15,8 +15,8 @@
  */
 package org.ops4j.pax.web.samples.jersey;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;

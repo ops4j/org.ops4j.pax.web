@@ -43,10 +43,10 @@
 					<instructions>
 						<Bundle-Activator>org.ops4j.pax.web.samples.jersey.TestActivator</Bundle-Activator>
 						<Import-Package>
-							javax.servlet.*;version="[3.1,5)",
+							jakarta.servlet.*;version="[6,7)",
 
-							<!-- ranges indicate we can work with OSGi Core R6+ -->
-							org.osgi.framework;version="[1.8,2)",
+							<!-- OSGi Core R8+ -->
+							org.osgi.framework;version="[1.10,2)",
 							org.osgi.util.tracker;version="[1.5,2)",
 
 							*
@@ -78,11 +78,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>
-			<artifactId>osgi.cmpn</artifactId>
+			<artifactId>org.osgi.service.servlet</artifactId>
 			<scope>provided</scope>
 		</dependency>
 
-		<!-- JavaEE -->
+		<!-- JakartaEE -->
 
 		<dependency>
 			<groupId>jakarta.servlet</groupId>
