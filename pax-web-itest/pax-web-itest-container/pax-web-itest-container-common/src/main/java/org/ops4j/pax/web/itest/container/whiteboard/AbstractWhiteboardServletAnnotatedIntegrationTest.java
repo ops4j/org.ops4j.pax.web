@@ -15,8 +15,8 @@
  */
 package org.ops4j.pax.web.itest.container.whiteboard;
 
-import javax.servlet.Filter;
-import javax.servlet.Servlet;
+import jakarta.servlet.Filter;
+import jakarta.servlet.Servlet;
 
 import org.junit.Before;
 import org.junit.Test;

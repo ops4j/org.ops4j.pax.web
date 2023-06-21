@@ -54,12 +54,12 @@
 				<configuration>
 					<instructions>
 						<Import-Package>
-							<!-- ranges indicate Servlet API 3.1+ (JavaEE 7+) -->
-							javax.servlet;version="[3.1,5)",
-							javax.servlet.annotation;version="[3.1,5)",
-							javax.servlet.http;version="[3.1,5)",
-							javax.websocket;resolution:=optional,
-							javax.websocket.server;resolution:=optional,
+							<!-- ranges indicate Servlet API 3.1+ (JakartaEE 7+) -->
+							jakarta.servlet;version="[3.1,5)",
+							jakarta.servlet.annotation;version="[3.1,5)",
+							jakarta.servlet.http;version="[3.1,5)",
+							jakarta.websocket;resolution:=optional,
+							jakarta.websocket.server;resolution:=optional,
 
 							<!-- ranges indicate we can work with OSGi Core R6+ -->
 							org.osgi.framework;version="[1.8,2)",
@@ -70,9 +70,9 @@
 							org.osgi.service.event;resolution:=optional,
 							org.osgi.service.cm;resolution:=optional,
 							org.osgi.service.http;version="[1.2,2)",
-							org.osgi.service.http.context;version="[1.1,2)",
-							org.osgi.service.http.runtime.dto;version="[1.1,2)",
-							org.osgi.service.http.runtime;version="[1.1,2)",
+							org.osgi.service.servlet.context;version="[1.1,2)",
+							org.osgi.service.servlet.runtime.dto;version="[1.1,2)",
+							org.osgi.service.servlet.runtime;version="[1.1,2)",
 
 							<!-- from pax-web-api -->
 							org.ops4j.pax.web.service;version="${pax-web.osgi.version}",
@@ -602,9 +602,17 @@
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.service.cdi</artifactId>
 		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.osgi</groupId>-->
+<!--			<artifactId>org.osgi.service.jaxrs</artifactId>-->
+<!--		</dependency>-->
 		<dependency>
 			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.service.jaxrs</artifactId>
+			<artifactId>org.osgi.service.component.annotations</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.service.servlet</artifactId>
 		</dependency>
 
 		<dependency>
@@ -663,7 +671,7 @@
 			<artifactId>xbean-finder-shaded</artifactId>
 		</dependency>
 
-		<!-- JavaEE -->
+		<!-- JakartaEE -->
 
 		<dependency>
 			<groupId>com.sun.activation</groupId>
@@ -722,6 +730,10 @@
 			<groupId>jakarta.websocket</groupId>
 			<artifactId>jakarta.websocket-api</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>jakarta.websocket</groupId>
+			<artifactId>jakarta.websocket-client-api</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>jakarta.persistence</groupId>
@@ -769,7 +781,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-slf4j-impl</artifactId>
+			<artifactId>log4j-slf4j2-impl</artifactId>
 		</dependency>
 
 		<!-- Testing -->

@@ -17,8 +17,8 @@ package org.ops4j.pax.web.itest.container.whiteboard;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import javax.servlet.Filter;
-import javax.servlet.Servlet;
+import jakarta.servlet.Filter;
+import jakarta.servlet.Servlet;
 
 import org.junit.After;
 import org.junit.Before;

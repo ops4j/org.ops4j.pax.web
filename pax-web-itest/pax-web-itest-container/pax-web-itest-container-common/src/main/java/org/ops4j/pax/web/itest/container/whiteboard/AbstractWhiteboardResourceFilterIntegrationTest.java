@@ -18,8 +18,8 @@ package org.ops4j.pax.web.itest.container.whiteboard;
 import java.net.URL;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import javax.servlet.Filter;
-import javax.servlet.Servlet;
+import jakarta.servlet.Filter;
+import jakarta.servlet.Servlet;
 
 import org.junit.After;
 import org.junit.Before;
@@ -30,7 +30,7 @@ import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
 import org.ops4j.pax.web.itest.utils.web.SimpleFilter;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
+import org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants;
 
 import static org.junit.Assert.assertNotNull;
 

@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import javax.inject.Inject;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.junit.After;
 import org.junit.Before;

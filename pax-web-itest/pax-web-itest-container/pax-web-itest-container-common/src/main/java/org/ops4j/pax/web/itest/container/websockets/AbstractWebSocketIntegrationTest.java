@@ -19,14 +19,14 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import javax.websocket.ClientEndpoint;
-import javax.websocket.CloseReason;
-import javax.websocket.ContainerProvider;
-import javax.websocket.OnClose;
-import javax.websocket.OnMessage;
-import javax.websocket.OnOpen;
-import javax.websocket.Session;
-import javax.websocket.WebSocketContainer;
+import jakarta.websocket.ClientEndpoint;
+import jakarta.websocket.CloseReason;
+import jakarta.websocket.ContainerProvider;
+import jakarta.websocket.OnClose;
+import jakarta.websocket.OnMessage;
+import jakarta.websocket.OnOpen;
+import jakarta.websocket.Session;
+import jakarta.websocket.WebSocketContainer;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -48,14 +48,14 @@ public abstract class AbstractWebSocketIntegrationTest extends AbstractContainer
 
 	@Before
 	public void setUp() throws Exception {
-		// Jetty uses org.eclipse.jetty.websocket.javax.server.config.JavaxWebSocketServletContainerInitializer SCI that handles:
-		//  - classes implementing javax.websocket.server.ServerApplicationConfig
-		//  - classes implementing javax.websocket.Endpoint
-		//  - classes annotated with @javax.websocket.server.ServerEndpoint
+		// Jetty uses org.eclipse.jetty.ee10.websocket.jakarta.server.config.JakartaWebSocketServletContainerInitializer SCI that handles:
+		//  - classes implementing jakarta.websocket.server.ServerApplicationConfig
+		//  - classes implementing jakarta.websocket.Endpoint
+		//  - classes annotated with @jakarta.websocket.server.ServerEndpoint
 		// Tomcat uses org.apache.tomcat.websocket.server.WsSci SCI that handles:
-		//  - classes implementing javax.websocket.server.ServerApplicationConfig
-		//  - classes implementing javax.websocket.Endpoint
-		//  - classes annotated with @javax.websocket.server.ServerEndpoint
+		//  - classes implementing jakarta.websocket.server.ServerApplicationConfig
+		//  - classes implementing jakarta.websocket.Endpoint
+		//  - classes annotated with @jakarta.websocket.server.ServerEndpoint
 		// Undertow doesn't provide any special SCI. When web sockets are configured, Wildfly calls
 		// io.undertow.servlet.api.DeploymentInfo.addServletContextAttribute() with
 		// "io.undertow.websockets.jsr.WebSocketDeploymentInfo" as attribute name and an instance of

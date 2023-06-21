@@ -15,7 +15,7 @@
  */
 package org.ops4j.pax.web.itest.container.war;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -40,7 +40,7 @@ public abstract class AbstractWarSecurityIntegrationTest extends AbstractContain
 
 	@Test
 	public void test() throws Exception {
-		// Servlet 1 - dynamically registered, with manually called javax.servlet.ServletRegistration.Dynamic.setServletSecurity()
+		// Servlet 1 - dynamically registered, with manually called jakarta.servlet.ServletRegistration.Dynamic.setServletSecurity()
 		//  - /s1/* for role-admin and role-manager (all methods but HEAD)
 		//  - /s1/* for role-admin (HEAD)
 		HttpTestClientFactory.createDefaultTestClient()

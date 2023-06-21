@@ -16,7 +16,7 @@
 package org.ops4j.pax.web.itest.container.whiteboard;
 
 import java.util.Arrays;
-import javax.servlet.Servlet;
+import jakarta.servlet.Servlet;
 
 import org.junit.After;
 import org.junit.Before;
@@ -33,8 +33,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.http.runtime.HttpServiceRuntime;
-import org.osgi.service.http.runtime.dto.RuntimeDTO;
+import org.osgi.service.servlet.runtime.HttpServiceRuntime;
+import org.osgi.service.servlet.runtime.dto.RuntimeDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -217,7 +217,7 @@ public abstract class AbstractWhiteboardIntegrationTest extends AbstractContaine
 								resp -> resp.contains("Hello Whiteboard Extender"))
 						.doGETandExecuteTest("http://127.0.0.1:8181/dtocheck/dtocheck");
 
-				// interact with org.osgi.service.http.runtime.HttpServiceRuntime
+				// interact with org.osgi.service.servlet.runtime.HttpServiceRuntime
 				HttpServiceRuntime httpServiceRuntime = bundleContext.getService(serviceReference);
 				RuntimeDTO runtimeDTO = httpServiceRuntime.getRuntimeDTO();
 

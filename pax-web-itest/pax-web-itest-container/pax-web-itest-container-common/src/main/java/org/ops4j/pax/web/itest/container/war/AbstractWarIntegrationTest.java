@@ -31,8 +31,8 @@ import org.ops4j.pax.web.service.spi.model.events.WebApplicationEventListener;
 import org.ops4j.pax.web.service.spi.model.events.WebElementEvent;
 import org.ops4j.pax.web.service.spi.model.events.WebElementEventListener;
 import org.osgi.framework.Bundle;
-import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
+import org.ops4j.pax.web.service.http.HttpContext;
+import org.ops4j.pax.web.service.http.HttpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -256,7 +256,7 @@ public abstract class AbstractWarIntegrationTest extends AbstractContainerTestBa
 		httpService.registerResources("/war-simple", "/static", httpContext1.get());
 
 		// can't replace WAR's "default" resource servlet:
-		// org.osgi.service.http.NamespaceException: \
+		// org.osgi.service.servlet.NamespaceException: \
 		//    ServletModel{id=ServletModel-40,name='default',alias='/',urlPatterns=[/],contexts=[{HS,OCM-23,default,/war-simple}]} \
 		//    can't be registered. \
 		//    ServletContextModel{id=ServletContextModel-22,contextPath='/war-simple'} already contains servlet named default: \

@@ -66,15 +66,15 @@ public abstract class AbstractJspIntegrationTest extends AbstractContainerTestBa
 
 	@Test
 	public void testPrecompiled() throws Exception {
-		String elFactory = System.getProperty("javax.el.ExpressionFactory");
+		String elFactory = System.getProperty("jakarta.el.ExpressionFactory");
 		try {
 			// The "context" in which JSPs are served is related to "helloworld-jsp" bundle and unlike in the
 			// case where JSPs are compiled (and TCCL is the loader from pax-web-jsp), here, JSP servlet
 			// (actually directly compiled JSP page) calls ExpressionFactory.newInstance() within the scope of
 			// TCCL of helloworld-jsp bundle.
-			// So we need this property ("helloworld-jsp" can't see the /META-INF/services/javax.el.ExpressionFactory
+			// So we need this property ("helloworld-jsp" can't see the /META-INF/services/jakarta.el.ExpressionFactory
 			// inside pax-web-jsp) AND we need org.apache.el Import-Package.
-			System.setProperty("javax.el.ExpressionFactory", "org.apache.el.ExpressionFactoryImpl");
+			System.setProperty("jakarta.el.ExpressionFactory", "org.apache.el.ExpressionFactoryImpl");
 			HttpTestClientFactory.createDefaultTestClient()
 					.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 							resp -> resp.contains("<h1>Hello World</h1>"))
@@ -85,7 +85,7 @@ public abstract class AbstractJspIntegrationTest extends AbstractContainerTestBa
 					.doGETandExecuteTest("http://localhost:8181/helloworld/jspc/using-tld.jsp");
 		} finally {
 			if (elFactory != null) {
-				System.setProperty("javax.el.ExpressionFactory", elFactory);
+				System.setProperty("jakarta.el.ExpressionFactory", elFactory);
 			}
 		}
 	}
