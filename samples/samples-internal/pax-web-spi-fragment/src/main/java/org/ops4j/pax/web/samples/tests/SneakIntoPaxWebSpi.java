@@ -27,7 +27,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.Set;
-import javax.servlet.ServletContainerInitializer;
+import jakarta.servlet.ServletContainerInitializer;
 
 import org.apache.xbean.osgi.bundle.util.BundleResourceHelper;
 import org.ops4j.pax.web.utils.ClassPathUtil;
@@ -53,7 +53,7 @@ public class SneakIntoPaxWebSpi {
 		Set<Bundle> wiredBundles = ClassPathUtil.getBundlesInClassSpace(bundle, new LinkedHashSet<>(), false);
 		// should be:
 		// wiredBundles: java.util.Set  = {java.util.LinkedHashSet@4061}  size = 8
-		//  0 = {org.apache.felix.framework.BundleImpl@4064} "javax.servlet-api [17]"
+		//  0 = {org.apache.felix.framework.BundleImpl@4064} "jakarta.servlet-api [17]"
 		//  1 = {org.apache.felix.framework.BundleImpl@4065} "org.ops4j.pax.web.pax-web-api [18]"
 		//  2 = {org.apache.felix.framework.BundleImpl@4066} "org.apache.xbean.bundleutils [21]"
 		//  3 = {org.apache.felix.framework.BundleImpl@4067} "org.ops4j.pax.logging.pax-logging-api [15]"
@@ -95,7 +95,7 @@ public class SneakIntoPaxWebSpi {
 		List<Class<? extends ServletContainerInitializer>> initializers = new LinkedList<>();
 
 		BundleWiring wiring = b.adapt(BundleWiring.class);
-		List<URL> urls = wiring.findEntries("/META-INF/services", "javax.servlet.ServletContainerInitializer", 0);
+		List<URL> urls = wiring.findEntries("/META-INF/services", "jakarta.servlet.ServletContainerInitializer", 0);
 		for (URL url : urls) {
 			LOG.info("Wiring entry: {}", url);
 			String className = readService(url);
@@ -113,7 +113,7 @@ public class SneakIntoPaxWebSpi {
 	public static List<Class<? extends ServletContainerInitializer>> findInitializersUsingBundle(Bundle b) throws Exception {
 		List<Class<? extends ServletContainerInitializer>> initializers = new LinkedList<>();
 
-		Enumeration<URL> urls = b.findEntries("/META-INF/services", "javax.servlet.ServletContainerInitializer", false);
+		Enumeration<URL> urls = b.findEntries("/META-INF/services", "jakarta.servlet.ServletContainerInitializer", false);
 		if (urls != null) {
 			while (urls.hasMoreElements()) {
 				URL url = urls.nextElement();
