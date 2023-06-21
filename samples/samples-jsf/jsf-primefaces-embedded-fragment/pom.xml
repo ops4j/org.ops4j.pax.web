@@ -47,7 +47,7 @@
 						-->
 						<Require-Bundle>org.ops4j.pax.web.samples.jsf-primefaces-commons2</Require-Bundle>
 						<Import-Package>
-							org.osgi.framework;version="[1.8,2)",
+							org.osgi.framework;version="[1.10,2)",
 							*
 						</Import-Package>
 						<Private-Package />
@@ -84,7 +84,7 @@
 			<artifactId>osgi.core</artifactId>
 		</dependency>
 
-		<!-- JavaEE -->
+		<!-- JakartaEE -->
 
 		<dependency>
 			<groupId>jakarta.servlet</groupId>

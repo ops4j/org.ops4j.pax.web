@@ -26,7 +26,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.jar.Manifest;
-import javax.servlet.ServletContainerInitializer;
+import jakarta.servlet.ServletContainerInitializer;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
@@ -76,7 +76,7 @@ public class PaxWebSpiIntegrationTest extends AbstractOsgiTestBase {
 				mavenBundle("org.ow2.asm", "asm-commons").version(System.getProperty("version.asm")).startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle("org.ow2.asm", "asm-tree").version(System.getProperty("version.asm")).startLevel(START_LEVEL_TEST_BUNDLE - 1),
 
-				// bundle and two fragments to perform searching of /META-INF/services/javax.servlet.ServletContainerInitializer
+				// bundle and two fragments to perform searching of /META-INF/services/jakarta.servlet.ServletContainerInitializer
 				mavenBundle("org.ops4j.pax.web.samples", "initializers").versionAsInProject(),
 				mavenBundle("org.ops4j.pax.web.samples", "initializers-fragment1").versionAsInProject().noStart(),
 				mavenBundle("org.ops4j.pax.web.samples", "initializers-fragment2").versionAsInProject().noStart(),

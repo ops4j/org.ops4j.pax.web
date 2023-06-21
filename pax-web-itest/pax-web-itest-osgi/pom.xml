@@ -288,7 +288,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>
-			<artifactId>osgi.cmpn</artifactId>
+			<artifactId>org.osgi.service.servlet</artifactId>
 		</dependency>
 
 		<dependency>
@@ -303,7 +303,7 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- JavaEE -->
+		<!-- JakartaEE -->
 
 		<dependency>
 			<groupId>jakarta.annotation</groupId>
@@ -313,7 +313,7 @@
 		<dependency>
 			<groupId>jakarta.servlet</groupId>
 			<artifactId>jakarta.servlet-api</artifactId>
-			<!-- it has to be "test" - Pax Exam needs javax.servlet classes when loading @Test classes -->
+			<!-- it has to be "test" - Pax Exam needs jakarta.servlet classes when loading @Test classes -->
 			<scope>test</scope>
 		</dependency>
 
@@ -334,7 +334,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-slf4j-impl</artifactId>
+			<artifactId>log4j-slf4j2-impl</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

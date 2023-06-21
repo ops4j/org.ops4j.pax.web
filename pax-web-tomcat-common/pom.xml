@@ -57,7 +57,7 @@
 							org.ops4j.pax.web.service;version="${pax-web.osgi.version}",
 
 							<!-- from pax-logging-api -->
-							org.apache.juli.logging;resolution:=optional,
+							org.apache.juli.logging;version="[9.0,11.0)";resolution:=optional,
 
 							<!-- JavaSE -->
 							javax.management,

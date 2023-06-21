@@ -22,7 +22,7 @@ import org.ops4j.pax.web.service.PaxWebConstants;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
+import org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants;
 
 public class FilterBundleActivator implements BundleActivator {
 

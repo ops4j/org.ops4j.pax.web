@@ -137,14 +137,6 @@
 							org.osgi.framework;version="[1.10,2)",
 							org.osgi.framework.wiring;version="[1.2,2)",
 
-							<!-- OSGi CMPN R8.1 140 Whiteboard Specification for Jakarta™ Servlet -->
-							org.osgi.service.servlet.context;version="2.0.0",
-							org.osgi.service.servlet.runtime;version="2.0.0",
-							org.osgi.service.servlet.runtime.dto;version="2.0.0",
-							org.osgi.service.servlet.whiteboard;version="2.0.0",
-							org.osgi.service.servlet.whiteboard.annotations;version="2.0.0",
-							org.osgi.service.servlet.whiteboard.propertytypes;version="2.0.0",
-
 							<!-- from pax-logging-api -->
 							org.slf4j;version="[2,3)"
 						</Import-Package>
@@ -156,6 +148,17 @@
 							org.ops4j.pax.web.utils;version="${pax-web.osgi.version}",
 							<!-- Special export for org.keycloak:keycloak-osgi-adapter:18.0.x -->
 <!--							org.ops4j.pax.web.service;version="7.4",-->
+
+							<!-- re-export OSGi CMPN R7 102 HTTP Service packages, but moved to Pax Web -->
+							org.ops4j.pax.web.service.http;version="${pax-web.osgi.version}",
+
+							<!-- OSGi CMPN R8.1 140 Whiteboard Specification for Jakarta™ Servlet -->
+							org.osgi.service.servlet.context;version="2.0.0",
+							org.osgi.service.servlet.runtime;version="2.0.0",
+							org.osgi.service.servlet.runtime.dto;version="2.0.0",
+							org.osgi.service.servlet.whiteboard;version="2.0.0",
+							org.osgi.service.servlet.whiteboard.annotations;version="2.0.0",
+							org.osgi.service.servlet.whiteboard.propertytypes;version="2.0.0",
 						</Export-Package>
 						<Include-Resource>
 							{maven-resources},
