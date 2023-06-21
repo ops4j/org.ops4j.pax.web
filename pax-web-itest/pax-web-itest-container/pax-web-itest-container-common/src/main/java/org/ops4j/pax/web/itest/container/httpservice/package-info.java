@@ -15,7 +15,7 @@
  */
 
 /**
- * Tests related to {@link org.osgi.service.http.HttpService} and chapter 102 of OSGi CMPN R7 Specification
+ * Tests related to {@link org.ops4j.pax.web.service.http.HttpService} and chapter 102 of OSGi CMPN R7 Specification
  * (including {@link org.ops4j.pax.web.service.WebContainer} extension from Pax Web).
  * No Whiteboard, no JSP, no WAR tests here.
  */

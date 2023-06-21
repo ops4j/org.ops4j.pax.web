@@ -36,44 +36,17 @@
 	<description>Integration test base module for Pax Web</description>
 
 	<modules>
-		<module>pax-web-itest-common</module>
 		<module>pax-web-itest-utils</module>
+		<module>pax-web-itest-common</module>
 		<module>pax-web-itest-osgi</module>
 		<module>pax-web-itest-server</module>
 		<module>pax-web-itest-jsp</module>
 		<module>pax-web-itest-container</module>
-		<module>pax-web-itest-karaf</module>
-		<module>pax-web-itest-keycloak</module>
+<!--		<module>pax-web-itest-karaf</module>-->
+<!--		<module>pax-web-itest-keycloak</module>-->
 	</modules>
 
 	<profiles>
-		<profile>
-			<id>felix</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-				<jdk>[8,9)</jdk>
-			</activation>
-			<dependencies>
-				<dependency>
-					<groupId>org.apache.felix</groupId>
-					<artifactId>org.apache.felix.framework</artifactId>
-					<scope>test</scope>
-				</dependency>
-			</dependencies>
-		</profile>
-		<profile>
-			<id>felix6</id>
-			<activation>
-				<activeByDefault>false</activeByDefault>
-			</activation>
-			<dependencies>
-				<dependency>
-					<groupId>org.apache.felix</groupId>
-					<artifactId>org.apache.felix.framework</artifactId>
-					<scope>test</scope>
-				</dependency>
-			</dependencies>
-		</profile>
 		<profile>
 			<id>equinox</id>
 			<activation>
@@ -88,38 +61,19 @@
 			</dependencies>
 		</profile>
 		<profile>
-			<id>jdk11</id>
-			<activation>
-				<jdk>[9,)</jdk>
-			</activation>
-			<dependencyManagement>
-				<dependencies>
-					<dependency>
-						<groupId>org.osgi</groupId>
-						<artifactId>osgi.core</artifactId>
-						<version>${dependency.org.osgi.core}</version>
-					</dependency>
-					<dependency>
-						<groupId>org.apache.felix</groupId>
-						<artifactId>org.apache.felix.framework</artifactId>
-						<version>${dependency.org.apache.felix.framework7}</version>
-					</dependency>
-				</dependencies>
-			</dependencyManagement>
-			<dependencies>
-				<dependency>
-					<groupId>org.apache.felix</groupId>
-					<artifactId>org.apache.felix.framework</artifactId>
-					<scope>test</scope>
-				</dependency>
-			</dependencies>
-		</profile>
-		<profile>
 			<id>tck</id>
 			<modules>
 				<module>pax-web-tck</module>
 			</modules>
 		</profile>
 	</profiles>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.framework</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
 
 </project>

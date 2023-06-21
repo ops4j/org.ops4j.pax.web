@@ -62,7 +62,7 @@ public abstract class AbstractWhiteboardDSRestartIntegrationTest extends Abstrac
 			// ...
 			// data: org.ops4j.pax.web.service.spi.model.events.ElementEventData  = {org.ops4j.pax.web.service.spi.model.events.ServletEventData@6392}
 			//  urlPatterns: java.lang.String[]  = {java.lang.String[1]@6395} ["/resources/*"]
-			//  servlet: javax.servlet.Servlet  = {org.ops4j.pax.web.service.jetty.internal.web.JettyResourceServlet@6396}
+			//  servlet: jakarta.servlet.Servlet  = {org.ops4j.pax.web.service.jetty.internal.web.JettyResourceServlet@6396}
 			//  ...
 			//  contextNames: java.util.List  = {java.util.LinkedList@6398}  size = 4
 			//   0 = "default"

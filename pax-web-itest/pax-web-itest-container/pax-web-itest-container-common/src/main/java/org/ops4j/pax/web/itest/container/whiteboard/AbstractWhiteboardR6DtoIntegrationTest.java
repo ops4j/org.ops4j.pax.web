@@ -25,9 +25,9 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
-import javax.servlet.Servlet;
-import javax.servlet.ServletRequestListener;
-import javax.servlet.http.HttpServlet;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletRequestListener;
+import jakarta.servlet.http.HttpServlet;
 
 import org.junit.After;
 import org.junit.Before;
@@ -40,6 +40,7 @@ import org.ops4j.pax.web.samples.whiteboard.ds.WhiteboardListener;
 import org.ops4j.pax.web.samples.whiteboard.ds.WhiteboardResource;
 import org.ops4j.pax.web.samples.whiteboard.ds.WhiteboardServlet;
 import org.ops4j.pax.web.samples.whiteboard.ds.WhiteboardServletWithContext;
+import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.spi.model.events.ErrorPageEventData;
 import org.ops4j.pax.web.service.spi.model.events.ServletEventData;
 import org.ops4j.pax.web.service.spi.model.events.WebElementEvent;
@@ -51,14 +52,14 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.http.HttpService;
-import org.osgi.service.http.context.ServletContextHelper;
-import org.osgi.service.http.runtime.HttpServiceRuntime;
-import org.osgi.service.http.runtime.HttpServiceRuntimeConstants;
-import org.osgi.service.http.runtime.dto.RequestInfoDTO;
-import org.osgi.service.http.runtime.dto.RuntimeDTO;
-import org.osgi.service.http.runtime.dto.ServletContextDTO;
-import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
+import org.ops4j.pax.web.service.http.HttpService;
+import org.osgi.service.servlet.context.ServletContextHelper;
+import org.osgi.service.servlet.runtime.HttpServiceRuntime;
+import org.osgi.service.servlet.runtime.HttpServiceRuntimeConstants;
+import org.osgi.service.servlet.runtime.dto.RequestInfoDTO;
+import org.osgi.service.servlet.runtime.dto.RuntimeDTO;
+import org.osgi.service.servlet.runtime.dto.ServletContextDTO;
+import org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants;
 import org.osgi.util.tracker.ServiceTracker;
 
 import static org.junit.Assert.assertEquals;
@@ -396,7 +397,7 @@ public abstract class AbstractWhiteboardR6DtoIntegrationTest extends AbstractCon
 		Long serviceId = (Long) serviceReference.getProperty("service.id");
 
 		String[] endpoints = (String[]) ref.getProperty(HttpServiceRuntimeConstants.HTTP_SERVICE_ENDPOINT);
-		List<Long> serviceIds = (List<Long>) ref.getProperty(HttpServiceRuntimeConstants.HTTP_SERVICE_ID);
+		List<Long> serviceIds = (List<Long>) ref.getProperty(PaxWebConstants.HTTP_SERVICE_ID);
 
 		assertTrue("HttpServiceIDs shall contain service ID from HttpContext", serviceIds.contains(serviceId));
 		assertNotNull("endpoint shall be not null", endpoints);

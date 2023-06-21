@@ -17,7 +17,7 @@ package org.ops4j.pax.web.itest.container.whiteboard;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import javax.servlet.Filter;
+import jakarta.servlet.Filter;
 
 import org.junit.Test;
 import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
@@ -27,9 +27,9 @@ import org.ops4j.pax.web.itest.utils.web.TestServlet;
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
-import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
+import org.ops4j.pax.web.service.http.HttpContext;
+import org.ops4j.pax.web.service.http.HttpService;
+import org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants;
 
 /**
  * @author Toni Menzel (tonit)
@@ -89,7 +89,7 @@ public abstract class AbstractCrossServiceIntegrationTest extends AbstractContai
 		filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/crosservice/*");
 		// "140.5 Registering Servlet Filters": Servlet filters are only applied to servlet requests if they are bound
 		// to the same Servlet Context Helper and the same Http Whiteboard implementation.
-		filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_FILTER);
+		filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, PaxWebConstants.HTTP_SERVICE_CONTEXT_FILTER);
 		ServiceRegistration<?> registerService = context.registerService(Filter.class.getName(), new SimpleFilter(), filterProps);
 
 		HttpTestClientFactory.createDefaultTestClient()

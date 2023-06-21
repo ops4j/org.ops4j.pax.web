@@ -27,19 +27,19 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import javax.servlet.AsyncContext;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.Servlet;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletRequestEvent;
-import javax.servlet.ServletRequestListener;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.AsyncContext;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletRequestEvent;
+import jakarta.servlet.ServletRequestListener;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -48,8 +48,8 @@ import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
 import org.ops4j.pax.web.itest.utils.web.BrokenServlet;
 import org.ops4j.pax.web.itest.utils.web.ErrorServlet;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.http.context.ServletContextHelper;
-import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
+import org.osgi.service.servlet.context.ServletContextHelper;
+import org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -176,8 +176,8 @@ public abstract class AbstractWhiteboardR6IntegrationTest extends AbstractContai
 		Dictionary<String, String> properties = new Hashtable<>();
 		properties.put("osgi.http.whiteboard.filter.pattern", "/*");
 		CountDownLatch latch = new CountDownLatch(1);
-		ServiceRegistration<javax.servlet.Filter> registerFilter = context
-				.registerService(javax.servlet.Filter.class, new MyFilter(latch), properties);
+		ServiceRegistration<jakarta.servlet.Filter> registerFilter = context
+				.registerService(jakarta.servlet.Filter.class, new MyFilter(latch), properties);
 
 		latch.await(5, TimeUnit.SECONDS);
 		HttpTestClientFactory.createDefaultTestClient()
@@ -395,7 +395,7 @@ public abstract class AbstractWhiteboardR6IntegrationTest extends AbstractContai
 		}
 	}
 
-	private static class MyFilter implements javax.servlet.Filter {
+	private static class MyFilter implements jakarta.servlet.Filter {
 
 		private final CountDownLatch latch;
 

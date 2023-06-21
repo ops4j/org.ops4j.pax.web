@@ -33,13 +33,13 @@ public abstract class AbstractWarJSFFaceletsIntegrationTest extends AbstractCont
 		wab = configureAndWaitForDeploymentUnlessInstalled("trinidad-demo", () -> {
 			// we'll override Import-Package to prevent duplicate "javax.faces.webapp" package import (pax-url problem?)
 			installAndStartWebBundle("org.apache.myfaces.trinidad", "trinidad-demo", "2.2.1", "trinidad-demo", "/simple",
-					uri -> uri + "&Import-Package=javax.servlet.http,javax.xml.parsers,javax.xml.transform,org.w3c.dom,"
+					uri -> uri + "&Import-Package=jakarta.servlet.http,javax.xml.parsers,javax.xml.transform,org.w3c.dom,"
 							+ "org.xml.sax,org.xml.sax.ext,org.xml.sax.helpers,"
-							+ "javax.faces,javax.faces.view,javax.faces.context,javax.el,"
+							+ "javax.faces,javax.faces.view,javax.faces.context,jakarta.el,"
 							+ "javax.faces.component,javax.faces.application,javax.faces.render,javax.faces.event,"
 							+ "javax.faces.component.visit,javax.faces.component.behavior,javax.faces.el,"
 							+ "javax.faces.convert,javax.crypto,javax.naming,javax.faces.lifecycle,javax.faces.model,"
-							+ "javax.servlet.jsp.tagext,javax.servlet.jsp,javax.faces.validator"
+							+ "jakarta.servlet.jsp.tagext,jakarta.servlet.jsp,javax.faces.validator"
 							+ "&Require-Bundle=org.apache.myfaces.core.impl");
 		});
 	}

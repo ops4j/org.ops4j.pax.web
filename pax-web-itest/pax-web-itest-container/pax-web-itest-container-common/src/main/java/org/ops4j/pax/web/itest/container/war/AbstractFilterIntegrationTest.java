@@ -19,19 +19,19 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 
 import org.junit.Test;
 import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
 import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.framework.Bundle;
-import org.osgi.service.http.HttpContext;
+import org.ops4j.pax.web.service.http.HttpContext;
 
 /**
  * @author Achim Nierbeck
@@ -42,7 +42,7 @@ public abstract class AbstractFilterIntegrationTest extends AbstractContainerTes
 	public void testSimpleFilter() throws Exception {
 		WebContainer service = getWebContainer(context);
 
-		final String fullContent = "This content is Filtered by a javax.servlet.Filter";
+		final String fullContent = "This content is Filtered by a jakarta.servlet.Filter";
 		Filter filter = new Filter() {
 			@Override
 			public void init(FilterConfig filterConfig) throws ServletException {
@@ -71,8 +71,8 @@ public abstract class AbstractFilterIntegrationTest extends AbstractContainerTes
 		});
 
 		HttpTestClientFactory.createDefaultTestClient()
-				.withResponseAssertion("Response must contain 'This content is Filtered by a javax.servlet.Filter'",
-						resp -> resp.contains("This content is Filtered by a javax.servlet.Filter"))
+				.withResponseAssertion("Response must contain 'This content is Filtered by a jakarta.servlet.Filter'",
+						resp -> resp.contains("This content is Filtered by a jakarta.servlet.Filter"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/testFilter/filter.me");
 
 		service.unregisterFilter(filter);

@@ -37,7 +37,7 @@ public abstract class AbstractContainerTestBase extends AbstractControlledTestBa
 	protected Option[] baseConfigureWithoutRuntime() {
 		Option[] options = super.baseConfigure();
 		Option[] containerOptions = new Option[] {
-				frameworkProperty("org.osgi.service.http.port").value("8181")
+				frameworkProperty("org.osgi.service.servlet.port").value("8181")
 		};
 		options = combine(options, containerOptions);
 		options = combine(options, defaultLoggingConfig());

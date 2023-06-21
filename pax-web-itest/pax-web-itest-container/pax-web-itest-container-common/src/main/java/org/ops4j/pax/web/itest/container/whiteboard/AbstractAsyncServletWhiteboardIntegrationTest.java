@@ -17,8 +17,8 @@ package org.ops4j.pax.web.itest.container.whiteboard;
 
 import java.util.Arrays;
 import java.util.Hashtable;
-import javax.servlet.Filter;
-import javax.servlet.Servlet;
+import jakarta.servlet.Filter;
+import jakarta.servlet.Servlet;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -27,7 +27,7 @@ import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
 import org.ops4j.pax.web.itest.utils.web.AsyncFilter;
 import org.ops4j.pax.web.itest.utils.web.AsyncServlet;
 import org.ops4j.pax.web.itest.utils.web.TestServlet;
-import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
+import org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants;
 
 /**
  * @author Grzegorz Grzybek

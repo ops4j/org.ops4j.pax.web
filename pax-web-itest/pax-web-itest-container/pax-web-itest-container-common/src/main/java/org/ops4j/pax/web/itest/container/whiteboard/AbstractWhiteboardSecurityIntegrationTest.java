@@ -25,7 +25,7 @@ import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 public abstract class AbstractWhiteboardSecurityIntegrationTest extends AbstractContainerTestBase {
 

@@ -15,7 +15,7 @@
  */
 package org.ops4j.pax.web.itest.container.httpservice;
 
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 
 import org.junit.After;
 import org.junit.Before;
@@ -86,7 +86,7 @@ public abstract class AbstractWebContainerIntegrationTest extends AbstractContai
 	 */
 	@Test
 	public void testServletContextRegistration() throws Exception {
-		// according to javax.servlet.ServletContext.getContextPath() javadoc, root context has
+		// according to jakarta.servlet.ServletContext.getContextPath() javadoc, root context has
 		// "" context path, not "/", but we'll unify it
 		String filter = String.format("(%s=%s)",
 				PaxWebConstants.SERVICE_PROPERTY_WEB_SERVLETCONTEXT_PATH, "/");

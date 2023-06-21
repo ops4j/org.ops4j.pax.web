@@ -25,7 +25,7 @@ import org.ops4j.pax.web.service.spi.model.events.ServletEventData;
 import org.ops4j.pax.web.service.spi.model.events.WebElementEvent;
 import org.osgi.framework.Bundle;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import static org.ops4j.pax.exam.OptionUtils.combine;
 

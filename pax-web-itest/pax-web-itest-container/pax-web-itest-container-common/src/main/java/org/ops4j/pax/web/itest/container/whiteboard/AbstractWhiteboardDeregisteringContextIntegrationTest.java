@@ -17,7 +17,7 @@ package org.ops4j.pax.web.itest.container.whiteboard;
 
 import java.util.Hashtable;
 import javax.inject.Inject;
-import javax.servlet.Servlet;
+import jakarta.servlet.Servlet;
 
 import org.junit.Test;
 import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
@@ -26,7 +26,7 @@ import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.http.HttpContext;
+import org.ops4j.pax.web.service.http.HttpContext;
 
 /**
  * @author Toni Menzel (tonit)
