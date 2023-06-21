@@ -42,6 +42,7 @@ import org.ops4j.pax.web.itest.utils.VersionUtils;
 import org.ops4j.pax.web.itest.utils.WaitCondition;
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainer;
+import org.ops4j.pax.web.service.http.HttpService;
 import org.ops4j.pax.web.service.spi.model.events.FilterEventData;
 import org.ops4j.pax.web.service.spi.model.events.ServerEvent;
 import org.ops4j.pax.web.service.spi.model.events.ServerListener;
@@ -56,7 +57,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -205,10 +205,12 @@ public abstract class AbstractControlledTestBase {
 		return new Option[] {
 				mavenBundle("jakarta.annotation", "jakarta.annotation-api")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.ops4j.pax.web", "pax-web-compatibility-annotation13")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 2).noStart(),
+//				mavenBundle("org.ops4j.pax.web", "pax-web-compatibility-annotation13")
+//						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 2).noStart(),
 				mavenBundle("jakarta.servlet", "jakarta.servlet-api")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+//				mavenBundle("org.osgi", "org.osgi.service.servlet")
+//						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1).start(),
 				mavenBundle("org.ops4j.pax.web", "pax-web-api")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1).start(),
 				mavenBundle("org.ops4j.pax.web", "pax-web-spi")
@@ -218,9 +220,9 @@ public abstract class AbstractControlledTestBase {
 
 	/**
 	 * Installation of Pax Web Runtime - the <em>first</em> Pax Web bundle with an activator and implementation
-	 * of {@link org.osgi.service.http.HttpService} (though it needs an instance of
+	 * of {@link HttpService} (though it needs an instance of
 	 * {@link org.ops4j.pax.web.service.spi.ServerControllerFactory} to actually register
-	 * {@link org.osgi.service.http.HttpService}.
+	 * {@link HttpService}.
 	 * @return
 	 */
 	protected Option[] paxWebRuntime() {
@@ -266,8 +268,8 @@ public abstract class AbstractControlledTestBase {
 		return new Option[] {
 				mavenBundle("jakarta.el", "jakarta.el-api")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.ops4j.pax.web", "pax-web-compatibility-el2")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 2).noStart(),
+//				mavenBundle("org.ops4j.pax.web", "pax-web-compatibility-el2")
+//						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 2).noStart(),
 				mavenBundle("org.ops4j.pax.web", "pax-web-tomcat-common")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle("org.eclipse.jdt", "ecj")
@@ -281,8 +283,8 @@ public abstract class AbstractControlledTestBase {
 		return new Option[] {
 				mavenBundle("jakarta.el", "jakarta.el-api")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.ops4j.pax.web", "pax-web-compatibility-el2")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 2).noStart(),
+//				mavenBundle("org.ops4j.pax.web", "pax-web-compatibility-el2")
+//						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 2).noStart(),
 				mavenBundle("org.eclipse.jdt", "ecj")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle("org.ops4j.pax.web", "pax-web-jsp")
@@ -312,12 +314,12 @@ public abstract class AbstractControlledTestBase {
 						.artifactId("jetty-server").versionAsInProject(),
 				mavenBundle().groupId("org.eclipse.jetty")
 						.artifactId("jetty-xml").versionAsInProject(),
-				mavenBundle().groupId("org.eclipse.jetty")
-						.artifactId("jetty-servlet").versionAsInProject(),
+				mavenBundle().groupId("org.eclipse.jetty.ee10")
+						.artifactId("jetty-ee10-servlet").versionAsInProject(),
 				mavenBundle().groupId("org.eclipse.jetty")
 						.artifactId("jetty-security").versionAsInProject(),
-				mavenBundle().groupId("org.eclipse.jetty")
-						.artifactId("jetty-jaas").versionAsInProject()
+//				mavenBundle().groupId("org.eclipse.jetty")
+//						.artifactId("jetty-jaas").versionAsInProject()
 		};
 	}
 
@@ -328,20 +330,21 @@ public abstract class AbstractControlledTestBase {
 	protected Option[] paxWebJettyHttp2() {
 		Option[] common = combine(paxWebJetty(),
 				mavenBundle().groupId("org.eclipse.jetty.http2")
-						.artifactId("http2-hpack").versionAsInProject(),
+						.artifactId("jetty-http2-hpack").versionAsInProject(),
 				mavenBundle().groupId("org.eclipse.jetty.http2")
-						.artifactId("http2-common").versionAsInProject(),
+						.artifactId("jetty-http2-common").versionAsInProject(),
 				mavenBundle().groupId("org.eclipse.jetty.http2")
-						.artifactId("http2-server").versionAsInProject(),
-				mavenBundle().groupId("org.eclipse.jetty")
-						.artifactId("jetty-alpn-server").versionAsInProject()
+						.artifactId("jetty-http2-server").versionAsInProject()
+//				mavenBundle().groupId("org.eclipse.jetty")
+//						.artifactId("jetty-alpn-server").versionAsInProject()
 		);
-		return combine(common,
-				mavenBundle().groupId("org.eclipse.jetty.alpn")
-						.artifactId("alpn-api").versionAsInProject(),
-				mavenBundle().groupId("org.eclipse.jetty")
-						.artifactId("jetty-alpn-java-server").versionAsInProject()
-		);
+//		return combine(common,
+//				mavenBundle().groupId("org.eclipse.jetty.alpn")
+//						.artifactId("alpn-api").versionAsInProject(),
+//				mavenBundle().groupId("org.eclipse.jetty")
+//						.artifactId("jetty-alpn-java-server").versionAsInProject()
+//		);
+		return common;
 	}
 
 	protected Option[] jettyWebSockets() {
@@ -352,22 +355,22 @@ public abstract class AbstractControlledTestBase {
 						.artifactId("jetty-client").versionAsInProject(),
 				mavenBundle().groupId("org.eclipse.jetty")
 						.artifactId("jetty-alpn-client").versionAsInProject(),
+				mavenBundle().groupId("org.eclipse.jetty.ee10.websocket")
+						.artifactId("jetty-ee10-websocket-jakarta-common").versionAsInProject(),
+				mavenBundle().groupId("org.eclipse.jetty.ee10.websocket")
+						.artifactId("jetty-ee10-websocket-jakarta-client").versionAsInProject(),
+				mavenBundle().groupId("org.eclipse.jetty.ee10.websocket")
+						.artifactId("jetty-ee10-websocket-jakarta-server").versionAsInProject(),
+//				mavenBundle().groupId("org.eclipse.jetty.websocket")
+//						.artifactId("websocket-jetty-api").versionAsInProject(),
 				mavenBundle().groupId("org.eclipse.jetty.websocket")
-						.artifactId("websocket-javax-common").versionAsInProject(),
+						.artifactId("jetty-websocket-core-common").versionAsInProject(),
 				mavenBundle().groupId("org.eclipse.jetty.websocket")
-						.artifactId("websocket-javax-client").versionAsInProject(),
+						.artifactId("jetty-websocket-core-client").versionAsInProject(),
 				mavenBundle().groupId("org.eclipse.jetty.websocket")
-						.artifactId("websocket-javax-server").versionAsInProject(),
-				mavenBundle().groupId("org.eclipse.jetty.websocket")
-						.artifactId("websocket-jetty-api").versionAsInProject(),
-				mavenBundle().groupId("org.eclipse.jetty.websocket")
-						.artifactId("websocket-core-common").versionAsInProject(),
-				mavenBundle().groupId("org.eclipse.jetty.websocket")
-						.artifactId("websocket-core-client").versionAsInProject(),
-				mavenBundle().groupId("org.eclipse.jetty.websocket")
-						.artifactId("websocket-core-server").versionAsInProject(),
-				mavenBundle().groupId("org.eclipse.jetty.websocket")
-						.artifactId("websocket-servlet").versionAsInProject(),
+						.artifactId("jetty-websocket-core-server").versionAsInProject(),
+				mavenBundle().groupId("org.eclipse.jetty.ee10.websocket")
+						.artifactId("jetty-ee10-websocket-servlet").versionAsInProject(),
 				mavenBundle("org.ops4j.pax.web", "pax-web-websocket")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1)
 		};
@@ -391,6 +394,8 @@ public abstract class AbstractControlledTestBase {
 	protected Option[] tomcatWebSockets() {
 		return new Option[] {
 				mavenBundle("jakarta.websocket", "jakarta.websocket-api")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("jakarta.websocket", "jakarta.websocket-client-api")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle("org.ops4j.pax.web", "pax-web-tomcat-websocket")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
@@ -421,6 +426,8 @@ public abstract class AbstractControlledTestBase {
 	protected Option[] undertowWebSockets() {
 		return new Option[] {
 				mavenBundle("jakarta.websocket", "jakarta.websocket-api")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("jakarta.websocket", "jakarta.websocket-client-api")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle("io.undertow", "undertow-websockets-jsr")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
@@ -499,8 +506,8 @@ public abstract class AbstractControlledTestBase {
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle("jakarta.el", "jakarta.el-api")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.ops4j.pax.web", "pax-web-compatibility-el2")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 2).noStart(),
+//				mavenBundle("org.ops4j.pax.web", "pax-web-compatibility-el2")
+//						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 2).noStart(),
 				mavenBundle("jakarta.interceptor", "jakarta.interceptor-api")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle("org.ops4j.pax.web", "pax-web-compatibility-interceptor12")
@@ -526,18 +533,20 @@ public abstract class AbstractControlledTestBase {
 		Option[] options = new Option[] {
 				mavenBundle("jakarta.websocket", "jakarta.websocket-api")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("jakarta.websocket", "jakarta.websocket-client-api")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle("jakarta.el", "jakarta.el-api")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.ops4j.pax.web", "pax-web-compatibility-el2")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 2).noStart(),
+//				mavenBundle("org.ops4j.pax.web", "pax-web-compatibility-el2")
+//						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 2).noStart(),
 				mavenBundle("jakarta.interceptor", "jakarta.interceptor-api")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.ops4j.pax.web", "pax-web-compatibility-interceptor12")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 2).noStart(),
+//				mavenBundle("org.ops4j.pax.web", "pax-web-compatibility-interceptor12")
+//						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 2).noStart(),
 				mavenBundle("jakarta.enterprise", "jakarta.enterprise.cdi-api")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1).noStart(),
-				mavenBundle("org.ops4j.pax.web", "pax-web-compatibility-cdi12")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 2).noStart(),
+//				mavenBundle("org.ops4j.pax.web", "pax-web-compatibility-cdi12")
+//						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 2).noStart(),
 				mavenBundle("commons-collections", "commons-collections")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle("commons-beanutils", "commons-beanutils")
@@ -565,6 +574,8 @@ public abstract class AbstractControlledTestBase {
 				mavenBundle("org.ops4j.pax.web", "pax-web-compatibility-el2")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 2).noStart(),
 				mavenBundle("jakarta.websocket", "jakarta.websocket-api")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("jakarta.websocket", "jakarta.websocket-client-api")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				// it has to be CDI 1.2 for Myfaces 2.3.x, but can't conflict with CDI 2.0 needed by aries-cdi
 //				mavenBundle("javax.enterprise", "cdi-api")
@@ -599,15 +610,15 @@ public abstract class AbstractControlledTestBase {
 
 				mavenBundle("jakarta.enterprise", "jakarta.enterprise.cdi-api")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1).noStart(),
-				mavenBundle("org.ops4j.pax.web", "pax-web-compatibility-cdi12")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 2).noStart(),
+//				mavenBundle("org.ops4j.pax.web", "pax-web-compatibility-cdi12")
+//						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 2).noStart(),
 				mavenBundle("jakarta.interceptor", "jakarta.interceptor-api")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.ops4j.pax.web", "pax-web-compatibility-interceptor12")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 2).noStart(),
+//				mavenBundle("org.ops4j.pax.web", "pax-web-compatibility-interceptor12")
+//						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 2).noStart(),
 				// Aries CDI extension.servlet.weld and extension.el.jsp require JavaServlet 3.1 capability...
-				mavenBundle("org.ops4j.pax.web", "pax-web-compatibility-servlet31")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1).noStart(),
+//				mavenBundle("org.ops4j.pax.web", "pax-web-compatibility-servlet31")
+//						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1).noStart(),
 
 				mavenBundle("org.osgi", "org.osgi.service.cdi")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
@@ -657,8 +668,8 @@ public abstract class AbstractControlledTestBase {
 
 	protected Option[] ariesJaxrs() {
 		return new Option[] {
-				mavenBundle("org.ops4j.pax.web", "pax-web-compatibility-jaxrs2")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 2).noStart(),
+//				mavenBundle("org.ops4j.pax.web", "pax-web-compatibility-jaxrs2")
+//						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 2).noStart(),
 				mavenBundle("jakarta.ws.rs", "jakarta.ws.rs-api")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle("jakarta.xml.bind", "jakarta.xml.bind-api")
@@ -669,8 +680,8 @@ public abstract class AbstractControlledTestBase {
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle("com.sun.activation", "javax.activation")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.ops4j.pax.web", "pax-web-compatibility-servlet31")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1).noStart(),
+//				mavenBundle("org.ops4j.pax.web", "pax-web-compatibility-servlet31")
+//						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1).noStart(),
 
 				mavenBundle("org.osgi", "org.osgi.service.jaxrs")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
@@ -719,8 +730,8 @@ public abstract class AbstractControlledTestBase {
 		return combine(myfaces(),
 				mavenBundle("jakarta.persistence", "jakarta.persistence-api")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.ops4j.pax.web", "pax-web-compatibility-jpa2")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 2).noStart(),
+//				mavenBundle("org.ops4j.pax.web", "pax-web-compatibility-jpa2")
+//						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 2).noStart(),
 				mavenBundle("jakarta.xml.bind", "jakarta.xml.bind-api")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle("com.sun.activation", "javax.activation")
@@ -901,7 +912,7 @@ public abstract class AbstractControlledTestBase {
 	}
 
 	/**
-	 * Creates a listener for deployment of named {@link javax.servlet.Servlet}.
+	 * Creates a listener for deployment of named {@link jakarta.servlet.Servlet}.
 	 * @param servletName
 	 * @param action
 	 */
@@ -934,7 +945,7 @@ public abstract class AbstractControlledTestBase {
 	}
 
 	/**
-	 * Creates a listener for deployment of a {@link javax.servlet.Servlet} mapped to some URL.
+	 * Creates a listener for deployment of a {@link jakarta.servlet.Servlet} mapped to some URL.
 	 * @param mapping
 	 * @param action
 	 */
@@ -967,7 +978,7 @@ public abstract class AbstractControlledTestBase {
 	}
 
 	/**
-	 * Creates a listener for deployment of a {@link javax.servlet.Filter} mapped to some URL.
+	 * Creates a listener for deployment of a {@link jakarta.servlet.Filter} mapped to some URL.
 	 * @param mapping
 	 * @param action
 	 */
@@ -1132,8 +1143,8 @@ public abstract class AbstractControlledTestBase {
 	}
 
 	/**
-	 * Creates {@link javax.servlet.Servlet} init parameters with legacy name that can be (which is deprecated, but
-	 * the only way with pure {@link HttpService} to specify servlet name) used to configure {@link javax.servlet.Servlet}
+	 * Creates {@link jakarta.servlet.Servlet} init parameters with legacy name that can be (which is deprecated, but
+	 * the only way with pure {@link HttpService} to specify servlet name) used to configure {@link jakarta.servlet.Servlet}
 	 * name.
 	 * @param servletName
 	 * @return

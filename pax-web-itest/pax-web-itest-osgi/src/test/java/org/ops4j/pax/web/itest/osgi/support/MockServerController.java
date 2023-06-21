@@ -16,7 +16,7 @@
 package org.ops4j.pax.web.itest.osgi.support;
 
 import java.net.URL;
-import javax.servlet.Servlet;
+import jakarta.servlet.Servlet;
 
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerState;

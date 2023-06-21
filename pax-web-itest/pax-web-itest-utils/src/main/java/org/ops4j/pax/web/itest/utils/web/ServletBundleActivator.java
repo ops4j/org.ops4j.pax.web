@@ -20,11 +20,11 @@ import jakarta.servlet.Servlet;
 
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.WebContainer;
+import org.ops4j.pax.web.service.http.HttpContext;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.http.HttpContext;
 
 public class ServletBundleActivator implements BundleActivator {
 

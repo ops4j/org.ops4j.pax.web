@@ -24,7 +24,7 @@ import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
-import javax.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServlet;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -37,6 +37,7 @@ import org.ops4j.pax.tinybundles.core.TinyBundles;
 import org.ops4j.pax.web.itest.osgi.support.MockServerController;
 import org.ops4j.pax.web.service.PaxWebConfig;
 import org.ops4j.pax.web.service.PaxWebConstants;
+import org.ops4j.pax.web.service.http.HttpService;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerControllerFactory;
 import org.ops4j.pax.web.service.spi.task.Batch;
@@ -46,7 +47,6 @@ import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.http.HttpService;
 import org.osgi.service.metatype.AttributeDefinition;
 import org.osgi.service.metatype.MetaTypeInformation;
 import org.osgi.service.metatype.MetaTypeService;
@@ -124,7 +124,7 @@ public class PaxWebRuntimeIntegrationTest extends AbstractOsgiTestBase {
 		ServiceListener sl1 = (event) -> {
 			if (event.getType() == ServiceEvent.REGISTERED) {
 				String[] classes = (String[]) event.getServiceReference().getProperty(Constants.OBJECTCLASS);
-				if (Arrays.asList(classes).contains("org.osgi.service.http.HttpService")) {
+				if (Arrays.asList(classes).contains("org.ops4j.pax.web.service.http.HttpService")) {
 					latch1.countDown();
 				}
 			}
@@ -157,7 +157,7 @@ public class PaxWebRuntimeIntegrationTest extends AbstractOsgiTestBase {
 		ServiceListener sl2 = (event) -> {
 			if (event.getType() == ServiceEvent.UNREGISTERING) {
 				String[] classes = (String[]) event.getServiceReference().getProperty(Constants.OBJECTCLASS);
-				if (Arrays.asList(classes).contains("org.osgi.service.http.HttpService")) {
+				if (Arrays.asList(classes).contains("org.ops4j.pax.web.service.http.HttpService")) {
 					latch3.countDown();
 				}
 			}
@@ -186,7 +186,7 @@ public class PaxWebRuntimeIntegrationTest extends AbstractOsgiTestBase {
 		ServiceListener sl1 = (event) -> {
 			if (event.getType() == ServiceEvent.REGISTERED) {
 				String[] classes = (String[]) event.getServiceReference().getProperty(Constants.OBJECTCLASS);
-				if (Arrays.asList(classes).contains("org.osgi.service.http.HttpService")) {
+				if (Arrays.asList(classes).contains("org.ops4j.pax.web.service.http.HttpService")) {
 					latch1.countDown();
 				}
 			}

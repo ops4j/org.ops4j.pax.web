@@ -70,32 +70,12 @@
 						-->
 						<Require-Bundle>org.ops4j.pax.web.samples.jsf-primefaces-commons1</Require-Bundle>
 						<Import-Package>
-							org.osgi.framework;version="[1.8,2)",
-							javax.servlet;version="[3.1,5)"
-							javax.servlet.http;version="[3.1,5)",
+							org.osgi.framework;version="[1.10,2)",
+							jakarta.servlet;version="[6,7)"
+							jakarta.servlet.http;version="[6,7)",
 							org.ops4j.pax.web.samples.jsf3
 						</Import-Package>
 						<DynamicImport-Package>*</DynamicImport-Package>
-<!--						<Import-Package>-->
-<!--							javax.el,-->
-<!--							javax.faces.webapp,-->
-<!--							javax.servlet.jsp;version="[2.2,3.0)",-->
-<!--							javax.servlet.jsp.jstl.core;version="1.2",-->
-<!--							javax.servlet.jsp.jstl.fmt;version="1.2",-->
-<!--							javax.servlet.jsp.jstl.tlv;version="1.2",-->
-<!--							org.apache.taglibs.standard.resources;version="1.1.2",-->
-<!--							org.apache.taglibs.standard.tag.common.core;version="1.1.2",-->
-<!--							org.apache.taglibs.standard.tag.rt.core;version="1.1.2",-->
-<!--							org.apache.taglibs.standard.tei;version="1.1.2",-->
-<!--							org.apache.taglibs.standard.tlv;version="1.1.2",-->
-<!--							javax.faces.*,-->
-<!--							org.apache.myfaces.webapp,-->
-<!--							org.apache.myfaces.config,-->
-<!--							org.apache.myfaces.config.impl,-->
-<!--							org.apache.myfaces.config.impl.digester,-->
-<!--							org.apache.myfaces.config.impl.digester.elements,-->
-<!--							*-->
-<!--						</Import-Package>-->
 						<Private-Package />
 						<Export-Package>!*</Export-Package>
 						<!--
@@ -188,7 +168,7 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<!-- JavaEE -->
+		<!-- JakartaEE -->
 
 		<dependency>
 			<groupId>jakarta.servlet</groupId>

@@ -63,7 +63,7 @@ public class ClassPathUtilIntegrationTest extends AbstractOsgiTestBase {
 				// to do it's job (like scanning for resources)
 				mavenBundle("org.ops4j.pax.web.samples", "pax-web-spi-fragment").versionAsInProject().noStart(),
 
-				// bundle and two fragments to perform searching of /META-INF/services/javax.servlet.ServletContainerInitializer
+				// bundle and two fragments to perform searching of /META-INF/services/jakarta.servlet.ServletContainerInitializer
 				mavenBundle("org.ops4j.pax.web.samples", "initializers").versionAsInProject(),
 				mavenBundle("org.ops4j.pax.web.samples", "initializers-fragment1").versionAsInProject().noStart(),
 				mavenBundle("org.ops4j.pax.web.samples", "initializers-fragment2").versionAsInProject().noStart(),
