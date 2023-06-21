@@ -15,8 +15,8 @@
  */
 package org.ops4j.pax.web.extender.samples.whiteboard.internal;
 
-import javax.servlet.ServletRequestEvent;
-import javax.servlet.ServletRequestListener;
+import jakarta.servlet.ServletRequestEvent;
+import jakarta.servlet.ServletRequestListener;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

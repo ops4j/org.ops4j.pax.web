@@ -26,12 +26,12 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.PrototypeServiceFactory;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.http.context.ServletContextHelper;
-import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
+import org.osgi.service.servlet.context.ServletContextHelper;
+import org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.Servlet;
+import jakarta.servlet.Servlet;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
@@ -128,7 +128,7 @@ public class Activator implements BundleActivator {
 		adminAndViewerConstraint.getWebResourceCollections().add(forAdminAndViewer);
 		security.getSecurityConstraints().add(adminAndViewerConstraint);
 
-		// the servlet invoking javax.servlet.http.HttpServletRequest.logout() must be under some constraint,
+		// the servlet invoking jakarta.servlet.http.HttpServletRequest.logout() must be under some constraint,
 		// otherwise Keycloak won't notice it
 		DefaultSecurityConstraintMapping logoutConstraint = new DefaultSecurityConstraintMapping();
 		logoutConstraint.setName("logout-area");

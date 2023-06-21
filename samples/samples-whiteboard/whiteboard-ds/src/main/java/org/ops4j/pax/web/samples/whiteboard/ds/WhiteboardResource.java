@@ -17,7 +17,7 @@ package org.ops4j.pax.web.samples.whiteboard.ds;
 
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
+import org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants;
 
 @Component(
 		service = { Object.class, WhiteboardResource.class }, // WhiteboardResource only for testing

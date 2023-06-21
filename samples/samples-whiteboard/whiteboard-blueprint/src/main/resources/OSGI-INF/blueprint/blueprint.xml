@@ -23,7 +23,7 @@
 
 	<!-- Registering the Forbidden Servlet first -->
 	<bean id="forbiddenContext" class="org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardContext" />
-	<service id="forbiddenCtxtService" ref="forbiddenContext" interface="org.osgi.service.http.HttpContext">
+	<service id="forbiddenCtxtService" ref="forbiddenContext" interface="org.ops4j.pax.web.service.http.HttpContext">
 		<service-properties>
 			<entry key="httpContext.id" value="forbidden" />
 			<entry key="service.ranking" value="-2147483648" />
@@ -44,7 +44,7 @@
 	<bean id="forbiddenServlet" class="org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardServlet">
 		<argument type="java.lang.String" value="/forbidden" />
 	</bean>
-	<service id="forbiddenServletService" ref="forbiddenServlet" interface="javax.servlet.Servlet">
+	<service id="forbiddenServletService" ref="forbiddenServlet" interface="jakarta.servlet.Servlet">
 		<service-properties>
 			<entry key="alias" value="/forbidden" />
 			<entry key="httpContext.id" value="forbidden" />
@@ -91,7 +91,7 @@
 	<bean id="whiteBoardServlet" class="org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardServlet">
 		<argument type="java.lang.String" value="/whiteboard" />
 	</bean>
-	<service id="whiteBoardServletService" ref="whiteBoardServlet" interface="javax.servlet.Servlet">
+	<service id="whiteBoardServletService" ref="whiteBoardServlet" interface="jakarta.servlet.Servlet">
 		<service-properties>
 			<entry key="alias" value="/whiteboard" />
 			<entry key="osgi.http.whiteboard.servlet.name" value="whiteboard-servlet" />
@@ -102,7 +102,7 @@
 	<bean id="rootServlet" class="org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardServlet">
 		<argument type="java.lang.String" value="/root" />
 	</bean>
-	<service id="rootServletService" ref="rootServlet" interface="javax.servlet.Servlet">
+	<service id="rootServletService" ref="rootServlet" interface="jakarta.servlet.Servlet">
 		<service-properties>
 			<entry key="alias" value="/root" />
 			<entry key="osgi.http.whiteboard.servlet.name" value="root-servlet" />
@@ -119,14 +119,14 @@
 	<bean id="filteredServlet" class="org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardServlet">
 		<argument type="java.lang.String" value="/filtered" />
 	</bean>
-	<service id="filteredServletService" ref="filteredServlet" interface="javax.servlet.Servlet">
+	<service id="filteredServletService" ref="filteredServlet" interface="jakarta.servlet.Servlet">
 		<service-properties>
 			<entry key="alias" value="/filtered" />
 			<entry key="osgi.http.whiteboard.servlet.name" value="filtered-servlet" />
 		</service-properties>
 	</service>
 
-	<service id="servletFilterService" interface="javax.servlet.Filter">
+	<service id="servletFilterService" interface="jakarta.servlet.Filter">
 		<service-properties>
 			<entry key="urlPatterns" value="/filtered/*" />
 			<entry key="osgi.http.whiteboard.filter.name" value="filter1" />
@@ -140,7 +140,7 @@
 	</service>
 
 	<!-- Exceptions / Error-Page -->
-	<service interface="javax.servlet.http.HttpServlet">
+	<service interface="jakarta.servlet.http.HttpServlet">
 		<service-properties>
 			<entry key="alias" value="/exception" />
 		</service-properties>

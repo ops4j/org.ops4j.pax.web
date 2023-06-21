@@ -20,7 +20,7 @@ import org.ops4j.pax.web.service.whiteboard.WelcomeFileMapping;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
+import org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants;
 
 @Component
 public class PaxWebWhiteboardWelcomeFiles implements WelcomeFileMapping {

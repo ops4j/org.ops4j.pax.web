@@ -18,14 +18,15 @@ package org.ops4j.pax.web.extender.samples.whiteboard.internal;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
-import javax.servlet.Servlet;
+import jakarta.servlet.Servlet;
 
+import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
+import org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants;
 
 public class Activator implements BundleActivator {
 
@@ -76,25 +77,25 @@ public class Activator implements BundleActivator {
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/whiteboard");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "extended1");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, String.format("(%s=extended1)", HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY));
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, String.format("(%s=extended1)", PaxWebConstants.HTTP_SERVICE_CONTEXT_PROPERTY));
 		servletReg1 = bundleContext.registerService(Servlet.class, new WhiteboardServlet("/whiteboard"), props);
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/whiteboard");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "extended2");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, String.format("(%s=extended2)", HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY));
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, String.format("(%s=extended2)", PaxWebConstants.HTTP_SERVICE_CONTEXT_PROPERTY));
 		servletReg2 = bundleContext.registerService(Servlet.class, new WhiteboardServlet("/whiteboard"), props);
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/whiteboard");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "extended3");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, String.format("(%s=extended3)", HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY));
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, String.format("(%s=extended3)", PaxWebConstants.HTTP_SERVICE_CONTEXT_PROPERTY));
 		servletReg3 = bundleContext.registerService(Servlet.class, new WhiteboardServlet("/whiteboard"), props);
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/whiteboard");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "extended4");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, String.format("(%s=extended4)", HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY));
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, String.format("(%s=extended4)", PaxWebConstants.HTTP_SERVICE_CONTEXT_PROPERTY));
 		servletReg4 = bundleContext.registerService(Servlet.class, new WhiteboardServlet("/whiteboard"), props);
 	}
 
