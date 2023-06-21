@@ -17,15 +17,15 @@ package org.ops4j.pax.web.samples.whiteboard.ds.extended;
 
 import java.io.IOException;
 import java.net.URL;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.http.HttpContext;
+import org.ops4j.pax.web.service.http.HttpContext;
 
 @Component(property = {
 		PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID + "=" + PaxWebWhiteboardHttpContext.CONTEXT_ID,

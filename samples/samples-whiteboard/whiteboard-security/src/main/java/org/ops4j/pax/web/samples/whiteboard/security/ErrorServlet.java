@@ -15,10 +15,10 @@
  */
 package org.ops4j.pax.web.samples.whiteboard.security;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 public class ErrorServlet extends HttpServlet {
@@ -26,12 +26,12 @@ public class ErrorServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
 		// attributes should be like this:
 		// value: java.lang.Object  = {java.util.concurrent.ConcurrentHashMap@8832}  size = 5
-		//  {@8840} "javax.servlet.error.status_code" -> {java.lang.Integer@8841} 401
+		//  {@8840} "jakarta.servlet.error.status_code" -> {java.lang.Integer@8841} 401
 		//  {@8842} "org.eclipse.jetty.server.error_context" -> {org.eclipse.jetty.servlet.ServletContextHandler$Context@8811} "ServletContext@o.o.p.w.s.j.i.PaxWebServletContextHandler@29fc4879{/,null,AVAILABLE}"
-		//  {@8843} "javax.servlet.error.request_uri" -> {@8805} "/very-secure/x"
-		//  {@8844} "javax.servlet.error.servlet_name" -> {@8845} "secure-servlet"
-		//  {@8846} "javax.servlet.error.message" -> {@8847} "Unauthorized"
-		Integer rc = (Integer) request.getAttribute("javax.servlet.error.status_code");
+		//  {@8843} "jakarta.servlet.error.request_uri" -> {@8805} "/very-secure/x"
+		//  {@8844} "jakarta.servlet.error.servlet_name" -> {@8845} "secure-servlet"
+		//  {@8846} "jakarta.servlet.error.message" -> {@8847} "Unauthorized"
+		Integer rc = (Integer) request.getAttribute("jakarta.servlet.error.status_code");
 		request.setAttribute("code", rc);
 		response.setStatus(rc);
 		if (rc == 401) {

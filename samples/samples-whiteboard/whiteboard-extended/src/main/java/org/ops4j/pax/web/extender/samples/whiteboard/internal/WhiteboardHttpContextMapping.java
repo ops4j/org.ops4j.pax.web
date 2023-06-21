@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
-import org.osgi.service.http.HttpContext;
+import org.ops4j.pax.web.service.http.HttpContext;
 
 public class WhiteboardHttpContextMapping implements HttpContextMapping {
 

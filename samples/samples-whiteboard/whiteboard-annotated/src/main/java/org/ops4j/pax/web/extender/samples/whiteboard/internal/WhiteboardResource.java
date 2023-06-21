@@ -16,7 +16,7 @@
 package org.ops4j.pax.web.extender.samples.whiteboard.internal;
 
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.http.whiteboard.propertytypes.HttpWhiteboardResource;
+import org.osgi.service.servlet.whiteboard.propertytypes.HttpWhiteboardResource;
 
 @Component(service = WhiteboardResource.class)
 @HttpWhiteboardResource(pattern = "/*", prefix = "/static")

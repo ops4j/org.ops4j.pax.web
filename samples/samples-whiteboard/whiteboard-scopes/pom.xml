@@ -43,9 +43,9 @@
 					<instructions>
 						<Bundle-Activator>org.ops4j.pax.web.extender.samples.whiteboard.internal.Activator</Bundle-Activator>
 						<Import-Package>
-							<!-- ranges indicate Servlet API 3.1+ (JavaEE 7+) -->
-							javax.servlet;version="[3.1,5)",
-							javax.servlet.http;version="[3.1,5)",
+							<!-- ranges indicate Servlet API 3.1+ (JakartaEE 7+) -->
+							jakarta.servlet;version="[3.1,5)",
+							jakarta.servlet.http;version="[3.1,5)",
 
 							<!-- ranges indicate we can work with OSGi Core R6+ -->
 							org.osgi.framework;version="[1.8,2)",
@@ -53,8 +53,8 @@
 
 							<!-- OSGi cmpn -->
 							org.osgi.service.http;version="[1.2,2)",
-							org.osgi.service.http.context;version="[1.1,2)",
-							org.osgi.service.http.whiteboard;version="[1.1,2)",
+							org.osgi.service.servlet.context;version="[1.1,2)",
+							org.osgi.service.servlet.whiteboard;version="[1.1,2)",
 
 							<!-- from pax-logging-api -->
 							org.slf4j;version="[1.7,2)"
@@ -89,11 +89,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>
-			<artifactId>osgi.cmpn</artifactId>
+			<artifactId>org.osgi.service.servlet</artifactId>
 			<scope>provided</scope>
 		</dependency>
 
-		<!-- JavaEE -->
+		<!-- JakartaEE -->
 
 		<dependency>
 			<groupId>jakarta.servlet</groupId>
