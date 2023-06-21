@@ -20,10 +20,10 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 
 import org.ops4j.pax.web.service.WebContainer;
+import org.ops4j.pax.web.service.http.HttpContext;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.http.HttpContext;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 

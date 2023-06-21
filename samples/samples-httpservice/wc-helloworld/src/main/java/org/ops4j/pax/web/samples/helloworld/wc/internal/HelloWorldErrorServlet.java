@@ -19,10 +19,10 @@ package org.ops4j.pax.web.samples.helloworld.wc.internal;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Hello World Error Page Servlet.
@@ -58,12 +58,12 @@ public class HelloWorldErrorServlet extends HttpServlet {
 		writer.println("<h2>Error attributes:</h2>");
 		writer.println("<table border='1'>");
 		writer.println("<tr><th>Request attribute name</th><th>Value</th></tr>");
-		printAttribute(writer, request, "javax.servlet.error.exception");
-		printAttribute(writer, request, "javax.servlet.error.exception_type");
-		printAttribute(writer, request, "javax.servlet.error.message");
-		printAttribute(writer, request, "javax.servlet.error.request_uri");
-		printAttribute(writer, request, "javax.servlet.error.servlet_name");
-		printAttribute(writer, request, "javax.servlet.error.status_code");
+		printAttribute(writer, request, "jakarta.servlet.error.exception");
+		printAttribute(writer, request, "jakarta.servlet.error.exception_type");
+		printAttribute(writer, request, "jakarta.servlet.error.message");
+		printAttribute(writer, request, "jakarta.servlet.error.request_uri");
+		printAttribute(writer, request, "jakarta.servlet.error.servlet_name");
+		printAttribute(writer, request, "jakarta.servlet.error.status_code");
 		writer.println("</table>");
 		writer.println("</body></html>");
 	}

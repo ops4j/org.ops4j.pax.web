@@ -16,9 +16,9 @@
  */
 package org.ops4j.pax.web.samples.helloworld.wc.internal;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletRequestEvent;
-import javax.servlet.ServletRequestListener;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletRequestEvent;
+import jakarta.servlet.ServletRequestListener;
 
 /**
  * Hello World Request Listener. Counts each request and stores the value in

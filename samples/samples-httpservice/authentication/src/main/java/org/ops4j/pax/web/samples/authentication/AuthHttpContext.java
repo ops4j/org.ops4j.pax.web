@@ -18,10 +18,10 @@ package org.ops4j.pax.web.samples.authentication;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Base64;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
-import org.osgi.service.http.HttpContext;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.ops4j.pax.web.service.http.HttpContext;
 
 /**
  * Created by IntelliJ IDEA. User: alin.dreghiciu Date: Dec 10, 2007 Time:
