@@ -106,12 +106,11 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 	 * {@code org.eclipse.jetty.webapp.WebAppContext} which does all the sort of XML/annotation configuration, but
 	 * we take some of the mechanisms from {@code WebAppContext} if they're useful in Pax Web.
 	 *
-	 * @param parent
 	 * @param contextPath
 	 * @param configuration
 	 */
-	public PaxWebServletContextHandler(Handler.Container parent, String contextPath, Configuration configuration) {
-		super(parent, contextPath, true, true);
+	public PaxWebServletContextHandler(String contextPath, Configuration configuration) {
+		super(contextPath, true, true);
 
 		// TCCL of sessionManager timer threads will be set to thread of pax-web-jetty bundle, not to current TCCL
 		ScheduledExecutorScheduler executorScheduler = new ScheduledExecutorScheduler(getSessionHandler().toString() + "Timer", true,

@@ -302,8 +302,7 @@ public class EmbeddedJettyTest {
 		// servlet context handler extends ContextHandler for easier ContextHandler with _handler = ServletHandler
 		// created ServletContextHandler will already have session, security handlers (depending on options) and
 		// ServletHandler and we can add servlets/filters through ServletContextHandler
-		ServletContextHandler handler1 = new ServletContextHandler(null, "/c1", ServletContextHandler.NO_SESSIONS);
-		handler1.setAllowNullPathInfo(true); // for ServletContextHandler
+		ServletContextHandler handler1 = new ServletContextHandler("/c1", ServletContextHandler.NO_SESSIONS);
 		handler1.setAllowNullPathInContext(true); // for ContextHandler
 		// this single method adds both ServletHolder and ServletMapping
 		// calling org.eclipse.jetty.servlet.ServletHandler.addServletWithMapping()
@@ -317,8 +316,7 @@ public class EmbeddedJettyTest {
 			}
 		}), "/");
 
-		ServletContextHandler handler2 = new ServletContextHandler(null, "/c2", ServletContextHandler.NO_SESSIONS);
-		handler2.setAllowNullPathInfo(true);
+		ServletContextHandler handler2 = new ServletContextHandler("/c2", ServletContextHandler.NO_SESSIONS);
 		handler2.setAllowNullPathInContext(true);
 		handler2.addServlet(new ServletHolder("default-servlet", new HttpServlet() {
 			@Override
@@ -341,7 +339,6 @@ public class EmbeddedJettyTest {
 		Socket s1 = new Socket();
 		s1.connect(new InetSocketAddress("127.0.0.1", port));
 
-		// TODO: replace /c1/ with /c1 when https://github.com/eclipse/jetty.project/issues/9906 is fixed
 		s1.getOutputStream().write((
 				"GET /c1/ HTTP/1.1\r\n" +
 				"Host: 127.0.0.1:" + connector.getLocalPort() + "\r\n" +
@@ -360,7 +357,6 @@ public class EmbeddedJettyTest {
 		Socket s2 = new Socket();
 		s2.connect(new InetSocketAddress("127.0.0.1", port));
 
-		// TODO: replace /c2/ with /c2 when https://github.com/eclipse/jetty.project/issues/9906 is fixed
 		s2.getOutputStream().write((
 				"GET /c2/ HTTP/1.1\r\n" +
 				"Host: 127.0.0.1:" + connector.getLocalPort() + "\r\n" +
@@ -388,7 +384,7 @@ public class EmbeddedJettyTest {
 
 		ContextHandlerCollection chc = new ContextHandlerCollection();
 
-		ServletContextHandler h = new ServletContextHandler(null, "/c1", ServletContextHandler.NO_SESSIONS);
+		ServletContextHandler h = new ServletContextHandler("/c1", ServletContextHandler.NO_SESSIONS);
 		h.setAllowNullPathInContext(false);
 		h.addServlet(new ServletHolder("default-servlet", new ServletHandler.Default404Servlet()), "/*");
 
@@ -430,8 +426,7 @@ public class EmbeddedJettyTest {
 
 		ContextHandlerCollection chc = new ContextHandlerCollection();
 
-		ServletContextHandler handler1 = new ServletContextHandler(null, "/c1", ServletContextHandler.NO_SESSIONS);
-		handler1.setAllowNullPathInfo(true);
+		ServletContextHandler handler1 = new ServletContextHandler("/c1", ServletContextHandler.NO_SESSIONS);
 		handler1.setAllowNullPathInContext(true);
 
 		// SCI that adds a ServletContextListener which tries to add ServletContextListener
@@ -521,8 +516,8 @@ public class EmbeddedJettyTest {
 		server.setConnectors(new Connector[] { connector });
 
 		ContextHandlerCollection chc = new ContextHandlerCollection();
-		ServletContextHandler handler1 = new ServletContextHandler(null, "/", ServletContextHandler.NO_SESSIONS);
-		handler1.setAllowNullPathInfo(true);
+		ServletContextHandler handler1 = new ServletContextHandler("/", ServletContextHandler.NO_SESSIONS);
+		handler1.setAllowNullPathInContext(true);
 
 		ServletHolder sh1 = new ServletHolder("default", new DefaultServlet());
 		sh1.setInitParameter("dirAllowed", "false");
@@ -564,12 +559,11 @@ public class EmbeddedJettyTest {
 
 		ContextHandlerCollection chc = new ContextHandlerCollection();
 
-		ServletContextHandler handler1 = new ServletContextHandler(null, "/c1", ServletContextHandler.NO_SESSIONS);
+		ServletContextHandler handler1 = new ServletContextHandler("/c1", ServletContextHandler.NO_SESSIONS);
 
 		// without "default 404 servlet", jetty won't invoke a "pipeline" that has only a filter.
 		handler1.getServletHandler().setEnsureDefaultServlet(true);
 
-		handler1.setAllowNullPathInfo(true);
 		handler1.setAllowNullPathInContext(true);
 		handler1.addFilter(new FilterHolder(new Filter() {
 			@Override
@@ -619,7 +613,7 @@ public class EmbeddedJettyTest {
 
 		ContextHandlerCollection chc = new ContextHandlerCollection();
 
-		ServletContextHandler handler1 = new ServletContextHandler(chc, "/c1", ServletContextHandler.NO_SESSIONS);
+		ServletContextHandler handler1 = new ServletContextHandler("/c1", ServletContextHandler.NO_SESSIONS);
 		handler1.addServlet(new ServletHolder("s1", new HttpServlet() {
 			@Override
 			protected void service(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -630,6 +624,7 @@ public class EmbeddedJettyTest {
 			}
 		}), "/s1");
 
+		chc.addHandler(handler1);
 		server.setHandler(chc);
 		server.start();
 
@@ -648,8 +643,8 @@ public class EmbeddedJettyTest {
 
 		// add new context
 
-		ServletContextHandler handler2 = new ServletContextHandler(chc, "/c2", ServletContextHandler.NO_SESSIONS);
-		handler2.setAllowNullPathInfo(true);
+		ServletContextHandler handler2 = new ServletContextHandler("/c2", ServletContextHandler.NO_SESSIONS);
+		handler2.setAllowNullPathInContext(true);
 		handler2.addServlet(new ServletHolder("s1", new HttpServlet() {
 			@Override
 			protected void service(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -659,6 +654,7 @@ public class EmbeddedJettyTest {
 				resp.getWriter().close();
 			}
 		}), "/s1");
+		chc.addHandler(handler2);
 		handler2.start();
 
 		// add new servlet to existing context
@@ -702,7 +698,6 @@ public class EmbeddedJettyTest {
 		wac1.setContextPath("/app1");
 		// by default, null path info is not allowed and redirect (with added "/") is sent when requesting just
 		// the context URL
-		wac1.setAllowNullPathInfo(false);
 		wac1.setAllowNullPathInContext(false);
 		// when we don't pass handler collection (or handler wrapper) in constructor, we have to add this
 		// specialized context handler manually

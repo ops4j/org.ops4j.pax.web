@@ -22,7 +22,7 @@
 		<Arg>
 			<New class="org.eclipse.jetty.ee10.webapp.WebAppContext">
 				<Set name="contextPath">/app1</Set>
-				<Set name="allowNullPathInfo">false</Set>
+				<Set name="allowNullPathInContext">false</Set>
 				<Set name="configurationClasses">
 					<Array type="java.lang.String">
 						<Item>org.eclipse.jetty.ee10.webapp.WebXmlConfiguration</Item>

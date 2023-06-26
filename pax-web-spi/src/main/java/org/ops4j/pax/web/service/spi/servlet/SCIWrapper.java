@@ -40,16 +40,7 @@ public class SCIWrapper implements ServletContainerInitializer, Comparable<SCIWr
 	 * @throws ServletException
 	 */
 	public void onStartup() throws ServletException {
-		ServletContainerInitializer sci = model.getContainerInitializer();
-		if (!sci.getClass().getName().startsWith("org.eclipse.jetty")) {
-			sci.onStartup(model.getClasses(), context);
-		} else {
-			// org.eclipse.jetty.ee10.websocket.jakarta.server.config.JakartaWebSocketServletContainerInitializer.onStartup()
-			// uses org.eclipse.jetty.ee10.servlet.ServletContextHandler.getServletContextHandler() which was
-			// more flexible before Jetty 12...
-			// here we'll pass proper context ourselves
-			sci.onStartup(model.getClasses(), context.getContainerServletContext());
-		}
+		model.getContainerInitializer().onStartup(model.getClasses(), context);
 		context.rememberAttributesFromSCIs();
 	}
 

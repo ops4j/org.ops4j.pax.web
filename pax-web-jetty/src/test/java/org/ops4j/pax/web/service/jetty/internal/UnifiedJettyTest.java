@@ -70,8 +70,7 @@ public class UnifiedJettyTest {
 		server.setConnectors(new Connector[] { connector });
 
 		ContextHandlerCollection chc = new ContextHandlerCollection();
-		ServletContextHandler handler1 = new ServletContextHandler(null, "/", ServletContextHandler.NO_SESSIONS);
-		handler1.setAllowNullPathInfo(true);
+		ServletContextHandler handler1 = new ServletContextHandler("/", ServletContextHandler.NO_SESSIONS);
 		handler1.setAllowNullPathInContext(true);
 
 		// in Jetty, DefaultServlet implements org.eclipse.jetty.util.resource.ResourceFactory used by the
@@ -174,8 +173,8 @@ public class UnifiedJettyTest {
 		server.setConnectors(new Connector[] { connector });
 
 		ContextHandlerCollection chc = new ContextHandlerCollection();
-		ServletContextHandler handler1 = new ServletContextHandler(null, "/", ServletContextHandler.NO_SESSIONS);
-		handler1.setAllowNullPathInfo(true);
+		ServletContextHandler handler1 = new ServletContextHandler("/", ServletContextHandler.NO_SESSIONS);
+		handler1.setAllowNullPathInContext(true);
 		// a bug when "false"? When mapped to "/" it doesn't matter, but fails
 		// when mapped to "/x" resources would have to be under /x....
 		//		handler1.setInitParameter(DefaultServlet.CONTEXT_INIT + "pathInfoOnly", "true");
@@ -231,8 +230,8 @@ public class UnifiedJettyTest {
 		server.setConnectors(new Connector[] { connector });
 
 		ContextHandlerCollection chc = new ContextHandlerCollection();
-		ServletContextHandler handler1 = new ServletContextHandler(null, "/c", ServletContextHandler.NO_SESSIONS);
-		handler1.setAllowNullPathInfo(false);
+		ServletContextHandler handler1 = new ServletContextHandler("/c", ServletContextHandler.NO_SESSIONS);
+		handler1.setAllowNullPathInContext(false);
 		// a bug when "false"? When mapped to "/" it doesn't matter, but fails
 		// when mapped to "/x" resources would have to be under /x....
 		//		handler1.setInitParameter(DefaultServlet.CONTEXT_INIT + "pathInfoOnly", "true");
@@ -297,8 +296,7 @@ public class UnifiedJettyTest {
 		server.setConnectors(new Connector[] { connector });
 
 		ContextHandlerCollection chc = new ContextHandlerCollection();
-		ServletContextHandler handler1 = new ServletContextHandler(null, "/", ServletContextHandler.NO_SESSIONS);
-		handler1.setAllowNullPathInfo(true);
+		ServletContextHandler handler1 = new ServletContextHandler("/", ServletContextHandler.NO_SESSIONS);
 		handler1.setAllowNullPathInContext(true);
 		handler1.setWelcomeFiles(new String[] { "index.txt" });
 
@@ -367,8 +365,9 @@ public class UnifiedJettyTest {
 		server.setConnectors(new Connector[] { connector });
 
 		ContextHandlerCollection chc = new ContextHandlerCollection();
-		ServletContextHandler handler = new ServletContextHandler(null, "/", ServletContextHandler.NO_SESSIONS);
-		handler.setAllowNullPathInfo(true);
+		ServletContextHandler handler = new ServletContextHandler("/", ServletContextHandler.NO_SESSIONS);
+		handler.setAllowNullPathInContext(true);
+		handler.setWelcomeFiles(new String[] { "index.y", "index.x" });
 
 		File b1 = new File("target/b1");
 		FileUtils.deleteDirectory(b1);
@@ -402,7 +401,6 @@ public class UnifiedJettyTest {
 
 		// the "/" default & resource servlet
 		JettyResourceServlet jrs1 = new JettyResourceServlet(p1, null);
-		jrs1.setWelcomeFiles(new String[] { "index.y", "index.x" });
 		ServletHolder defaultServlet = new ServletHolder("default", jrs1);
 		defaultServlet.setInitParameter("redirectWelcome", "false");
 		defaultServlet.setInitParameter("welcomeServlets", "true");
@@ -414,7 +412,6 @@ public class UnifiedJettyTest {
 
 		// the "/r" resource servlet
 		JettyResourceServlet jrs2 = new JettyResourceServlet(p2, null);
-		jrs2.setWelcomeFiles(new String[] { "index.y", "index.x" });
 		ServletHolder resourceServlet = new ServletHolder("resource", jrs2);
 		resourceServlet.setInitParameter("redirectWelcome", "false");
 		resourceServlet.setInitParameter("welcomeServlets", "true");
@@ -424,7 +421,6 @@ public class UnifiedJettyTest {
 
 		// the "/s" resource servlet - with redirected welcome files
 		JettyResourceServlet jrs3 = new JettyResourceServlet(p3, null);
-		jrs3.setWelcomeFiles(new String[] { "index.y", "index.x" });
 		ServletHolder resource2Servlet = new ServletHolder("resource2", jrs3);
 		resource2Servlet.setInitParameter("redirectWelcome", "true");
 		resource2Servlet.setInitParameter("welcomeServlets", "true");
@@ -502,10 +498,9 @@ public class UnifiedJettyTest {
 		// "/" - no "/index.x" or "/index.y" physical resource, but existing mapping for *.y to indexx servlet
 		// forward is performed implicitly by Jetty's DefaultServlet
 		response = send(port, "/");
-		// TODO: https://github.com/eclipse/jetty.project/issues/9910
-//		assertTrue(response.contains("req.context_path=\"\""));
-//		assertTrue(response.contains("req.request_uri=\"/index.y\""));
-//		assertTrue(response.contains("jakarta.servlet.forward.request_uri=\"/\""));
+		assertTrue(response.contains("req.context_path=\"\""));
+		assertTrue(response.contains("req.request_uri=\"/index.y\""));
+		assertTrue(response.contains("jakarta.servlet.forward.request_uri=\"/\""));
 
 		// Forward vs. Include:
 		// in forward method:
@@ -517,28 +512,26 @@ public class UnifiedJettyTest {
 
 		// "/" (but through gateway) - similar forward, but performed explicitly by gateway servlet
 		// 9.4 The Forward Method:
-		//	 The path elements of the request object exposed to the target servlet must reflect the
-		//	 path used to obtain the RequestDispatcher.
+		//     The path elements of the request object exposed to the target servlet must reflect the
+		//     path used to obtain the RequestDispatcher.
 		// so "gateway" forwards to "/", "/" is handled by "default" which forwards to "/index.y"
 		response = send(port, "/gateway/x?what=forward&where=/");
-		// TODO: https://github.com/eclipse/jetty.project/issues/9910
-//		assertTrue(response.contains("req.context_path=\"\""));
-//		assertTrue(response.contains("req.request_uri=\"/index.y\""));
-//		assertTrue(response.contains("jakarta.servlet.forward.context_path=\"\""));
-//		assertTrue(response.contains("jakarta.servlet.forward.request_uri=\"/gateway/x\""));
-//		assertTrue(response.contains("jakarta.servlet.forward.servlet_path=\"/gateway\""));
-//		assertTrue(response.contains("jakarta.servlet.forward.path_info=\"/x\""));
+		assertTrue(response.contains("req.context_path=\"\""));
+		assertTrue(response.contains("req.request_uri=\"/index.y\""));
+		assertTrue(response.contains("jakarta.servlet.forward.context_path=\"\""));
+		assertTrue(response.contains("jakarta.servlet.forward.request_uri=\"/gateway/x\""));
+		assertTrue(response.contains("jakarta.servlet.forward.servlet_path=\"/gateway\""));
+		assertTrue(response.contains("jakarta.servlet.forward.path_info=\"/x\""));
 
 		// "/", but included by gateway servlet
 		// "gateway" includes "/" which includes "/index.y"
 		response = send(port, "/gateway/x?what=include&where=/");
-		// TODO: https://github.com/eclipse/jetty.project/issues/9910
-//		assertTrue(response.contains("req.context_path=\"\""));
-//		assertTrue(response.contains("req.request_uri=\"/gateway/x\""));
-//		assertTrue(response.contains("jakarta.servlet.include.context_path=\"\""));
-//		assertTrue(response.contains("jakarta.servlet.include.request_uri=\"/index.y\""));
-//		assertTrue(response.contains("jakarta.servlet.include.servlet_path=\"/index.y\""));
-//		assertTrue(response.contains("jakarta.servlet.include.path_info=\"null\""));
+		assertTrue(response.contains("req.context_path=\"\""));
+		assertTrue(response.contains("req.request_uri=\"/gateway/x\""));
+		assertTrue(response.contains("jakarta.servlet.include.context_path=\"\""));
+		assertTrue(response.contains("jakarta.servlet.include.request_uri=\"/index.y\""));
+		assertTrue(response.contains("jakarta.servlet.include.servlet_path=\"/index.y\""));
+		assertTrue(response.contains("jakarta.servlet.include.path_info=\"null\""));
 
 		response = send(port, "/sub");
 		assertTrue(response.startsWith("HTTP/1.1 302"));
@@ -550,43 +543,40 @@ public class UnifiedJettyTest {
 
 		// "/sub/" + "index.x" welcome files is forwarded and mapped to indexx servlet
 		// According to 10.10 "Welcome Files":
-		//	The Web server must append each welcome file in the order specified in the deployment descriptor to the
-		//	partial request and check whether a static resource in the WAR is mapped to that
-		//	request URI. If no match is found, the Web server MUST again append each
-		//	welcome file in the order specified in the deployment descriptor to the partial
-		//	request and check if a servlet is mapped to that request URI.
-		//	[...]
-		//	The container may send the request to the welcome resource with a forward, a redirect, or a
-		//	container specific mechanism that is indistinguishable from a direct request.
+		//    The Web server must append each welcome file in the order specified in the deployment descriptor to the
+		//    partial request and check whether a static resource in the WAR is mapped to that
+		//    request URI. If no match is found, the Web server MUST again append each
+		//    welcome file in the order specified in the deployment descriptor to the partial
+		//    request and check if a servlet is mapped to that request URI.
+		//    [...]
+		//    The container may send the request to the welcome resource with a forward, a redirect, or a
+		//    container specific mechanism that is indistinguishable from a direct request.
 		// Jetty detects /sub/index.y (first welcome file) can be mapped to indexx servlet, but continues the
 		// search for physical resource. /sub/index.x is actual physical resource, so forward is chosen, which
 		// is eventually mapped to indexx again - with index.x, not index.y
 		response = send(port, "/sub/");
-		// TODO: https://github.com/eclipse/jetty.project/issues/9910
-//		assertTrue(response.contains("req.context_path=\"\""));
-//		assertTrue(response.contains("req.request_uri=\"/sub/index.x\""));
-//		assertTrue(response.contains("jakarta.servlet.forward.context_path=\"\""));
-//		assertTrue(response.contains("jakarta.servlet.forward.request_uri=\"/sub/\""));
-//		assertTrue(response.contains("jakarta.servlet.forward.servlet_path=\"/sub/\""));
-//		assertTrue(response.contains("jakarta.servlet.forward.path_info=\"null\""));
+		assertTrue(response.contains("req.context_path=\"\""));
+		assertTrue(response.contains("req.request_uri=\"/sub/index.x\""));
+		assertTrue(response.contains("jakarta.servlet.forward.context_path=\"\""));
+		assertTrue(response.contains("jakarta.servlet.forward.request_uri=\"/sub/\""));
+		assertTrue(response.contains("jakarta.servlet.forward.servlet_path=\"/sub/\""));
+		assertTrue(response.contains("jakarta.servlet.forward.path_info=\"null\""));
 
 		response = send(port, "/gateway/x?what=forward&where=/sub/");
-		// TODO: https://github.com/eclipse/jetty.project/issues/9910
-//		assertTrue(response.contains("req.context_path=\"\""));
-//		assertTrue(response.contains("req.request_uri=\"/sub/index.x\""));
-//		assertTrue(response.contains("jakarta.servlet.forward.context_path=\"\""));
-//		assertTrue(response.contains("jakarta.servlet.forward.request_uri=\"/gateway/x\""));
-//		assertTrue(response.contains("jakarta.servlet.forward.servlet_path=\"/gateway\""));
-//		assertTrue(response.contains("jakarta.servlet.forward.path_info=\"/x\""));
+		assertTrue(response.contains("req.context_path=\"\""));
+		assertTrue(response.contains("req.request_uri=\"/sub/index.x\""));
+		assertTrue(response.contains("jakarta.servlet.forward.context_path=\"\""));
+		assertTrue(response.contains("jakarta.servlet.forward.request_uri=\"/gateway/x\""));
+		assertTrue(response.contains("jakarta.servlet.forward.servlet_path=\"/gateway\""));
+		assertTrue(response.contains("jakarta.servlet.forward.path_info=\"/x\""));
 
 		response = send(port, "/gateway/x?what=include&where=/sub/");
-		// TODO: https://github.com/eclipse/jetty.project/issues/9910
-//		assertTrue(response.contains("req.context_path=\"\""));
-//		assertTrue(response.contains("req.request_uri=\"/gateway/x\""));
-//		assertTrue(response.contains("jakarta.servlet.include.context_path=\"\""));
-//		assertTrue(response.contains("jakarta.servlet.include.request_uri=\"/sub/index.x\""));
-//		assertTrue(response.contains("jakarta.servlet.include.servlet_path=\"/sub/index.x\""));
-//		assertTrue(response.contains("jakarta.servlet.include.path_info=\"null\""));
+		assertTrue(response.contains("req.context_path=\"\""));
+		assertTrue(response.contains("req.request_uri=\"/gateway/x\""));
+		assertTrue(response.contains("jakarta.servlet.include.context_path=\"\""));
+		assertTrue(response.contains("jakarta.servlet.include.request_uri=\"/sub/index.x\""));
+		assertTrue(response.contains("jakarta.servlet.include.servlet_path=\"/sub/index.x\""));
+		assertTrue(response.contains("jakarta.servlet.include.path_info=\"null\""));
 
 		// --- resource access through "/r" servlet
 
@@ -605,15 +595,15 @@ public class UnifiedJettyTest {
 		// with full URI (no welcome files are checked). Such resource is not found, so we have 404
 		response = send(port, "/r/");
 		// TODO: https://github.com/eclipse/jetty.project/issues/9910
-//		assertTrue(response.startsWith("HTTP/1.1 404"));
+		assertTrue(response.startsWith("HTTP/1.1 404"));
 
 		response = send(port, "/gateway/x?what=forward&where=/r/");
 		// TODO: https://github.com/eclipse/jetty.project/issues/9910
-//		assertTrue(response.startsWith("HTTP/1.1 404"));
+		assertTrue(response.startsWith("HTTP/1.1 404"));
 		response = send(port, "/gateway/x?what=include&where=/r/");
 		// TODO: https://github.com/eclipse/jetty.project/issues/9910
 		// HTTP 500 according to 9.3 "The Include Method"
-//		assertTrue(response.startsWith("HTTP/1.1 500"));
+		assertTrue(response.startsWith("HTTP/1.1 500"));
 
 		response = send(port, "/r/sub");
 		assertTrue(response.startsWith("HTTP/1.1 302"));
@@ -626,13 +616,13 @@ public class UnifiedJettyTest {
 		// resource exists and is returned
 		response = send(port, "/r/sub/");
 		// TODO: https://github.com/eclipse/jetty.project/issues/9910
-//		assertTrue(response.endsWith("'sub/index-b2'"));
+		assertTrue(response.endsWith("'sub/index-b2'"));
 		response = send(port, "/gateway/x?what=forward&where=/r/sub/");
 		// TODO: https://github.com/eclipse/jetty.project/issues/9910
-//		assertTrue(response.endsWith("'sub/index-b2'"));
+		assertTrue(response.endsWith("'sub/index-b2'"));
 		response = send(port, "/gateway/x?what=include&where=/r/sub/");
 		// TODO: https://github.com/eclipse/jetty.project/issues/9910
-//		assertTrue(response.endsWith(">>>'sub/index-b2'<<<"));
+		assertTrue(response.endsWith(">>>'sub/index-b2'<<<"));
 
 		// --- resource access through "/s" servlet - welcome files with redirect
 
@@ -646,17 +636,17 @@ public class UnifiedJettyTest {
 
 		response = send(port, "/s/");
 		// TODO: https://github.com/eclipse/jetty.project/issues/9910
-//		assertTrue(response.startsWith("HTTP/1.1 302"));
+		assertTrue(response.startsWith("HTTP/1.1 302"));
 		// redirect to first welcome page with found *.y mapping, but another mapping will be found using /s/*
-//		assertTrue(extractHeaders(response).get("Location").endsWith("/s/index.y"));
+		assertTrue(extractHeaders(response).get("Location").endsWith("/s/index.y"));
 
 		response = send(port, "/gateway/x?what=forward&where=/s/");
 		// TODO: https://github.com/eclipse/jetty.project/issues/9910
-//		assertTrue(response.startsWith("HTTP/1.1 302"));
-//		assertTrue(extractHeaders(response).get("Location").endsWith("/s/index.y?what=forward&where=/s/"));
+		assertTrue(response.startsWith("HTTP/1.1 302"));
+		assertTrue(extractHeaders(response).get("Location").endsWith("/s/index.y?what=forward&where=/s/"));
 		response = send(port, "/gateway/x?what=include&where=/s/");
 		// TODO: https://github.com/eclipse/jetty.project/issues/9910
-//		assertTrue(response.contains(">>><<<"));
+		assertTrue(response.contains(">>><<<"));
 
 		response = send(port, "/s/sub");
 		assertTrue(response.startsWith("HTTP/1.1 302"));
@@ -671,15 +661,15 @@ public class UnifiedJettyTest {
 		// resource exists and is returned
 		response = send(port, "/s/sub/");
 		// TODO: https://github.com/eclipse/jetty.project/issues/9910
-//		assertTrue(response.startsWith("HTTP/1.1 302"));
-//		assertTrue(extractHeaders(response).get("Location").endsWith("/s/sub/index.x"));
+		assertTrue(response.startsWith("HTTP/1.1 302"));
+		assertTrue(extractHeaders(response).get("Location").endsWith("/s/sub/index.x"));
 		response = send(port, "/gateway/x?what=forward&where=/s/sub/");
 		// TODO: https://github.com/eclipse/jetty.project/issues/9910
-//		assertTrue(response.startsWith("HTTP/1.1 302"));
-//		assertTrue(extractHeaders(response).get("Location").endsWith("/s/sub/index.x?what=forward&where=/s/sub/"));
+		assertTrue(response.startsWith("HTTP/1.1 302"));
+		assertTrue(extractHeaders(response).get("Location").endsWith("/s/sub/index.x?what=forward&where=/s/sub/"));
 		response = send(port, "/gateway/x?what=include&where=/s/sub/");
 		// TODO: https://github.com/eclipse/jetty.project/issues/9910
-//		assertTrue(response.contains(">>><<<"));
+		assertTrue(response.contains(">>><<<"));
 
 		server.stop();
 		server.join();
@@ -693,8 +683,7 @@ public class UnifiedJettyTest {
 		server.setConnectors(new Connector[] { connector });
 
 		ContextHandlerCollection chc = new ContextHandlerCollection();
-		ServletContextHandler handler = new ServletContextHandler(null, "/c", ServletContextHandler.NO_SESSIONS);
-		handler.setAllowNullPathInfo(false);
+		ServletContextHandler handler = new ServletContextHandler("/c", ServletContextHandler.NO_SESSIONS);
 		handler.setAllowNullPathInContext(false);
 		handler.setWelcomeFiles(new String[] { "index.y", "index.x" });
 
@@ -925,15 +914,15 @@ public class UnifiedJettyTest {
 		// with full URI (no welcome files are checked). Such resource is not found, so we have 404
 		response = send(port, "/c/r/");
 		// TODO: https://github.com/eclipse/jetty.project/issues/9910
-//		assertTrue(response.startsWith("HTTP/1.1 404"));
+		assertTrue(response.startsWith("HTTP/1.1 404"));
 
 		response = send(port, "/c/gateway/x?what=forward&where=/r/");
 		// TODO: https://github.com/eclipse/jetty.project/issues/9910
-//		assertTrue(response.startsWith("HTTP/1.1 404"));
+		assertTrue(response.startsWith("HTTP/1.1 404"));
 		response = send(port, "/c/gateway/x?what=include&where=/r/");
 		// TODO: https://github.com/eclipse/jetty.project/issues/9910
 		// HTTP 500 according to 9.3 "The Include Method"
-//		assertTrue(response.startsWith("HTTP/1.1 500"));
+		assertTrue(response.startsWith("HTTP/1.1 500"));
 
 		response = send(port, "/c/r/sub");
 		assertTrue(response.startsWith("HTTP/1.1 302"));
@@ -963,17 +952,17 @@ public class UnifiedJettyTest {
 
 		response = send(port, "/c/s/");
 		// TODO: https://github.com/eclipse/jetty.project/issues/9910
-//		assertTrue(response.startsWith("HTTP/1.1 302"));
+		assertTrue(response.startsWith("HTTP/1.1 302"));
 		// redirect to first welcome page with found *.y mapping, but another mapping will be found using /s/*
-//		assertTrue(extractHeaders(response).get("Location").endsWith("/c/s/index.y"));
+		assertTrue(extractHeaders(response).get("Location").endsWith("/c/s/index.y"));
 
 		response = send(port, "/c/gateway/x?what=forward&where=/s/");
 		// TODO: https://github.com/eclipse/jetty.project/issues/9910
-//		assertTrue(response.startsWith("HTTP/1.1 302"));
-//		assertTrue(extractHeaders(response).get("Location").endsWith("/c/s/index.y?what=forward&where=/s/"));
+		assertTrue(response.startsWith("HTTP/1.1 302"));
+		assertTrue(extractHeaders(response).get("Location").endsWith("/c/s/index.y?what=forward&where=/s/"));
 		response = send(port, "/c/gateway/x?what=include&where=/s/");
 		// TODO: https://github.com/eclipse/jetty.project/issues/9910
-//		assertTrue(response.contains(">>><<<"));
+		assertTrue(response.contains(">>><<<"));
 
 		response = send(port, "/c/s/sub");
 		assertTrue(response.startsWith("HTTP/1.1 302"));
@@ -1020,8 +1009,8 @@ public class UnifiedJettyTest {
 			}
 		};
 
-		ServletContextHandler rootHandler = new ServletContextHandler(chc, "/", ServletContextHandler.NO_SESSIONS);
-		rootHandler.setAllowNullPathInfo(true);
+		ServletContextHandler rootHandler = new ServletContextHandler("/", ServletContextHandler.NO_SESSIONS);
+		rootHandler.setAllowNullPathInContext(true);
 		rootHandler.getServletHandler().addServlet(new ServletHolder("default-servlet", servlet));
 		map(rootHandler, "default-servlet", new String[] {
 				"/p/*",
@@ -1031,8 +1020,8 @@ public class UnifiedJettyTest {
 				"/x"
 		});
 
-		ServletContextHandler otherHandler = new ServletContextHandler(chc, "/c1", ServletContextHandler.NO_SESSIONS);
-		otherHandler.setAllowNullPathInfo(true);
+		ServletContextHandler otherHandler = new ServletContextHandler("/c1", ServletContextHandler.NO_SESSIONS);
+		otherHandler.setAllowNullPathInContext(false);
 		otherHandler.getServletHandler().addServlet(new ServletHolder("default-servlet", servlet));
 		map(otherHandler, "default-servlet", new String[] {
 				"/p/*",
@@ -1041,6 +1030,9 @@ public class UnifiedJettyTest {
 //				"/",
 				"/x"
 		});
+
+		chc.addHandler(rootHandler);
+		chc.addHandler(otherHandler);
 
 		server.setHandler(chc);
 		server.start();

@@ -254,7 +254,6 @@ public class EmbeddedJettyHttp2Test {
 		final CountDownLatch latch = new CountDownLatch(3);
 
 		ServletContextHandler handler = new ServletContextHandler("/");
-		handler.setAllowNullPathInfo(true);
 		handler.setAllowNullPathInContext(true);
 		handler.addServlet(new ServletHolder("default-servlet", new HttpServlet() {
 			@Override
@@ -469,7 +468,6 @@ public class EmbeddedJettyHttp2Test {
 		final CountDownLatch latch = new CountDownLatch(3);
 
 		ServletContextHandler handler = new ServletContextHandler("/");
-		handler.setAllowNullPathInfo(true);
 		handler.setAllowNullPathInContext(true);
 		handler.addServlet(new ServletHolder("default-servlet", new HttpServlet() {
 			@Override
