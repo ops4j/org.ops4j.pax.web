@@ -16,6 +16,8 @@
 package org.ops4j.pax.web.service.jetty.internal;
 
 import org.eclipse.jetty.ee10.servlet.ServletContextRequest;
+import org.eclipse.jetty.ee10.servlet.ServletHandler;
+import org.eclipse.jetty.http.pathmap.MatchedResource;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.session.DefaultSessionIdManager;
@@ -34,7 +36,8 @@ public class PaxWebSessionIdManager extends DefaultSessionIdManager {
 
 	public static String getSessionIdSuffix(Request r) {
 		ServletContextRequest req = Request.as(r, ServletContextRequest.class);
-		if (req.getMappedServlet() != null && req.getMappedServlet().getServletHolder() instanceof PaxWebServletHolder holder) {
+		MatchedResource<ServletHandler.MappedServlet> match = req.getMatchedResource();
+		if (match != null && match.getResource() != null && match.getResource().getServletHolder() instanceof PaxWebServletHolder holder) {
 			OsgiContextModel ocm = holder.getOsgiContextModel();
 			// we can't replace '/' to '_' because of how
 			// org.eclipse.jetty.server.session.FileSessionDataStore.initializeStore() analyzes the

@@ -13,7 +13,6 @@
 
 package org.ops4j.pax.web.service.jetty.internal.web;
 
-//CHECKSTYLE:OFF
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -33,8 +32,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -48,7 +45,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpServletResponseWrapper;
 import org.eclipse.jetty.ee10.servlet.ServletApiRequest;
-import org.eclipse.jetty.ee10.servlet.ServletApiResponse;
 import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
 import org.eclipse.jetty.ee10.servlet.ServletContextRequest;
 import org.eclipse.jetty.ee10.servlet.ServletContextResponse;
@@ -71,13 +67,17 @@ import org.eclipse.jetty.http.content.VirtualHttpContentFactory;
 import org.eclipse.jetty.io.ByteBufferInputStream;
 import org.eclipse.jetty.io.ByteBufferPool;
 import org.eclipse.jetty.server.Context;
-import org.eclipse.jetty.server.HttpStream;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.ResourceService;
 import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ContextHandler;
-import org.eclipse.jetty.util.*;
+import org.eclipse.jetty.util.Blocker;
+import org.eclipse.jetty.util.BufferUtil;
+import org.eclipse.jetty.util.Callback;
+import org.eclipse.jetty.util.IO;
+import org.eclipse.jetty.util.StringUtil;
+import org.eclipse.jetty.util.URIUtil;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.resource.ResourceFactory;
 import org.eclipse.jetty.util.resource.Resources;
@@ -227,7 +227,7 @@ public class DefaultServlet extends HttpServlet
             }
         }
 
-        // for welcome file handling we need some _baseResource
+        // Pax Web: for welcome file handling we need some _baseResource
         _baseResource = configureBaseResource();
 
         List<CompressedContentFormat> precompressedFormats = parsePrecompressedFormats(getInitParameter("precompressed"),
@@ -238,7 +238,7 @@ public class DefaultServlet extends HttpServlet
         if (contentFactory == null)
         {
             MimeTypes mimeTypes = _contextHandler.getMimeTypes();
-            // we need to translate "" to "/", so this::getResource is not enough
+            // Pax Web: we need to translate "" to "/", so this::getResource is not enough
             // also we want to use LaxResourceFactory whether or not _baseResource is set (it has to be set for
             // proper welcome file handling)
 //            ResourceFactory resourceFactory = _baseResource != null ? ResourceFactory.of(_baseResource) : this::getResource;
@@ -299,6 +299,7 @@ public class DefaultServlet extends HttpServlet
 
         _resourceService.setAcceptRanges(getInitBoolean("acceptRanges", _resourceService.isAcceptRanges()));
         _resourceService.setDirAllowed(getInitBoolean("dirAllowed", _resourceService.isDirAllowed()));
+        // Pax Web: use preconfigured value of redirectWelcome flag
         boolean redirectWelcome = getInitBoolean("redirectWelcome", this.redirectWelcome);
         _resourceService.setWelcomeMode(redirectWelcome ? ResourceService.WelcomeMode.REDIRECT : ResourceService.WelcomeMode.SERVE);
         _resourceService.setPrecompressedFormats(precompressedFormats);
@@ -477,7 +478,7 @@ public class DefaultServlet extends HttpServlet
         else if (isPathInfoOnly())
             encodedPathInContext = URIUtil.encodePath(req.getPathInfo());
         else if (req instanceof ServletApiRequest apiRequest)
-            encodedPathInContext = Context.getPathInContext(req.getContextPath(), apiRequest.getServletContextRequest().getHttpURI().getCanonicalPath());
+            encodedPathInContext = Context.getPathInContext(req.getContextPath(), apiRequest.getRequest().getHttpURI().getCanonicalPath());
         else
             encodedPathInContext = Context.getPathInContext(req.getContextPath(), URIUtil.canonicalPath(req.getRequestURI()));
 
@@ -509,7 +510,7 @@ public class DefaultServlet extends HttpServlet
             else
             {
                 ServletCoreRequest coreRequest = new ServletCoreRequest(req);
-                ServletCoreResponse coreResponse = new ServletCoreResponse(coreRequest, resp);
+                ServletCoreResponse coreResponse = new ServletCoreResponse(coreRequest, resp, included);
 
                 if (coreResponse.isCommitted())
                 {
@@ -647,17 +648,6 @@ public class DefaultServlet extends HttpServlet
         public boolean isSecure()
         {
             return _servletRequest.isSecure();
-        }
-
-        @Override
-        public boolean addErrorListener(Predicate<Throwable> onError)
-        {
-            return false;
-        }
-
-        @Override
-        public void addHttpStreamWrapper(Function<HttpStream, HttpStream> wrapper)
-        {
         }
 
         @Override
@@ -891,13 +881,34 @@ public class DefaultServlet extends HttpServlet
         private final ServletCoreRequest _coreRequest;
         private final Response _coreResponse;
         private final HttpFields.Mutable _httpFields;
+        private final boolean _included;
 
-        public ServletCoreResponse(ServletCoreRequest coreRequest, HttpServletResponse response)
+        public ServletCoreResponse(ServletCoreRequest coreRequest, HttpServletResponse response, boolean included)
         {
             _coreRequest = coreRequest;
             _response = response;
             _coreResponse = ServletContextResponse.getServletContextResponse(response);
-            _httpFields = new HttpServletResponseHttpFields(response);
+            HttpFields.Mutable fields = new HttpServletResponseHttpFields(response);
+            if (included)
+            {
+                // If included, accept but ignore mutations.
+                fields = new HttpFields.Mutable.Wrapper(fields)
+                {
+                    @Override
+                    public HttpField onAddField(HttpField field)
+                    {
+                        return null;
+                    }
+
+                    @Override
+                    public boolean onRemoveField(HttpField field)
+                    {
+                        return false;
+                    }
+                };
+            }
+            _httpFields = fields;
+            _included = included;
         }
 
         @Override
@@ -908,12 +919,7 @@ public class DefaultServlet extends HttpServlet
 
         public ServletContextResponse getServletContextResponse()
         {
-            if (_response instanceof ServletApiResponse)
-            {
-                ServletApiResponse apiResponse = (ServletApiResponse)_response;
-                return apiResponse.getResponse();
-            }
-            return null;
+            return ServletContextResponse.getServletContextResponse(_response);
         }
 
         @Override
@@ -953,6 +959,8 @@ public class DefaultServlet extends HttpServlet
         @Override
         public void write(boolean last, ByteBuffer byteBuffer, Callback callback)
         {
+            if (_included)
+                last = false;
             try
             {
                 if (BufferUtil.hasContent(byteBuffer))
@@ -1002,6 +1010,8 @@ public class DefaultServlet extends HttpServlet
         {
             if (LOG.isDebugEnabled())
                 LOG.debug("{}.setStatus({})", this.getClass().getSimpleName(), code);
+            if (_included)
+                return;
             _response.setStatus(code);
         }
 
@@ -1033,6 +1043,12 @@ public class DefaultServlet extends HttpServlet
         {
             return null;
         }
+
+        @Override
+        public String toString()
+        {
+            return "%s@%x{%s,%s}".formatted(this.getClass().getSimpleName(), hashCode(), this._coreRequest, _response);
+        }
     }
 
     private class ServletResourceService extends ResourceService implements ResourceService.WelcomeFactory
@@ -1045,23 +1061,14 @@ public class DefaultServlet extends HttpServlet
         }
 
         @Override
-        public String getWelcomeTarget(Request coreRequest)
+        public String getWelcomeTarget(HttpContent content, Request coreRequest)
         {
             String[] welcomes = _servletContextHandler.getWelcomeFiles();
             if (welcomes == null)
                 return null;
-
-            HttpServletRequest request = getServletRequest(coreRequest);
             String pathInContext = Request.getPathInContext(coreRequest);
-            String includedServletPath = (String)request.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH);
-            String requestTarget;
-            if (includedServletPath != null)
-                requestTarget = getIncludedPathInContext(request, includedServletPath, isPathInfoOnly());
-            else
-                requestTarget = isPathInfoOnly() ? request.getPathInfo() : pathInContext;
-
             String welcomeTarget = null;
-            Resource base = _baseResource.resolve(requestTarget);
+            Resource base = content.getResource();
             if (Resources.isReadableDirectory(base))
             {
                 for (String welcome : welcomes)
@@ -1070,13 +1077,16 @@ public class DefaultServlet extends HttpServlet
 
                     // If the welcome resource is a file, it has
                     // precedence over resources served by Servlets.
-                    Resource welcomePath = base.resolve(welcome);
+                    Resource welcomePath = content.getResource().resolve(welcome);
                     if (Resources.isReadableFile(welcomePath))
                         return welcomeInContext;
 
                     // Check whether a Servlet may serve the welcome resource.
                     if (_welcomeServletMode != WelcomeServletMode.NONE && welcomeTarget == null)
                     {
+                        if (isPathInfoOnly() && !isIncluded(getServletRequest(coreRequest)))
+                            welcomeTarget = URIUtil.addPaths(getServletRequest(coreRequest).getPathInfo(), welcome);
+
                         ServletHandler.MappedServlet entry = _servletContextHandler.getServletHandler().getMappedServlet(welcomeInContext);
                         // Is there a different Servlet that may serve the welcome resource?
                         if (entry != null && entry.getServletHolder().getServletInstance() != DefaultServlet.this)
@@ -1186,7 +1196,8 @@ public class DefaultServlet extends HttpServlet
             HttpServletResponse response = getServletResponse(coreResponse);
             try
             {
-                // TODO: not sure if this is allowed here.
+                if (isIncluded(request))
+                    return;
                 if (cause != null)
                     request.setAttribute(RequestDispatcher.ERROR_EXCEPTION, cause);
                 response.sendError(statusCode, reason);
@@ -1266,13 +1277,20 @@ public class DefaultServlet extends HttpServlet
 
         public ForcedCharacterEncodingHttpContent(HttpContent content, String characterEncoding)
         {
-            super(content);
+            super(Objects.requireNonNull(content));
             this.characterEncoding = characterEncoding;
-            String mimeType = content.getContentTypeValue();
-            int idx = mimeType.indexOf(";charset");
-            if (idx >= 0)
-                mimeType = mimeType.substring(0, idx);
-            this.contentType = mimeType + ";charset=" + this.characterEncoding;
+            if (content.getContentTypeValue() == null || content.getResource().isDirectory())
+            {
+                this.contentType = null;
+            }
+            else
+            {
+                String mimeType = content.getContentTypeValue();
+                int idx = mimeType.indexOf(";charset");
+                if (idx >= 0)
+                    mimeType = mimeType.substring(0, idx);
+                this.contentType = mimeType + ";charset=" + characterEncoding;
+            }
         }
 
         @Override

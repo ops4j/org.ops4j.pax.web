@@ -24,8 +24,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.SessionCookieConfig;
 import jakarta.servlet.annotation.ServletSecurity;
 import jakarta.servlet.http.HttpSessionAttributeListener;
-import org.eclipse.jetty.ee.security.ConstraintAware;
-import org.eclipse.jetty.ee.security.ConstraintMapping;
 import org.eclipse.jetty.ee10.servlet.ErrorPageErrorHandler;
 import org.eclipse.jetty.ee10.servlet.FilterHolder;
 import org.eclipse.jetty.ee10.servlet.FilterMapping;
@@ -34,6 +32,8 @@ import org.eclipse.jetty.ee10.servlet.ServletHandler;
 import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.eclipse.jetty.ee10.servlet.ServletMapping;
 import org.eclipse.jetty.ee10.servlet.SessionHandler;
+import org.eclipse.jetty.ee10.servlet.security.ConstraintAware;
+import org.eclipse.jetty.ee10.servlet.security.ConstraintMapping;
 import org.eclipse.jetty.ee10.servlet.security.ConstraintSecurityHandler;
 import org.eclipse.jetty.http.HttpCookie;
 import org.eclipse.jetty.http.PreEncodedHttpField;
@@ -754,11 +754,11 @@ class JettyServerWrapper implements BatchVisitor {
 
 			LOG.info("Creating new Jetty context for {}", model);
 
-			PaxWebServletContextHandler sch = new PaxWebServletContextHandler(null, contextPath, configuration);
+			PaxWebServletContextHandler sch = new PaxWebServletContextHandler(contextPath, configuration);
 			// special, OSGi-aware org.eclipse.jetty.servlet.ServletHandler
 			sch.setServletHandler(new PaxWebServletHandler(default404Servlet, new OsgiSessionAttributeListener(sessionListenerModels)));
 			// setting "false" here will trigger 302 redirect when browsing to context without trailing "/"
-			sch.setAllowNullPathInfo(false);
+			sch.setAllowNullPathInContext(false);
 			// welcome files will be handled at default/resource servlet level and OsgiServletContext
 			sch.setWelcomeFiles(new String[0]);
 

@@ -82,7 +82,8 @@ public class EmbeddedJettyHttp2Test {
 
 	@BeforeEach
 	public void resetState() {
-		decoder = new HpackDecoder(4096, 8192);
+		decoder = new HpackDecoder(8192);
+		decoder.setMaxTableCapacity(4096);
 		responses = new HashMap<>();
 	}
 
@@ -253,7 +254,6 @@ public class EmbeddedJettyHttp2Test {
 		final CountDownLatch latch = new CountDownLatch(3);
 
 		ServletContextHandler handler = new ServletContextHandler("/");
-		handler.setAllowNullPathInfo(true);
 		handler.setAllowNullPathInContext(true);
 		handler.addServlet(new ServletHolder("default-servlet", new HttpServlet() {
 			@Override
@@ -468,7 +468,6 @@ public class EmbeddedJettyHttp2Test {
 		final CountDownLatch latch = new CountDownLatch(3);
 
 		ServletContextHandler handler = new ServletContextHandler("/");
-		handler.setAllowNullPathInfo(true);
 		handler.setAllowNullPathInContext(true);
 		handler.addServlet(new ServletHolder("default-servlet", new HttpServlet() {
 			@Override

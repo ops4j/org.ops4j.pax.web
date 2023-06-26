@@ -66,8 +66,8 @@ public class EmbeddedJettyWebSocketsTest {
 
 		ContextHandlerCollection chc = new ContextHandlerCollection();
 
-		ServletContextHandler sch = new ServletContextHandler(null, "/", ServletContextHandler.NO_SESSIONS);
-		sch.setAllowNullPathInfo(true);
+		ServletContextHandler sch = new ServletContextHandler("/", ServletContextHandler.NO_SESSIONS);
+		sch.setAllowNullPathInContext(true);
 		sch.addServlet(DefaultServlet.class, "/");
 
 		chc.addHandler(sch);
