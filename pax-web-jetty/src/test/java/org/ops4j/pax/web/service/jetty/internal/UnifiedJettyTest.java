@@ -60,6 +60,19 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 public class UnifiedJettyTest {
 
+	// see discussion at https://github.com/eclipse/jetty.project/issues/9910 about whether pathInfoOnly
+	// should be used for resources only or also for welcome files based on servlet mapping
+	// Jetty 12 changed the behavior, but I think it made it more consistent
+	//  - jetty's proprietary "pathInfoOnly" option was used only for resources in Jetty <=11. When switching to servlet
+	//    mapping, full servlet path was used for mapped servlet
+	//  - so for "/r/*" mapped servlet, "index.txt, index.x" welcome files and "/r/" request URI
+	//      1. pathInfoOnly=true and "/index.txt" resource exists, "/index.txt" resource was served
+	//      2. pathInfoOnly=false and "/r/index.txt" resource exists, "/r/index.txt" resource was served
+	//      3. pathInfoOnly=true and "/index.txt" resource doesn't exist, "/r/index.y" servlet was invoked (and not "/index.y"!)
+	//      4. pathInfoOnly=false and "/index.txt" resource doesn't exist, "/r/index.y" servlet was invoked
+	// In Jetty 12 (and so in pax-web-tmocat and pax-web-undertow too) point 3. changes to:
+	//      3. pathInfoOnly=true and "/index.txt" resource doesn't exist, "/index.y" servlet is invoked
+
 	public static final Logger LOG = LoggerFactory.getLogger(UnifiedJettyTest.class);
 
 	@Test
@@ -407,6 +420,7 @@ public class UnifiedJettyTest {
 		// with "true" it leads to endless redirect... Also in Tomcat it has to be "false" because servletPath
 		// is returned incorrectly
 		defaultServlet.setInitParameter("pathInfoOnly", "false");
+		defaultServlet.setInitParameter("dirAllowed", "false");
 		defaultServlet.setInitParameter("baseResource", b1.getAbsolutePath());
 		handler.addServlet(defaultServlet, "/");
 
@@ -416,6 +430,7 @@ public class UnifiedJettyTest {
 		resourceServlet.setInitParameter("redirectWelcome", "false");
 		resourceServlet.setInitParameter("welcomeServlets", "true");
 		resourceServlet.setInitParameter("pathInfoOnly", "true");
+		resourceServlet.setInitParameter("dirAllowed", "false");
 		resourceServlet.setInitParameter("baseResource", b2.getAbsolutePath());
 		handler.addServlet(resourceServlet, "/r/*");
 
@@ -425,6 +440,7 @@ public class UnifiedJettyTest {
 		resource2Servlet.setInitParameter("redirectWelcome", "true");
 		resource2Servlet.setInitParameter("welcomeServlets", "true");
 		resource2Servlet.setInitParameter("pathInfoOnly", "true");
+		resource2Servlet.setInitParameter("dirAllowed", "false");
 		resource2Servlet.setInitParameter("baseResource", b3.getAbsolutePath());
 		handler.addServlet(resource2Servlet, "/s/*");
 
@@ -589,20 +605,24 @@ public class UnifiedJettyTest {
 		assertTrue(response.endsWith(">>><<<"));
 
 		// "/r" - no "/index.x" or "/index.y" physical resource, but existing mapping for *.y to indexx servlet
-		// forward is performed implicitly by Jetty's DefaultServlet (even if mapped to /r/*), forward URI is
-		// "/r/index.y" (first welcome), but this time, "/r/*" is a mapping with higher priority than "*.y"
-		// (with "/" servlet, "*.y" had higher priority than "/"), so "resource" servlet is called, this time
-		// with full URI (no welcome files are checked). Such resource is not found, so we have 404
+		// forward is performed implicitly by Jetty's DefaultServlet to "/index.y" (first welcome)
 		response = send(port, "/r/");
-		// TODO: https://github.com/eclipse/jetty.project/issues/9910
-		assertTrue(response.startsWith("HTTP/1.1 404"));
-
+		assertTrue(response.contains("req.context_path=\"\""));
+		assertTrue(response.contains("req.request_uri=\"/index.y\""));
+		assertTrue(response.contains("jakarta.servlet.forward.context_path=\"\""));
+		assertTrue(response.contains("jakarta.servlet.forward.request_uri=\"/r/\""));
+		assertTrue(response.contains("jakarta.servlet.forward.servlet_path=\"/r\""));
+		assertTrue(response.contains("jakarta.servlet.forward.path_info=\"/\""));
 		response = send(port, "/gateway/x?what=forward&where=/r/");
-		// TODO: https://github.com/eclipse/jetty.project/issues/9910
-		assertTrue(response.startsWith("HTTP/1.1 404"));
+		assertTrue(response.contains("req.context_path=\"\""));
+		assertTrue(response.contains("req.request_uri=\"/index.y\""));
+		assertTrue(response.contains("jakarta.servlet.forward.context_path=\"\""));
+		assertTrue(response.contains("jakarta.servlet.forward.request_uri=\"/gateway/x\""));
+		assertTrue(response.contains("jakarta.servlet.forward.servlet_path=\"/gateway\""));
+		assertTrue(response.contains("jakarta.servlet.forward.path_info=\"/x\""));
 		response = send(port, "/gateway/x?what=include&where=/r/");
-		// TODO: https://github.com/eclipse/jetty.project/issues/9910
 		// HTTP 500 according to 9.3 "The Include Method"
+		// >>> current failure (HTTP 500 is only when the resource doesn't exist) <<<
 		assertTrue(response.startsWith("HTTP/1.1 500"));
 
 		response = send(port, "/r/sub");
