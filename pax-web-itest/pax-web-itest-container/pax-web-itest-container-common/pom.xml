@@ -54,15 +54,16 @@
 				<configuration>
 					<instructions>
 						<Import-Package>
-							<!-- ranges indicate Servlet API 3.1+ (JakartaEE 7+) -->
-							jakarta.servlet;version="[3.1,5)",
-							jakarta.servlet.annotation;version="[3.1,5)",
-							jakarta.servlet.http;version="[3.1,5)",
-							jakarta.websocket;resolution:=optional,
-							jakarta.websocket.server;resolution:=optional,
+							<!-- Servlet API 6.0+ (JakartaEE 10+) -->
+							jakarta.servlet;version="[6,7)",
+							jakarta.servlet.annotation;version="[6,7)",
+							jakarta.servlet.http;version="[6,7)",
 
-							<!-- ranges indicate we can work with OSGi Core R6+ -->
-							org.osgi.framework;version="[1.8,2)",
+							jakarta.websocket;version="[2.1,3)";resolution:=optional,
+							jakarta.websocket.server;version="[2.1,3)";resolution:=optional,
+
+							<!-- OSGi Core R8+ -->
+							org.osgi.framework;version="[1.10,2)",
 							org.osgi.framework.wiring;version="[1.2,2)",
 							org.osgi.util.tracker;version="[1.5,2)",
 
@@ -90,7 +91,7 @@
 							org.ops4j.pax.web.itest.utils.web,
 
 							<!-- from pax-logging-api -->
-							org.slf4j;version="[1.7,2)",
+							org.slf4j;version="[2,3)",
 
 							<!-- test dependencies -->
 							javax.inject,
@@ -174,42 +175,42 @@
 			<artifactId>pax-web-itest-utils</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-compatibility-servlet31</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-compatibility-cdi12</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-compatibility-el2</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-compatibility-interceptor12</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-compatibility-annotation13</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-compatibility-jpa2</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-compatibility-jaxrs2</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-fragment-myfaces-inject</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-fragment-myfaces-spifly</artifactId>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.ops4j.pax.web</groupId>-->
+<!--			<artifactId>pax-web-compatibility-servlet31</artifactId>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>org.ops4j.pax.web</groupId>-->
+<!--			<artifactId>pax-web-compatibility-cdi12</artifactId>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>org.ops4j.pax.web</groupId>-->
+<!--			<artifactId>pax-web-compatibility-el2</artifactId>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>org.ops4j.pax.web</groupId>-->
+<!--			<artifactId>pax-web-compatibility-interceptor12</artifactId>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>org.ops4j.pax.web</groupId>-->
+<!--			<artifactId>pax-web-compatibility-annotation13</artifactId>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>org.ops4j.pax.web</groupId>-->
+<!--			<artifactId>pax-web-compatibility-jpa2</artifactId>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>org.ops4j.pax.web</groupId>-->
+<!--			<artifactId>pax-web-compatibility-jaxrs2</artifactId>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>org.ops4j.pax.web</groupId>-->
+<!--			<artifactId>pax-web-fragment-myfaces-inject</artifactId>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>org.ops4j.pax.web</groupId>-->
+<!--			<artifactId>pax-web-fragment-myfaces-spifly</artifactId>-->
+<!--		</dependency>-->
 
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
@@ -409,16 +410,16 @@
 			<type>war</type>
 		</dependency>
 
-		<dependency>
-			<groupId>org.ops4j.pax.web.samples</groupId>
-			<artifactId>war-vaadin08</artifactId>
-			<type>war</type>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web.samples</groupId>
-			<artifactId>war-vaadin08-spring</artifactId>
-			<type>war</type>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.ops4j.pax.web.samples</groupId>-->
+<!--			<artifactId>war-vaadin08</artifactId>-->
+<!--			<type>war</type>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>org.ops4j.pax.web.samples</groupId>-->
+<!--			<artifactId>war-vaadin08-spring</artifactId>-->
+<!--			<type>war</type>-->
+<!--		</dependency>-->
 
 		<dependency>
 			<groupId>org.ops4j.pax.web.samples</groupId>
@@ -484,10 +485,10 @@
 			<groupId>org.ops4j.pax.web.samples</groupId>
 			<artifactId>authentication</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web.samples</groupId>
-			<artifactId>hs-jersey</artifactId>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.ops4j.pax.web.samples</groupId>-->
+<!--			<artifactId>hs-jersey</artifactId>-->
+<!--		</dependency>-->
 		<dependency>
 			<groupId>org.ops4j.pax.web.samples</groupId>
 			<artifactId>http-custom-context</artifactId>

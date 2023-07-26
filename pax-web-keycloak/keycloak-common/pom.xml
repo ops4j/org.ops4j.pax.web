@@ -202,7 +202,7 @@
 							org.bouncycastle.operator.jcajce;version="[1.70,2)",
 
 							org.ietf.jgss;resolution:=optional,
-							org.jboss.logging;version="[3.4,4)"
+							org.jboss.logging;version="[3.5,4)"
 						</Import-Package>
 						<Embed-Dependency>
 							artifactId=keycloak-common;inline=keycloak-version.properties

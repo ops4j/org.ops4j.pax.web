@@ -77,11 +77,11 @@
 			<artifactId>pax-web-undertow-websocket</artifactId>
 			<scope>runtime</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-undertow-bundle</artifactId>
-			<scope>runtime</scope>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.ops4j.pax.web</groupId>-->
+<!--			<artifactId>pax-web-undertow-bundle</artifactId>-->
+<!--			<scope>runtime</scope>-->
+<!--		</dependency>-->
 
 		<!-- OPS4J dependencies -->
 

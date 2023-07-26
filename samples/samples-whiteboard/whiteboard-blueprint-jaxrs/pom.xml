@@ -42,20 +42,20 @@
 				<configuration>
 					<instructions>
 						<Import-Package>
-							<!-- ranges indicate Servlet API 3.1+ (JakartaEE 7+) -->
-							jakarta.servlet;version="[3.1,5)",
-							jakarta.servlet.http;version="[3.1,5)",
+							<!-- Servlet API 6.0+ (JakartaEE 10+) -->
+							jakarta.servlet;version="[6,7)",
+							jakarta.servlet.http;version="[6,7)",
 
 							javax.ws.rs,
 							javax.ws.rs.core,
 
 							org.apache.cxf.jaxrs.swagger,
 
-							<!-- ranges indicate we can work with OSGi Core R6+ -->
-							org.osgi.framework;version="[1.8,2)",
+							<!-- OSGi Core R8+ -->
+							org.osgi.framework;version="[1.10,2)",
 
 							<!-- from pax-logging-api -->
-							org.slf4j;version="[1.7,2)"
+							org.slf4j;version="[2,3)"
 						</Import-Package>
 						<Export-Package>org.ops4j.pax.web.extender.samples.whiteboard.internal</Export-Package>
 					</instructions>

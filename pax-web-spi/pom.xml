@@ -88,7 +88,7 @@
 				<configuration>
 					<instructions>
 						<Import-Package>
-							<!-- ranges indicate Servlet API 6.0+ (JakartaEE 10+) -->
+							<!-- Servlet API 6.0+ (JakartaEE 10+) -->
 							jakarta.servlet;version="[6,7)",
 							jakarta.servlet.annotation;version="[6,7)",
 							jakarta.servlet.descriptor;version="[6,7)",
@@ -117,7 +117,7 @@
 							org.ops4j.pax.web.utils;version="${pax-web.osgi.version}",
 
 							<!-- from pax-logging-api -->
-							org.slf4j;version="[1.7,2)"
+							org.slf4j;version="[2,3)"
 						</Import-Package>
 						<Private-Package>
 							<!-- supporting libraries -->

@@ -48,7 +48,7 @@
 							jakarta.servlet.jsp.*
 						</DynamicImport-Package>
 						<Import-Package>
-							<!-- ranges indicate Servlet API 6.0+ (JakartaEE 10+) -->
+							<!-- Servlet API 6.0+ (JakartaEE 10+) -->
 							jakarta.servlet;version="[6,7)",
 							jakarta.servlet.annotation;version="[6,7)",
 							jakarta.servlet.descriptor;version="[6,7)",

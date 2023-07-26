@@ -47,11 +47,11 @@
 					<instructions>
 						<Bundle-Activator>org.ops4j.pax.web.deployer.internal.Activator</Bundle-Activator>
 						<Import-Package>
-							<!-- ranges indicate we can work with OSGi Core R6+ -->
-							org.osgi.framework;version="[1.8,2)",
+							<!-- OSGi Core R8+ -->
+							org.osgi.framework;version="[1.10,2)",
 
 							<!-- from pax-logging-api -->
-							org.slf4j;version="[1.7,2)",
+							org.slf4j;version="[2,3)",
 
 							org.apache.felix.fileinstall;version="[3,4)"
 						</Import-Package>

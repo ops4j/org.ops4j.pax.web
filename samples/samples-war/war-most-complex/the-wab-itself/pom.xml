@@ -47,8 +47,12 @@
 					</supportedProjectTypes>
 					<instructions>
 						<Import-Package>
+							<!-- OSGi Core R8+ -->
 							org.osgi.framework;version="[1.10,2)",
+
+							<!-- Servlet API 6.0+ (JakartaEE 10+) -->
 							jakarta.servlet.*;version="[6,7)",
+
 							<!--
 								wiring to container-bundle-1, which is wired to container-bundle-3, which itself
 								won't be wired directly to the-wab-itself

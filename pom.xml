@@ -3229,7 +3229,7 @@
 <!--		<module>pax-web-archetypes</module>-->
 <!--		<module>pax-web-jaas</module>-->
 
-<!--		<module>pax-web-resources</module>-->
+		<module>pax-web-resources</module>
 
 		<!-- All the samples (Http Service, Whiteboard, JSP, WebSockets, WAR) -->
 		<module>samples</module>

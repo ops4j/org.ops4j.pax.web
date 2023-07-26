@@ -49,8 +49,8 @@
 							org.ops4j.pax.web.resources.api,
 							org.ops4j.pax.web.resources.api.query,
 
-							<!-- ranges indicate we can work with OSGi Core R6+ -->
-							org.osgi.framework;version="[1.8,2)",
+							<!-- OSGi Core R8+ -->
+							org.osgi.framework;version="[1.10,2)",
 							org.osgi.framework.wiring;version="[1.2,2)",
 							org.osgi.util.tracker;version="[1.5,2)",
 
@@ -93,10 +93,11 @@
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>osgi.core</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>
-			<artifactId>osgi.cmpn</artifactId>
+			<artifactId>org.osgi.service.servlet</artifactId>
 			<scope>provided</scope>
 		</dependency>
 

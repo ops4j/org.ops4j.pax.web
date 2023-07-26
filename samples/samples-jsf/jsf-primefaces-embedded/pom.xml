@@ -70,9 +70,13 @@
 						-->
 						<Require-Bundle>org.ops4j.pax.web.samples.jsf-primefaces-commons1</Require-Bundle>
 						<Import-Package>
+							<!-- OSGi Core R8+ -->
 							org.osgi.framework;version="[1.10,2)",
-							jakarta.servlet;version="[6,7)"
+
+							<!-- Servlet API 6.0+ (JakartaEE 10+) -->
+							jakarta.servlet;version="[6,7)",
 							jakarta.servlet.http;version="[6,7)",
+
 							org.ops4j.pax.web.samples.jsf3
 						</Import-Package>
 						<DynamicImport-Package>*</DynamicImport-Package>

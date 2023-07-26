@@ -47,9 +47,11 @@
 					</supportedProjectTypes>
 					<instructions>
 						<Import-Package>
+							<!-- Servlet API 6.0+ (JakartaEE 10+) -->
+							jakarta.servlet.*;version="[6,7)",
+
 							javax.enterprise.context,
 							javax.inject,
-							jakarta.servlet.*;version="[3.1,5)",
 							javax.faces.annotation,
 							javax.faces.bean,
 							javax.faces.view,
