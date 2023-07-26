@@ -65,7 +65,7 @@
 
 	<dependencies>
 
-		<!-- JavaEE -->
+		<!-- JakartaEE -->
 
 		<dependency>
 			<groupId>jakarta.el</groupId>

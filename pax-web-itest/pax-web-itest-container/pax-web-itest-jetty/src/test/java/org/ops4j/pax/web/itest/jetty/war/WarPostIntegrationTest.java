@@ -15,7 +15,7 @@
  */
 package org.ops4j.pax.web.itest.jetty.war;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;

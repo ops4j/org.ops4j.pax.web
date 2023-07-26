@@ -53,7 +53,7 @@ import org.slf4j.LoggerFactory;
  * inside the forked version, but if in future, Undertow opens the default servlet more, we could get rid of
  * the fork.</p>
  */
-public class UndertowResourceServlet extends DefaultServlet implements ResourceManager {
+	public class UndertowResourceServlet extends DefaultServlet implements ResourceManager {
 
 	public static final Logger LOG = LoggerFactory.getLogger(UndertowResourceServlet.class);
 

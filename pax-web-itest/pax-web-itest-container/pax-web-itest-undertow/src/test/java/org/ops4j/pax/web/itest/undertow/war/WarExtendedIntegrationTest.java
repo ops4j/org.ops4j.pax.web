@@ -17,7 +17,7 @@
 package org.ops4j.pax.web.itest.undertow.war;
 
 import java.util.List;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.junit.After;
 import org.junit.Before;

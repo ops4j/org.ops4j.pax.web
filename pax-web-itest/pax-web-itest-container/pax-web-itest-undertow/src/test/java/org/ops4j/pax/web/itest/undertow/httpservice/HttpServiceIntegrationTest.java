@@ -15,7 +15,7 @@
  */
 package org.ops4j.pax.web.itest.undertow.httpservice;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,7 +24,7 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.container.httpservice.AbstractHttpServiceIntegrationTest;
 import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
-import org.osgi.service.http.HttpService;
+import org.ops4j.pax.web.service.http.HttpService;
 
 import static org.ops4j.pax.exam.OptionUtils.combine;
 

@@ -38,7 +38,7 @@ public class WebSocketIntegrationTest extends AbstractWebSocketIntegrationTest {
 
 	@Override
 	protected String getContainerSpecificWebSocketsBundleSN() {
-		return "org.eclipse.jetty.websocket.javax.client";
+		return "org.eclipse.jetty.ee10.websocket.jakarta.client";
 	}
 
 }

@@ -91,7 +91,7 @@
 			<scope>runtime</scope>
 		</dependency>
 
-		<!-- JavaEE -->
+		<!-- JakartaEE -->
 
 		<dependency>
 			<!--

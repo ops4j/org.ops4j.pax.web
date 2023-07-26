@@ -150,7 +150,7 @@ public class SecurityParametersTest {
 		// TLS 1.3 (https://www.rfc-editor.org/rfc/rfc8446.html#appendix-B.4):
 		// - TLS_AES_256_GCM_SHA384
 		// - TLS_AES_128_GCM_SHA256
-		// - TLS_CHACHA20_POLY1305_SHA256 (unsupported)
+		// - TLS_CHACHA20_POLY1305_SHA256 (unsupported in JDK8)
 		// - TLS_AES_128_CCM_SHA256 (unsupported)
 		// - TLS_AES_128_CCM_8_SHA256 (unsupported)
 		// TLS 1.2 (in order of appearance in sun.security.ssl.CipherSuite)
