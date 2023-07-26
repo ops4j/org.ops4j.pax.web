@@ -149,7 +149,7 @@
 
 		<!-- Other Maven plugins (and their dependencies) -->
 		<plugin.apache.apache-rat-plugin>0.15</plugin.apache.apache-rat-plugin>
-		<plugin.asciidoctor-maven-plugin>2.2.2</plugin.asciidoctor-maven-plugin>
+		<plugin.asciidoctor-maven-plugin>2.2.4</plugin.asciidoctor-maven-plugin>
 		<plugin.dependency.org.asciidoctor.diagram>2.2.3</plugin.dependency.org.asciidoctor.diagram>
 		<plugin.felix.maven-bundle-plugin>5.1.8</plugin.felix.maven-bundle-plugin>
 		<plugin.felix.maven-scr-plugin>1.26.4</plugin.felix.maven-scr-plugin>
@@ -158,7 +158,7 @@
 		<plugin.mojo.build-helper-maven-plugin>3.3.0</plugin.mojo.build-helper-maven-plugin>
 		<plugin.sonarsource.sonar-maven-plugin>3.9.0.2155</plugin.sonarsource.sonar-maven-plugin>
 		<plugin.mycila.license-maven-plugin>4.1</plugin.mycila.license-maven-plugin>
-		<plugin.servicemix.depends-maven-plugin>1.4.0</plugin.servicemix.depends-maven-plugin>
+		<plugin.servicemix.depends-maven-plugin>1.5.0</plugin.servicemix.depends-maven-plugin>
 		<plugin.sonatype.nexus-staging-maven-plugin>1.6.13</plugin.sonatype.nexus-staging-maven-plugin>
 		<plugin.bnd.bnd-maven-plugin>6.4.0</plugin.bnd.bnd-maven-plugin>
 
