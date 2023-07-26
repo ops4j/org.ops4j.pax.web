@@ -77,12 +77,14 @@ public class JettyHandlerServiceIntegrationTest extends AbstractContainerTestBas
 		ContextHandler ctxtHandler = new ContextHandler();
 		ctxtHandler.setContextPath("/static-content");
 		ResourceHandler resourceHandler = new ResourceHandler();
-		resourceHandler.setResourceBase("target");
-		resourceHandler.setDirectoriesListed(true);
+		resourceHandler.setBaseResourceAsString("target");
+		resourceHandler.setDirAllowed(true);
 		ctxtHandler.setHandler(resourceHandler);
 
-		HttpConfiguration.Customizer customizer = (connector1, channelConfig, request)
-				-> request.getResponse().addHeader("X-Y-Z", "x-y-z");
+		HttpConfiguration.Customizer customizer = (request, responseHeaders) -> {
+			responseHeaders.add("X-Y-Z", "x-y-z");
+			return request;
+		};
 
 		@SuppressWarnings("unchecked")
 		final ServiceRegistration<Handler>[] registerHandlerService = new ServiceRegistration[1];

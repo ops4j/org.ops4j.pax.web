@@ -104,7 +104,7 @@ It is important to be aware how it translates to real context managed by target 
 
 == Resources
 
-From the perspective of JavaEE web developer, the proper interface to access web resources is `javax.servlet.ServletContext` and its resource accessing methods:
+From the perspective of JakartaEE web developer, the proper interface to access web resources is `javax.servlet.ServletContext` and its resource accessing methods:
 
 * `javax.servlet.ServletContext.getResourcePaths` - a directory listing for entries beginning with the passed argument which is a _base_. The _base_ is a directory directly stored in a WAR, but also a path inside _all_ the `/WEB-INF/lib/\*.jar!/META-INF/resources/`. This method returns _names_ and doesn't restrict access to `/WEB-INF` directory!
 * `javax.servlet.ServletContext.getResource[AsStream]` - this method returns a URL (a stream from it). Passed argument _must_ start with `/` and is a base inside a WAR or a base of each of the `/WEB-INF/lib/\*.jar!/META-INF/resources/`. According to JavaDoc, this method doesn't involve classloaders. Also this method doesn't prevent accessing `/WEB-INF/` or `/META-INF`!

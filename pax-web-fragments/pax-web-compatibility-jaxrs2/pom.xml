@@ -59,7 +59,7 @@
 
 	<dependencies>
 
-		<!-- JavaEE -->
+		<!-- JakartaEE -->
 
 		<dependency>
 			<groupId>jakarta.ws.rs</groupId>

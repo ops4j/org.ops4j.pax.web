@@ -33,9 +33,9 @@ import javax.faces.application.ResourceHandler;
 import javax.faces.application.ResourceWrapper;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletResponseWrapper;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletResponseWrapper;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.ops4j.pax.web.resources.jsf.OsgiResource;
 import org.slf4j.Logger;

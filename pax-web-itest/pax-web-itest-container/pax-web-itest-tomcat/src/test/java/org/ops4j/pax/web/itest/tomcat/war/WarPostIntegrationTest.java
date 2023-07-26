@@ -15,7 +15,7 @@
  */
 package org.ops4j.pax.web.itest.tomcat.war;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.junit.Before;
 import org.junit.runner.RunWith;
