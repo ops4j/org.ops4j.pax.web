@@ -138,8 +138,8 @@
 		<plugin.maven-install-plugin>3.1.1</plugin.maven-install-plugin>
 		<plugin.maven-jar-plugin>3.3.0</plugin.maven-jar-plugin>
 		<plugin.maven-javadoc-plugin>3.5.0</plugin.maven-javadoc-plugin>
-		<plugin.maven-release-plugin>2.5.3</plugin.maven-release-plugin>
-		<plugin.maven-remote-resources-plugin>3.0.0</plugin.maven-remote-resources-plugin>
+		<plugin.maven-release-plugin>3.0.1</plugin.maven-release-plugin>
+		<plugin.maven-remote-resources-plugin>3.1.0</plugin.maven-remote-resources-plugin>
 		<plugin.maven-resources-plugin>3.3.1</plugin.maven-resources-plugin>
 		<plugin.dependency.maven-filtering>3.3.1</plugin.dependency.maven-filtering>
 		<plugin.maven-site-plugin>3.12.1</plugin.maven-site-plugin>
@@ -151,13 +151,13 @@
 		<plugin.apache.apache-rat-plugin>0.15</plugin.apache.apache-rat-plugin>
 		<plugin.asciidoctor-maven-plugin>2.2.4</plugin.asciidoctor-maven-plugin>
 		<plugin.dependency.org.asciidoctor.diagram>2.2.3</plugin.dependency.org.asciidoctor.diagram>
-		<plugin.felix.maven-bundle-plugin>5.1.8</plugin.felix.maven-bundle-plugin>
+		<plugin.felix.maven-bundle-plugin>5.1.9</plugin.felix.maven-bundle-plugin>
 		<plugin.felix.maven-scr-plugin>1.26.4</plugin.felix.maven-scr-plugin>
 		<plugin.gatling.gatling-maven-plugin>3.1.2</plugin.gatling.gatling-maven-plugin>
 		<plugin.jacoco.jacoco-maven-plugin>0.8.7</plugin.jacoco.jacoco-maven-plugin>
-		<plugin.mojo.build-helper-maven-plugin>3.3.0</plugin.mojo.build-helper-maven-plugin>
+		<plugin.mojo.build-helper-maven-plugin>3.4.0</plugin.mojo.build-helper-maven-plugin>
 		<plugin.sonarsource.sonar-maven-plugin>3.9.0.2155</plugin.sonarsource.sonar-maven-plugin>
-		<plugin.mycila.license-maven-plugin>4.1</plugin.mycila.license-maven-plugin>
+		<plugin.mycila.license-maven-plugin>4.2</plugin.mycila.license-maven-plugin>
 		<plugin.servicemix.depends-maven-plugin>1.5.0</plugin.servicemix.depends-maven-plugin>
 		<plugin.sonatype.nexus-staging-maven-plugin>1.6.13</plugin.sonatype.nexus-staging-maven-plugin>
 		<plugin.bnd.bnd-maven-plugin>6.4.0</plugin.bnd.bnd-maven-plugin>
