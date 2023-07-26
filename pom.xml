@@ -38,8 +38,8 @@
 	<url>https://ops4j1.jira.com/wiki/spaces/PAXWEB/overview</url>
 
 	<issueManagement>
-		<system>jira</system>
-		<url>https://ops4j1.jira.com/projects/PAXWEB/summary/statistics</url>
+		<system>GitHub</system>
+		<url>https://github.com/ops4j/org.ops4j.pax.web/issues</url>
 	</issueManagement>
 
 	<scm>
