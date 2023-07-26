@@ -70,6 +70,7 @@
 						<configuration>
 							<instructions>
 								<Import-Package>
+									<!-- Servlet API 6.0+ (JakartaEE 10+) -->
 									jakarta.servlet;version="[6,7)",
 									jakarta.servlet.http;version="[6,7)"
 								</Import-Package>

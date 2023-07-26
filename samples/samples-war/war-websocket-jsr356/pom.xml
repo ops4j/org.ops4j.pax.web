@@ -47,6 +47,7 @@
 					</supportedProjectTypes>
 					<instructions>
 						<Import-Package>
+							<!-- OSGi Core R8+ -->
 							org.osgi.framework;version="[1.10,2)",
 
 							jakarta.websocket;version="[2.1,3)",

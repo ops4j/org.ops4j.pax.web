@@ -43,7 +43,7 @@
 					<instructions>
 						<Bundle-Activator>org.ops4j.pax.web.samples.helloworld.jsp.internal.Activator</Bundle-Activator>
 						<Import-Package>
-							<!-- ranges indicate Servlet API 6.0+ (JakartaEE 10+) -->
+							<!-- Servlet API 6.0+ (JakartaEE 10+) -->
 							jakarta.servlet;version="[6,7)",
 							jakarta.servlet.http;version="[6,7)",
 

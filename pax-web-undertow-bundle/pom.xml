@@ -48,18 +48,21 @@
 					<instructions>
 						<Bundle-Activator>org.ops4j.pax.web.service.undertow.bundle.internal.CompositeActivator</Bundle-Activator>
 						<Import-Package>
-							<!-- ranges indicate Servlet API 3.1+ (JavaEE 7+) -->
-							javax.servlet;version="[3.1,5)",
-							javax.servlet.annotation;version="[3.1,5)",
-							javax.servlet.descriptor;version="[3.1,5)",
-							javax.servlet.http;version="[3.1,5)",
+							<!-- Servlet API 6.0+ (JakartaEE 10+) -->
+							jakarta.servlet;version="[6,7)",
+							jakarta.servlet.annotation;version="[6,7)",
+							jakarta.servlet.descriptor;version="[6,7)",
+							jakarta.servlet.http;version="[6,7)",
 
-							javax.websocket;version="[1.1,2)";resolution:=optional,
-							javax.websocket.server;version="[1.1,2)";resolution:=optional,
+							jakarta.websocket;version="[2.1,3)";resolution:=optional,
+							jakarta.websocket.server;version="[2.1,3)";resolution:=optional,
 
-							<!-- ranges indicate we can work with OSGi Core R6+ -->
-							org.osgi.framework;version="[1.8,2)",
-							org.osgi.framework.dto;version="[1.0,2)",
+							jakarta.annotation;version="[2.1,3)";resolution:=optional,
+							jakarta.annotation.security;version="[2.1,3)";resolution:=optional,
+
+							<!-- OSGi Core R8+ -->
+							org.osgi.framework;version="[1.10,2)",
+							org.osgi.framework.dto;version="[1.8,2)",
 							org.osgi.framework.wiring;version="[1.2,2)",
 							org.osgi.util.tracker;version="[1.5,2)",
 
@@ -92,15 +95,13 @@
 							org.ops4j.pax.web.service.spi.whiteboard;version="${pax-web.osgi.version}",
 
 							<!-- from pax-logging-api -->
-							org.slf4j;version="[1.7,2)",
-							org.slf4j.helpers;version="[1.7,2)";resolution:=optional,
-							org.slf4j.spi;version="[1.7,2)";resolution:=optional,
-							org.osgi.service.log;version="[1.3,2)";resolution:=optional,
-							org.jboss.logging;version="[3.4,4)",
+							org.slf4j;version="[2,3)",
+							org.slf4j.helpers;version="[2,3)";resolution:=optional,
+							org.slf4j.spi;version="[2,3)";resolution:=optional,
+							org.osgi.service.log;version="[1.5,2)";resolution:=optional,
+							org.jboss.logging;version="[3.5,4)",
 
 							<!-- other -->
-							javax.annotation;version="[1.2,2)";resolution:=optional,
-							javax.annotation.security;version="[1.2,2)";resolution:=optional,
 							javax.crypto,
 							javax.management;resolution:=optional,
 							javax.naming;resolution:=optional,

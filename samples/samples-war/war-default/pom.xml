@@ -47,7 +47,9 @@
 					</supportedProjectTypes>
 					<instructions>
 						<Import-Package>
+							<!-- OSGi Core R8+ -->
 							org.osgi.framework;version="[1.10,2)",
+
 							org.ops4j.pax.web.samples.helloworld,
 							*
 						</Import-Package>

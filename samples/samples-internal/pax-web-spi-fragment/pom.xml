@@ -42,7 +42,9 @@
 				<configuration>
 					<instructions>
 						<Import-Package>
+							<!-- OSGi Core R8+ -->
 							org.osgi.framework;version="[1.10,2)",
+
 							*
 						</Import-Package>
 						<Export-Package>

@@ -43,11 +43,13 @@
 					<instructions>
 						<Bundle-Activator>org.ops4j.pax.web.service.tomcat.internal.Activator</Bundle-Activator>
 						<Import-Package>
-							<!-- ranges indicate Servlet API 6.0+ (JakartaEE 10+) -->
+							<!-- Servlet API 6.0+ (JakartaEE 10+) -->
 							jakarta.servlet;version="[6,7)",
 							jakarta.servlet.annotation;version="[6,7)",
 							jakarta.servlet.descriptor;version="[6,7)",
 							jakarta.servlet.http;version="[6,7)",
+
+							jakarta.annotation;version="[2.1,3)";resolution:=optional,
 
 							<!-- OSGi Core R8+ -->
 							org.osgi.framework;version="[1.10,2)",
@@ -100,7 +102,6 @@
 							org.apache.juli;version="${dependency.org.apache.tomcat}",
 
 							<!-- other -->
-							jakarta.annotation;version="[2,3)";resolution:=optional,
 							javax.management,
 							javax.management.modelmbean,
 							javax.naming,

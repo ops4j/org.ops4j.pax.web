@@ -69,8 +69,12 @@
 					<manifestLocation>${project.build.directory}/classes</manifestLocation>
 					<instructions>
 						<Import-Package>
+							<!-- OSGi Core R8+ -->
 							org.osgi.framework;version="[1.10,2)",
+
+							<!-- Servlet API 6.0+ (JakartaEE 10+) -->
 							jakarta.servlet.*;version="[6,7)",
+
 							org.ops4j.pax.web.samples.war.cb1.utils
 						</Import-Package>
 						<!-- We can't use obvious private packages, because they're now prefixed with "WEB-INF.classes-not-javaee." -->

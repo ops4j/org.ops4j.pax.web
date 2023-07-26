@@ -47,6 +47,7 @@
 					</supportedProjectTypes>
 					<instructions>
 						<Import-Package>
+							<!-- Servlet API 6.0+ (JakartaEE 10+) -->
 							jakarta.servlet.*;version="[6,7)",
 
 							javax.naming,

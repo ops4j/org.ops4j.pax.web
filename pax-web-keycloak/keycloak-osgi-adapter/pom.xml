@@ -45,10 +45,12 @@
 							org.keycloak.adapters.osgi;version="${dependency.org.keycloak}"
 						</Export-Package>
 						<Import-Package>
+							<!-- OSGi Core R8+ -->
+							org.osgi.framework;version="[1.10,2)",
+
 							org.keycloak.adapters;version="${dependency.org.keycloak}",
 							org.keycloak.adapters.spi;version="${dependency.org.keycloak}",
-							org.osgi.framework;version="[1.8,2)",
-							org.slf4j;version="[1.7,2)"
+							org.slf4j;version="[2,3)"
 						</Import-Package>
 					</instructions>
 				</configuration>

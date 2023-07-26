@@ -42,7 +42,10 @@
 				<configuration>
 					<instructions>
 						<Import-Package>
+							<!-- OSGi Core R8+ -->
 							org.osgi.framework;version="[1.10,2)",
+
+							<!-- Servlet API 6.0+ (JakartaEE 10+) -->
 							jakarta.servlet.*;version="[6,7)"
 						</Import-Package>
 						<Private-Package>org.ops4j.pax.web.samples.war.cf1.scis</Private-Package>

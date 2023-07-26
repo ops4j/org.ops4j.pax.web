@@ -53,7 +53,7 @@
 							org.ops4j.pax.web.service,
 							org.keycloak.adapters.osgi,
 							!org.keycloak.adapters.undertow,
-							org.jboss.logging;version="[3.4,4)",
+							org.jboss.logging;version="[3.5,4)",
 							*
 						</Import-Package>
 						<_contract>!*</_contract>

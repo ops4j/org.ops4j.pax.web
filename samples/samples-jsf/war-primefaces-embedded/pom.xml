@@ -55,11 +55,16 @@
 					</supportedProjectTypes>
 					<instructions>
 						<Import-Package>
-							jakarta.el,
-							javax.websocket.*,
-							jakarta.servlet.jsp.jstl.*;version="1.2",
-							jakarta.servlet.jsp.*;version="2.3",
-							jakarta.servlet.*;version="[3.1,5)",
+							<!-- Servlet API 6.0+ (JakartaEE 10+) -->
+							jakarta.servlet.*;version="[6,7)",
+
+							jakarta.servlet.jsp.jstl.*;version="3.0",
+							jakarta.servlet.jsp.*;version="3.1",
+
+							jakarta.el;version="[5.0,6)",
+
+							jakarta.websocket.*;version="[2.1,3)",
+
 							javax.naming,
 
 							<!-- for InstanceManager needed by MyFaces' Tomcat7AnnotationInjectionProvider -->

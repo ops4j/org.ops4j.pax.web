@@ -46,7 +46,7 @@
 							org.osgi.dto;version="[1.1,2)",
 							org.osgi.framework;version="[1.10,2)",
 
-							<!-- ranges indicate Servlet API 6.0+ (JakartaEE 10+) -->
+							<!-- Servlet API 6.0+ (JakartaEE 10+) -->
 							jakarta.servlet;version="[6,7)",
 							jakarta.servlet.annotation;version="[6,7)",
 							jakarta.servlet.http;version="[6,7)",

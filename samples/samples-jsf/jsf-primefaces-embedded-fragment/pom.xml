@@ -47,7 +47,9 @@
 						-->
 						<Require-Bundle>org.ops4j.pax.web.samples.jsf-primefaces-commons2</Require-Bundle>
 						<Import-Package>
+							<!-- OSGi Core R8+ -->
 							org.osgi.framework;version="[1.10,2)",
+
 							*
 						</Import-Package>
 						<Private-Package />

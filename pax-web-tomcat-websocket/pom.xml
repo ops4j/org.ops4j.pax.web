@@ -45,7 +45,7 @@
 							javax.naming,
 							javax.net.ssl,
 
-							<!-- ranges indicate Servlet API 6.0+ (JakartaEE 10+) -->
+							<!-- Servlet API 6.0+ (JakartaEE 10+) -->
 							jakarta.servlet;version="[6,7)",
 							jakarta.servlet.annotation;version="[6,7)",
 							jakarta.servlet.http;version="[6,7)",
