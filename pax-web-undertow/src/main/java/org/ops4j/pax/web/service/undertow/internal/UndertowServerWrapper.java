@@ -720,7 +720,9 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 						workerForListener, bufferPoolForListener,
 						inetAddress
 				);
-				listeners.put(https.getName(), new UndertowFactory.AcceptingChannelWithAddress(listener, inetAddress));
+				UndertowFactory.AcceptingChannelWithAddress l = new UndertowFactory.AcceptingChannelWithAddress(listener, inetAddress);
+				l.setSecure(https.isSecure());
+				listeners.put(https.getName(), l);
 			}
 		}
 
