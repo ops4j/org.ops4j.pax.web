@@ -75,7 +75,8 @@ public class EmbeddedJettyHttp2Test {
 
 	@Before
 	public void resetState() {
-		decoder = new HpackDecoder(4096, 8192);
+		decoder = new HpackDecoder(8192);
+		decoder.setMaxTableCapacity(4096);
 		responses = new HashMap<>();
 	}
 
