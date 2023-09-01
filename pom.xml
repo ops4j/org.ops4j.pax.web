@@ -248,6 +248,7 @@
 
 		<dependency.org.assertj>3.24.2</dependency.org.assertj>
 		<dependency.org.bouncycastle>1.75</dependency.org.bouncycastle>
+		<dependency.org.bouncycastle>1.76</dependency.org.bouncycastle>
 		<dependency.org.codehaus.woodstox.stax2-api>4.2.1</dependency.org.codehaus.woodstox.stax2-api>
 		<dependency.org.eclipse.jdt.ecj>3.32.0</dependency.org.eclipse.jdt.ecj>
 
