@@ -786,9 +786,9 @@
 							<goal>run</goal>
 						</goals>
 						<configuration>
-							<tasks>
+							<target>
 								<mkdir dir="target/logs" />
-							</tasks>
+							</target>
 						</configuration>
 					</execution>
 				</executions>
