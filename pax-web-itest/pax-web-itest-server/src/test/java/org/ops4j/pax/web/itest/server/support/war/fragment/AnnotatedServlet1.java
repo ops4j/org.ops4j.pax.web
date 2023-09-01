@@ -23,12 +23,13 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.Part;
 
 @WebServlet(name = "annotatedServlet1", urlPatterns = { "/as1", "/as1/*" }, initParams = {
 		@WebInitParam(name = "param1", value = "value1"),
 		@WebInitParam(name = "param2", value = "value2")
 }, loadOnStartup = 3)
-@MultipartConfig(location = "/dev/null", maxFileSize = 424242L, maxRequestSize = 1024, fileSizeThreshold = 128)
+@MultipartConfig(location = "/tmp/upload", maxFileSize = 40L, maxRequestSize = 1024, fileSizeThreshold = 128)
 public class AnnotatedServlet1 extends HttpServlet {
 
 	@Override
@@ -36,6 +37,14 @@ public class AnnotatedServlet1 extends HttpServlet {
 		String msg = String.format("Hello %s!", req.getPathInfo());
 		req.setAttribute("cl", msg.length());
 		resp.getWriter().print(msg);
+	}
+
+	@Override
+	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		for (Part part : req.getParts()) {
+			System.out.println(part);
+			System.out.println(part.getHeader("Content-Disposition"));
+		}
 	}
 
 }
