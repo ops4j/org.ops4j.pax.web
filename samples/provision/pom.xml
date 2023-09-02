@@ -21,7 +21,7 @@
     <relativePath>../</relativePath>
     <groupId>org.ops4j.pax.web</groupId>
     <artifactId>samples</artifactId>
-    <version>7.3.29</version>
+    <version>7.3.30-SNAPSHOT</version>
   </parent>
 
   <groupId>org.ops4j.pax.web.samples</groupId>
