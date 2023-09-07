@@ -181,7 +181,7 @@
 
 		<!--		<dependency.io.gatling.highcharts>3.6.1</dependency.io.gatling.highcharts>-->
 
-		<dependency.io.undertow>2.3.7.Final</dependency.io.undertow>
+		<dependency.io.undertow>2.3.8.Final</dependency.io.undertow>
 
 		<dependency.jakarta.annotation-api>2.1.1</dependency.jakarta.annotation-api>
 		<dependency.jakarta.authentication-api>3.0.0</dependency.jakarta.authentication-api>
