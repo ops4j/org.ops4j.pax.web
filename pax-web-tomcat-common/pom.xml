@@ -62,7 +62,7 @@
 <!--							javax.servlet.jsp.tagext;version="2.3";resolution:=optional,-->
 
 							<!-- from pax-logging-api -->
-							org.apache.juli.logging,
+							org.apache.juli.logging;resolution:=optional,
 
 							<!-- JavaSE -->
 							javax.management,
