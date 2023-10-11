@@ -72,6 +72,27 @@
 
 			<dependency>
 				<groupId>org.keycloak</groupId>
+				<artifactId>keycloak-jetty-core</artifactId>
+				<version>${dependency.org.keycloak18}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.keycloak</groupId>
+				<artifactId>keycloak-jetty-adapter-spi</artifactId>
+				<version>${dependency.org.keycloak18}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.keycloak</groupId>
+				<artifactId>keycloak-jetty94-adapter</artifactId>
+				<version>${dependency.org.keycloak18}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.keycloak</groupId>
+				<artifactId>keycloak-pax-web-jetty94</artifactId>
+				<version>${dependency.org.keycloak18}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.keycloak</groupId>
 				<artifactId>keycloak-tomcat-core-adapter</artifactId>
 				<version>${dependency.org.keycloak18}</version>
 			</dependency>
@@ -95,6 +116,7 @@
 	</dependencyManagement>
 
 	<modules>
+		<module>pax-web-jetty-keycloak18</module>
 		<module>pax-web-tomcat-keycloak18</module>
 	</modules>
 

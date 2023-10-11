@@ -1407,12 +1407,17 @@
 
 			<dependency>
 				<groupId>org.ops4j.pax.web</groupId>
-				<artifactId>pax-web-tomcat-keycloak18</artifactId>
+				<artifactId>pax-web-jetty-keycloak18</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.web</groupId>
 				<artifactId>pax-web-jetty-keycloak</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web</groupId>
+				<artifactId>pax-web-tomcat-keycloak18</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
