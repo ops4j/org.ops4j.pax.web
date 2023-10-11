@@ -28,10 +28,10 @@
 	</parent>
 
 	<groupId>org.ops4j.pax.web</groupId>
-	<artifactId>pax-web-tomcat-keycloak18</artifactId>
+	<artifactId>pax-web-jetty-keycloak18</artifactId>
 	<packaging>bundle</packaging>
 
-	<name>OPS4J Pax Web - Keycloak 18.x support - Tomcat 9</name>
+	<name>OPS4J Pax Web - Keycloak 18.x support - Jetty 9.4</name>
 
 	<build>
 		<plugins>
@@ -41,18 +41,20 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-						<Fragment-Host>org.ops4j.pax.web.pax-web-tomcat</Fragment-Host>
+						<Fragment-Host>org.ops4j.pax.web.pax-web-jetty</Fragment-Host>
 						<Private-Package>
-							org.keycloak.adapters.osgi.tomcat,
-							org.keycloak.adapters.tomcat;-split-package:=merge-first
+							org.keycloak.adapters.jetty,
+							org.keycloak.adapters.jetty.core,
+							org.keycloak.adapters.jetty.spi,
+							org.keycloak.adapters.osgi.jetty94
 						</Private-Package>
 						<Export-Package>
-							org.keycloak.adapters.osgi.tomcat;version=${dependency.org.keycloak18},
-							org.keycloak.adapters.tomcat;version=${dependency.org.keycloak18};-split-package:=merge-first
+							org.keycloak.adapters.jetty;version=${dependency.org.keycloak18},
+							org.keycloak.adapters.jetty.core;version=${dependency.org.keycloak18},
+							org.keycloak.adapters.jetty.spi;version=${dependency.org.keycloak18},
+							org.keycloak.adapters.osgi.jetty94;version=${dependency.org.keycloak18}
 						</Export-Package>
 						<Import-Package>
-							!org.keycloak.adapters.osgi.tomcat,
-							!org.keycloak.adapters.tomcat,
 							org.keycloak.adapters.osgi,
 							*
 						</Import-Package>
@@ -66,7 +68,7 @@
 
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-tomcat</artifactId>
+			<artifactId>pax-web-jetty</artifactId>
 		</dependency>
 
 		<!-- Keycloak -->
@@ -118,75 +120,31 @@
 
 		<dependency>
 			<groupId>org.keycloak</groupId>
-			<artifactId>keycloak-tomcat-core-adapter</artifactId>
+			<artifactId>keycloak-jetty-core</artifactId>
 			<exclusions>
 				<exclusion>
 					<groupId>org.bouncycastle</groupId>
 					<artifactId>bcprov-jdk15on</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.apache.tomcat</groupId>
-					<artifactId>tomcat-catalina</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.apache.tomcat</groupId>
-					<artifactId>tomcat-annotations-api</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.keycloak</groupId>
-			<artifactId>keycloak-tomcat-adapter-spi</artifactId>
+			<artifactId>keycloak-jetty-adapter-spi</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.keycloak</groupId>
+			<artifactId>keycloak-jetty94-adapter</artifactId>
 			<exclusions>
 				<exclusion>
 					<groupId>org.bouncycastle</groupId>
 					<artifactId>bcprov-jdk15on</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.apache.tomcat</groupId>
-					<artifactId>tomcat-catalina</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.apache.tomcat</groupId>
-					<artifactId>tomcat-annotations-api</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.keycloak</groupId>
-			<artifactId>keycloak-tomcat-adapter</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>org.bouncycastle</groupId>
-					<artifactId>bcprov-jdk15on</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.apache.tomcat</groupId>
-					<artifactId>tomcat-catalina</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.apache.tomcat</groupId>
-					<artifactId>tomcat-annotations-api</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.keycloak</groupId>
-			<artifactId>keycloak-pax-web-tomcat8</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>org.bouncycastle</groupId>
-					<artifactId>bcprov-jdk15on</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.apache.tomcat</groupId>
-					<artifactId>tomcat-catalina</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.apache.tomcat</groupId>
-					<artifactId>tomcat-annotations-api</artifactId>
-				</exclusion>
-			</exclusions>
+			<artifactId>keycloak-pax-web-jetty94</artifactId>
 		</dependency>
 
 	</dependencies>
