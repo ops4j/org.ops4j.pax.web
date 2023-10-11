@@ -188,46 +188,6 @@ public class OsgiContextConfiguration implements LifecycleListener {
 
 			context.setVirtualHosts(allVirtualHosts.toArray(new String[0]));
 
-			// Tomcat-specific context configuration
-			ClassLoader tccl = Thread.currentThread().getContextClassLoader();
-			Thread.currentThread().setContextClassLoader(osgiContextModel.getClassLoader());
-			try {
-				List<URL> contextConfigs = new ArrayList<>();
-				if (configuration.server().getContextConfigurationFile() != null) {
-					LOG.info("Found global Tomcat context configuration file: {}", configuration.server().getContextConfigurationFile());
-					contextConfigs.add(configuration.server().getContextConfigurationFile().toURI().toURL());
-				}
-				for (URL url : osgiContextModel.getServerSpecificDescriptors()) {
-					String path = url.getPath();
-					if (path.endsWith("/META-INF/context.xml")) {
-						contextConfigs.add(url);
-					}
-				}
-				for (URL url : contextConfigs) {
-					String path = url.getPath();
-					LOG.info("Processing context specific {} for {}", url, osgiContextModel.getContextPath());
-
-					Digester digester = tomcatFactory.createContextDigester();
-					if (osgiContextModel.getClassLoader() != null) {
-						digester.setClassLoader(osgiContextModel.getClassLoader());
-					} else {
-						digester.setClassLoader(tccl);
-					}
-					digester.push(context.getParent());
-					digester.push(context);
-
-					try (InputStream is = url.openStream()) {
-						digester.parse(is);
-					} catch (IOException | SAXException e) {
-						LOG.warn("Problem parsing {}: {}", url, e.getMessage(), e);
-					}
-				}
-			} catch (MalformedURLException e) {
-				LOG.warn("Can't process context configuration file: {}", e.getMessage(), e);
-			} finally {
-				Thread.currentThread().setContextClassLoader(tccl);
-			}
-
 			// special removal of extra valves and listeners
 			Valve[] valves = context.getPipeline().getValves();
 			List<Valve> valvesToRemove = new ArrayList<>(valves.length);
@@ -270,6 +230,48 @@ public class OsgiContextConfiguration implements LifecycleListener {
 				}
 			}
 			llistenersToRemove.forEach(context::removeLifecycleListener);
+
+			// Tomcat-specific context configuration - may re-add valves and listeners, so we had to remove these
+			// before applying the configuration, not after...
+			// See https://github.com/ops4j/org.ops4j.pax.web/issues/1896 - thanks Stephan Siano!
+			ClassLoader tccl = Thread.currentThread().getContextClassLoader();
+			Thread.currentThread().setContextClassLoader(osgiContextModel.getClassLoader());
+			try {
+				List<URL> contextConfigs = new ArrayList<>();
+				if (configuration.server().getContextConfigurationFile() != null) {
+					LOG.info("Found global Tomcat context configuration file: {}", configuration.server().getContextConfigurationFile());
+					contextConfigs.add(configuration.server().getContextConfigurationFile().toURI().toURL());
+				}
+				for (URL url : osgiContextModel.getServerSpecificDescriptors()) {
+					String path = url.getPath();
+					if (path.endsWith("/META-INF/context.xml")) {
+						contextConfigs.add(url);
+					}
+				}
+				for (URL url : contextConfigs) {
+					String path = url.getPath();
+					LOG.info("Processing context specific {} for {}", url, osgiContextModel.getContextPath());
+
+					Digester digester = tomcatFactory.createContextDigester();
+					if (osgiContextModel.getClassLoader() != null) {
+						digester.setClassLoader(osgiContextModel.getClassLoader());
+					} else {
+						digester.setClassLoader(tccl);
+					}
+					digester.push(context.getParent());
+					digester.push(context);
+
+					try (InputStream is = url.openStream()) {
+						digester.parse(is);
+					} catch (IOException | SAXException e) {
+						LOG.warn("Problem parsing {}: {}", url, e.getMessage(), e);
+					}
+				}
+			} catch (MalformedURLException e) {
+				LOG.warn("Can't process context configuration file: {}", e.getMessage(), e);
+			} finally {
+				Thread.currentThread().setContextClassLoader(tccl);
+			}
 
 			LoginConfig lc;
 			boolean noAuth = false;
