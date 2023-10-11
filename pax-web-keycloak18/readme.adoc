@@ -70,11 +70,11 @@ And install some Keycloak features. These differ for Jetty, Tomcat and Undertow.
 
 Common features/bundles:
 ----
-karaf@root()> feature:repo-add mvn:org.keycloak/keycloak-osgi-features/18.0.3/xml/features
-Adding feature url mvn:org.keycloak/keycloak-osgi-features/18.0.3/xml/features
+karaf@root()> feature:repo-add mvn:org.keycloak/keycloak-osgi-features/18.0.2/xml/features
+Adding feature url mvn:org.keycloak/keycloak-osgi-features/18.0.2/xml/features
 
 karaf@root()> feature:install -v keycloak-adapter-core
-Adding features: keycloak-adapter-core/[18.0.3,18.0.3]
+Adding features: keycloak-adapter-core/[18.0.2,18.0.2]
 ...
 ----
 
@@ -83,14 +83,14 @@ Before trying to run the example, we need running Keycloak 18 server:
 $ bin/add-user-keycloak.sh -u admin
 Press ctrl-d (Unix) or ctrl-z (Windows) to exit
 Password: admin123
-Added 'admin' to '/data/servers/keycloak-18.0.3/standalone/configuration/keycloak-add-user.json', restart server to load user
+Added 'admin' to '/data/servers/keycloak-18.0.2/standalone/configuration/keycloak-add-user.json', restart server to load user
 
 $ bin/standalone.sh -Djboss.socket.binding.port-offset=100
 ...
 13:34:23,466 INFO  [org.jboss.modules] (main) JBoss Modules version 1.11.0.Final
 13:34:23,891 INFO  [org.jboss.msc] (main) JBoss MSC version 1.4.12.Final
 13:34:23,900 INFO  [org.jboss.threads] (main) JBoss Threads version 2.4.0.Final
-13:34:24,007 INFO  [org.jboss.as] (MSC service thread 1-2) WFLYSRV0049: Keycloak 18.0.3 (WildFly Core 15.0.1.Final) starting
+13:34:24,007 INFO  [org.jboss.as] (MSC service thread 1-2) WFLYSRV0049: Keycloak 18.0.2 (WildFly Core 15.0.1.Final) starting
 ...
 13:34:39,620 INFO  [org.jboss.as] (Controller Boot Thread) WFLYSRV0051: Admin console listening on http://127.0.0.1:10090
 ----
@@ -137,15 +137,15 @@ If the resolver used is `org.keycloak.adapters.osgi.PathBasedKeycloakConfigResol
 
 Now, the remaining bundles for Keycloak - Jetty support are:
 ----
-karaf@root()> install mvn:org.keycloak/keycloak-osgi-adapter/18.0.3
+karaf@root()> install mvn:org.keycloak/keycloak-osgi-adapter/18.0.2
 Bundle ID: 88
-karaf@root()> install mvn:org.keycloak/keycloak-jetty-adapter-spi/18.0.3
+karaf@root()> install mvn:org.keycloak/keycloak-jetty-adapter-spi/18.0.2
 Bundle ID: 89
-karaf@root()> install mvn:org.keycloak/keycloak-jetty-core/18.0.3
+karaf@root()> install mvn:org.keycloak/keycloak-jetty-core/18.0.2
 Bundle ID: 90
-karaf@root()> install mvn:org.keycloak/keycloak-jetty94-adapter/18.0.3
+karaf@root()> install mvn:org.keycloak/keycloak-jetty94-adapter/18.0.2
 Bundle ID: 91
-karaf@root()> install mvn:org.keycloak/keycloak-pax-web-jetty94/18.0.3
+karaf@root()> install mvn:org.keycloak/keycloak-pax-web-jetty94/18.0.2
 Bundle ID: 92
 ----
 
@@ -153,11 +153,11 @@ NOTE: `keycloak-pax-http-jetty` feature is disabled in Keycloak OSGi/Karaf featu
 
 For Tomcat, we need `pax-web-http-tomcat` (instead of `pax-web-http-jetty`) and these Keycloak bundles (again, `keycloak-pax-http-tomcat` is disabled):
 ----
-karaf@root()> install mvn:org.keycloak/keycloak-osgi-adapter/18.0.3
-karaf@root()> install mvn:org.keycloak/keycloak-tomcat-core-adapter/18.0.3
-karaf@root()> install mvn:org.keycloak/keycloak-tomcat-adapter-spi/18.0.3
-karaf@root()> install mvn:org.keycloak/keycloak-tomcat-adapter/18.0.3
-karaf@root()> install mvn:org.keycloak/keycloak-pax-web-tomcat8/18.0.3
+karaf@root()> install mvn:org.keycloak/keycloak-osgi-adapter/18.0.2
+karaf@root()> install wrap:mvn:org.keycloak/keycloak-tomcat-core-adapter/18.0.2
+karaf@root()> install wrap:mvn:org.keycloak/keycloak-tomcat-adapter-spi/18.0.2
+karaf@root()> install wrap:mvn:org.keycloak/keycloak-tomcat-adapter/18.0.2
+karaf@root()> install mvn:org.keycloak/keycloak-pax-web-tomcat8/18.0.2
 ----
 
 There are however two problems:
