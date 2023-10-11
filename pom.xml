@@ -228,7 +228,7 @@
 		<!-- Version 2.2.x of felix.scr is for OSGi Core R10+ -->
 		<dependency.org.apache.felix.scr>2.1.30</dependency.org.apache.felix.scr>
 		<dependency.org.apache.felix.utils>1.11.8</dependency.org.apache.felix.utils>
-		<dependency.org.apache.felix.webconsole>4.8.10</dependency.org.apache.felix.webconsole>
+		<dependency.org.apache.felix.webconsole>4.8.12</dependency.org.apache.felix.webconsole>
 
 		<dependency.org.apache.geronimo.bundles.commons-discovery>0.4_1</dependency.org.apache.geronimo.bundles.commons-discovery>
 
