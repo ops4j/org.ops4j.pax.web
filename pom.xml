@@ -246,7 +246,7 @@
 		<dependency.org.apache.servicemix.bundles.jasypt>1.9.3_1</dependency.org.apache.servicemix.bundles.jasypt>
 		<dependency.org.apache.servicemix.bundles.javax-inject>1_3</dependency.org.apache.servicemix.bundles.javax-inject>
 		<dependency.org.apache.taglibs>1.2.5</dependency.org.apache.taglibs>
-		<dependency.org.apache.tomcat>9.0.80</dependency.org.apache.tomcat>
+		<dependency.org.apache.tomcat>9.0.82</dependency.org.apache.tomcat>
 		<dependency.org.apache.ws.xmlschema>2.3.1</dependency.org.apache.ws.xmlschema>
 		<dependency.org.apache.xbean>4.23</dependency.org.apache.xbean>
 
@@ -3304,6 +3304,10 @@
 	</dependencyManagement>
 
 	<repositories>
+		<repository>
+			<id>staging-orgapachetomcat-1461</id>
+			<url>https://repository.apache.org/content/repositories/orgapachetomcat-1461</url>
+		</repository>
 		<repository>
 			<id>apache-snapshots</id>
 			<name>Apache Snapshots</name>
