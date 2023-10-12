@@ -235,6 +235,7 @@ javax.servlet.context.tempdir = ${karaf.data}/pax-web/tmp
 	<feature name="pax-web-jetty-keycloak" description="Keycloak 20.x+ Jetty bundles" version="${project.version}">
 		<!-- This feature doesn't require any external feature repository -->
 		<feature>keycloak-adapter-core</feature>
+		<feature>pax-web-core</feature>
 		<feature>pax-web-http-jetty</feature>
 
 		<bundle start="false" start-level="25">mvn:org.ops4j.pax.web/pax-web-jetty-keycloak/${project.version}</bundle>
@@ -337,7 +338,8 @@ javax.servlet.context.tempdir = ${karaf.data}/pax-web/tmp
 	<feature name="pax-web-tomcat-keycloak" description="Keycloak 20.x+ Tomcat bundles" version="${project.version}">
 		<!-- This feature doesn't require any external feature repository -->
 		<feature>keycloak-adapter-core</feature>
-		<feature>pax-web-tomcat</feature>
+		<feature>pax-web-core</feature>
+		<feature>pax-web-http-tomcat</feature>
 
 		<bundle start="false" start-level="25">mvn:org.ops4j.pax.web/pax-web-tomcat-keycloak/${project.version}</bundle>
 	</feature>
@@ -436,7 +438,8 @@ javax.servlet.context.tempdir = ${karaf.data}/pax-web/tmp
 	<feature name="pax-web-undertow-keycloak" description="Keycloak 20.x+ Undertow bundles" version="${project.version}">
 		<!-- This feature doesn't require any external feature repository -->
 		<feature>keycloak-adapter-core</feature>
-		<feature>pax-web-undertow</feature>
+		<feature>pax-web-core</feature>
+		<feature>pax-web-http-undertow</feature>
 
 		<bundle start="false" start-level="25">mvn:org.ops4j.pax.web/pax-web-undertow-keycloak/${project.version}</bundle>
 	</feature>
@@ -497,7 +500,7 @@ javax.servlet.context.tempdir = ${karaf.data}/pax-web/tmp
 
 		<!--
 			These bundles were part of keycloak-adapter-core feature in Keycloak 18, but
-			 - there are new dependencies (keycloak-crypto-default)
+			 - there are new dependencies (keycloak-crypto-default, keycloak-policy-enforcer)
 			 - there's SPI requirement (https://github.com/keycloak/keycloak/issues/9287), but we don't want SPI-Fly
 			 - we can control packages better after repackaging (OSGi is not easy...)
 		-->

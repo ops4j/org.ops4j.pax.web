@@ -65,6 +65,11 @@
 				<artifactId>keycloak-adapter-core</artifactId>
 				<version>${dependency.org.keycloak}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.keycloak</groupId>
+				<artifactId>keycloak-policy-enforcer</artifactId>
+				<version>${dependency.org.keycloak}</version>
+			</dependency>
 
 			<!-- New library in Keycloak 20 -->
 

@@ -51,6 +51,7 @@
 						</Export-Package>
 						<Import-Package>
 							org.ops4j.pax.web.service,
+							org.keycloak.adapters.osgi,
 							!org.keycloak.adapters.undertow,
 							*
 						</Import-Package>
