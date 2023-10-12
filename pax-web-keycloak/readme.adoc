@@ -2,7 +2,7 @@
 
 More information is available in readme file for pax-web-keycloak18.
 
-For Keycloak 19+, where the OSGi/Karaf/Pax Web bits are removed, we have to repackage more. For Keycloak 18 we had to repackage Tomcat Keycloak libraries, for Keycloak 19+ we'll additionally repackage Jetty and Undertow ones.
+For Keycloak 19+, where the OSGi/Karaf/Pax Web bits are removed, we have to repackage more. For Keycloak 18 we had to repackage Jetty and Tomcat Keycloak libraries, for Keycloak 19+ we'll additionally repackage Undertow one.
 
 The Keycloak libraries that were providing `org.ops4j.pax.web.service.AuthenticatorService` services in Keycloak 18 were:
 
@@ -23,7 +23,7 @@ We don't backport the above to Pax Web for Keycloak 20+ support.
 
 == Installation
 
-The Keycloak integration tests can be performed using Apache Karaf 4.4.3.
+The Keycloak integration tests can be performed using Apache Karaf 4.4.4.
 
 Before starting Karaf:
 ----
@@ -33,49 +33,18 @@ paxweb.keycloak.resolver = org.keycloak.adapters.osgi.PathBasedKeycloakConfigRes
 EOF
 ----
 
-In Karaf for Jetty:
-----
-karaf@root()> feature:install pax-web-http-jetty
-karaf@root()> feature:install pax-web-jsp
-karaf@root()> feature:install pax-web-whiteboard
-karaf@root()> feature:install pax-web-karaf
-karaf@root()> feature:install pax-web-jetty-keycloak
-karaf@root()> install -s mvn:org.ops4j.pax.web.samples/whiteboard-security/8.0.15
-----
-
-In Karaf for Tomcat:
-----
-karaf@root()> feature:install pax-web-http-tomcat
-karaf@root()> feature:install pax-web-jsp
-karaf@root()> feature:install pax-web-whiteboard
-karaf@root()> feature:install pax-web-karaf
-karaf@root()> feature:install pax-web-tomcat-keycloak
-karaf@root()> install -s mvn:org.ops4j.pax.web.samples/whiteboard-security/8.0.15
-----
-
-In Karaf for Undertow:
-----
-karaf@root()> feature:install pax-web-http-undertow
-karaf@root()> feature:install pax-web-jsp
-karaf@root()> feature:install pax-web-whiteboard
-karaf@root()> feature:install pax-web-karaf
-karaf@root()> feature:install pax-web-undertow-keycloak
-karaf@root()> install -s mvn:org.ops4j.pax.web.samples/whiteboard-security/8.0.15
-----
-
 Before trying to run the example, we need running Keycloak 20 server:
 ----
 $ pwd
-/data/servers/keycloak-20.0.3
+/data/servers/keycloak-20.0.4
 
 $ bin/kc.sh start-dev --http-port 8180
-2023-02-27 16:56:11,759 INFO  [org.keycloak.quarkus.runtime.hostname.DefaultHostnameProvider] (main) Hostname settings: Base URL: <unset>, Hostname: <request>, Strict HTTPS: false, Path: <request>, Strict BackChannel: false, Admin URL: <unset>, Admin: <request>, Port: -1, Proxied: false
 ...
-2023-02-27 16:56:16,210 INFO  [io.quarkus] (main) Keycloak 21.0.0 on JVM (powered by Quarkus 2.13.7.Final) started in 5.985s. Listening on: http://0.0.0.0:8180
+2023-10-12 10:22:18,159 INFO  [org.keycloak.quarkus.runtime.hostname.DefaultHostnameProvider] (main) Hostname settings: Base URL: <unset>, Hostname: <request>, Strict HTTPS: false, Path: <request>, Strict BackChannel: false, Admin URL: <unset>, Admin: <request>, Port: -1, Proxied: false
+...
+2023-10-12 10:22:27,105 INFO  [io.quarkus] (main) Keycloak 22.0.4 on JVM (powered by Quarkus 3.2.6.Final) started in 10.245s. Listening on: http://0.0.0.0:8180
 ...
 ----
-
-For convenience, I've exported Pax Web Keycloak realm into `realm-export.json` file - it can be imported into fresh installation of Keycloak server. You should however create `admin` and `viewer` users and assign them `paxweb-admin` and `paxweb-viewer` roles respectively.
 
 Now, the Keycloak console is available at http://127.0.0.1:8180/admin/master/console/#/.
 
@@ -88,6 +57,8 @@ We need to prepare some configuration:
 * `whiteboard-rootcontext` _client_ with `http://localhost:8181/*` _Valid Redirect URIs_
 
 Make sure that _Standard Flow Enabled_ is selected for the clients.
+
+For convenience, I've exported Pax Web Keycloak realm into `realm-export.json` file - it can be imported into fresh installation of Keycloak server. You should however create `admin` and `viewer` users and assign them `paxweb-admin` and `paxweb-viewer` roles respectively.
 
 After configuring the realm, roles, users and the clients, we can get the configurations and write them to Karaf's:
 
@@ -116,3 +87,37 @@ After configuring the realm, roles, users and the clients, we can get the config
 ----
 
 If the resolver used is `org.keycloak.adapters.osgi.PathBasedKeycloakConfigResolver`, the configuration file for `/pax-web-security` context should be `etc/pax-web-security-keycloak.json`. This option is used to check different types of `org.keycloak.adapters.KeycloakConfigResolver` implementations.
+
+Now we can install features in Karaf.
+
+In Karaf for Jetty:
+----
+karaf@root()> feature:install pax-web-http-jetty
+karaf@root()> feature:install pax-web-jsp
+karaf@root()> feature:install pax-web-whiteboard
+karaf@root()> feature:install pax-web-karaf
+karaf@root()> feature:install pax-web-jetty-keycloak
+karaf@root()> install -s mvn:org.ops4j.pax.web.samples/whiteboard-security/8.0.23
+----
+
+In Karaf for Tomcat:
+----
+karaf@root()> feature:install pax-web-http-tomcat
+karaf@root()> feature:install pax-web-jsp
+karaf@root()> feature:install pax-web-whiteboard
+karaf@root()> feature:install pax-web-karaf
+karaf@root()> feature:install pax-web-tomcat-keycloak
+karaf@root()> install -s mvn:org.ops4j.pax.web.samples/whiteboard-security/8.0.23
+----
+
+In Karaf for Undertow:
+----
+karaf@root()> feature:install pax-web-http-undertow
+karaf@root()> feature:install pax-web-jsp
+karaf@root()> feature:install pax-web-whiteboard
+karaf@root()> feature:install pax-web-karaf
+karaf@root()> feature:install pax-web-undertow-keycloak
+karaf@root()> install -s mvn:org.ops4j.pax.web.samples/whiteboard-security/8.0.23
+----
+
+Application can be tested by browsing to http://localhost:8181/app.

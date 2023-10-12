@@ -62,6 +62,7 @@
 							org.keycloak.common.constants;version="${dependency.org.keycloak}",
 							org.keycloak.common.crypto;version="${dependency.org.keycloak}",
 							org.keycloak.common.enums;version="${dependency.org.keycloak}",
+							org.keycloak.common.profile;version="${dependency.org.keycloak}",
 							org.keycloak.common.util;version="${dependency.org.keycloak}",
 							org.keycloak.common.util.reflections;version="${dependency.org.keycloak}",
 							<!--
@@ -83,8 +84,7 @@
 							org.keycloak.jose.jws;version="${dependency.org.keycloak}",
 							org.keycloak.jose.jws.crypto;version="${dependency.org.keycloak}",
 							org.keycloak.json;version="${dependency.org.keycloak}",
-							org.keycloak.protocol;version="${dependency.org.keycloak}",
-							org.keycloak.protocol.oidc;version="${dependency.org.keycloak}",
+							org.keycloak.protocol.oidc.client.authentication;version="${dependency.org.keycloak}",
 							org.keycloak.protocol.oidc.representations;version="${dependency.org.keycloak}",
 							org.keycloak.representations;version="${dependency.org.keycloak}",
 							org.keycloak.representations.account;version="${dependency.org.keycloak}",
@@ -130,16 +130,24 @@
 								org.keycloak.crypto.def.BCOCSPProvider
 							-->
 							org.keycloak.adapters;version="${dependency.org.keycloak}",
-							org.keycloak.adapters.authentication;version="${dependency.org.keycloak}",
-							org.keycloak.adapters.authorization;version="${dependency.org.keycloak}",
-							org.keycloak.adapters.authorization.cip;version="${dependency.org.keycloak}",
-							org.keycloak.adapters.authorization.util;version="${dependency.org.keycloak}",
 							org.keycloak.adapters.jaas;version="${dependency.org.keycloak}",
+							org.keycloak.adapters.pep;version="${dependency.org.keycloak}",
 							org.keycloak.adapters.rotation;version="${dependency.org.keycloak}",
 							<!--
 								org.keycloak/keycloak-crypto-default
 							-->
-							org.keycloak.crypto.def;version="${dependency.org.keycloak}";-split-package:=merge-first
+							org.keycloak.crypto.def;version="${dependency.org.keycloak}";-split-package:=merge-first,
+							<!--
+								org.keycloak/keycloak-policy-enforcer
+							-->
+							org.keycloak.adapters.authorization;version="${dependency.org.keycloak}",
+							org.keycloak.adapters.authorization.cip;version="${dependency.org.keycloak}",
+							org.keycloak.adapters.authorization.cip.spi;version="${dependency.org.keycloak}",
+							org.keycloak.adapters.authorization.integration.elytron;version="${dependency.org.keycloak}",
+							<!-- export, even if it's for jakarta.servlet API -->
+							org.keycloak.adapters.authorization.integration.jakarta;version="${dependency.org.keycloak}",
+							org.keycloak.adapters.authorization.spi;version="${dependency.org.keycloak}",
+							org.keycloak.adapters.authorization.util;version="${dependency.org.keycloak}"
 						</Export-Package>
 						<Import-Package>
 							com.fasterxml.jackson.annotation;version="[2.14,3)",
@@ -271,6 +279,10 @@
 		<dependency>
 			<groupId>org.keycloak</groupId>
 			<artifactId>keycloak-crypto-default</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.keycloak</groupId>
+			<artifactId>keycloak-policy-enforcer</artifactId>
 		</dependency>
 
 	</dependencies>
