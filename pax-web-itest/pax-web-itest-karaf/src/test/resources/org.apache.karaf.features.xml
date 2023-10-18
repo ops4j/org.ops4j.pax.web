@@ -19,7 +19,7 @@
 <featuresProcessing xmlns="http://karaf.apache.org/xmlns/features-processing/v1.0.0">
 
     <blacklistedRepositories>
-        <repository>mvn:org.ops4j.pax.web/pax-web-features/8.0.15/xml/features</repository>
+        <repository>mvn:org.ops4j.pax.web/pax-web-features/8.0.22/xml/features</repository>
     </blacklistedRepositories>
 
 </featuresProcessing>
