@@ -23,7 +23,7 @@
 	<parent>
 		<groupId>org.ops4j.pax.web</groupId>
 		<artifactId>pax-web-resources</artifactId>
-		<version>8.0.24-SNAPSHOT</version>
+		<version>8.0.23</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
