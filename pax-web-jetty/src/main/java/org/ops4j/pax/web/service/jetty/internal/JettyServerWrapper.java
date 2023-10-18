@@ -606,7 +606,7 @@ class JettyServerWrapper implements BatchVisitor {
 		writer.setTimeZone(lc.getLogNCSATimeZone());
 
 		CustomRequestLog requestLog = new CustomRequestLog(writer,
-				lc.isLogNCSAExtended() ? CustomRequestLog.NCSA_FORMAT : CustomRequestLog.EXTENDED_NCSA_FORMAT);
+				lc.isLogNCSAExtended() ? CustomRequestLog.EXTENDED_NCSA_FORMAT : CustomRequestLog.NCSA_FORMAT);
 
 		// original approach from PAXWEB-269 - http://wiki.eclipse.org/Jetty/Howto/Configure_Request_Logs:
 //		server.getRootHandlerCollection().addHandler(requestLogHandler);
