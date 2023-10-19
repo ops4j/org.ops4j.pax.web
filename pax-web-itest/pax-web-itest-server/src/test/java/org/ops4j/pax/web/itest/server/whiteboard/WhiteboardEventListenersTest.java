@@ -55,6 +55,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.ops4j.pax.web.itest.server.support.Utils.httpGET;
 import static org.ops4j.pax.web.service.tomcat.internal.PaxWebStandardContext.PAXWEB_STANDARD_WRAPPER;
+import static org.ops4j.pax.web.service.tomcat.internal.PaxWebStandardContext.PAXWEB_TOMCAT_REQUEST;
 
 @RunWith(Parameterized.class)
 public class WhiteboardEventListenersTest extends MultiContainerTestSupport {
@@ -96,7 +97,9 @@ public class WhiteboardEventListenersTest extends MultiContainerTestSupport {
 		EventListenerModel elModel = getListenerCustomizer().addingService(elRef);
 
 		httpGET(port, "/s");
-		events.entrySet().removeIf(e -> e.getKey().contains("jetty") || e.getKey().equals(PAXWEB_STANDARD_WRAPPER));
+		events.entrySet().removeIf(e -> e.getKey().contains("jetty")
+				|| e.getKey().equals(PAXWEB_STANDARD_WRAPPER)
+				|| e.getKey().equals(PAXWEB_TOMCAT_REQUEST));
 		assertThat(events.size(), equalTo(3));
 		Iterator<Map.Entry<String, EventObject>> it = events.entrySet().iterator();
 		assertThat(((ServletRequestAttributeEvent) it.next().getValue()).getValue(), equalTo("1"));
@@ -106,7 +109,9 @@ public class WhiteboardEventListenersTest extends MultiContainerTestSupport {
 		getListenerCustomizer().removedService(elRef, elModel);
 
 		httpGET(port, "/s");
-		events.entrySet().removeIf(e -> e.getKey().contains("jetty") || e.getKey().equals(PAXWEB_STANDARD_WRAPPER));
+		events.entrySet().removeIf(e -> e.getKey().contains("jetty")
+				|| e.getKey().equals(PAXWEB_STANDARD_WRAPPER)
+				|| e.getKey().equals(PAXWEB_TOMCAT_REQUEST));
 		assertThat("No new events should be added", events.size(), equalTo(3));
 
 		// 2. Whiteboard registration as Pax Web specific org.ops4j.pax.web.service.whiteboard.ListenerMapping
@@ -120,7 +125,9 @@ public class WhiteboardEventListenersTest extends MultiContainerTestSupport {
 		elModel = getListenerMappingCustomizer().addingService(elMappingRef);
 
 		httpGET(port, "/s");
-		events.entrySet().removeIf(e -> e.getKey().contains("jetty") || e.getKey().equals(PAXWEB_STANDARD_WRAPPER));
+		events.entrySet().removeIf(e -> e.getKey().contains("jetty")
+				|| e.getKey().equals(PAXWEB_STANDARD_WRAPPER)
+				|| e.getKey().equals(PAXWEB_TOMCAT_REQUEST));
 		assertThat(events.size(), equalTo(3));
 		it = events.entrySet().iterator();
 		assertThat(((ServletRequestAttributeEvent) it.next().getValue()).getValue(), equalTo("1"));
@@ -130,7 +137,9 @@ public class WhiteboardEventListenersTest extends MultiContainerTestSupport {
 		getListenerMappingCustomizer().removedService(elMappingRef, elModel);
 
 		httpGET(port, "/s");
-		events.entrySet().removeIf(e -> e.getKey().contains("jetty") || e.getKey().equals(PAXWEB_STANDARD_WRAPPER));
+		events.entrySet().removeIf(e -> e.getKey().contains("jetty")
+				|| e.getKey().equals(PAXWEB_STANDARD_WRAPPER)
+				|| e.getKey().equals(PAXWEB_TOMCAT_REQUEST));
 		assertThat("No new events should be added", events.size(), equalTo(3));
 
 		getServletCustomizer().removedService(servletRef, model);
