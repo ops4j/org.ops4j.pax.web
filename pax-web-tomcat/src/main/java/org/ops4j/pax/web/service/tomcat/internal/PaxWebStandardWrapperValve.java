@@ -23,6 +23,7 @@ import org.apache.catalina.connector.Response;
 import org.apache.catalina.valves.ValveBase;
 
 import static org.ops4j.pax.web.service.tomcat.internal.PaxWebStandardContext.PAXWEB_STANDARD_WRAPPER;
+import static org.ops4j.pax.web.service.tomcat.internal.PaxWebStandardContext.PAXWEB_TOMCAT_REQUEST;
 
 public class PaxWebStandardWrapperValve extends ValveBase {
 
@@ -45,6 +46,7 @@ public class PaxWebStandardWrapperValve extends ValveBase {
 	public void invoke(Request request, Response response) throws IOException, ServletException {
 		// attributes to be used ONLY by "initial OSGi filter"
 		request.setAttribute(PAXWEB_STANDARD_WRAPPER, request.getWrapper());
+		request.setAttribute(PAXWEB_TOMCAT_REQUEST, request);
 
 		getNext().invoke(request, response);
 	}

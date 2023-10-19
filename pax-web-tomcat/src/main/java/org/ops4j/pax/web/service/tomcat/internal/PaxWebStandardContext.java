@@ -17,11 +17,13 @@ package org.ops4j.pax.web.service.tomcat.internal;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
@@ -36,7 +38,9 @@ import javax.servlet.http.HttpSessionListener;
 import org.apache.catalina.Container;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.LifecycleState;
+import org.apache.catalina.connector.Request;
 import org.apache.catalina.core.StandardContext;
+import org.apache.catalina.realm.GenericPrincipal;
 import org.apache.catalina.valves.ValveBase;
 import org.apache.tomcat.util.descriptor.web.ErrorPage;
 import org.ops4j.pax.web.service.WebContainerContext;
@@ -53,6 +57,7 @@ import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiSessionAttributeListener;
 import org.ops4j.pax.web.service.spi.servlet.PreprocessorFilterConfig;
 import org.ops4j.pax.web.service.spi.servlet.SCIWrapper;
+import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.whiteboard.Preprocessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,6 +80,10 @@ public class PaxWebStandardContext extends StandardContext {
 	 * Name of an attribute that indicates a {@link PaxWebStandardWrapper} for given request processing
 	 */
 	public static final String PAXWEB_STANDARD_WRAPPER = ".paxweb.standard.wrapper";
+	/**
+	 * Name of the attribute for real {@link org.apache.catalina.connector.Request}
+	 */
+	public static final String PAXWEB_TOMCAT_REQUEST = ".paxweb.tomcat.request";
 
 	/**
 	 * Default {@link ServletContext} to use for chains without target servlet (e.g., filters only)
@@ -143,6 +152,8 @@ public class PaxWebStandardContext extends StandardContext {
 			PaxWebStandardContext delegate = PaxWebStandardContext.this;
 			PaxWebStandardWrapper wrapper = (PaxWebStandardWrapper) request.getAttribute(PAXWEB_STANDARD_WRAPPER);
 			request.removeAttribute(PAXWEB_STANDARD_WRAPPER);
+			Request tomcatRequest = (Request) request.getAttribute(PAXWEB_TOMCAT_REQUEST);
+			request.removeAttribute(PAXWEB_TOMCAT_REQUEST);
 
 			if (wrapper == null) {
 				Container[] children = PaxWebStandardContext.this.findChildren();
@@ -155,14 +166,29 @@ public class PaxWebStandardContext extends StandardContext {
 				}
 			}
 
+			// listener called when org.osgi.service.http.HttpContext.handleSecurity() returns true
+			Consumer<HttpServletRequest> authListener = (req) -> {
+				final Object user = req.getAttribute(ServletContextHelper.REMOTE_USER);
+				final Object authType = req.getAttribute(ServletContextHelper.AUTHENTICATION_TYPE);
+
+				if (user != null || authType != null) {
+					// translate it into Tomcat specific authentication
+					String userName = user != null ? user.toString() : null;
+					String authMethod = authType != null ? authType.toString() : null;
+					if (tomcatRequest.getPrincipal() == null) {
+						tomcatRequest.setUserPrincipal(new GenericPrincipal(userName, null, Collections.emptyList()));
+					}
+				}
+			};
+
 			final OsgiFilterChain osgiChain;
 			List<Preprocessor> preprocessorInstances = preprocessors.stream().map(PreprocessorFilterConfig::getInstance).collect(Collectors.toList());
 			if (wrapper != null && !wrapper.is404()) {
 				osgiChain = new OsgiFilterChain(new ArrayList<>(preprocessorInstances),
-						wrapper.getServletContext(), wrapper.getWebContainerContext(), null, osgiSessionsBridge);
+						wrapper.getServletContext(), wrapper.getWebContainerContext(), null, osgiSessionsBridge, authListener);
 			} else {
 				osgiChain = new OsgiFilterChain(new ArrayList<>(preprocessorInstances),
-						delegate.getDefaultServletContext(), delegate.getDefaultWebContainerContext(), null, osgiSessionsBridge);
+						delegate.getDefaultServletContext(), delegate.getDefaultWebContainerContext(), null, osgiSessionsBridge, authListener);
 			}
 
 			// this chain will be called (or not)

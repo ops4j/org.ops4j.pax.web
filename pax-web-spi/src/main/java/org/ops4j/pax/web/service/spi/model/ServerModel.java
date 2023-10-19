@@ -1338,7 +1338,7 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 		// (in BundleWebApplication.buildModel())
 		ocm = new OsgiContextModel(null, wab, contextPath, false);
 		ocm.setWab(true);
-		// do NOT use "default" as the name of the context, so it's NOT patched by
+		// do NOT use "default" as the name of the context, so it's NOT matched by
 		// osgi.http.whiteboard.context.select=(osgi.http.whiteboard.context.name=default)
 		ocm.setName(contextPath);
 		bundleWabAllocatedContexts.put(contextPath, ocm);

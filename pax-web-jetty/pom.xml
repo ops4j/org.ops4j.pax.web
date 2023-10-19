@@ -79,6 +79,7 @@
 							javax.annotation;version="[1.2,2)";resolution:=optional,
 							javax.management,
 							javax.net.ssl,
+							javax.security.auth,
 							javax.xml.parsers,
 							org.w3c.dom,
 							org.xml.sax
