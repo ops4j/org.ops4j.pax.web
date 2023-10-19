@@ -18,6 +18,7 @@ package org.ops4j.pax.web.service.spi.servlet;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Consumer;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -47,6 +48,7 @@ public class OsgiFilterChain implements FilterChain {
 	private final WebContainerContext webContext;
 
 	private final OsgiSessionAttributeListener osgiSessionsBridge;
+	private final Consumer<HttpServletRequest> authListener;
 
 	private FilterChain chain;
 
@@ -63,12 +65,13 @@ public class OsgiFilterChain implements FilterChain {
 	 */
 	public OsgiFilterChain(List<Preprocessor> preprocessors, ServletContext servletContext,
 			WebContainerContext context, FilterChain originalChain,
-			OsgiSessionAttributeListener osgiSessionsBridge) {
+			OsgiSessionAttributeListener osgiSessionsBridge, Consumer<HttpServletRequest> authListener) {
 		this.preprocessors.addAll(preprocessors);
 		this.webContext = context;
 		this.servletContext = servletContext;
 		this.chain = originalChain;
 		this.osgiSessionsBridge = osgiSessionsBridge;
+		this.authListener = authListener;
 	}
 
 	public void setChain(FilterChain chain) {
@@ -96,6 +99,16 @@ public class OsgiFilterChain implements FilterChain {
 		// and target servlet)
 		try {
 			if (webContext == null || webContext.handleSecurity(req, res)) {
+				if (authListener != null && webContext != null) {
+					// it means we've passed the OSGi security handler
+					// here, the listener may translate (if available):
+					// - org.osgi.service.http.context.ServletContextHelper.REMOTE_USER
+					// - org.osgi.service.http.context.ServletContextHelper.AUTHENTICATION_TYPE
+					// into runtime-specific data available through:
+					// - javax.servlet.http.HttpServletRequest.getUserPrincipal()
+					// - javax.servlet.http.HttpServletRequest.getRemoteUser()
+					authListener.accept(req);
+				}
 				// continue normally with normal filters and target servlet
 				chain.doFilter(req, res);
 			} else {

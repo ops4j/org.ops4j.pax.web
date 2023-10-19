@@ -78,6 +78,7 @@
 							io.undertow.protocols.ssl;version="[2.2,3)",
 							io.undertow.security.api;version="[2.2,3)",
 							io.undertow.security.idm;version="[2.2,3)",
+							io.undertow.security.impl;version="[2.2,3)",
 							io.undertow.server;version="[2.2,3)",
 							io.undertow.server.handlers;version="[2.2,3)",
 							io.undertow.server.handlers.accesslog;version="[2.2,3)",

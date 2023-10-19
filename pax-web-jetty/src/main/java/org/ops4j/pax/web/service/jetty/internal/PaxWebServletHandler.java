@@ -17,11 +17,15 @@
 package org.ops4j.pax.web.service.jetty.internal;
 
 import java.io.IOException;
+import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import javax.security.auth.Subject;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterChain;
 import javax.servlet.Servlet;
@@ -32,6 +36,10 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.jetty.security.AbstractLoginService;
+import org.eclipse.jetty.security.DefaultUserIdentity;
+import org.eclipse.jetty.security.UserAuthentication;
+import org.eclipse.jetty.server.Authentication;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.ServletRequestHttpWrapper;
 import org.eclipse.jetty.server.ServletResponseHttpWrapper;
@@ -49,6 +57,7 @@ import org.ops4j.pax.web.service.spi.servlet.OsgiFilterChain;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiSessionAttributeListener;
 import org.ops4j.pax.web.service.spi.servlet.PreprocessorFilterConfig;
+import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.whiteboard.Preprocessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -364,13 +373,31 @@ public class PaxWebServletHandler extends ServletHandler {
 			// 3b. if the holder is for known 404 servlet, we still need a chain that calls 404 servlet
 			chain = (request, response) -> holder.handle(baseRequest, request, response);
 		}
+
+		// listener called when org.osgi.service.http.HttpContext.handleSecurity() returns true
+		Consumer<HttpServletRequest> authListener = (req) -> {
+			final Object user = req.getAttribute(ServletContextHelper.REMOTE_USER);
+			final Object authType = req.getAttribute(ServletContextHelper.AUTHENTICATION_TYPE);
+
+			if (user != null || authType != null) {
+				// translate it into Jetty specific authentication
+				if (baseRequest.getAuthentication() == null || baseRequest.getAuthentication() == Authentication.UNAUTHENTICATED) {
+					String userName = user != null ? user.toString() : null;
+					String authMethod = authType != null ? authType.toString() : null;
+					Principal p = new AbstractLoginService.UserPrincipal(userName, null);
+					Subject s = new Subject(true, Collections.singleton(p), Collections.emptySet(), Collections.emptySet());
+					baseRequest.setAuthentication(new UserAuthentication(authMethod, new DefaultUserIdentity(s, p, new String[0])));
+				}
+			}
+		};
+
 		List<Preprocessor> preprocessorInstances = preprocessors.stream().map(PreprocessorFilterConfig::getInstance).collect(Collectors.toList());
 		if (!holder.is404()) {
 			return new OsgiFilterChain(new ArrayList<>(preprocessorInstances), holder.getServletContext(),
-					holder.getWebContainerContext(), chain, osgiSessionsBridge);
+					holder.getWebContainerContext(), chain, osgiSessionsBridge, authListener);
 		} else {
 			return new OsgiFilterChain(new ArrayList<>(preprocessorInstances), defaultServletContext,
-					defaultWebContainerContext, chain, osgiSessionsBridge);
+					defaultWebContainerContext, chain, osgiSessionsBridge, authListener);
 		}
 	}
 

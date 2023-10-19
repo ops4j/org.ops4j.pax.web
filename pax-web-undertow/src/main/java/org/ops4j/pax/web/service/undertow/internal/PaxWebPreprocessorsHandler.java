@@ -18,6 +18,7 @@ package org.ops4j.pax.web.service.undertow.internal;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletContext;
@@ -60,6 +61,8 @@ public class PaxWebPreprocessorsHandler implements HandlerWrapper {
 				List<Preprocessor> preprocessorInstances = preprocessors.stream().map(PreprocessorFilterConfig::getInstance).collect(Collectors.toList());
 
 				final Exception[] ex = new Exception[] { null };
+				// in Undertow we use authListener in org.ops4j.pax.web.service.undertow.internal.PaxWebSecurityHandler
+				Consumer<HttpServletRequest> authListener = null;
 				FilterChain chain = new OsgiFilterChain(new ArrayList<>(preprocessorInstances), null, null, new FilterChain() {
 					@Override
 					public void doFilter(ServletRequest request, ServletResponse response) {
@@ -70,7 +73,7 @@ public class PaxWebPreprocessorsHandler implements HandlerWrapper {
 							ex[0] = e;
 						}
 					}
-				}, null);
+				}, null, authListener);
 
 				chain.doFilter(incomingRequest, outgoingRequest);
 				if (ex[0] != null) {

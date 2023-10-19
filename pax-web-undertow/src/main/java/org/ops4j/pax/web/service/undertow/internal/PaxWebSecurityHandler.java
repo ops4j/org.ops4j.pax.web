@@ -19,6 +19,7 @@ import javax.servlet.Servlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import io.undertow.security.api.SecurityContext;
 import io.undertow.server.HandlerWrapper;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
@@ -26,6 +27,8 @@ import io.undertow.servlet.api.ServletInfo;
 import io.undertow.servlet.handlers.ServletRequestContext;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
+import org.ops4j.pax.web.service.undertow.internal.security.OsgiSecurityContext;
+import org.osgi.service.http.context.ServletContextHelper;
 
 public class PaxWebSecurityHandler implements HandlerWrapper {
 
@@ -58,6 +61,29 @@ public class PaxWebSecurityHandler implements HandlerWrapper {
 
 					try {
 						if (webContext == null || webContext.handleSecurity(req, res)) {
+							if (webContext != null) {
+								final Object user = req.getAttribute(ServletContextHelper.REMOTE_USER);
+								final Object authType = req.getAttribute(ServletContextHelper.AUTHENTICATION_TYPE);
+								SecurityContext sc = exchange.getSecurityContext();
+								// if we didn't authenticate using the server (for example using <login-config> or
+								// non-OSGi security configuration), then if we have one of:
+								//  - org.osgi.service.http.authentication.remote.user
+								//  - org.osgi.service.http.authentication.type
+								// we have to behave as we were authenticated...
+								// see: https://github.com/ops4j/org.ops4j.pax.web/issues/1907
+								if (sc == null) {
+									if (user != null || authType != null) {
+										exchange.setSecurityContext(new OsgiSecurityContext(exchange, user, authType));
+									}
+								} else if (!sc.isAuthenticated()) {
+									// this is less obvious, but for now we'll override this status only if there's no
+									// need to authenticate at Undertow level
+									if (!sc.isAuthenticationRequired() && (user != null || authType != null)) {
+										exchange.setSecurityContext(new OsgiSecurityContext(exchange, user, authType));
+									}
+								}
+							}
+
 							// continue normally with normal filters and target servlet
 							handler.handleRequest(exchange);
 						} else {
