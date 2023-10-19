@@ -798,7 +798,7 @@ public class OsgiServletContext implements ServletContext {
 
 	@Override
 	public String getServletContextName() {
-		return osgiContextModel.getName();
+		return osgiContextModel.isWab() ? osgiContextModel.getDisplayName() : osgiContextModel.getName();
 	}
 
 	// --- methods dependent on which actual servlet/filter uses the context
