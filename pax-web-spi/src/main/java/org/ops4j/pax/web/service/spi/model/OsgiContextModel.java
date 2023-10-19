@@ -208,6 +208,9 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 	/** If this name is set, it'll be used in associated {@link WebContainerContext} */
 	private String name = null;
 
+	/** Value from {@code <display-name>} of the WAB */
+	private String displayName = null;
+
 	/**
 	 * <p>Actual OSGi-specific <em>context</em> (can be {@link HttpContext} or
 	 * {@link ServletContextHelper} wrapper) that'll be used by {@link ServletContext}
@@ -540,6 +543,14 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getDisplayName() {
+		return displayName;
+	}
+
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
 	}
 
 	public Map<String, String> getContextParams() {

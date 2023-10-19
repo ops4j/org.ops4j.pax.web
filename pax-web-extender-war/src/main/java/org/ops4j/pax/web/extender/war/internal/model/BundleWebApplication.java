@@ -1296,6 +1296,9 @@ public class BundleWebApplication {
 		// we simply take the allocated (and associated with our bundle and our bundle's Web-ContextPath) context
 		final OsgiContextModel ocm = allocatedOsgiContextModel;
 
+		// https://issues.apache.org/jira/browse/KARAF-7774
+		ocm.setDisplayName(mainWebXml.getDisplayName());
+
 		ocm.setWab(true);
 		ocm.setServiceId(0);
 		ocm.setServiceRank(Integer.MAX_VALUE);
