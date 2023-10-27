@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright 2023 OPS4J.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.ops4j.pax.web.samples</groupId>
+		<artifactId>samples-war</artifactId>
+		<version>8.0.24-SNAPSHOT</version>
+		<relativePath>../../pom.xml</relativePath>
+	</parent>
+
+	<groupId>org.ops4j.pax.web.samples</groupId>
+	<artifactId>wab-using-filter</artifactId>
+	<packaging>war</packaging>
+
+	<name>OPS4J Pax Web WAB + Filter - the WAB</name>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<supportedProjectTypes>
+						<supportedProjectType>jar</supportedProjectType>
+						<supportedProjectType>war</supportedProjectType>
+						<supportedProjectType>bundle</supportedProjectType>
+					</supportedProjectTypes>
+					<instructions>
+						<Import-Package>
+							org.osgi.framework;version="[1.8,2)",
+							javax.servlet.*;version="[3.1,5)",
+							org.ops4j.pax.web.samples.wf.filter,
+							org.slf4j
+						</Import-Package>
+						<Private-Package>
+							org.ops4j.pax.web.samples.wf.wab
+						</Private-Package>
+						<_wab>${project.build.directory}/${project.build.finalName}</_wab>
+						<Web-ContextPath>/wab-and-filter</Web-ContextPath>
+						<Embed-Dependency>*;scope=compile|runtime</Embed-Dependency>
+						<Embed-Directory>WEB-INF/lib</Embed-Directory>
+						<Include-Resource>
+							{maven-dependencies}
+						</Include-Resource>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+
+		<!-- pax-web own artifacts -->
+
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>filter-bundle</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- JavaEE -->
+
+		<dependency>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+	</dependencies>
+
+</project>

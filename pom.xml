@@ -1194,6 +1194,18 @@
 				<type>war</type>
 			</dependency>
 
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>filter-bundle</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>wab-using-filter</artifactId>
+				<version>${project.version}</version>
+				<type>war</type>
+			</dependency>
+
 			<!-- pax-web jsp samples -->
 
 			<dependency>
