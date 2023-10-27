@@ -67,6 +67,7 @@
 		<module>war-keycloak</module>
 		<module>war-dispatcher</module>
 		<module>war-default</module>
+		<module>wab-and-filter</module>
 	</modules>
 
 </project>
