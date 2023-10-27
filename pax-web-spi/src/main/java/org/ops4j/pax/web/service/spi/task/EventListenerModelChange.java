@@ -20,8 +20,6 @@ import java.util.EventListener;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.servlet.ServletContextListener;
-
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 
@@ -63,13 +61,7 @@ public class EventListenerModelChange extends Change {
 	public void uninstall(List<Change> operations) {
 		if (getKind() == OpCode.ADD) {
 			EventListener listener = eventListenerModel.getResolvedListener();
-			if (listener != null) {
-				if (ServletContextListener.class.isAssignableFrom(listener.getClass())) {
-					// special case - we don't want such listeners to be removed, so they really get the
-					// notification about context being destroyed
-					return;
-				}
-			}
+			// schedule removal of all listeners, but ServletContextListener removals will be delayed
 			operations.add(new EventListenerModelChange(OpCode.DELETE, eventListenerModel));
 		}
 	}

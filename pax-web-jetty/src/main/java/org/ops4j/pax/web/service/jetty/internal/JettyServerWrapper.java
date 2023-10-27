@@ -1697,6 +1697,7 @@ class JettyServerWrapper implements BatchVisitor {
 
 					if (pendingTransaction(contextPath)) {
 						LOG.debug("Delaying removal of event listener {}", eventListenerModel);
+						delayedRemovals.get(contextPath).add(eventListenerModel);
 						return;
 					}
 
