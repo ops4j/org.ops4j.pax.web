@@ -56,7 +56,7 @@
 							org.ops4j.pax.web.samples.wf.wab
 						</Private-Package>
 						<_wab>${project.build.directory}/${project.build.finalName}</_wab>
-						<Web-ContextPath>/wab-and-filter</Web-ContextPath>
+						<Web-ContextPath>/</Web-ContextPath>
 						<Embed-Dependency>*;scope=compile|runtime</Embed-Dependency>
 						<Embed-Directory>WEB-INF/lib</Embed-Directory>
 						<Include-Resource>
