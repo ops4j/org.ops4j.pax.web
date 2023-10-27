@@ -2647,7 +2647,9 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 			serverModel.runSilently(() -> {
 				String name = Thread.currentThread().getName();
 				try {
-					Thread.currentThread().setName(name + " (" + batch.getShortDescription() + ")");
+					if (batch.getShortDescription() != null) {
+						Thread.currentThread().setName(name + " (" + batch.getShortDescription() + ")");
+					}
 
 					if (stopped) {
 						LOG.info("WebContainer is already stopped.");
