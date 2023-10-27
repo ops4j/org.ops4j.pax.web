@@ -40,7 +40,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
-				<!-- explicit version due to httpTomcatServerWrappers://issues.apache.org/jira/browse/SUREFIRE-1374 -->
+				<!-- explicit version due to https://issues.apache.org/jira/browse/SUREFIRE-1374 -->
 				<version>2.19.1</version>
 				<configuration>
 					<includes>
