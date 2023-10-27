@@ -185,6 +185,11 @@ public class PaxWebServletHandler extends ServletHandler {
 			if (fh instanceof PaxWebFilterHolder) {
 				PaxWebFilterHolder pwfh = (PaxWebFilterHolder) fh;
 				if (pwfh.getFilterModel() == null || pwfh.getFilterModel().isDynamic()) {
+					try {
+						pwfh.destroyInstance(pwfh.getInstance());
+					} catch (Exception e) {
+						LOG.warn("Problem destroying filter {}: {}", pwfh, e.getMessage(), e);
+					}
 					continue;
 				}
 				newFilters.add(pwfh);
