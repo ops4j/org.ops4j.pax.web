@@ -23,7 +23,7 @@
 	<parent>
 		<groupId>org.ops4j.pax.web</groupId>
 		<artifactId>pax-web-itest</artifactId>
-		<version>9.0.13-SNAPSHOT</version>
+		<version>9.0.13</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 

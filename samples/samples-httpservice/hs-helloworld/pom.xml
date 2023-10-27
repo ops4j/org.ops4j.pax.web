@@ -23,7 +23,7 @@
 	<parent>
 		<groupId>org.ops4j.pax.web.samples</groupId>
 		<artifactId>samples-httpservice</artifactId>
-		<version>9.0.13-SNAPSHOT</version>
+		<version>9.0.13</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
