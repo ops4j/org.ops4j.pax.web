@@ -34,7 +34,7 @@ import org.ops4j.pax.web.service.spi.servlet.DefaultSessionCookieConfig;
 public class SessionConfigurationModel {
 
 	/** {@code <session-config>/<session-timeout>} */
-	private Integer sessionTimeout = PaxWebConstants.DEFAULT_SESSION_TIMEOUT;
+	private Integer sessionTimeout;
 
 	/** {@code <session-config>/<cookie-config>} */
 	private SessionCookieConfig sessionCookieConfig = new DefaultSessionCookieConfig();
@@ -65,7 +65,7 @@ public class SessionConfigurationModel {
 	//  - io.undertow.server.session.SessionManager/io.undertow.servlet.api.SessionPersistenceManager (no built-in file persistence manager in Undertow)
 
 	public Integer getSessionTimeout() {
-		return sessionTimeout == null ? PaxWebConstants.DEFAULT_SESSION_TIMEOUT : sessionTimeout;
+		return sessionTimeout;
 	}
 
 	public void setSessionTimeout(Integer sessionTimeout) {
