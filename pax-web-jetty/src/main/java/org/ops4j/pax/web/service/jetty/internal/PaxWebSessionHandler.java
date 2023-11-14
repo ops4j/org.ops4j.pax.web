@@ -26,7 +26,7 @@ public class PaxWebSessionHandler extends SessionHandler {
 		HttpCookie cookie = super.getSessionCookie(session, requestIsSecure);
 		if (cookie != null) {
 			String id = getExtendedId(cookie.getValue());
-			return HttpCookie.from(cookie.getName(), id, getSessionAttributes());
+			return HttpCookie.from(cookie.getName(), id, getSessionCookieAttributes());
 		}
 		return cookie;
 	}
