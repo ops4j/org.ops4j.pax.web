@@ -3208,17 +3208,17 @@
 
 		<!-- Jetty 12 support -->
 		<module>pax-web-jetty</module>
-<!-- 		<module>pax-web-jetty-bundle</module>-->
+ 		<module>pax-web-jetty-bundle</module>
 
 		<!-- Tomcat 10 support -->
 		<module>pax-web-tomcat</module>
 		<module>pax-web-tomcat-websocket</module>
-<!--		<module>pax-web-tomcat-bundle</module>-->
+		<module>pax-web-tomcat-bundle</module>
 
 		<!-- Undertow 2.3 support -->
 		<module>pax-web-undertow</module>
 		<module>pax-web-undertow-websocket</module>
-<!--		<module>pax-web-undertow-bundle</module>-->
+		<module>pax-web-undertow-bundle</module>
 
 <!--		<module>pax-web-features</module>-->
 
