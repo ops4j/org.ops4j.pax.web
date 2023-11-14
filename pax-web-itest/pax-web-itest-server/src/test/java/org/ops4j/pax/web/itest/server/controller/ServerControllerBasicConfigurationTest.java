@@ -38,10 +38,10 @@ import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.task.Batch;
 import org.osgi.framework.Bundle;
 
-import javax.servlet.Servlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.endsWith;
@@ -325,7 +325,7 @@ public class ServerControllerBasicConfigurationTest extends MultiContainerTestSu
 			protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 				resp.setContentType("text/plain");
 
-				certificates.add((X509Certificate[]) req.getAttribute("javax.servlet.request.X509Certificate"));
+				certificates.add((X509Certificate[]) req.getAttribute("jakarta.servlet.request.X509Certificate"));
 
 				resp.getWriter().print("OK");
 				resp.getWriter().close();
