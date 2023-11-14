@@ -28,11 +28,11 @@ import java.util.MissingResourceException;
 import java.util.Optional;
 import java.util.PropertyResourceBundle;
 
-import javax.faces.application.Resource;
-import javax.faces.application.ResourceHandler;
-import javax.faces.application.ResourceWrapper;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
+import jakarta.faces.application.Resource;
+import jakarta.faces.application.ResourceHandler;
+import jakarta.faces.application.ResourceWrapper;
+import jakarta.faces.context.ExternalContext;
+import jakarta.faces.context.FacesContext;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletResponseWrapper;
 import jakarta.servlet.http.HttpServletResponse;
@@ -152,9 +152,9 @@ public final class ResourceHandlerUtils {
 			if (mapping.isExtensionMapping()) {
 				// Mapping using a suffix. In this case we have to strip
 				// the suffix. If we have a url like:
-				// http://localhost:8080/testjsf20/javax.faces.resource/imagen.jpg.jsf?ln=dojo
+				// http://localhost:8080/testjsf20/jakarta.faces.resource/imagen.jpg.jsf?ln=dojo
 				//
-				// The servlet path is /javax.faces.resource/imagen.jpg.jsf
+				// The servlet path is /jakarta.faces.resource/imagen.jpg.jsf
 				//
 				// For obtain the resource name we have to remove the .jsf
 				// suffix and
@@ -167,10 +167,10 @@ public final class ResourceHandlerUtils {
 			} else {
 				// Mapping using prefix. In this case we have to strip
 				// the prefix used for mapping. If we have a url like:
-				// http://localhost:8080/testjsf20/faces/javax.faces.resource/imagen.jpg?ln=dojo
+				// http://localhost:8080/testjsf20/faces/jakarta.faces.resource/imagen.jpg?ln=dojo
 				//
 				// The servlet path is /faces
-				// and the path info is /javax.faces.resource/imagen.jpg
+				// and the path info is /jakarta.faces.resource/imagen.jpg
 				//
 				// For obtain the resource name we have to remove the /faces
 				// prefix and

@@ -209,8 +209,6 @@ public abstract class AbstractControlledTestBase {
 //						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 2).noStart(),
 				mavenBundle("jakarta.servlet", "jakarta.servlet-api")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-//				mavenBundle("org.osgi", "org.osgi.service.servlet")
-//						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1).start(),
 				mavenBundle("org.ops4j.pax.web", "pax-web-api")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1).start(),
 				mavenBundle("org.ops4j.pax.web", "pax-web-spi")

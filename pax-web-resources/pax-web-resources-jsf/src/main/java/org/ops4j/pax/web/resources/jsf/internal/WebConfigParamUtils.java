@@ -18,7 +18,7 @@
  */
 package org.ops4j.pax.web.resources.jsf.internal;
 
-import javax.faces.context.ExternalContext;
+import jakarta.faces.context.ExternalContext;
 
 /**
  * Utilities to handle web.xml

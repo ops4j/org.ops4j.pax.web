@@ -18,13 +18,14 @@
  */
 package org.ops4j.pax.web.samples.primefaces;
 
-// According to "5.4 Managed Bean Annotations" of JSF 2.3 specification,javax.faces.bean package
+// According to "5.4 Managed Bean Annotations" of JSF 2.3 specification,jakarta.faces.bean package
 // is deprecated and the recommended annotations should be taken from CDI 1.2
 
-@SuppressWarnings("deprecation")
-@javax.faces.bean.ManagedBean(name = "helloWorld")
-@javax.faces.bean.SessionScoped
-public class HelloWorldController {
+import java.io.Serializable;
+
+@jakarta.inject.Named("helloWorld")
+@jakarta.enterprise.context.SessionScoped
+public class HelloWorldController implements Serializable {
 
 	private String name;
 
