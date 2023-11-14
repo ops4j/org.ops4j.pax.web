@@ -59,6 +59,8 @@ public class TomcatResourceServlet extends DefaultServlet {
 	private String[] welcomeFiles;
 
 	private boolean redirectWelcome = false;
+
+	// this flag has to be set if resource/default servlet is mapped to "/", as pathInfo is null in such case
 	private boolean pathInfoOnly = true;
 
 	private OsgiServletContext highestRankedContext;
@@ -208,12 +210,13 @@ public class TomcatResourceServlet extends DefaultServlet {
 
 		String resolvedWelcome = null;
 
-		// 1) physical resources (but checked for pathInfo only):
+		// 1) physical resources:
 		for (String welcome : welcomeFiles) {
 			String path = relativePath + welcome;
 			WebResource resource = resources.getResource(path);
 			if (resource.exists()) {
 				// redirect/include/forward has to be done with our context + servlet path
+				// for physical resources, we need to add servletPath back
 				resolvedWelcome = pathInfoOnly ? servletPath + path : path;
 				break;
 			}
@@ -223,9 +226,7 @@ public class TomcatResourceServlet extends DefaultServlet {
 		RequestDispatcher dispatcher = null;
 		if (resolvedWelcome == null) {
 			for (String welcome : welcomeFiles) {
-				// path uses servlet path as well - always - not only with !pathInfoOnly, but because
-				// pathInfoOnly=false is set ONLY for "/" servlet, it doesn't really matter
-				String path = servletPath + relativePath + welcome;
+				String path = relativePath + welcome;
 				dispatcher = request.getRequestDispatcher(path);
 				if (dispatcher != null) {
 					resolvedWelcome = path;
@@ -241,7 +242,7 @@ public class TomcatResourceServlet extends DefaultServlet {
 					return;
 				}
 				String queryString = request.getQueryString();
-				if (queryString != null && !"".equals(queryString)) {
+				if (queryString != null && !queryString.isEmpty()) {
 					resolvedWelcome = resolvedWelcome + "?" + queryString;
 				}
 				resolvedWelcome = request.getContextPath() + resolvedWelcome;
@@ -283,7 +284,7 @@ public class TomcatResourceServlet extends DefaultServlet {
 	/**
 	 * <p>Override {@link DefaultServlet#getRelativePath(HttpServletRequest, boolean)} to use only path info. Just
 	 * as {@link org.apache.catalina.servlets.WebdavServlet} and just as Jetty does it with {@code pathInfoOnly}
-	 * servlet init parameter.</p>
+	 * servlet init parameter (although it has changed drammatically with Jetty 12).</p>
 	 *
 	 * <p>As with Jetty, {@code pathInfoOnly} has to be {@code false} because servlet path and path info are
 	 * confusing when servlet is mapped to "/".</p>
@@ -322,7 +323,7 @@ public class TomcatResourceServlet extends DefaultServlet {
 		if (childPath == null) {
 			return null;
 		}
-		if (childPath.length() > 0 && !childPath.startsWith("/")) {
+		if (!childPath.isEmpty() && !childPath.startsWith("/")) {
 			childPath = "/" + childPath;
 		}
 

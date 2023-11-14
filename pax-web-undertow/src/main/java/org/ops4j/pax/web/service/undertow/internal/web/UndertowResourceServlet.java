@@ -74,6 +74,7 @@ import org.slf4j.LoggerFactory;
 	private String[] welcomeFiles;
 
 	private boolean redirectWelcome = false;
+	// this flag has to be set if resource/default servlet is mapped to "/", as pathInfo is null in such case
 	private boolean pathInfoOnly = true;
 
 	private boolean cacheConfigurable = false;
@@ -261,12 +262,13 @@ import org.slf4j.LoggerFactory;
 		HttpServerExchange exchange = requireCurrentServletRequestContext().getOriginalRequest().getExchange();
 		String resolvedWelcome = null;
 
-		// 1) physical resources (but checked for pathInfo only):
+		// 1) physical resources:
 		for (String welcome : welcomeFiles) {
 			String path = relativePath + welcome;
 			Resource resource = resourceSupplier.getResource(exchange, path);
 			if (resource != null) {
 				// redirect/include/forward has to be done with our context + servlet path
+				// for physical resources, we need to add servletPath back
 				resolvedWelcome = pathInfoOnly ? servletPath + path : path;
 				break;
 			}
@@ -276,8 +278,7 @@ import org.slf4j.LoggerFactory;
 		RequestDispatcher dispatcher = null;
 		if (resolvedWelcome == null) {
 			for (String welcome : welcomeFiles) {
-				// path uses servlet path as well
-				String path = servletPath + relativePath + welcome;
+				String path = relativePath + welcome;
 				dispatcher = req.getRequestDispatcher(path);
 				if (dispatcher != null) {
 					resolvedWelcome = path;
