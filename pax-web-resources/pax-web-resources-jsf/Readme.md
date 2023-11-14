@@ -25,4 +25,4 @@ The implementation makes use of the standard JSF-ResourceHandler-API. Just enabl
 A service with the interface `org.ops4j.pax.web.resource.api.OsgiResourceLocator` must be available in the framework. The default implementation is provided via [pax-web-resources-extender](../pax-web-resources-extender).
 
 
-There is no coupling to Myfaces, nor Mojarra. Only `javax.faces` is used.
+There is no coupling to Myfaces, nor Mojarra. Only `jakarta.faces` is used.

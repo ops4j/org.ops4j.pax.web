@@ -56,7 +56,7 @@
 					<instructions>
 						<Import-Package>
 							<!-- This is one of the required "wires" - to ensure that this WAB is "wired" to MyFaces -->
-							javax.faces.webapp
+							jakarta.faces.webapp
 						</Import-Package>
 						<Require-Bundle>
 							<!--
@@ -93,6 +93,11 @@
 		<dependency>
 			<groupId>jakarta.servlet</groupId>
 			<artifactId>jakarta.servlet-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.enterprise</groupId>
+			<artifactId>jakarta.enterprise.cdi-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 

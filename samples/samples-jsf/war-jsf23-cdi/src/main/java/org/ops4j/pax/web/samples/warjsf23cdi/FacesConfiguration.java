@@ -17,8 +17,8 @@ package org.ops4j.pax.web.samples.warjsf23cdi;
 
 import org.osgi.service.cdi.annotations.Bean;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.faces.annotation.FacesConfig;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.faces.annotation.FacesConfig;
 
 @ApplicationScoped
 // see:

@@ -44,7 +44,7 @@
 						<Bundle-SymbolicName>jsf-resourcehandler-myfaces</Bundle-SymbolicName>
 						<Import-Package>
 							org.ops4j.pax.web.resources.jsf,
-							javax.faces.webapp
+							jakarta.faces.webapp
 						</Import-Package>
 						<Require-Bundle>
 							org.apache.myfaces.core.impl
@@ -90,6 +90,12 @@
 		<dependency>
 			<groupId>jakarta.el</groupId>
 			<artifactId>jakarta.el-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.enterprise</groupId>
+			<artifactId>jakarta.enterprise.cdi-api</artifactId>
+			<scope>provided</scope>
 		</dependency>
 
 		<!-- Other -->

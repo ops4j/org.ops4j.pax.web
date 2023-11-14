@@ -52,10 +52,10 @@
 
 							javax.enterprise.context,
 							javax.inject,
-							javax.faces.annotation,
-							javax.faces.bean,
-							javax.faces.view,
-							javax.faces.webapp,
+							jakarta.faces.annotation,
+							jakarta.faces.bean,
+							jakarta.faces.view,
+							jakarta.faces.webapp,
 							org.osgi.service.url,
 							org.osgi.service.cdi.annotations,
 							org.ops4j.pax.web.service.spi

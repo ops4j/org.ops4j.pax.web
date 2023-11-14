@@ -20,18 +20,7 @@
  */
 package org.ops4j.pax.web.itest.container.war.jsf;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.Collection;
-import javax.faces.application.Resource;
-import javax.faces.context.FacesContext;
-
+import jakarta.faces.application.Resource;
 import org.junit.Test;
 import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 import org.ops4j.pax.web.itest.utils.WaitCondition;
@@ -46,6 +35,16 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.Collection;
 
 import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
@@ -113,7 +112,7 @@ public class AbstractWarJSFResourcehandlerIntegrationTest extends AbstractContai
 	 * 	    </ul>
 	 * 	</li>
 	 * 	<li>
-	 * 	    Test {@link org.ops4j.pax.web.resources.jsf.OsgiResource#userAgentNeedsUpdate(FacesContext)}
+	 * 	    Test {@code org.ops4j.pax.web.resources.jsf.OsgiResource#userAgentNeedsUpdate(FacesContext)}
 	 * 	    with an If-Modified-Since header
 	 * 	</li>
 	 * 	<li>Test servletmapping with prefix (faces/*) rather than extension for both, page and image serving</li>
@@ -225,11 +224,11 @@ public class AbstractWarJSFResourcehandlerIntegrationTest extends AbstractContai
 						resp -> resp.contains("/osgi-resourcehandler-myfaces/faces/javax.faces.resource/images/iceland.jpg?type=osgi&amp;ln=default&amp;lv=2_0"))
 				.doGETandExecuteTest(pageUrlWithPrefixMapping);
 
-		try {
-			testResourceUnavailble();
-			fail("Expected IOException");
-		} catch (IOException ignored) {
-		}
+//		try {
+//			testResourceUnavailble();
+//			fail("Expected IOException");
+//		} catch (IOException ignored) {
+//		}
 	}
 
 	/**
@@ -244,7 +243,7 @@ public class AbstractWarJSFResourcehandlerIntegrationTest extends AbstractContai
 	 * <p>
 	 * According to the spec, IOException is the only one catched later on.
 	 */
-//	@Test(expected = IOException.class)
+	@Test(expected = IOException.class)
 	public void testResourceUnavailble() throws Exception {
 		ServiceReference<OsgiResourceLocator> sr = context.getServiceReference(OsgiResourceLocator.class);
 		OsgiResourceLocator resourceLocator = context.getService(sr);

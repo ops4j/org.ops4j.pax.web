@@ -15,10 +15,11 @@
  */
 package org.ops4j.pax.web.jsf.resourcehandler.itest.application.myfaces;
 
-@SuppressWarnings("deprecation")
-@javax.faces.bean.ManagedBean
-@javax.faces.bean.SessionScoped
-public class SomeBean {
+import java.io.Serializable;
+
+@jakarta.inject.Named
+@jakarta.enterprise.context.SessionScoped
+public class SomeBean implements Serializable {
 
 	public String getHello() {
 		return "Hello Bean";
