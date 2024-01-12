@@ -49,7 +49,7 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
 
-import org.apache.commons.compress.archivers.ArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.felix.utils.extender.Extension;
@@ -936,7 +936,7 @@ public class MultiContainerTestSupport {
 					return;
 				}
 				try {
-					ArchiveEntry entry = zos.createArchiveEntry(p.toFile(), name);
+					ZipArchiveEntry entry = zos.createArchiveEntry(p.toFile(), name);
 					zos.putArchiveEntry(entry);
 					if (p.toFile().isFile()) {
 						try (FileInputStream fis = new FileInputStream(p.toFile())) {
