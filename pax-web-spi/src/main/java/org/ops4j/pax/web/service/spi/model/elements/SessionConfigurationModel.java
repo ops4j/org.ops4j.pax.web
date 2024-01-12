@@ -20,7 +20,6 @@ import java.util.Set;
 import javax.servlet.SessionCookieConfig;
 import javax.servlet.SessionTrackingMode;
 
-import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.servlet.DefaultSessionCookieConfig;
 
