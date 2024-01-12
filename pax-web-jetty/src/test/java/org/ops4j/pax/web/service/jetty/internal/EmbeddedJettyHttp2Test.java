@@ -53,6 +53,7 @@ import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.AbstractHandler;
+import org.eclipse.jetty.util.NanoTime;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.junit.Before;
 import org.junit.Test;
@@ -75,7 +76,7 @@ public class EmbeddedJettyHttp2Test {
 
 	@Before
 	public void resetState() {
-		decoder = new HpackDecoder(8192);
+		decoder = new HpackDecoder(8192, NanoTime::now);
 		decoder.setMaxTableCapacity(4096);
 		responses = new HashMap<>();
 	}
