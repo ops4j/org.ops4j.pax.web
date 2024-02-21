@@ -215,7 +215,7 @@
 		<dependency.org.apache.cxf>3.5.7</dependency.org.apache.cxf>
 
 		<dependency.org.apache.commons.collections4>4.4</dependency.org.apache.commons.collections4>
-		<dependency.org.apache.commons.compress>1.25.0</dependency.org.apache.commons.compress>
+		<dependency.org.apache.commons.compress>1.26.0</dependency.org.apache.commons.compress>
 		<dependency.org.apache.commons.lang3>3.14.0</dependency.org.apache.commons.lang3>
 
 		<dependency.org.apache.felix.configadmin>1.9.26</dependency.org.apache.felix.configadmin>
