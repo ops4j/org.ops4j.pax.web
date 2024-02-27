@@ -2736,6 +2736,9 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 					deployment.setDefaultSessionTimeout(session.getSessionTimeout() * 60);
 				}
 				SessionCookieConfig scc = session.getSessionCookieConfig();
+				if (scc == null) {
+					scc = configuration.session().getDefaultSessionCookieConfig();
+				}
 				ServletSessionConfig ssc = deployment.getServletSessionConfig();
 				if (scc != null) {
 					if (ssc == null) {

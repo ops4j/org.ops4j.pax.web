@@ -21,7 +21,6 @@ import javax.servlet.SessionCookieConfig;
 import javax.servlet.SessionTrackingMode;
 
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
-import org.ops4j.pax.web.service.spi.servlet.DefaultSessionCookieConfig;
 
 /**
  * <p>Set of parameters configuring HTTP Sessions, referenced from {@link OsgiContextModel}.</p>
@@ -36,7 +35,7 @@ public class SessionConfigurationModel {
 	private Integer sessionTimeout;
 
 	/** {@code <session-config>/<cookie-config>} */
-	private SessionCookieConfig sessionCookieConfig = new DefaultSessionCookieConfig();
+	private SessionCookieConfig sessionCookieConfig;
 
 	/** {@code <session-config>/<tracking-mode>} */
 	private final Set<SessionTrackingMode> trackingModes = new HashSet<>();
