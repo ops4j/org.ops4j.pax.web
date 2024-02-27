@@ -2218,6 +2218,9 @@ class JettyServerWrapper implements BatchVisitor {
 					sessionHandler.setMaxInactiveInterval(sessionConfig.getSessionTimeout() * 60);
 				}
 				SessionCookieConfig scc = sessionConfig.getSessionCookieConfig();
+				if (scc == null) {
+					scc = configuration.session().getDefaultSessionCookieConfig();
+				}
 				if (scc != null) {
 					if (scc.getName() != null) {
 						sessionHandler.setSessionCookie(scc.getName());

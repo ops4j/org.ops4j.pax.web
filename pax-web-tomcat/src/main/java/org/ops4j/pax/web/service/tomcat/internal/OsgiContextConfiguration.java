@@ -124,6 +124,9 @@ public class OsgiContextConfiguration implements LifecycleListener {
 					context.setSessionTimeout(sc.getSessionTimeout());
 				}
 				SessionCookieConfig scc = sc.getSessionCookieConfig();
+				if (scc == null) {
+					scc = configuration.session().getDefaultSessionCookieConfig();
+				}
 				SessionCookieConfig config = context.getServletContext().getSessionCookieConfig();
 				if (scc != null && config != null) {
 					if (scc.getName() != null) {
