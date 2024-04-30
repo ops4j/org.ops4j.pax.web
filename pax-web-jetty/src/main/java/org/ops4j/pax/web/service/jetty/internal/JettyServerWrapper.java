@@ -802,7 +802,7 @@ class JettyServerWrapper implements BatchVisitor {
 			SessionHandler sessions = sch.getSessionHandler();
 			if (sessions != null) {
 				SessionConfiguration sc = configuration.session();
-				sessions.setMaxInactiveInterval(sc.getSessionTimeout());
+				sessions.setMaxInactiveInterval(sc.getSessionTimeout() * 60);
 				sessions.setSessionCookie(defaultSessionCookieConfig.getName());
 				sessions.getSessionCookieConfig().setDomain(defaultSessionCookieConfig.getDomain());
 				// will default to context path if null
