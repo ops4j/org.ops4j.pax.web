@@ -228,7 +228,7 @@
 		<!-- Version 2.2.x of felix.scr is for OSGi Core R10+ -->
 		<dependency.org.apache.felix.scr>2.1.30</dependency.org.apache.felix.scr>
 		<dependency.org.apache.felix.utils>1.11.8</dependency.org.apache.felix.utils>
-		<dependency.org.apache.felix.webconsole>4.9.8</dependency.org.apache.felix.webconsole>
+		<dependency.org.apache.felix.webconsole>4.8.12</dependency.org.apache.felix.webconsole>
 
 		<dependency.org.apache.geronimo.bundles.commons-discovery>0.4_1</dependency.org.apache.geronimo.bundles.commons-discovery>
 
@@ -249,7 +249,8 @@
 		<dependency.org.apache.ws.xmlschema>2.3.1</dependency.org.apache.ws.xmlschema>
 		<dependency.org.apache.xbean>4.25</dependency.org.apache.xbean>
 
-		<dependency.org.bouncycastle>1.78.1</dependency.org.bouncycastle>
+		<!-- 1.78.1 has issues: https://github.com/bcgit/bc-java/issues/1644 -->
+		<dependency.org.bouncycastle>1.77</dependency.org.bouncycastle>
 
 		<dependency.org.codehaus.woodstox.stax2-api>4.2.2</dependency.org.codehaus.woodstox.stax2-api>
 
@@ -275,7 +276,8 @@
 		<dependency.org.jboss.classfilewriter>1.2.5.Final</dependency.org.jboss.classfilewriter>
 		<!-- 3.4.x is the last for JDK8 -->
 		<dependency.org.jboss.logging>3.4.3.Final</dependency.org.jboss.logging>
-		<dependency.org.jboss.threads>3.6.1.Final</dependency.org.jboss.threads>
+		<!-- 3.6.x is JDK 11 -->
+		<dependency.org.jboss.threads>3.5.1.Final</dependency.org.jboss.threads>
 		<!-- 3.1.7+ doesn't work with aries-cdi because of WELD-2581 -->
 		<dependency.org.jboss.weld>3.1.6.Final</dependency.org.jboss.weld>
 		<dependency.org.jboss.xnio>3.8.14.Final</dependency.org.jboss.xnio>
@@ -311,7 +313,8 @@
 		<dependency.org.vaadin.artur>1.7.1</dependency.org.vaadin.artur>
 
 		<dependency.org.wildfly.client>1.0.1.Final</dependency.org.wildfly.client>
-		<dependency.org.wildfly.common>1.7.0.Final</dependency.org.wildfly.common>
+		<!-- 1.7.0.Final is JDK 11 -->
+		<dependency.org.wildfly.common>1.6.0.Final</dependency.org.wildfly.common>
 
 		<dependency.org.yaml.snakeyaml>1.33</dependency.org.yaml.snakeyaml>
 	</properties>
