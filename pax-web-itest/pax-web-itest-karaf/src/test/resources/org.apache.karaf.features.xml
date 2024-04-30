@@ -22,4 +22,9 @@
         <repository>mvn:org.ops4j.pax.web/pax-web-features/8.0.27/xml/features</repository>
     </blacklistedRepositories>
 
+    <blacklistedFeatures>
+        <feature version="[6,7)">spring</feature>
+        <feature version="[6,7)">spring-web</feature>
+    </blacklistedFeatures>
+
 </featuresProcessing>

@@ -40,7 +40,7 @@ public abstract class SpringWiredBaseKarafTest extends SpringEmbeddedBaseKarafTe
 
 	public Option springConfig() {
 		MavenUrlReference karafSpringFeatures = maven()
-				.groupId("org.apache.karaf.features").artifactId("spring")
+				.groupId("org.apache.karaf.features").artifactId("spring-legacy")
 				.type("xml").classifier("features").version(getKarafVersion());
 
 		return features(karafSpringFeatures, "spring", "spring-web");
