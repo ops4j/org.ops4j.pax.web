@@ -251,7 +251,8 @@
 
 		<dependency.org.codehaus.woodstox.stax2-api>4.2.2</dependency.org.codehaus.woodstox.stax2-api>
 
-		<dependency.org.eclipse.jdt.ecj>3.37.0</dependency.org.eclipse.jdt.ecj>
+		<!-- 3.34.0 is JDK17+ -->
+		<dependency.org.eclipse.jdt.ecj>3.33.0</dependency.org.eclipse.jdt.ecj>
 
 		<!-- Please keep Maven and OSGi version in sync -->
 		<dependency.org.eclipse.jetty>10.0.20</dependency.org.eclipse.jetty>
