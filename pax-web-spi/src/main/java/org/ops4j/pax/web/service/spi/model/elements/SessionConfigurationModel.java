@@ -62,10 +62,18 @@ public class SessionConfigurationModel {
 	//  - org.apache.catalina.session.StandardManager/org.apache.catalina.session.FileStore
 	//  - io.undertow.server.session.SessionManager/io.undertow.servlet.api.SessionPersistenceManager (no built-in file persistence manager in Undertow)
 
+	/**
+	 * Get session timeout in minutes
+	 * @return
+	 */
 	public Integer getSessionTimeout() {
 		return sessionTimeout;
 	}
 
+	/**
+	 * Sets session timeout in minutes
+	 * @param sessionTimeout
+	 */
 	public void setSessionTimeout(Integer sessionTimeout) {
 		this.sessionTimeout = sessionTimeout;
 	}
