@@ -1507,7 +1507,7 @@ class JettyServerWrapper implements BatchVisitor {
 				// when targeting /s1 servlet
 
 				// if there's out-of-band list of new filters, there's no way the change will be "quick"
-				noQuick |= filtersMap.get(model) != null;
+				noQuick |= change.useWebOrder() || filtersMap.get(model) != null;
 
 				// we need highest ranked OsgiContextModel for current context path - chosen not among all
 				// associated OsgiContextModels, but among OsgiContextModels of the FilterModel
@@ -1610,7 +1610,20 @@ class JettyServerWrapper implements BatchVisitor {
 				}
 				newFilterMappingsListBefore.addAll(newFilterMappingsListAfter);
 				sch.getServletHandler().setFilters(newFilterHolders);
-				sch.getServletHandler().setFilterMappings(newFilterMappingsListBefore.toArray(new PaxWebFilterMapping[0]));
+
+				if (!change.useWebOrder()) {
+					sch.getServletHandler().setFilterMappings(newFilterMappingsListBefore.toArray(new PaxWebFilterMapping[0]));
+				}
+			}
+
+			if (change.useWebOrder()) {
+				// add the mappings now using web.xml order
+				Map<Integer, PaxWebFilterMapping> webOrderMapping = new TreeMap<>();
+				for (PaxWebFilterMapping mapping : newFilterMappingsListBefore) {
+					webOrderMapping.put(mapping.getOrder(), mapping);
+				}
+
+				sch.getServletHandler().setFilterMappings(webOrderMapping.values().toArray(new PaxWebFilterMapping[0]));
 			}
 
 			if (!change.isDynamic()) {

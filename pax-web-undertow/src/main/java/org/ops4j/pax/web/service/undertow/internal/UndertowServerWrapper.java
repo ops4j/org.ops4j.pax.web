@@ -1922,6 +1922,8 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 
 			List<FilterInfo> added = new LinkedList<>();
 
+			// order -> [ FilterModel, FilterModel.Mapping ]
+			Map<Integer, Object[]> webOrderMapping = new TreeMap<>();
 			for (FilterModel model : filters) {
 				if (model.isPreprocessor()) {
 					continue;
@@ -1974,7 +1976,37 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 				if (!quick || added.size() > 0 || state != DeploymentManager.State.STARTED) {
 					deploymentInfo.addFilter(info);
 
-					configureFilterMappings(model, deploymentInfo);
+					if (!change.useWebOrder()) {
+						configureFilterMappings(model, deploymentInfo);
+					} else {
+						// add mapping later
+						for (FilterModel.Mapping mapping : model.getMappingsPerDispatcherTypes()) {
+							webOrderMapping.put(mapping.getOrder(), new Object[] { model, mapping });
+						}
+					}
+				}
+			}
+
+			if (change.useWebOrder()) {
+				for (Object[] pair : webOrderMapping.values()) {
+					FilterModel model = (FilterModel) pair[0];
+					FilterModel.Mapping mapping = (FilterModel.Mapping) pair[1];
+					String filterName = model.getName();
+
+					for (DispatcherType dt : mapping.getDispatcherTypes()) {
+						if (mapping.getRegexPatterns() != null && mapping.getRegexPatterns().length > 0) {
+							deploymentInfo.addFilterUrlMapping(filterName, "/*", dt);
+						} else if (mapping.getUrlPatterns() != null) {
+							for (String pattern : mapping.getUrlPatterns()) {
+								deploymentInfo.addFilterUrlMapping(filterName, pattern, dt);
+							}
+						}
+						if (mapping.getServletNames() != null) {
+							for (String name : mapping.getServletNames()) {
+								deploymentInfo.addFilterServletNameMapping(filterName, name, dt);
+							}
+						}
+					}
 				}
 			}
 

@@ -68,6 +68,7 @@
 		<module>war-dispatcher</module>
 		<module>war-default</module>
 		<module>wab-and-filter</module>
+		<module>war-filters</module>
 	</modules>
 
 </project>
