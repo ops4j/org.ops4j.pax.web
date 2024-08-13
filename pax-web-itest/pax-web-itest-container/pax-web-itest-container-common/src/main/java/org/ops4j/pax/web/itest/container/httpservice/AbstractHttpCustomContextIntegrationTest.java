@@ -55,10 +55,10 @@ public abstract class AbstractHttpCustomContextIntegrationTest extends AbstractC
 	public void testRoot() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Response must contain 'Session:'", resp -> resp.contains("Session:"))
-				.doGETandExecuteTest("http://127.0.0.1:8181/c/s");
+				.doGETandExecuteTest("http://127.0.0.1:8181/c.b.d/s");
 		// test image-serving
 		HttpTestClientFactory.createDefaultTestClient()
-				.doGETandExecuteTest("http://127.0.0.1:8181/c/www/logo.png");
+				.doGETandExecuteTest("http://127.0.0.1:8181/c.b.d/www/logo.png");
 	}
 
 }
