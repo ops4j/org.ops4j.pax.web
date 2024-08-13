@@ -167,15 +167,15 @@
 		<dependency.biz.aQute.bnd.bndlib>7.0.0</dependency.biz.aQute.bnd.bndlib>
 
 		<dependency.commons-beanutils>1.9.4</dependency.commons-beanutils>
-		<dependency.commons-codec>1.17.0</dependency.commons-codec>
+		<dependency.commons-codec>1.17.1</dependency.commons-codec>
 		<dependency.commons-collections3>3.2.2</dependency.commons-collections3>
 		<dependency.commons-digester>1.8.1</dependency.commons-digester>
 		<dependency.commons-fileupload>1.5</dependency.commons-fileupload>
 		<dependency.commons-io>2.16.1</dependency.commons-io>
 		<dependency.com.fasterxml.classmate>1.7.0</dependency.com.fasterxml.classmate>
-		<dependency.com.fasterxml.jackson.core>2.17.0</dependency.com.fasterxml.jackson.core>
-		<dependency.com.fasterxml.jackson.core.databind>2.17.0</dependency.com.fasterxml.jackson.core.databind>
-		<dependency.com.fasterxml.woodstox>6.6.2</dependency.com.fasterxml.woodstox>
+		<dependency.com.fasterxml.jackson.core>2.17.2</dependency.com.fasterxml.jackson.core>
+		<dependency.com.fasterxml.jackson.core.databind>2.17.2</dependency.com.fasterxml.jackson.core.databind>
+		<dependency.com.fasterxml.woodstox>6.7.0</dependency.com.fasterxml.woodstox>
 		<dependency.com.sun.activation>1.2.0</dependency.com.sun.activation>
 		<dependency.com.sun.istack>3.0.12</dependency.com.sun.istack>
 		<dependency.com.sun.xml.bind>2.3.9</dependency.com.sun.xml.bind>
@@ -214,8 +214,8 @@
 		<dependency.org.apache.cxf>3.5.8</dependency.org.apache.cxf>
 
 		<dependency.org.apache.commons.collections4>4.4</dependency.org.apache.commons.collections4>
-		<dependency.org.apache.commons.compress>1.26.1</dependency.org.apache.commons.compress>
-		<dependency.org.apache.commons.lang3>3.14.0</dependency.org.apache.commons.lang3>
+		<dependency.org.apache.commons.compress>1.27.0</dependency.org.apache.commons.compress>
+		<dependency.org.apache.commons.lang3>3.16.0</dependency.org.apache.commons.lang3>
 
 		<dependency.org.apache.felix.configadmin>1.9.26</dependency.org.apache.felix.configadmin>
 		<dependency.org.apache.felix.converter>1.0.18</dependency.org.apache.felix.converter>
@@ -235,7 +235,7 @@
 		<dependency.org.apache.httpcomponents.client4>4.5.14</dependency.org.apache.httpcomponents.client4>
 		<dependency.org.apache.httpcomponents.client5>5.3.1</dependency.org.apache.httpcomponents.client5>
 		<dependency.org.apache.httpcomponents.core4>4.4.16</dependency.org.apache.httpcomponents.core4>
-		<dependency.org.apache.httpcomponents.core5>5.2.4</dependency.org.apache.httpcomponents.core5>
+		<dependency.org.apache.httpcomponents.core5>5.2.5</dependency.org.apache.httpcomponents.core5>
 		<dependency.org.apache.karaf>4.3.10</dependency.org.apache.karaf>
 		<dependency.org.apache.logging.log4j>2.23.1</dependency.org.apache.logging.log4j>
 		<dependency.org.apache.myfaces>2.3.10</dependency.org.apache.myfaces>
@@ -268,7 +268,7 @@
 
 		<dependency.org.glassfish.hk2>2.6.1</dependency.org.glassfish.hk2>
 		<dependency.org.glassfish.hk2.osgi-locator>1.0.3</dependency.org.glassfish.hk2.osgi-locator>
-		<dependency.org.glassfish.jersey>2.42</dependency.org.glassfish.jersey>
+		<dependency.org.glassfish.jersey>2.44</dependency.org.glassfish.jersey>
 
 		<dependency.org.javassist>3.30.2-GA</dependency.org.javassist>
 		<dependency.org.jasypt>1.9.3</dependency.org.jasypt>
@@ -283,7 +283,7 @@
 		<dependency.org.jboss.xnio>3.8.14.Final</dependency.org.jboss.xnio>
 
 		<dependency.org.jline>3.21.0</dependency.org.jline>
-		<dependency.org.jsoup>1.17.2</dependency.org.jsoup>
+		<dependency.org.jsoup>1.18.1</dependency.org.jsoup>
 		<!-- Special version of Keycloak that will never exceed 18.0.x - the last version with OSGi/Karaf/PaxWeb support -->
 		<dependency.org.keycloak18>18.0.2</dependency.org.keycloak18>
 		<!-- Keycloak version newer than 18 - just the latest available upstream version -->
@@ -307,9 +307,9 @@
 		<dependency.org.osgi.util.promise>1.3.0</dependency.org.osgi.util.promise>
 
 		<dependency.org.ow2.asm>9.7</dependency.org.ow2.asm>
-		<dependency.org.primefaces>13.0.8</dependency.org.primefaces>
+		<dependency.org.primefaces>14.0.4</dependency.org.primefaces>
 		<dependency.org.slf4j>1.7.36</dependency.org.slf4j>
-		<dependency.org.springframework>5.3.34</dependency.org.springframework>
+		<dependency.org.springframework>5.3.37</dependency.org.springframework>
 		<dependency.org.vaadin.artur>1.7.1</dependency.org.vaadin.artur>
 
 		<dependency.org.wildfly.client>1.0.1.Final</dependency.org.wildfly.client>
