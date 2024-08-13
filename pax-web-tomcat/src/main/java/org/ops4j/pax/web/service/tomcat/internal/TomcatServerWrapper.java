@@ -1447,6 +1447,8 @@ class TomcatServerWrapper implements BatchVisitor {
 				}
 			}
 
+			// order -> [ FilterModel, FilterModel.Mapping ]
+			Map<Integer, Object[]> webOrderMapping = new TreeMap<>();
 			for (FilterModel model : filters) {
 				List<OsgiContextModel> contextModels = filtersMap.get(model) != null
 						? filtersMap.get(model) : model.getContextModels();
@@ -1455,7 +1457,24 @@ class TomcatServerWrapper implements BatchVisitor {
 				PaxWebFilterDef filterDef = new PaxWebFilterDef(model, false, osgiContext);
 				filterDef.setWhiteboardTCCL("whiteboard".equalsIgnoreCase(configuration.server().getTCCLType()));
 				context.addFilterDef(filterDef);
-				configureFilterMappings(model, context);
+				if (!change.useWebOrder()) {
+					// normal order by filter -> mapping
+					configureFilterMappings(model, context);
+				} else {
+					// order from web.xml
+					for (FilterModel.Mapping map : model.getMappingsPerDispatcherTypes()) {
+						webOrderMapping.put(map.getOrder(), new Object[] {
+								model, map
+						});
+					}
+				}
+			}
+			if (change.useWebOrder()) {
+				webOrderMapping.values().forEach(pair -> {
+					FilterModel model = (FilterModel) pair[0];
+					FilterModel.Mapping map = (FilterModel.Mapping) pair[1];
+					context.addFilterMap(new PaxWebFilterMap(model, map));
+				});
 			}
 
 			if (context.isStarted() && !pendingTransaction(contextPath)) {

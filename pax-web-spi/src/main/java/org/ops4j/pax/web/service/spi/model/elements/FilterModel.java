@@ -629,6 +629,8 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 		protected String[] urlPatterns;
 		protected String[] regexPatterns;
 
+		protected int order = -1;
+
 		public Mapping() {
 		}
 
@@ -667,6 +669,14 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 
 		public void setRegexPatterns(String[] regexPatterns) {
 			this.regexPatterns = regexPatterns;
+		}
+
+		public int getOrder() {
+			return order;
+		}
+
+		public void setOrder(int order) {
+			this.order = order;
 		}
 	}
 

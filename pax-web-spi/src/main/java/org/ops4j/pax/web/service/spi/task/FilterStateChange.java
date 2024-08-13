@@ -37,6 +37,8 @@ public class FilterStateChange extends Change {
 	 */
 	private boolean dynamic = false;
 
+	private boolean useWebOrder = false;
+
 	public FilterStateChange(Map<String, TreeMap<FilterModel, List<OsgiContextModel>>> contextFilters, boolean dynamic) {
 		super(OpCode.NONE);
 		this.contextFilters = contextFilters;
@@ -65,6 +67,19 @@ public class FilterStateChange extends Change {
 
 	public Map<String, TreeMap<FilterModel, List<OsgiContextModel>>> getContextFilters() {
 		return contextFilters;
+	}
+
+	public boolean useWebOrder() {
+		return useWebOrder;
+	}
+
+	/**
+	 * Set a flag, so when filters are added to the context for particular runtime, they are added
+	 * in {@code web.xml} order instead of OSGi Whiteboard order (by rank)
+	 * @param useWebOrder
+	 */
+	public void setUseWebOrder(boolean useWebOrder) {
+		this.useWebOrder = useWebOrder;
 	}
 
 	@Override

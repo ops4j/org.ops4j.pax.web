@@ -345,6 +345,11 @@
 			<artifactId>war-http2</artifactId>
 			<type>war</type>
 		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web.samples</groupId>
+			<artifactId>war-filters</artifactId>
+			<type>war</type>
+		</dependency>
 
 		<dependency>
 			<groupId>org.ops4j.pax.web.samples</groupId>

@@ -35,6 +35,8 @@ public class PaxWebFilterMapping extends FilterMapping {
 	private final long timestamp;
 	private final boolean after;
 
+	private final int order;
+
 	/**
 	 * {@link FilterMapping} with selected {@link FilterModel.Mapping}
 	 * @param filterModel
@@ -61,6 +63,7 @@ public class PaxWebFilterMapping extends FilterMapping {
 		}
 
 		this.after = true;
+		this.order = mapping.getOrder();
 	}
 
 	/**
@@ -84,6 +87,7 @@ public class PaxWebFilterMapping extends FilterMapping {
 		this.setServletNames(dynamicMapping.getServletNames());
 
 		this.after = dynamicMapping.isAfter();
+		this.order = 0;
 	}
 
 	public FilterModel getFilterModel() {
@@ -92,6 +96,10 @@ public class PaxWebFilterMapping extends FilterMapping {
 
 	public boolean isAfter() {
 		return after;
+	}
+
+	public int getOrder() {
+		return order;
 	}
 
 }

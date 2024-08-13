@@ -28,6 +28,7 @@ import java.util.Enumeration;
 import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -96,6 +97,7 @@ import org.ops4j.pax.web.service.spi.servlet.DefaultSessionCookieConfig;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContextClassLoader;
 import org.ops4j.pax.web.service.spi.task.Batch;
 import org.ops4j.pax.web.service.spi.task.Change;
+import org.ops4j.pax.web.service.spi.task.FilterStateChange;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.service.spi.util.WebContainerManager;
 import org.ops4j.pax.web.utils.ClassPathUtil;
@@ -1757,13 +1759,17 @@ public class BundleWebApplication {
 			wabBatch.addServletModel(builder.build());
 		});
 
-		// 4. filters and their mappings
+		// 4. filters and their mappings - we MUST preserve the order of mappings from web.xml
 		Map<String, TreeMap<FilterModel, List<OsgiContextModel>>> allFilterModels = new HashMap<>();
 		TreeMap<FilterModel, List<OsgiContextModel>> filterModels = new TreeMap<>();
 		allFilterModels.put(contextPath, filterModels);
 		final Map<String, List<FilterMap>> filterMappings = new HashMap<>();
+		final Map<FilterMap, Integer> mappingOrder = new IdentityHashMap<>();
+		final int[] counter = new int[] { 1 };
 		mainWebXml.getFilterMappings().forEach(fm -> {
 			filterMappings.computeIfAbsent(fm.getFilterName(), n -> new LinkedList<>()).add(fm);
+			mappingOrder.put(fm, counter[0]);
+			counter[0]++;
 		});
 		mainWebXml.getFilters().forEach((fn, def) -> {
 			Class<Filter> filterClass = null;
@@ -1787,6 +1793,7 @@ public class BundleWebApplication {
 
 			for (FilterMap map : filterMappings.get(fn)) {
 				FilterModel.Mapping m = new FilterModel.Mapping();
+				m.setOrder(mappingOrder.get(map));
 				String[] dtn = map.getDispatcherNames();
 				if (dtn == null || dtn.length == 0) {
 					m.setDispatcherTypes(new DispatcherType[] { DispatcherType.REQUEST });
@@ -1811,7 +1818,9 @@ public class BundleWebApplication {
 		});
 		if (filterModels.size() > 0) {
 			// this is for ServerController
-			wabBatch.updateFilters(allFilterModels, false);
+			FilterStateChange change = new FilterStateChange(allFilterModels, false);
+			change.setUseWebOrder(true);
+			wabBatch.getOperations().add(change);
 		}
 
 		// 5. listeners
