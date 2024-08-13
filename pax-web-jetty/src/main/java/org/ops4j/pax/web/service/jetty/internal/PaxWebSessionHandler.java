@@ -48,7 +48,9 @@ public class PaxWebSessionHandler extends SessionHandler {
 		if (tilde == -1) {
 			return eid;
 		}
-		int dot = eid.indexOf(".", tilde);
+		// org.eclipse.jetty.server.session.DefaultSessionIdManager.setWorkerName()
+		// ensures that there should be no dot in worker name appended to session id
+		int dot = eid.lastIndexOf(".");
 		if (dot == -1) {
 			return eid.substring(0, tilde);
 		}

@@ -57,7 +57,7 @@ public class Activator implements BundleActivator {
 				// whiteboard-register this context, so we can set its context path
 				Dictionary<String, Object> props = new Hashtable<>();
 				props.put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID, "custom");
-				props.put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_PATH, "/c");
+				props.put(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_PATH, "/c.b.d");
 				reg = context.registerService(HttpContext.class, httpContext, props);
 
 				return httpService;
