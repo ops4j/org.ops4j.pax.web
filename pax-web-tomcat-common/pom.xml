@@ -70,6 +70,7 @@
 							javax.naming.spi,
 							javax.management.modelmbean,
 							javax.net.ssl,
+							javax.security.auth,
 							javax.xml.parsers,
 							org.xml.sax,
 							org.xml.sax.ext,
