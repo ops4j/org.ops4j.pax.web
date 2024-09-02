@@ -708,6 +708,15 @@ public class BundleWebApplication {
 
 				allocatedServletContextModel = view.getServletContext(bundle, contextPath);
 				allocatedOsgiContextModel = view.getOsgiContext(bundle, contextPath);
+				ServletContextModel scm = allocatedServletContextModel;
+				OsgiContextModel ocm = allocatedOsgiContextModel;
+
+				if (scm == null || ocm == null) {
+					LOG.debug("Context path {} was allocated and deallocated before it could be used. {} will wait.",
+							contextPath, this);
+					deploymentState.compareAndSet(state, State.WAITING_FOR_CONTEXT);
+					return;
+				}
 
 				LOG.info("Allocated context for {}: {}", contextPath, allocatedOsgiContextModel);
 
@@ -718,7 +727,7 @@ public class BundleWebApplication {
 				// This is important advantage of pax-web-extender-war over pax-web-extender-whiteboard. Here
 				// we have complete web application, while in Whiteboard, we build it element by element.
 				// Here we can do it "transactionally" without bothering about conflicts etc.
-				buildModel();
+				buildModel(allocatedServletContextModel, allocatedOsgiContextModel);
 
 				// from now on, this.contextPath is "ours" and we can do anything with it
 				if (deploymentState.compareAndSet(state, State.DEPLOYING)) {
@@ -1273,16 +1282,15 @@ public class BundleWebApplication {
 	 * {@code org.ops4j.pax.web.service.spi.model} package configured in a transactional {@link Batch}.
 	 */
 	@SuppressWarnings("unchecked")
-	private void buildModel() {
+	private void buildModel(ServletContextModel allocatedServletContextModel, OsgiContextModel allocatedOsgiContextModel) {
 		final Batch wabBatch = new Batch("Deployment of " + this);
 		wabBatch.setShortDescription("deploy " + this.contextPath);
 
 		wabBatch.beginTransaction(contextPath);
 
 		// we simply take the allocated (and associated with our bundle and our bundle's Web-ContextPath) context
-		ServletContextModel scm = allocatedServletContextModel;
 		// but we still add it to the batch - ServerModel has special handling for allocated Servlet/OsgiContextModels
-		wabBatch.addServletContextModel(scm);
+		wabBatch.addServletContextModel(allocatedServletContextModel);
 
 		// 1. The most important part - the OsgiContextModel which bridges web elements from the WAB to actual
 		// servlet context in several aspects - it scopes access to resources and provides proper classloader.
@@ -1467,7 +1475,7 @@ public class BundleWebApplication {
 		// 1.6 context specific configuration URLs
 		ocm.getServerSpecificDescriptors().addAll(serverSpecificDescriptors);
 
-		wabBatch.addOsgiContextModel(ocm, scm);
+		wabBatch.addOsgiContextModel(ocm, allocatedServletContextModel);
 		wabBatch.associateOsgiContextModel(httpContext, ocm);
 
 		// elements from web.xml are processed to create a Batch that'll be send to a dedicated view of a WebContainer.
