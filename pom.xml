@@ -302,7 +302,7 @@
 		<dependency.org.ow2.asm>9.7</dependency.org.ow2.asm>
 		<dependency.org.primefaces>14.0.4</dependency.org.primefaces>
 		<dependency.org.slf4j>1.7.36</dependency.org.slf4j>
-		<dependency.org.springframework>5.3.37</dependency.org.springframework>
+		<dependency.org.springframework>6.0.23</dependency.org.springframework>
 		<dependency.org.vaadin.artur>1.7.1</dependency.org.vaadin.artur>
 
 		<dependency.org.wildfly.client>1.0.1.Final</dependency.org.wildfly.client>
