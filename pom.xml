@@ -122,7 +122,7 @@
 
 		<!-- Maven plugins from org.apache.maven.plugins (and their dependencies) -->
 		<plugin.maven-antrun-plugin>3.1.0</plugin.maven-antrun-plugin>
-		<plugin.maven-archetype-plugin>3.2.1</plugin.maven-archetype-plugin>
+		<plugin.maven-archetype-plugin>3.3.0</plugin.maven-archetype-plugin>
 		<plugin.maven-assembly-plugin>3.7.1</plugin.maven-assembly-plugin>
 		<plugin.maven-checkstyle-plugin>3.4.0</plugin.maven-checkstyle-plugin>
 		<plugin.dependency.com.puppycrawl.tools.checkstyle>10.16.0</plugin.dependency.com.puppycrawl.tools.checkstyle>
