@@ -702,6 +702,9 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 					event(WebElementEvent.State.UNDEPLOYED, model);
 					return null;
+				} catch (RuntimeException e) {
+					event(WebElementEvent.State.FAILED, model, e);
+					throw e;
 				} catch (Exception e) {
 					event(WebElementEvent.State.FAILED, model, e);
 					throw new RuntimeException(e.getMessage(), e);
@@ -1019,6 +1022,9 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 					event(WebElementEvent.State.UNDEPLOYED, model);
 					return null;
+				} catch (RuntimeException e) {
+					event(WebElementEvent.State.FAILED, model, e);
+					throw e;
 				} catch (Exception e) {
 					event(WebElementEvent.State.FAILED, model, e);
 					throw new RuntimeException(e.getMessage(), e);
@@ -1084,6 +1090,9 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 					event(WebElementEvent.State.DEPLOYED, model);
 					return null;
+				} catch (RuntimeException e) {
+					event(WebElementEvent.State.FAILED, model, e);
+					throw e;
 				} catch (Exception e) {
 					event(WebElementEvent.State.FAILED, model, e);
 					throw new RuntimeException(e.getMessage(), e);
@@ -1163,6 +1172,10 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 				event(WebElementEvent.State.UNDEPLOYED, model);
 				return null;
 			});
+		} catch (RuntimeException e) {
+			// if toUnregister is null, IllegalArgumentException is thrown anyway
+			event(WebElementEvent.State.FAILED, model, e);
+			throw e;
 		} catch (Exception e) {
 			// if toUnregister is null, IllegalArgumentException is thrown anyway
 			event(WebElementEvent.State.FAILED, model, e);
@@ -1215,6 +1228,9 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 					event(WebElementEvent.State.DEPLOYED, model);
 					return null;
+				} catch (RuntimeException e) {
+					event(WebElementEvent.State.FAILED, model, e);
+					throw e;
 				} catch (Exception e) {
 					event(WebElementEvent.State.FAILED, model, e);
 					throw new RuntimeException(e.getMessage(), e);
@@ -1272,6 +1288,9 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 					event(WebElementEvent.State.UNDEPLOYED, model);
 					return null;
+				} catch (RuntimeException e) {
+					event(WebElementEvent.State.FAILED, model, e);
+					throw e;
 				} catch (Exception e) {
 					event(WebElementEvent.State.FAILED, model, e);
 					throw new RuntimeException(e.getMessage(), e);
@@ -1328,6 +1347,9 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 					event(WebElementEvent.State.DEPLOYED, model);
 					return null;
+				} catch (RuntimeException e) {
+					event(WebElementEvent.State.FAILED, model, e);
+					throw e;
 				} catch (Exception e) {
 					event(WebElementEvent.State.FAILED, model, e);
 					throw new RuntimeException(e.getMessage(), e);
@@ -1412,6 +1434,9 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 					event(WebElementEvent.State.UNDEPLOYED, model);
 					return null;
+				} catch (RuntimeException e) {
+					event(WebElementEvent.State.FAILED, model, e);
+					throw e;
 				} catch (Exception e) {
 					event(WebElementEvent.State.FAILED, model, e);
 					throw new RuntimeException(e.getMessage(), e);
@@ -1598,6 +1623,9 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 					event(WebElementEvent.State.DEPLOYED, model);
 					return null;
+				} catch (RuntimeException e) {
+					event(WebElementEvent.State.FAILED, model, e);
+					throw e;
 				} catch (Exception e) {
 					event(WebElementEvent.State.FAILED, model, e);
 					throw new RuntimeException(e.getMessage(), e);
@@ -1663,6 +1691,10 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 					event(WebElementEvent.State.UNDEPLOYED, model);
 					return null;
+				} catch (RuntimeException e) {
+					// if toUnregister is null, IllegalArgumentException is thrown anyway
+					event(WebElementEvent.State.FAILED, model, e);
+					throw e;
 				} catch (Exception e) {
 					// if toUnregister is null, IllegalArgumentException is thrown anyway
 					event(WebElementEvent.State.FAILED, model, e);
@@ -1925,6 +1957,9 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 					event(WebElementEvent.State.DEPLOYED, model);
 					return null;
+				} catch (RuntimeException e) {
+					event(WebElementEvent.State.FAILED, model, e);
+					throw e;
 				} catch (Exception e) {
 					event(WebElementEvent.State.FAILED, model, e);
 					throw new RuntimeException(e.getMessage(), e);
@@ -2074,6 +2109,9 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 					event(WebElementEvent.State.UNDEPLOYED, model);
 					return null;
+				} catch (RuntimeException e) {
+					event(WebElementEvent.State.FAILED, model, e);
+					throw e;
 				} catch (Exception e) {
 					event(WebElementEvent.State.FAILED, model, e);
 					throw new RuntimeException(e.getMessage(), e);
@@ -2172,6 +2210,9 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 					event(WebElementEvent.State.DEPLOYED, model);
 					return null;
+				} catch (RuntimeException e) {
+					event(WebElementEvent.State.FAILED, model, e);
+					throw e;
 				} catch (Exception e) {
 					event(WebElementEvent.State.FAILED, model, e);
 					throw new RuntimeException(e.getMessage(), e);
@@ -2239,6 +2280,9 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 					event(WebElementEvent.State.UNDEPLOYED, model);
 					return null;
+				} catch (RuntimeException e) {
+					event(WebElementEvent.State.FAILED, model, e);
+					throw e;
 				} catch (Exception e) {
 					event(WebElementEvent.State.FAILED, model, e);
 					throw new RuntimeException(e.getMessage(), e);
@@ -2331,6 +2375,8 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		public void registerServlet(ServletModel model) {
 			try {
 				doRegisterServlet(Collections.emptyList(), model);
+			} catch (RuntimeException e) {
+				throw e;
 			} catch (Exception e) {
 				throw new RuntimeException(e.getMessage(), e);
 			}
@@ -2356,6 +2402,8 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 			try {
 				doRegisterServlet(Collections.emptyList(), model);
+			} catch (RuntimeException e) {
+				throw e;
 			} catch (Exception e) {
 				throw new RuntimeException(e.getMessage(), e);
 			}
@@ -2370,7 +2418,9 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		public void registerFilter(FilterModel model) {
 			try {
 				doRegisterFilter(Collections.emptyList(), model);
-			} catch (ServletException e) {
+			} catch (RuntimeException e) {
+				throw e;
+			} catch (Exception e) {
 				throw new RuntimeException(e.getMessage(), e);
 			}
 		}
