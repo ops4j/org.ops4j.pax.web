@@ -255,7 +255,7 @@
 		<dependency.org.eclipse.jdt.ecj>3.33.0</dependency.org.eclipse.jdt.ecj>
 
 		<!-- Please keep Maven and OSGi version in sync -->
-		<dependency.org.eclipse.jetty>10.0.24</dependency.org.eclipse.jetty>
+		<dependency.org.eclipse.jetty>12.0.12</dependency.org.eclipse.jetty>
 		<dependency.org.eclipse.jetty.osgi>10.0.24</dependency.org.eclipse.jetty.osgi>
 		<dependency.org.eclipse.jetty.alpn>1.1.3.v20160715</dependency.org.eclipse.jetty.alpn>
 		<dependency.org.eclipse.jetty.alpn.osgi>1.1.3</dependency.org.eclipse.jetty.alpn.osgi>
