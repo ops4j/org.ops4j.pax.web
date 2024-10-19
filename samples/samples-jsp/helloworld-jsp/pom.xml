@@ -77,6 +77,13 @@
 			<plugin>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-jspc-maven-plugin</artifactId>
+				<dependencies>
+					<dependency>
+						<groupId>org.mortbay.jasper</groupId>
+						<artifactId>apache-jsp</artifactId>
+						<version>${dependency.org.apache.tomcat}</version>
+					</dependency>
+				</dependencies>
 				<executions>
 					<execution>
 						<id>jspc</id>
