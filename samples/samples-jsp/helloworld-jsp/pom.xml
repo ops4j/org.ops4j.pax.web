@@ -83,6 +83,11 @@
 						<artifactId>apache-jsp</artifactId>
 						<version>${dependency.org.apache.tomcat}</version>
 					</dependency>
+					<dependency>
+						<groupId>org.eclipse.jdt</groupId>
+						<artifactId>ecj</artifactId>
+						<version>${dependency.org.eclipse.jdt.ecj}</version>
+					</dependency>
 				</dependencies>
 				<executions>
 					<execution>
