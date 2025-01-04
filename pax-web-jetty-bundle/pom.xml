@@ -23,7 +23,7 @@
 		<relativePath>../pom.xml</relativePath>
 		<groupId>org.ops4j.pax</groupId>
 		<artifactId>web</artifactId>
-		<version>7.2.27-SNAPSHOT</version>
+		<version>7.2.31-SNAPSHOT</version>
 	</parent>
 
 	<groupId>org.ops4j.pax.web</groupId>
@@ -108,14 +108,13 @@
 							org.xml.sax.*
 						</Import-Package>
 						<Export-Package>
-							javax.servlet;version="3.1.0",
-							javax.servlet.annotation;version="3.1.0",
-							javax.servlet.descriptor;version="3.1.0",
-							javax.servlet.http;version="3.1.0",
-							javax.websocket.server;uses:="javax.websocket";version="1.1",
-							javax.websocket;version="1.1",
-							org.eclipse.jetty.*;version="${dependency.jetty.version}";
-							-split-package:=merge-first
+							javax.servlet;version="3.1.0";-noimport:=true,
+							javax.servlet.annotation;version="3.1.0";-noimport:=true,
+							javax.servlet.descriptor;version="3.1.0";-noimport:=true,
+							javax.servlet.http;version="3.1.0";-noimport:=true,
+							javax.websocket.server;uses:="javax.websocket";version="1.1";-noimport:=true,
+							javax.websocket;version="1.1";-noimport:=true,
+							org.eclipse.jetty.*;version="${dependency.jetty.version}";-split-package:=merge-first;-noimport:=true
 						</Export-Package>
 						<Embed-Dependency>*; scope=compile; type=!pom;
 							inline=**/*.class|**/*.ico|**/*.dtd|**/*.xml|**/*.properties|**/*.map|**/*.default|**/*.providers</Embed-Dependency>
@@ -126,6 +125,7 @@
 							Embed-Dependency,
 							Embed-Transitive
 						</_removeheaders>
+						<_contract>!*</_contract>
 					</instructions>
 				</configuration>
 				<executions>

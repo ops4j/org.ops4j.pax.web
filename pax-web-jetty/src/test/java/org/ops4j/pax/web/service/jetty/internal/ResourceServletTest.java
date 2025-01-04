@@ -49,6 +49,7 @@ public class ResourceServletTest {
 											   String uri, String expected) throws IOException, ServletException {
 		setUp();
 		// prepare
+		expect(httpRequest.getMethod()).andReturn("GET").anyTimes();
 		expect(httpRequest.getRequestURI()).andReturn(uri).anyTimes();
 		expect(httpRequest.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI))
 				.andReturn(null);

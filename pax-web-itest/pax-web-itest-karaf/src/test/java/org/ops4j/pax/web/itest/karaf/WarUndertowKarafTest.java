@@ -35,6 +35,7 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
  * @author achim
  */
 @RunWith(PaxExam.class)
+@Ignore("Somewhere after Karaf 4.2.1, feature resolution has changed and pax-web-undertow installs Jetty bundles and config...")
 public class WarUndertowKarafTest extends KarafBaseTest {
 
 	Logger LOG = LoggerFactory.getLogger(WarUndertowKarafTest.class);

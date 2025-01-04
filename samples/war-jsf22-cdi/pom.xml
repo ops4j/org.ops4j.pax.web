@@ -26,7 +26,7 @@
 	<parent>
 		<artifactId>samples</artifactId>
 		<groupId>org.ops4j.pax.web</groupId>
-		<version>7.2.27-SNAPSHOT</version>
+		<version>7.2.31-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -132,6 +132,7 @@
 									org.ops4j.pax.cdi.extension; filter:="(extension=pax-cdi-extension)",
 									org.ops4j.pax.cdi.faces
 								</Require-Capability>
+								<_contract>!*</_contract>
 							</instructions>
 						</configuration>
 					</execution>

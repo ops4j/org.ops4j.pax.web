@@ -20,7 +20,7 @@
 	<parent>
 		<groupId>org.ops4j.pax</groupId>
 		<artifactId>web</artifactId>
-		<version>7.2.27-SNAPSHOT</version>
+		<version>7.2.31-SNAPSHOT</version>
 	</parent>
 
 	<groupId>org.ops4j.pax.web</groupId>
@@ -61,8 +61,7 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-						<Export-Package>org.ops4j.pax.web.descriptor.gen;
-							version="${pax-web.osgi.version}"</Export-Package>
+						<Export-Package>org.ops4j.pax.web.descriptor.gen;version="${pax-web.osgi.version}";-noimport:=true</Export-Package>
 					</instructions>
 				</configuration>
 				<executions>

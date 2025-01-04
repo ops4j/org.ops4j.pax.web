@@ -29,6 +29,7 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRunti
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.logLevel;
 
 import java.io.File;
+import java.net.MalformedURLException;
 
 import javax.inject.Inject;
 
@@ -79,6 +80,13 @@ public class KarafBaseTest extends AbstractControlledTestBase {
 				.groupId("org.apache.karaf.features").artifactId("standard")
 				.type("xml").classifier("features").version(getKarafVersion());
 
+		String featureProcessing = null;
+		try {
+			featureProcessing = new File("target/test-classes/org.apache.karaf.features.xml").toURI().toURL().toString();
+		} catch (MalformedURLException e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
+
 		return new Option[]{
 				karafDistributionConfiguration().frameworkUrl(mvnKarafDist())
 						.unpackDirectory(new File("target/paxexam/unpack/"))
@@ -111,6 +119,9 @@ public class KarafBaseTest extends AbstractControlledTestBase {
 
 				editConfigurationFilePut("etc/org.ops4j.pax.url.mvn.cfg", "org.ops4j.pax.url.mvn.useFallbackRepositories", "false"),
 				editConfigurationFilePut("etc/org.ops4j.pax.url.mvn.cfg", "org.ops4j.pax.url.mvn.repositories", "https://repo1.maven.org/maven2@id=central"),
+
+				editConfigurationFilePut("etc/org.apache.karaf.features.cfg", "featureProcessing", featureProcessing),
+				systemProperty("karaf.log").value(new File("target/karaf.log").getAbsolutePath()),
 
 				KarafDistributionOption.replaceConfigurationFile("etc/keystore", new File(getClass().getClassLoader().getResource("keystore").getFile())),
 				KarafDistributionOption.replaceConfigurationFile("/etc/jetty.xml", new File(getClass().getClassLoader().getResource("jetty.xml").getFile())),

@@ -22,7 +22,7 @@
 		<relativePath>../pom.xml</relativePath>
 		<groupId>org.ops4j.pax</groupId>
 		<artifactId>web</artifactId>
-		<version>7.2.27-SNAPSHOT</version>
+		<version>7.2.31-SNAPSHOT</version>
 	</parent>
 
 	<groupId>org.ops4j.pax.web</groupId>
@@ -59,13 +59,13 @@
 							*
 						</Import-Package>
 						<Export-Package>
-							${bundle.namespace};version="${pax-web.osgi.version}",
-							${bundle.namespace}.whiteboard;version="${pax-web.osgi.version}",
-							org.osgi.service.http;version="1.2.1",
-							org.osgi.service.http.context;version="1.0",
-							org.osgi.service.http.runtime;version="1.0",
-							org.osgi.service.http.runtime.dto;version="1.0",
-							org.ops4j.pax.web.utils;version="${pax-web.osgi.version}"
+							${bundle.namespace};version="${pax-web.osgi.version}";-noimport:=true,
+							${bundle.namespace}.whiteboard;version="${pax-web.osgi.version}";-noimport:=true,
+							org.osgi.service.http;version="1.2.1";-noimport:=true,
+							org.osgi.service.http.context;version="1.0";-noimport:=true,
+							org.osgi.service.http.runtime;version="1.0";-noimport:=true,
+							org.osgi.service.http.runtime.dto;version="1.0";-noimport:=true,
+							org.ops4j.pax.web.utils;version="${pax-web.osgi.version}";-noimport:=true
 						</Export-Package>
 						<_removeheaders>
 							Include-Resource,
@@ -73,6 +73,7 @@
 							Embed-Dependency,
 							Embed-Transitive
 						</_removeheaders>
+						<_contract>!*</_contract>
 					</instructions>
 				</configuration>
 			</plugin>
