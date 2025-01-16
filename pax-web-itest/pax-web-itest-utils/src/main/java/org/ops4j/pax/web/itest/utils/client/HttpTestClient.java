@@ -176,6 +176,14 @@ public interface HttpTestClient {
 	HttpTestClient doOPTIONS(String url, String path);
 
 	/**
+	 * Prepares the client to execute a POST-request against the given URL with data.
+	 *
+	 * @param url Destination-url that should be tested
+	 * @return the HttpPostConfiguration-instance
+	 */
+	HttpTestClient doPOST(String url, byte[] data);
+
+	/**
 	 * Prepares the client to execute a POST-request against the given URL with attachments.
 	 *
 	 * @param url Destination-url that should be tested

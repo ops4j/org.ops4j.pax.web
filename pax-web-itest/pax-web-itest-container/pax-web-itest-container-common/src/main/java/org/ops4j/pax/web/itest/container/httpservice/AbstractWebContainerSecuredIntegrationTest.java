@@ -15,6 +15,7 @@
  */
 package org.ops4j.pax.web.itest.container.httpservice;
 
+import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import javax.inject.Inject;
@@ -119,6 +120,17 @@ public abstract class AbstractWebContainerSecuredIntegrationTest extends Abstrac
 				.withResponseAssertion("Response must contain '<h1>Hello World</h1>'",
 						resp -> resp.contains("<h1>Hello World</h1>"))
 				.doGETandExecuteTest("https://127.0.0.1:8443/helloworld/wc");
+	}
+
+	@Test
+	public void testPostRequest() throws Exception {
+		byte[] array = new byte[32768];
+		Arrays.fill(array, (byte) 0x42);
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'size: 32768'",
+						resp -> resp.contains("size: 32768"))
+				.doPOST("https://127.0.0.1:8443/helloworld/wc", array)
+				.executeTest();
 	}
 
 }

@@ -94,6 +94,8 @@ class Hc5TestClient implements HttpTestClient {
 
 	private Map<String, byte[]> attachments;
 
+	private byte[] data;
+
 	Hc5TestClient(boolean followRedirects) {
 		this.followRedirects = followRedirects;
 	}
@@ -247,6 +249,14 @@ class Hc5TestClient implements HttpTestClient {
 	}
 
 	@Override
+	public HttpTestClient doPOST(String url, byte[] data) {
+		this.doPOST = true;
+		pathToTest = url;
+		this.data = data;
+		return this;
+	}
+
+	@Override
 	public HttpTestClient addParameter(String name, String value) {
 		if (name == null || value == null) {
 			throw new IllegalArgumentException("Parameters must be set!");
@@ -325,6 +335,10 @@ class Hc5TestClient implements HttpTestClient {
 				final MultipartEntityBuilder b = MultipartEntityBuilder.create();
 				attachments.forEach(b::addBinaryBody);
 				requestBuilder.setEntity(b.build());
+			}
+
+			if (data != null) {
+				requestBuilder.setEntity(data, ContentType.APPLICATION_OCTET_STREAM);
 			}
 
 			if (doOPTIONS) {
