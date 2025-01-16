@@ -125,7 +125,7 @@
 		<plugin.maven-archetype-plugin>3.3.1</plugin.maven-archetype-plugin>
 		<plugin.maven-assembly-plugin>3.7.1</plugin.maven-assembly-plugin>
 		<plugin.maven-checkstyle-plugin>3.6.0</plugin.maven-checkstyle-plugin>
-		<plugin.dependency.com.puppycrawl.tools.checkstyle>10.16.0</plugin.dependency.com.puppycrawl.tools.checkstyle>
+		<plugin.dependency.com.puppycrawl.tools.checkstyle>10.21.1</plugin.dependency.com.puppycrawl.tools.checkstyle>
 		<plugin.maven-clean-plugin>3.4.0</plugin.maven-clean-plugin>
 		<plugin.maven-compiler-plugin>3.13.0</plugin.maven-compiler-plugin>
 		<plugin.maven-dependency-plugin>3.8.1</plugin.maven-dependency-plugin>
@@ -209,7 +209,7 @@
 		<dependency.org.apache.aries.spifly>1.3.7</dependency.org.apache.aries.spifly>
 		<dependency.org.apache.aries.util>1.1.3</dependency.org.apache.aries.util>
 
-		<dependency.org.apache.cxf>3.6.4</dependency.org.apache.cxf>
+		<dependency.org.apache.cxf>3.6.5</dependency.org.apache.cxf>
 
 		<dependency.org.apache.commons.collections4>4.4</dependency.org.apache.commons.collections4>
 		<dependency.org.apache.commons.compress>1.27.1</dependency.org.apache.commons.compress>
@@ -260,7 +260,7 @@
 		<dependency.org.eclipse.jetty.alpn>1.1.3.v20160715</dependency.org.eclipse.jetty.alpn>
 		<dependency.org.eclipse.jetty.alpn.osgi>1.1.3</dependency.org.eclipse.jetty.alpn.osgi>
 
-		<dependency.org.eclipse.platform.osgi>3.20.0</dependency.org.eclipse.platform.osgi>
+		<dependency.org.eclipse.platform.osgi>3.22.0</dependency.org.eclipse.platform.osgi>
 
 		<dependency.org.glassfish.hk2>2.6.1</dependency.org.glassfish.hk2>
 		<dependency.org.glassfish.hk2.osgi-locator>1.0.3</dependency.org.glassfish.hk2.osgi-locator>
@@ -269,8 +269,8 @@
 		<dependency.org.javassist>3.30.2-GA</dependency.org.javassist>
 		<dependency.org.jasypt>1.9.3</dependency.org.jasypt>
 		<dependency.org.jboss.classfilewriter>1.3.1.Final</dependency.org.jboss.classfilewriter>
-		<dependency.org.jboss.logging>3.6.0.Final</dependency.org.jboss.logging>
-		<dependency.org.jboss.threads>3.6.1.Final</dependency.org.jboss.threads>
+		<dependency.org.jboss.logging>3.6.1.Final</dependency.org.jboss.logging>
+		<dependency.org.jboss.threads>3.8.0.Final</dependency.org.jboss.threads>
 		<!-- 3.1.7+ doesn't work with aries-cdi because of WELD-2581 -->
 		<dependency.org.jboss.weld>3.1.6.Final</dependency.org.jboss.weld>
 		<dependency.org.jboss.xnio>3.8.16.Final</dependency.org.jboss.xnio>
@@ -301,7 +301,7 @@
 		<dependency.org.osgi.util.promise>1.3.0</dependency.org.osgi.util.promise>
 
 		<dependency.org.ow2.asm>9.7.1</dependency.org.ow2.asm>
-		<dependency.org.primefaces>14.0.4</dependency.org.primefaces>
+		<dependency.org.primefaces>14.0.10</dependency.org.primefaces>
 		<dependency.org.slf4j>1.7.36</dependency.org.slf4j>
 		<dependency.org.springframework>5.3.39</dependency.org.springframework>
 		<dependency.org.vaadin.artur>1.7.1</dependency.org.vaadin.artur>
