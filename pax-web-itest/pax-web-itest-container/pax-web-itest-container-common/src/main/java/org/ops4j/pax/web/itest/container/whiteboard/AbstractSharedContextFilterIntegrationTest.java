@@ -24,7 +24,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.tinybundles.TinyBundles;
+import org.ops4j.pax.tinybundles.core.TinyBundles;
 import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
 import org.ops4j.pax.web.itest.utils.web.FilterBundleActivator;
@@ -50,11 +50,11 @@ public abstract class AbstractSharedContextFilterIntegrationTest extends Abstrac
 		new File("target/bundles").mkdirs();
 		try {
 			InputStream b1 = TinyBundles.bundle()
-					.addClass(TestServlet.class)
-					.addClass(ServletBundleActivator.class)
-					.setHeader(Constants.BUNDLE_SYMBOLICNAME, SERVLET_BUNDLE)
-					.setHeader(Constants.BUNDLE_ACTIVATOR, ServletBundleActivator.class.getName())
-					.setHeader(Constants.DYNAMICIMPORT_PACKAGE, "*").build();
+					.add(TestServlet.class)
+					.add(ServletBundleActivator.class)
+					.set(Constants.BUNDLE_SYMBOLICNAME, SERVLET_BUNDLE)
+					.set(Constants.BUNDLE_ACTIVATOR, ServletBundleActivator.class.getName())
+					.set(Constants.DYNAMICIMPORT_PACKAGE, "*").build();
 			Store<InputStream> store = StoreFactory.anonymousStore();
 			File bundle1 = new File("target/bundles/b1.jar");
 			bundle1.delete();
@@ -62,11 +62,11 @@ public abstract class AbstractSharedContextFilterIntegrationTest extends Abstrac
 			b1.close();
 
 			InputStream b2 = TinyBundles.bundle()
-					.addClass(SimpleOnlyFilter.class)
-					.addClass(FilterBundleActivator.class)
-					.setHeader(Constants.BUNDLE_SYMBOLICNAME, FILTER_BUNDLE)
-					.setHeader(Constants.BUNDLE_ACTIVATOR, FilterBundleActivator.class.getName())
-					.setHeader(Constants.DYNAMICIMPORT_PACKAGE, "*").build();
+					.add(SimpleOnlyFilter.class)
+					.add(FilterBundleActivator.class)
+					.set(Constants.BUNDLE_SYMBOLICNAME, FILTER_BUNDLE)
+					.set(Constants.BUNDLE_ACTIVATOR, FilterBundleActivator.class.getName())
+					.set(Constants.DYNAMICIMPORT_PACKAGE, "*").build();
 			File bundle2 = new File("target/bundles/b2.jar");
 			bundle2.delete();
 			Files.copy(b2, bundle2.toPath());
