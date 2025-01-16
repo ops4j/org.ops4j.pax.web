@@ -246,7 +246,7 @@
 		<dependency.org.apache.servicemix.bundles.jasypt>1.9.3_1</dependency.org.apache.servicemix.bundles.jasypt>
 		<dependency.org.apache.servicemix.bundles.javax-inject>1_3</dependency.org.apache.servicemix.bundles.javax-inject>
 		<dependency.org.apache.taglibs>1.2.5</dependency.org.apache.taglibs>
-		<dependency.org.apache.tomcat>9.0.96</dependency.org.apache.tomcat>
+		<dependency.org.apache.tomcat>9.0.98</dependency.org.apache.tomcat>
 		<dependency.org.apache.ws.xmlschema>2.3.1</dependency.org.apache.ws.xmlschema>
 		<dependency.org.apache.xbean>4.25</dependency.org.apache.xbean>
 
@@ -291,6 +291,7 @@
 		<dependency.org.keycloak>22.0.4</dependency.org.keycloak>
 		<!-- 5.x is for JDK11+ -->
 		<dependency.org.mockito>4.11.0</dependency.org.mockito>
+		<dependency.org.mortbay.jasper.apache-jsp>9.0.96</dependency.org.mortbay.jasper.apache-jsp>
 		<dependency.org.mortbay.jetty.alpn>8.1.13.v20181017</dependency.org.mortbay.jetty.alpn>
 
 		<dependency.org.ops4j.base>1.5.1</dependency.org.ops4j.base>
