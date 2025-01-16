@@ -234,9 +234,9 @@
 		<dependency.org.apache.geronimo.bundles.commons-discovery>0.4_1</dependency.org.apache.geronimo.bundles.commons-discovery>
 
 		<dependency.org.apache.httpcomponents.client4>4.5.14</dependency.org.apache.httpcomponents.client4>
-		<dependency.org.apache.httpcomponents.client5>5.4.1</dependency.org.apache.httpcomponents.client5>
+		<dependency.org.apache.httpcomponents.client5>5.3.1</dependency.org.apache.httpcomponents.client5>
 		<dependency.org.apache.httpcomponents.core4>4.4.16</dependency.org.apache.httpcomponents.core4>
-		<dependency.org.apache.httpcomponents.core5>5.3.2</dependency.org.apache.httpcomponents.core5>
+		<dependency.org.apache.httpcomponents.core5>5.2.5</dependency.org.apache.httpcomponents.core5>
 		<dependency.org.apache.karaf>4.3.10</dependency.org.apache.karaf>
 		<dependency.org.apache.logging.log4j>2.24.3</dependency.org.apache.logging.log4j>
 		<dependency.org.apache.myfaces>2.3.11</dependency.org.apache.myfaces>
@@ -3182,12 +3182,22 @@
 
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpclient</artifactId>
+				<version>${dependency.org.apache.httpcomponents.client4}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpclient-osgi</artifactId>
 				<version>${dependency.org.apache.httpcomponents.client4}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpcore-osgi</artifactId>
+				<version>${dependency.org.apache.httpcomponents.core4}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpcore</artifactId>
 				<version>${dependency.org.apache.httpcomponents.core4}</version>
 			</dependency>
 
