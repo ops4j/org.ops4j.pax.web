@@ -109,7 +109,7 @@
 
 	<properties>
 		<!-- BC 1.80 has "java.*" OSGi imports and this module uses Felix 5 -->
-		<dependency.org.bouncycastle.felix5>1.77</dependency.org.bouncycastle.felix5>
+		<dependency.org.bouncycastle.felix5>1.78</dependency.org.bouncycastle.felix5>
 	</properties>
 
 	<dependencyManagement>
