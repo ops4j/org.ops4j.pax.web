@@ -435,7 +435,11 @@ public class UndertowFactory {
 			OptionMap sslParameters = sslParametersBuilder.getMap();
 
 			SSLContext sslContext = buildSSLContext(config, https, realm);
-			UndertowXnioSsl xnioSsl = new UndertowXnioSsl(xnio, sslParameters, bufferPoolForListener, sslContext);
+			// io.undertow.protocols.ssl.UndertowXnioSsl.DEFAULT_BUFFER_POOL is new DefaultByteBufferPool(true, 17 * 1024, -1, 12)
+			// so it's NOT what I read in
+			// https://github.com/wildfly/wildfly/blob/c405d3912c1d3e5d22b4af7a99e1454151672616/undertow/src/main/java/org/wildfly/extension/undertow/ByteBufferPoolDefinition.java#L59-L62
+			// see: https://github.com/ops4j/org.ops4j.pax.web/issues/2010
+			UndertowXnioSsl xnioSsl = new UndertowXnioSsl(xnio, sslParameters, new DefaultByteBufferPool(true, 17 * 1024, -1, 12), sslContext);
 
 			if (https.isProxyProtocol()) {
 				finalListener = new ProxyProtocolOpenListener(openListener, xnioSsl, bufferPoolForListener, sslParameters);

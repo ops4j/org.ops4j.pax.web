@@ -16,6 +16,7 @@
  */
 package org.ops4j.pax.web.samples.helloworld.wc.internal;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
@@ -74,6 +75,19 @@ public class HelloWorldServlet extends HttpServlet {
 		writer.println("<h1>HttpSessionListener:</h1>");
 		writer.println(getSessionListenerData());
 		writer.println("</body>");
+	}
+
+	@Override
+	public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		byte[] buf = new byte[4096];
+		int read;
+		while ((read = req.getInputStream().read(buf)) != -1) {
+			baos.write(buf, 0, read);
+		}
+		resp.setContentType("text/plain");
+		resp.getWriter().write(String.format("size: %d", baos.size()));
+		resp.getWriter().close();
 	}
 
 }
