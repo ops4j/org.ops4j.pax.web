@@ -81,7 +81,7 @@
 					<dependency>
 						<groupId>org.mortbay.jasper</groupId>
 						<artifactId>apache-jsp</artifactId>
-						<version>${dependency.org.apache.tomcat}</version>
+						<version>${dependency.org.mortbay.jasper.apache-jsp}</version>
 					</dependency>
 				</dependencies>
 				<executions>
