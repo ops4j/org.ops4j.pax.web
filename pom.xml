@@ -243,7 +243,7 @@
 		<dependency.org.apache.servicemix.bundles.jasypt>1.9.3_1</dependency.org.apache.servicemix.bundles.jasypt>
 		<dependency.org.apache.servicemix.bundles.javax-inject>1_3</dependency.org.apache.servicemix.bundles.javax-inject>
 		<dependency.org.apache.taglibs>1.2.5</dependency.org.apache.taglibs>
-		<dependency.org.apache.tomcat>9.0.99</dependency.org.apache.tomcat>
+		<dependency.org.apache.tomcat>9.0.98</dependency.org.apache.tomcat>
 		<dependency.org.apache.ws.xmlschema>2.3.1</dependency.org.apache.ws.xmlschema>
 		<dependency.org.apache.xbean>4.26</dependency.org.apache.xbean>
 
