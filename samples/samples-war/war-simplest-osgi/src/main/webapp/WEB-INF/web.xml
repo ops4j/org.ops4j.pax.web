@@ -30,4 +30,13 @@
 		<url-pattern>/servlet</url-pattern>
 	</servlet-mapping>
 
+	<mime-mapping>
+		<extension>md</extension>
+		<mime-type>text/markdown</mime-type>
+	</mime-mapping>
+
+	<welcome-file-list>
+		<welcome-file>readme.md</welcome-file>
+	</welcome-file-list>
+
 </web-app>

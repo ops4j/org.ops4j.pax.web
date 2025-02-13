@@ -3610,6 +3610,7 @@
 								<!-- README -->
 								<exclude>README.md</exclude>
 								<exclude>**/Readme.md</exclude>
+								<exclude>**/readme.md</exclude>
 								<exclude>**/readme*.txt</exclude>
 								<exclude>**/*.adoc</exclude>
 								<!-- archetype resources -->

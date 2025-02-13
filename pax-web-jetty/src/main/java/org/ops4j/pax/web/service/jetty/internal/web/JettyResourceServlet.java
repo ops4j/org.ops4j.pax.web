@@ -133,6 +133,22 @@ public class JettyResourceServlet extends DefaultServlet {
 				// under Osgi(Scoped)ServletContext
 				URL url = getServletContext().getResource(chroot + "/" + childPath);
 
+				// See: https://github.com/ops4j/org.ops4j.pax.web/issues/2014
+				// Everything is fine with Felix - it doesn't even seem to support directory-based bundles.
+				// However under Equinox and bundles available from directory (with META-INF/MANIFEST.MF
+				// available) we have problems determining whether given URL is a directory (for the purpose of
+				// welcome files).
+				// In Equinox we have two schemes:
+				//  - org.eclipse.osgi.storage.url.BundleResourceHandler.OSGI_RESOURCE_URL_PROTOCOL = "bundleresource"
+				//  - org.eclipse.osgi.storage.url.BundleResourceHandler.OSGI_ENTRY_URL_PROTOCOL = "bundleentry"
+				// let's ignore the resource one, as it is related to Bundle.getResource() (classloaders). So
+				// we have to return a Jetty Resource that _exists_ and _is directory_ because
+				// that's what org.eclipse.jetty.server.CachedContentFactory.load() checks...
+				if (url != null && "bundleentry".equals(url.getProtocol())
+						&& url.getPath() != null && url.getPath().endsWith("/")) {
+					return new EquinoxBundleentryDirectoryURLResource(PaxWebServletContextHandler.toJettyResource(url));
+				}
+
 				return PaxWebServletContextHandler.toJettyResource(url);
 			}
 		} catch (IOException e) {

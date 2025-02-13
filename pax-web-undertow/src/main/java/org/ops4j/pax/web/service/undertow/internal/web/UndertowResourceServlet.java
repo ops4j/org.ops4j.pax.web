@@ -211,7 +211,7 @@ public class UndertowResourceServlet extends DefaultServlet implements ResourceM
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		// we leave the most of the work do be done in original default servlet, but handle "directory access"
+		// we leave the most of the work to be done in original default servlet, but handle "directory access"
 		// first to add support for welcome files at this level (just as we did with TomcatResourceServlet) and
 		// what Jetty provides out of the box
 

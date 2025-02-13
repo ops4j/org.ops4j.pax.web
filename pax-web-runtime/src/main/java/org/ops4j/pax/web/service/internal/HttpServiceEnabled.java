@@ -787,7 +787,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 				chrootBase = "";
 			} else {
 				// yes - we will replace "/" with "" which means "root of the bundle" or "just pass incoming
-				// path directly to ServletContextHelper.getResource()
+				// path directly to ServletContextHelper.getResource()"
 				if (chrootBase.startsWith("/")) {
 					chrootBase = chrootBase.substring(1);
 				}
