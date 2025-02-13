@@ -130,7 +130,7 @@ class OsgiStandardRoot extends StandardRoot {
 					} else if (resource.getProtocol().equals("bundle")) {
 						if ("/".equals(resource.getPath())) {
 							// Felix, root of the bundle - return a resource which says it's a directory
-							return new RootBundleURLResource(OsgiStandardRoot.this, resource, fullPath);
+							return new DirectoryURLResource(OsgiStandardRoot.this, resource, fullPath);
 						} else if (!resource.getPath().endsWith("/")) {
 							// unfortunately, due to https://issues.apache.org/jira/browse/FELIX-6294
 							// we have to check ourselves if it's a directory and possibly append a slash
@@ -153,6 +153,17 @@ class OsgiStandardRoot extends StandardRoot {
 								LOG.warn("Problem checking directory bundle resource: {}", e.getMessage(), e);
 								return new EmptyResource(root, path);
 							}
+						}
+					} else if (resource.getProtocol().equals("bundleentry")) {
+						if ("/".equals(resource.getPath())) {
+							// Equinox, root of the bundle - return a resource which says it's a directory
+							return new DirectoryURLResource(OsgiStandardRoot.this, resource, fullPath);
+						} else if (resource.getPath().endsWith("/")) {
+							// See: https://github.com/ops4j/org.ops4j.pax.web/issues/2014
+							// resource is not null and URL ends with "/" which means it's a directory
+							// but UrlResource().exists() will return null - new FileInputStream() on directory
+							// throws an exception...
+							return new DirectoryURLResource(OsgiStandardRoot.this, resource, fullPath);
 						}
 					}
 
@@ -365,11 +376,11 @@ class OsgiStandardRoot extends StandardRoot {
 		}
 	}
 
-	private static class RootBundleURLResource extends AbstractResource {
+	private static class DirectoryURLResource extends AbstractResource {
 
 		private final URL url;
 
-		RootBundleURLResource(WebResourceRoot root, URL url, String fullPath) {
+		DirectoryURLResource(WebResourceRoot root, URL url, String fullPath) {
 			super(root, fullPath);
 			this.url = url;
 		}
@@ -431,7 +442,7 @@ class OsgiStandardRoot extends StandardRoot {
 
 		@Override
 		public boolean canRead() {
-			return false;
+			return true;
 		}
 
 		@Override

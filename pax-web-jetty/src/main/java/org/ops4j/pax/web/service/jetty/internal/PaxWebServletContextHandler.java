@@ -129,7 +129,7 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 		// we have to check if the URL points to the root of the bundle. Felix throws IOException
 		// when opening connection for URIs like "bundle://22.0:1/"
 		if (url != null) {
-			if ("bundle".equals(url.getProtocol())) {
+			if ("bundle".equals(url.getProtocol()) || "bundleentry".equals(url.getProtocol())) {
 				if ("/".equals(url.getPath())) {
 					// Felix, root of the bundle - return a resource which says it's a directory
 					return new RootBundleURLResource(Resource.newResource(url));
@@ -137,12 +137,13 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 					// unfortunately, due to https://issues.apache.org/jira/browse/FELIX-6294
 					// we have to check ourselves if it's a directory and possibly append a slash
 					// just as org.eclipse.osgi.storage.bundlefile.BundleFile#fixTrailingSlash() does it
-					Resource potentialDirectory = Resource.newResource(url);
-					if (potentialDirectory.exists() && potentialDirectory.length() == 0) {
-						URL fixedURL = new URL(url.toExternalForm() + "/");
-						Resource properDirectory = Resource.newResource(fixedURL);
-						if (properDirectory.exists()) {
-							return properDirectory;
+					try (Resource potentialDirectory = Resource.newResource(url)) {
+						if (potentialDirectory.exists() && potentialDirectory.length() == 0) {
+							URL fixedURL = new URL(url.toExternalForm() + "/");
+							Resource properDirectory = Resource.newResource(fixedURL);
+							if (properDirectory.exists()) {
+								return properDirectory;
+							}
 						}
 					}
 				}
@@ -357,7 +358,7 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 
 	/**
 	 * Special override for libraries using {@link ContextHandler#getCurrentContext()} directly. It should eventually
-	 * deletage to {@link org.ops4j.pax.web.service.spi.servlet.OsgiServletContext#getResource(String)}.
+	 * delegate to {@link org.ops4j.pax.web.service.spi.servlet.OsgiServletContext#getResource(String)}.
 	 * @param path
 	 * @return
 	 * @throws MalformedURLException
