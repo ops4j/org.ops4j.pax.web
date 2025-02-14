@@ -21,7 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
 import java.nio.channels.ReadableByteChannel;
 
 /**
@@ -66,9 +66,8 @@ public class EquinoxBundleentryDirectoryURLResource extends Resource {
 	}
 
 	@Override
-	@SuppressWarnings("deprecation")
-	public URL getURL() {
-		return delegate.getURL();
+	public URI getURI() {
+		return delegate.getURI();
 	}
 
 	@Override
