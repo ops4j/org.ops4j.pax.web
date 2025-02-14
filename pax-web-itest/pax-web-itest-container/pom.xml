@@ -74,6 +74,7 @@
 						<commons-digester.version>${dependency.commons-digester}</commons-digester.version>
 						<commons-fileupload.version>${dependency.commons-fileupload}</commons-fileupload.version>
 						<commons-io.version>${dependency.commons-io}</commons-io.version>
+						<org.apache.felix.inventory.version>${dependency.org.apache.felix.inventory}</org.apache.felix.inventory.version>
 						<felix-webconsole.version>${dependency.org.apache.felix.webconsole}</felix-webconsole.version>
 						<jakarta-el-api.version>${dependency.jakarta.el-api}</jakarta-el-api.version>
 						<jakarta-enterprise-cdi-api.version>${dependency.jakarta.enterprise.cdi-api}</jakarta-enterprise-cdi-api.version>
@@ -83,6 +84,7 @@
 						<activation.version>${dependency.com.sun.activation}</activation.version>
 						<karaf.version>${dependency.org.apache.karaf}</karaf.version>
 						<myfaces.version>${dependency.org.apache.myfaces}</myfaces.version>
+						<owasp-encoder.version>${dependency.org.owasp.encoder}</owasp-encoder.version>
 						<pax-web.version>${project.version}</pax-web.version>
 					</systemPropertyVariables>
 					<redirectTestOutputToFile>true</redirectTestOutputToFile>

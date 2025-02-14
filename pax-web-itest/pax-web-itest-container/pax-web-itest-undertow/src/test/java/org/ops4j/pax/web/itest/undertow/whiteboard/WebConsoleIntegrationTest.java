@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.itest.tomcat.httpservice;
+package org.ops4j.pax.web.itest.undertow.whiteboard;
 
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.web.itest.container.httpservice.AbstractWebConsoleIntegrationTest;
+import org.ops4j.pax.web.itest.container.whiteboard.AbstractWebConsoleIntegrationTest;
 
 import static org.ops4j.pax.exam.Constants.START_LEVEL_TEST_BUNDLE;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
@@ -32,11 +32,12 @@ public class WebConsoleIntegrationTest extends AbstractWebConsoleIntegrationTest
 	public Option[] configure() {
 		return combine(baseConfigure(),
 				combine(configAdmin(),
-						combine(paxWebTomcat(),
-								// felix.webconsole needs servlet-api 3
-								mavenBundle("org.ops4j.pax.web", "pax-web-compatibility-servlet31")
-										.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1).noStart()
-						)
+						combine(
+								combine(paxWebUndertow(),
+										// felix.webconsole needs servlet-api 3
+										mavenBundle("org.ops4j.pax.web", "pax-web-compatibility-servlet31")
+												.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1).noStart()
+								), paxWebExtenderWhiteboard())
 				)
 		);
 	}

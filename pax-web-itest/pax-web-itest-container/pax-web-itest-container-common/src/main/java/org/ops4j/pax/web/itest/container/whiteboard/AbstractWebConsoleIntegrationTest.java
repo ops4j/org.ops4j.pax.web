@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.itest.container.httpservice;
+package org.ops4j.pax.web.itest.container.whiteboard;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -29,9 +29,11 @@ public abstract class AbstractWebConsoleIntegrationTest extends AbstractContaine
 
 	@Before
 	public void setUp() throws Exception {
-		configureAndWaitForServletWithMapping("/system/console/res/*", () -> {
+		configureAndWaitForServletWithMapping("/res/*", () -> {
 			context.installBundle(String.format("mvn:commons-fileupload/commons-fileupload/%s", System.getProperty("commons-fileupload.version")));
 			context.installBundle(String.format("mvn:commons-io/commons-io/%s", System.getProperty("commons-io.version")));
+			context.installBundle(String.format("mvn:org.apache.felix/org.apache.felix.inventory/%s", System.getProperty("org.apache.felix.inventory.version")));
+			context.installBundle(String.format("mvn:org.owasp.encoder/encoder/%s", System.getProperty("owasp-encoder.version")));
 			Bundle b = context.installBundle(String.format("mvn:org.apache.felix/org.apache.felix.webconsole/%s", System.getProperty("felix-webconsole.version")));
 			b.start();
 		});
