@@ -125,7 +125,7 @@
 		<plugin.maven-archetype-plugin>3.3.1</plugin.maven-archetype-plugin>
 		<plugin.maven-assembly-plugin>3.7.1</plugin.maven-assembly-plugin>
 		<plugin.maven-checkstyle-plugin>3.6.0</plugin.maven-checkstyle-plugin>
-		<plugin.dependency.com.puppycrawl.tools.checkstyle>10.21.1</plugin.dependency.com.puppycrawl.tools.checkstyle>
+		<plugin.dependency.com.puppycrawl.tools.checkstyle>10.21.2</plugin.dependency.com.puppycrawl.tools.checkstyle>
 		<plugin.maven-clean-plugin>3.4.0</plugin.maven-clean-plugin>
 		<plugin.maven-compiler-plugin>3.13.0</plugin.maven-compiler-plugin>
 		<plugin.maven-dependency-plugin>3.8.1</plugin.maven-dependency-plugin>
@@ -303,7 +303,7 @@
 
 		<dependency.org.ow2.asm>9.7.1</dependency.org.ow2.asm>
 		<dependency.org.owasp.encoder>1.3.1</dependency.org.owasp.encoder>
-		<dependency.org.primefaces>14.0.10</dependency.org.primefaces>
+		<dependency.org.primefaces>14.0.11</dependency.org.primefaces>
 		<dependency.org.slf4j>1.7.36</dependency.org.slf4j>
 		<dependency.org.springframework>5.3.39</dependency.org.springframework>
 		<dependency.org.vaadin.artur>1.7.1</dependency.org.vaadin.artur>
