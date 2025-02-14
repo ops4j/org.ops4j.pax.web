@@ -37,6 +37,8 @@ public abstract class WebConsoleBaseKarafTest extends AbstractKarafTestBase {
 		return new Option[] {
 				mavenBundle("commons-fileupload", "commons-fileupload").version(System.getProperty("commons-fileupload.version")),
 				mavenBundle("commons-io", "commons-io").version(System.getProperty("commons-io.version")),
+				mavenBundle("org.apache.felix", "org.apache.felix.inventory").version(System.getProperty("org.apache.felix.inventory.version")),
+				mavenBundle("org.owasp.encoder", "encoder").version(System.getProperty("owasp-encoder.version")),
 				mavenBundle("org.apache.felix", "org.apache.felix.webconsole").version(System.getProperty("felix-webconsole.version")).noStart()
 		};
 	}

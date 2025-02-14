@@ -59,6 +59,8 @@
 						<commons-fileupload.version>${dependency.commons-fileupload}</commons-fileupload.version>
 						<commons-io.version>${dependency.commons-io}</commons-io.version>
 						<felix-webconsole.version>${dependency.org.apache.felix.webconsole}</felix-webconsole.version>
+						<org.apache.felix.inventory.version>${dependency.org.apache.felix.inventory}</org.apache.felix.inventory.version>
+						<owasp-encoder.version>${dependency.org.owasp.encoder}</owasp-encoder.version>
 					</systemPropertyVariables>
 					<forkCount>1</forkCount>
 					<reuseForks>false</reuseForks>

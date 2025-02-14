@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ops4j.pax.web.itest.tomcat.httpservice;
+package org.ops4j.pax.web.itest.tomcat.whiteboard;
 
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.web.itest.container.httpservice.AbstractWebConsoleIntegrationTest;
+import org.ops4j.pax.web.itest.container.whiteboard.AbstractWebConsoleIntegrationTest;
 
 import static org.ops4j.pax.exam.OptionUtils.combine;
 
@@ -28,7 +28,7 @@ public class WebConsoleIntegrationTest extends AbstractWebConsoleIntegrationTest
 
 	@Configuration
 	public Option[] configure() {
-		return combine(baseConfigure(), combine(configAdmin(), paxWebTomcat()));
+		return combine(baseConfigure(), combine(paxWebTomcat(), combine(configAdmin(), paxWebExtenderWhiteboard())));
 	}
 
 }
