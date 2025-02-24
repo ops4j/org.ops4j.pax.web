@@ -417,11 +417,6 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 			throw new IllegalArgumentException("Problem configuring Undertow server: " + e.getMessage(), e);
 		}
 
-		// Configure NCSA RequestLogHandler if needed
-		if (configuration.logging().isLogNCSAFormatEnabled()) {
-			configureRequestLog();
-		}
-
 		// If external configuration added some connectors, we have to ensure they match declaration from
 		// PID config: org.osgi.service.http.enabled and org.osgi.service.http.secure.enabled
 		verifyListenerConfiguration();
@@ -625,12 +620,10 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 					rh = filter.configure(rh, p);
 				}
 
-				if (rootHandler instanceof PathHandler) {
-					if (LOG.isDebugEnabled()) {
-						LOG.debug("Adding resource handler for location \"" + context + "\" and base path \"" + base.getCanonicalPath() + "\".");
-					}
-					((PathHandler) rootHandler).addPrefixPath(context, rh);
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("Adding resource handler for location \"{}\" and base path \"{}\".", context, base.getCanonicalPath());
 				}
+				pathHandler.addPrefixPath(context, rh);
 			}
 		}
 
@@ -649,6 +642,14 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 				Predicate p = fr.getPredicate() == null ? null : Predicates.parse(fr.getPredicate(), HttpHandler.class.getClassLoader());
 				rootHandler = filter.configure(rootHandler, p);
 			}
+		}
+
+		// Configure NCSA RequestLogHandler if needed - this may also wrap current rootHandler within AccessLogHandler
+		// whether or not the listeners are read from XML file, root handler will be wrapped inside
+		// access log handler, so potential listeners configured during verification
+		// will use access log handler too
+		if (configuration.logging().isLogNCSAFormatEnabled()) {
+			configureRequestLog();
 		}
 
 		// only now create listeners, because rootHandler may have been wrapped
