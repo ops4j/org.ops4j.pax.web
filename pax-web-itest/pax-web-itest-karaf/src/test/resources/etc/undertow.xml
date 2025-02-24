@@ -18,6 +18,16 @@
 -->
 <!-- Minimal Undertow XML configuration, where all the defaults will be configured by Pax Web -->
 <undertow xmlns="urn:org.ops4j.pax.web:undertow:1.1" xmlns:w="urn:jboss:domain:17.0">
+
+	<subsystem xmlns="urn:jboss:domain:undertow:12.0">
+		<server name="default-server" default-host="localhost">
+			<http-listener name="http" socket-binding="http" />
+			<host name="default-host" alias="localhost">
+				<access-log directory="${karaf.data}/log" />
+			</host>
+		</server>
+	</subsystem>
+
 	<security-realm name="default">
 		<w:authentication>
 			<w:jaas name="karaf" />
@@ -25,4 +35,10 @@
 		<user-principal-class-name>org.apache.karaf.jaas.boot.principal.UserPrincipal</user-principal-class-name>
 		<role-principal-class-name>org.apache.karaf.jaas.boot.principal.RolePrincipal</role-principal-class-name>
 	</security-realm>
+
+	<interface name="default">
+		<w:inet-address value="0.0.0.0" />
+	</interface>
+	<socket-binding name="http" interface="default" port="${org.osgi.service.http.port}" />
+
 </undertow>
