@@ -44,7 +44,16 @@ public class JaasAuthTomcatKarafTest extends AuthBaseKarafTest {
 		KarafDistributionConfigurationFilePutOption pid3
 				= new KarafDistributionConfigurationFilePutOption("etc/org.ops4j.pax.web.cfg",
 				"org.osgi.service.http.port", "8181");
-		return combine(basicOptions, users, config, pid1, pid2, pid3);
+		KarafDistributionConfigurationFilePutOption pid4
+				= new KarafDistributionConfigurationFilePutOption("etc/org.ops4j.pax.web.cfg",
+				"org.ops4j.pax.web.log.ncsa.enabled", "true");
+		KarafDistributionConfigurationFilePutOption pid5
+				= new KarafDistributionConfigurationFilePutOption("etc/org.ops4j.pax.web.cfg",
+				"org.ops4j.pax.web.log.ncsa.file", "access-log");
+		KarafDistributionConfigurationFilePutOption pid6
+				= new KarafDistributionConfigurationFilePutOption("etc/org.ops4j.pax.web.cfg",
+				"org.ops4j.pax.web.log.ncsa.directory", "data/log");
+		return combine(basicOptions, users, config, pid1, pid2, pid3, pid4, pid5, pid6);
 	}
 
 }
