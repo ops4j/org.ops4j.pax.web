@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 
+import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,7 +34,6 @@ import org.ops4j.store.Store;
 import org.ops4j.store.StoreFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
-import shaded.org.apache.commons.io.FileUtils;
 
 /**
  * @author Toni Menzel (tonit)

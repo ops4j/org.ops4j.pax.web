@@ -68,9 +68,9 @@
 
 							<!-- OSGi cmpn -->
 							org.osgi.service.cm;version="[1.0,2.0)";resolution:=optional,
-							org.osgi.service.http;version="[1.2,2)",
-							org.osgi.service.http.runtime;version="[1.1,2)",
-							org.osgi.service.http.runtime.dto;version="[1.1,2)",
+							org.ops4j.pax.web.service.http;version="${pax-web.osgi.version}",
+							org.osgi.service.servlet.runtime;version="[2,3)",
+							org.osgi.service.servlet.runtime.dto;version="[2,3)",
 
 							<!-- from pax-web-api -->
 							org.ops4j.pax.web.service;version="${pax-web.osgi.version}",
@@ -123,7 +123,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>
-			<artifactId>osgi.cmpn</artifactId>
+			<artifactId>org.osgi.service.servlet</artifactId>
 			<scope>provided</scope>
 		</dependency>
 

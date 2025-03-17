@@ -70,10 +70,10 @@
 							<!-- OSGi cmpn -->
 							org.osgi.service.event;resolution:=optional,
 							org.osgi.service.cm;resolution:=optional,
-							org.osgi.service.http;version="[1.2,2)",
-							org.osgi.service.servlet.context;version="[1.1,2)",
-							org.osgi.service.servlet.runtime.dto;version="[1.1,2)",
-							org.osgi.service.servlet.runtime;version="[1.1,2)",
+							org.ops4j.pax.web.service.http;version="${pax-web.osgi.version}",
+							org.osgi.service.servlet.context;version="[2,3)",
+							org.osgi.service.servlet.runtime.dto;version="[2,3)",
+							org.osgi.service.servlet.runtime;version="[2,3)",
 
 							<!-- from pax-web-api -->
 							org.ops4j.pax.web.service;version="${pax-web.osgi.version}",

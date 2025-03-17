@@ -24,20 +24,18 @@ import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import javax.security.auth.Subject;
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.Servlet;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 
 import org.eclipse.jetty.ee10.servlet.ServletContextRequest;
-import org.eclipse.jetty.ee10.servlet.ServletContextResponse;
+import org.eclipse.jetty.security.UserPrincipal;
+import org.eclipse.jetty.security.authentication.LoginAuthenticator;
+import org.eclipse.jetty.security.internal.DefaultUserIdentity;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.ee10.servlet.FilterHolder;
 import org.eclipse.jetty.ee10.servlet.FilterMapping;
@@ -55,7 +53,7 @@ import org.ops4j.pax.web.service.spi.servlet.OsgiFilterChain;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiSessionAttributeListener;
 import org.ops4j.pax.web.service.spi.servlet.PreprocessorFilterConfig;
-import org.osgi.service.servlet.whiteboard.Preprocessor;
+import org.osgi.service.servlet.context.ServletContextHelper;
 import org.osgi.service.servlet.whiteboard.Preprocessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -399,21 +397,7 @@ public class PaxWebServletHandler extends ServletHandler {
 		}
 
 		// listener called when org.osgi.service.http.HttpContext.handleSecurity() returns true
-		Consumer<HttpServletRequest> authListener = (req) -> {
-			final Object user = req.getAttribute(ServletContextHelper.REMOTE_USER);
-			final Object authType = req.getAttribute(ServletContextHelper.AUTHENTICATION_TYPE);
-
-			if (user != null || authType != null) {
-				// translate it into Jetty specific authentication
-				if (baseRequest.getAuthentication() == null || baseRequest.getAuthentication() == Authentication.UNAUTHENTICATED) {
-					String userName = user != null ? user.toString() : null;
-					String authMethod = authType != null ? authType.toString() : null;
-					Principal p = new UserPrincipal(userName, null);
-					Subject s = new Subject(true, Collections.singleton(p), Collections.emptySet(), Collections.emptySet());
-					baseRequest.setAuthentication(new UserAuthentication(authMethod, new DefaultUserIdentity(s, p, new String[0])));
-				}
-			}
-		};
+		Consumer<HttpServletRequest> authListener = new AuthBridgeConsumer(baseRequest);
 
 		List<Preprocessor> preprocessorInstances = preprocessors.stream().map(PreprocessorFilterConfig::getInstance).toList();
 		if (!holder.is404()) {
@@ -447,15 +431,18 @@ public class PaxWebServletHandler extends ServletHandler {
 
 		int dispatch = FilterMapping.dispatch(baseRequest.getDispatcherType());
 
+		// listener called when org.osgi.service.http.HttpContext.handleSecurity() returns true
+		Consumer<HttpServletRequest> authListener = new AuthBridgeConsumer(ServletContextRequest.getServletContextRequest(baseRequest));
+
 		FilterChain chain = _chainCache[dispatch].get(key);
 		if (chain != null) {
 			List<Preprocessor> preprocessorInstances = preprocessors.stream().map(PreprocessorFilterConfig::getInstance).toList();
 			if (!holder.is404()) {
 				return new OsgiFilterChain(new ArrayList<>(preprocessorInstances), holder.getOsgiServletContext(),
-						holder.getWebContainerContext(), chain, osgiSessionsBridge);
+						holder.getWebContainerContext(), chain, osgiSessionsBridge, authListener);
 			} else {
 				return new OsgiFilterChain(new ArrayList<>(preprocessorInstances), defaultServletContext,
-						defaultWebContainerContext, chain, osgiSessionsBridge);
+						defaultWebContainerContext, chain, osgiSessionsBridge, authListener);
 			}
 		}
 
@@ -493,10 +480,10 @@ public class PaxWebServletHandler extends ServletHandler {
 		List<Preprocessor> preprocessorInstances = preprocessors.stream().map(PreprocessorFilterConfig::getInstance).toList();
 		if (!holder.is404()) {
 			return new OsgiFilterChain(new ArrayList<>(preprocessorInstances), holder.getOsgiServletContext(),
-					holder.getWebContainerContext(), chain, osgiSessionsBridge);
+					holder.getWebContainerContext(), chain, osgiSessionsBridge, authListener);
 		} else {
 			return new OsgiFilterChain(new ArrayList<>(preprocessorInstances), defaultServletContext,
-					defaultWebContainerContext, chain, osgiSessionsBridge);
+					defaultWebContainerContext, chain, osgiSessionsBridge, authListener);
 		}
 	}
 
@@ -525,4 +512,30 @@ public class PaxWebServletHandler extends ServletHandler {
 		return preprocessors;
 	}
 
+	private static class AuthBridgeConsumer implements Consumer<HttpServletRequest> {
+		private final ServletContextRequest baseRequest;
+
+		public AuthBridgeConsumer(ServletContextRequest baseRequest) {
+			this.baseRequest = baseRequest;
+		}
+
+		@Override
+		public void accept(HttpServletRequest req) {
+			final Object user = req.getAttribute(ServletContextHelper.REMOTE_USER);
+			final Object authType = req.getAttribute(ServletContextHelper.AUTHENTICATION_TYPE);
+
+			if (user != null || authType != null) {
+				// translate it into Jetty specific authentication
+				if (baseRequest.getServletApiRequest().getAuthentication() == null) {
+					String userName = user != null ? user.toString() : null;
+					String authMethod = authType != null ? authType.toString() : null;
+					Principal p = new UserPrincipal(userName, null);
+					Subject s = new Subject(true, Collections.singleton(p), Collections.emptySet(), Collections.emptySet());
+					Request.setAuthenticationState(baseRequest, baseRequest.getServletApiRequest().getAuthentication());
+					LoginAuthenticator.UserAuthenticationSucceeded auth = new LoginAuthenticator.UserAuthenticationSucceeded(authMethod, new DefaultUserIdentity(s, p, new String[0]));
+					Request.setAuthenticationState(baseRequest, auth);
+				}
+			}
+		}
+	}
 }

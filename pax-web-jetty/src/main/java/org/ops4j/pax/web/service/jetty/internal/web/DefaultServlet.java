@@ -10,7 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
 // ========================================================================
 //
-
+//CHECKSTYLE:OFF
 package org.ops4j.pax.web.service.jetty.internal.web;
 
 import java.io.FileNotFoundException;
@@ -35,7 +35,6 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.MappingMatch;
-import org.eclipse.jetty.ee10.servlet.Dispatcher;
 import org.eclipse.jetty.ee10.servlet.ServletApiRequest;
 import org.eclipse.jetty.ee10.servlet.ServletApiResponse;
 import org.eclipse.jetty.ee10.servlet.ServletChannel;
@@ -70,7 +69,6 @@ import org.eclipse.jetty.util.URIUtil;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.resource.ResourceFactory;
 import org.eclipse.jetty.util.resource.Resources;
-import org.ops4j.pax.web.service.spi.servlet.OsgiHttpServletRequestWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -226,9 +224,7 @@ public class DefaultServlet extends HttpServlet
             // Pax Web: we need to translate "" to "/", so this::getResource is not enough
             // also we want to use LaxResourceFactory whether or not _baseResource is set (it has to be set for
             // proper welcome file handling)
-//            ResourceFactory resourceFactory = baseResource != null ? ResourceFactory.of(baseResource) : this::getResource;
-            ResourceFactory resourceFactory = new LaxResourceFactory();
-            contentFactory = new ResourceHttpContentFactory(resourceFactory, mimeTypes);
+            contentFactory = new ResourceHttpContentFactory(baseResource, mimeTypes);
 
             // Use the servers default stylesheet unless there is one explicitly set by an init param.
             Resource styleSheet = _contextHandler.getServer().getDefaultStyleSheet();

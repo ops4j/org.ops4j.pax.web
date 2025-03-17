@@ -52,6 +52,7 @@ import static org.eclipse.jetty.util.URIUtil.encodePath;
  * The current implementation does not support any read operations.
  * </p>
  */
+//CHECKSTYLE:OFF
 class ServletCoreRequest implements Request
 {
     private final HttpServletRequest _servletRequest;
@@ -265,3 +266,4 @@ class ServletCoreRequest implements Request
         return Session.getSession(_servletRequest.getSession(create));
     }
 }
+//CHECKSTYLE:ON

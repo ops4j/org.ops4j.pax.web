@@ -20,7 +20,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.http.runtime.HttpServiceRuntime;
+import org.osgi.service.servlet.runtime.HttpServiceRuntime;
 
 public abstract class WebCommand implements Action {
 

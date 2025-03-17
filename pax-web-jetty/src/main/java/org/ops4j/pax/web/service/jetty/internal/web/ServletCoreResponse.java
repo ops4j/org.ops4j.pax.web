@@ -40,6 +40,7 @@ import org.eclipse.jetty.util.IO;
  * A {@link HttpServletResponse} wrapped as a core {@link Response}.
  * All write operations are internally converted to blocking writes on the servlet API.
  */
+//CHECKSTYLE:OFF
 class ServletCoreResponse implements Response
 {
     private final HttpServletResponse _response;
@@ -378,3 +379,4 @@ class ServletCoreResponse implements Response
         }
     }
 }
+//CHECKSTYLE:ON

@@ -28,13 +28,13 @@
 
 		<!-- Annotation API and osgi.contract=JavaAnnotation, versions 1.3, 1.2, 1.1, 1.0 -->
 		<bundle start-level="30">mvn:jakarta.annotation/jakarta.annotation-api/${dependency.jakarta.annotation-api}</bundle>
-		<bundle start-level="30" start="false">mvn:org.ops4j.pax.web/pax-web-compatibility-annotation13/${project.version}</bundle>
+<!--		<bundle start-level="30" start="false">mvn:org.ops4j.pax.web/pax-web-compatibility-annotation13/${project.version}</bundle>-->
 		<!-- EL API and osgi.contract=JavaEL, versions 3.0, 2.2, 2.1, 2.0, 1.0 -->
 		<bundle start-level="30">mvn:jakarta.el/jakarta.el-api/${dependency.jakarta.el-api}</bundle>
-		<bundle start-level="30" start="false">mvn:org.ops4j.pax.web/pax-web-compatibility-el2/${project.version}</bundle>
+<!--		<bundle start-level="30" start="false">mvn:org.ops4j.pax.web/pax-web-compatibility-el2/${project.version}</bundle>-->
 		<!-- Servlet API and osgi.contract=JavaServlet, versions 4.0, 3.1, 3.0, 2.6 -->
 		<bundle start-level="30">mvn:jakarta.servlet/jakarta.servlet-api/${dependency.jakarta.servlet-api}</bundle>
-		<bundle start-level="30" start="false">mvn:org.ops4j.pax.web/pax-web-compatibility-servlet31/${project.version}</bundle>
+<!--		<bundle start-level="30" start="false">mvn:org.ops4j.pax.web/pax-web-compatibility-servlet31/${project.version}</bundle>-->
 	</feature>
 
 	<feature name="pax-web-core" description="Core Pax Web bundles" version="${project.version}">
@@ -49,12 +49,12 @@
 		<bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-spi/${project.version}</bundle>
 	</feature>
 
-	<feature name="pax-web-websockets" description="Pax Web bundles for Web Sockets (JSR 356) support" version="${project.version}">
-		<feature>pax-web-core</feature>
+<!--	<feature name="pax-web-websockets" description="Pax Web bundles for Web Sockets (JSR 356) support" version="${project.version}">-->
+<!--		<feature>pax-web-core</feature>-->
 
-		<bundle start-level="30" dependency="true">mvn:jakarta.websocket/jakarta.websocket-api/${dependency.jakarta.websocket-api}</bundle>
-		<bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-websocket/${project.version}</bundle>
-	</feature>
+<!--		<bundle start-level="30" dependency="true">mvn:jakarta.websocket/jakarta.websocket-api/${dependency.jakarta.websocket-api}</bundle>-->
+<!--		<bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-websocket/${project.version}</bundle>-->
+<!--	</feature>-->
 
 	<!--
 		Three distinct (don't install at the same time) sets of features implementing
@@ -94,22 +94,22 @@
 		<bundle start-level="30">mvn:org.eclipse.jetty/jetty-proxy/${dependency.org.eclipse.jetty}</bundle>
 	</feature>
 
-	<feature name="pax-web-jetty-websockets" description="Jetty 9 bundles for Web Sockets support" version="${dependency.org.eclipse.jetty}">
-		<feature>pax-web-websockets</feature>
-		<feature>pax-web-jetty</feature>
-		<feature>pax-web-http-jetty</feature>
+<!--	<feature name="pax-web-jetty-websockets" description="Jetty 9 bundles for Web Sockets support" version="${dependency.org.eclipse.jetty}">-->
+<!--		<feature>pax-web-websockets</feature>-->
+<!--		<feature>pax-web-jetty</feature>-->
+<!--		<feature>pax-web-http-jetty</feature>-->
 
-		<bundle start-level="30">mvn:org.eclipse.jetty/jetty-client/${dependency.org.eclipse.jetty}</bundle>
-		<bundle start-level="30">mvn:org.eclipse.jetty/jetty-alpn-client/${dependency.org.eclipse.jetty}</bundle>
-		<bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-javax-common/${dependency.org.eclipse.jetty}</bundle>
-		<bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-javax-client/${dependency.org.eclipse.jetty}</bundle>
-		<bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-javax-server/${dependency.org.eclipse.jetty}</bundle>
-		<bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-jetty-api/${dependency.org.eclipse.jetty}</bundle>
-		<bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-core-common/${dependency.org.eclipse.jetty}</bundle>
-		<bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-core-client/${dependency.org.eclipse.jetty}</bundle>
-		<bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-core-server/${dependency.org.eclipse.jetty}</bundle>
-		<bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-servlet/${dependency.org.eclipse.jetty}</bundle>
-	</feature>
+<!--		<bundle start-level="30">mvn:org.eclipse.jetty/jetty-client/${dependency.org.eclipse.jetty}</bundle>-->
+<!--		<bundle start-level="30">mvn:org.eclipse.jetty/jetty-alpn-client/${dependency.org.eclipse.jetty}</bundle>-->
+<!--		<bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-javax-common/${dependency.org.eclipse.jetty}</bundle>-->
+<!--		<bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-javax-client/${dependency.org.eclipse.jetty}</bundle>-->
+<!--		<bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-javax-server/${dependency.org.eclipse.jetty}</bundle>-->
+<!--		<bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-jetty-api/${dependency.org.eclipse.jetty}</bundle>-->
+<!--		<bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-core-common/${dependency.org.eclipse.jetty}</bundle>-->
+<!--		<bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-core-client/${dependency.org.eclipse.jetty}</bundle>-->
+<!--		<bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-core-server/${dependency.org.eclipse.jetty}</bundle>-->
+<!--		<bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-servlet/${dependency.org.eclipse.jetty}</bundle>-->
+<!--	</feature>-->
 
 	<feature name="pax-web-jetty-http2" description="Jetty 9 bundles for HTTP/2 support" version="${dependency.org.eclipse.jetty}" >
 		<feature>pax-web-jetty</feature>
@@ -241,12 +241,12 @@ javax.servlet.context.tempdir = ${karaf.data}/pax-web/tmp
 		<bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-tomcat/${project.version}</bundle>
 	</feature>
 
-	<feature name="pax-web-tomcat-websockets" description="Tomcat 9 bundles for Web Sockets support" version="${dependency.org.apache.tomcat}">
-		<feature>pax-web-websockets</feature>
-		<feature>pax-web-tomcat</feature>
+<!--	<feature name="pax-web-tomcat-websockets" description="Tomcat 9 bundles for Web Sockets support" version="${dependency.org.apache.tomcat}">-->
+<!--		<feature>pax-web-websockets</feature>-->
+<!--		<feature>pax-web-tomcat</feature>-->
 
-		<bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-tomcat-websocket/${project.version}</bundle>
-	</feature>
+<!--		<bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-tomcat-websocket/${project.version}</bundle>-->
+<!--	</feature>-->
 
 	<feature name="pax-web-http-tomcat" description="Http Service implementation using Tomcat 9" version="${project.version}">
 		<feature>pax-web-tomcat</feature>
@@ -336,7 +336,7 @@ javax.servlet.context.tempdir = ${karaf.data}/pax-web/tmp
 		<feature>pax-web-core</feature>
 
 		<bundle start-level="30" dependency="true">mvn:jakarta.annotation/jakarta.annotation-api/${dependency.jakarta.annotation-api}</bundle>
-		<bundle start-level="30" dependency="true">mvn:com.sun.activation/javax.activation/${dependency.com.sun.activation}</bundle>
+<!--		<bundle start-level="30" dependency="true">mvn:com.sun.activation/javax.activation/${dependency.com.sun.activation}</bundle>-->
 		<bundle start-level="30" dependency="true">mvn:jakarta.servlet/jakarta.servlet-api/${dependency.jakarta.servlet-api}</bundle>
 		<bundle start-level="30" dependency="true">mvn:jakarta.xml.bind/jakarta.xml.bind-api/${dependency.jakarta.xml.bind-api}</bundle>
 
@@ -347,13 +347,13 @@ javax.servlet.context.tempdir = ${karaf.data}/pax-web/tmp
 		<bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-undertow/${project.version}</bundle>
 	</feature>
 
-	<feature name="pax-web-undertow-websockets" description="Undertow 2 bundles for Web Sockets support" version="${dependency.io.undertow}">
-		<feature>pax-web-websockets</feature>
-		<feature>pax-web-undertow</feature>
+<!--	<feature name="pax-web-undertow-websockets" description="Undertow 2 bundles for Web Sockets support" version="${dependency.io.undertow}">-->
+<!--		<feature>pax-web-websockets</feature>-->
+<!--		<feature>pax-web-undertow</feature>-->
 
-		<bundle start-level="30">mvn:io.undertow/undertow-websockets-jsr/${dependency.io.undertow}</bundle>
-		<bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-undertow-websocket/${project.version}</bundle>
-	</feature>
+<!--		<bundle start-level="30">mvn:io.undertow/undertow-websockets-jsr/${dependency.io.undertow}</bundle>-->
+<!--		<bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-undertow-websocket/${project.version}</bundle>-->
+<!--	</feature>-->
 
 	<feature name="pax-web-http-undertow" description="Http Service implementation using Undertow 2" version="${project.version}">
 		<feature>pax-web-core</feature>
@@ -434,7 +434,7 @@ javax.servlet.context.tempdir = ${karaf.data}/pax-web/tmp
 		<feature>pax-web-core</feature>
 
 		<bundle start-level="30">mvn:jakarta.el/jakarta.el-api/${dependency.jakarta.el-api}</bundle>
-		<bundle start-level="30" start="false">mvn:org.ops4j.pax.web/pax-web-compatibility-el2/${project.version}</bundle>
+<!--		<bundle start-level="30" start="false">mvn:org.ops4j.pax.web/pax-web-compatibility-el2/${project.version}</bundle>-->
 		<bundle start-level="30" dependency="true">mvn:jakarta.annotation/jakarta.annotation-api/${dependency.jakarta.annotation-api}</bundle>
 
 		<bundle start-level="30">mvn:org.eclipse.jdt/ecj/${dependency.org.eclipse.jdt.ecj}</bundle>

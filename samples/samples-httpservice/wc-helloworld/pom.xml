@@ -52,10 +52,8 @@
 							org.osgi.util.tracker;version="[1.5,2)",
 
 							<!-- pax-web-api -->
+							org.ops4j.pax.web.service;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.service.http;version="${pax-web.osgi.version}"
-
-							<!-- pax-web-api -->
-							org.ops4j.pax.web.service;version="${pax-web.osgi.version}"
 						</Import-Package>
 						<Export-Package />
 						<Private-Package>org.ops4j.pax.web.samples.helloworld.wc.internal</Private-Package>

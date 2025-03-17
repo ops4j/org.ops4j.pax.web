@@ -315,6 +315,8 @@ public abstract class AbstractControlledTestBase {
 				mavenBundle().groupId("org.eclipse.jetty.ee10")
 						.artifactId("jetty-ee10-servlet").versionAsInProject(),
 				mavenBundle().groupId("org.eclipse.jetty")
+						.artifactId("jetty-session").versionAsInProject(),
+				mavenBundle().groupId("org.eclipse.jetty")
 						.artifactId("jetty-security").versionAsInProject(),
 //				mavenBundle().groupId("org.eclipse.jetty")
 //						.artifactId("jetty-jaas").versionAsInProject()
@@ -348,6 +350,8 @@ public abstract class AbstractControlledTestBase {
 	protected Option[] jettyWebSockets() {
 		return new Option[] {
 				mavenBundle("jakarta.websocket", "jakarta.websocket-api")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("jakarta.websocket", "jakarta.websocket-client-api")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle().groupId("org.eclipse.jetty")
 						.artifactId("jetty-client").versionAsInProject(),

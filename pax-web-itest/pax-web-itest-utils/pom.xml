@@ -66,8 +66,8 @@
 							jakarta.servlet.annotation;version="[6,7)",
 							jakarta.servlet.http;version="[6,7)",
 
-							jakarta.websocket;version="[2.1,3)",
-							jakarta.websocket.server;version="[2.1,3)",
+							jakarta.websocket;version="[2.1,3)";resolution:=optional,
+							jakarta.websocket.server;version="[2.1,3)";resolution:=optional,
 
 							<!-- OSGi Core R8+ -->
 							org.osgi.framework;version="[1.10,2)",

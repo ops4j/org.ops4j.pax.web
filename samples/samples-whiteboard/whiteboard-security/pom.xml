@@ -51,8 +51,8 @@
 							org.osgi.framework;version="[1.10,2)",
 
 							<!-- OSGi cmpn -->
-							org.osgi.service.servlet.context;version="[1.1,2)",
-							org.osgi.service.servlet.whiteboard;version="[1.1,2)",
+							org.osgi.service.servlet.context;version="[2,3)",
+							org.osgi.service.servlet.whiteboard;version="[2,3)",
 
 							<!-- from pax-web -->
 							org.ops4j.pax.web.service.whiteboard,

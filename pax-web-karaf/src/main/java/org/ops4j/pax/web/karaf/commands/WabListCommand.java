@@ -25,7 +25,7 @@ import org.apache.karaf.shell.support.table.ShellTable;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.spi.model.info.WebApplicationInfo;
 import org.ops4j.pax.web.service.spi.model.views.ReportWebContainerView;
-import org.osgi.service.http.runtime.HttpServiceRuntimeConstants;
+import org.osgi.service.servlet.runtime.HttpServiceRuntimeConstants;
 
 @Command(scope = "web", name = "wab-list", description = "Lists all available, deployed Web Application Bundles.")
 @Service

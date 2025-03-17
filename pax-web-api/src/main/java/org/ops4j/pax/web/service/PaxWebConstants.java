@@ -298,17 +298,17 @@ public interface PaxWebConstants {
 	String SERVICE_PROPERTY_WEB_SERVLETCONTEXT_NAME = "osgi.web.contextname";
 
 	/**
-	 * For compatibility purpose (OSGi CMPN 8: {@code org.osgi.service.http.whiteboard.HttpWhiteboardConstants#HTTP_SERVICE_CONTEXT_PROPERTY})
+	 * For compatibility purpose (OSGi CMPN 8: {@code org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants#HTTP_SERVICE_CONTEXT_PROPERTY})
 	 */
 	String HTTP_SERVICE_CONTEXT_PROPERTY = "osgi.http.whiteboard.context.httpservice";
 
 	/**
-	 * For compatibility purpose (OSGi CMPN 8: {@code org.osgi.service.http.whiteboard.HttpWhiteboardConstants#HTTP_SERVICE_CONTEXT_FILTER})
+	 * For compatibility purpose (OSGi CMPN 8: {@code org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants#HTTP_SERVICE_CONTEXT_FILTER})
 	 */
 	String HTTP_SERVICE_CONTEXT_FILTER = "(" + HTTP_SERVICE_CONTEXT_PROPERTY + "=*)";
 
 	/**
-	 * For compatibility purpose (OSGi CMPN 8: {@code org.osgi.service.http.runtime.HttpServiceRuntimeConstants#HTTP_SERVICE_ID})
+	 * For compatibility purpose (OSGi CMPN 8: {@code org.osgi.service.servlet.runtime.HttpServiceRuntimeConstants#HTTP_SERVICE_ID})
 	 */
 	String HTTP_SERVICE_ID = "osgi.http.service.id";
 

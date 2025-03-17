@@ -49,7 +49,7 @@ public abstract class AbstractAuthenticationIntegrationTest extends AbstractCont
 	public void testStatus() throws Exception {
 		HttpTestClientFactory.createDefaultTestClient()
 				.withResponseAssertion("Status must be available!",
-						resp -> resp.contains("org.osgi.service.servlet.authentication.type : null"))
+						resp -> resp.contains("org.osgi.service.http.authentication.type : null"))
 				.doGET("http://127.0.0.1:8181/status")
 				.executeTest();
 	}
@@ -67,7 +67,7 @@ public abstract class AbstractAuthenticationIntegrationTest extends AbstractCont
 		HttpTestClientFactory.createDefaultTestClient()
 				.authenticate("admin", "admin", "Test Realm")
 				.withResponseAssertion("Authorized Access must be allowed!",
-						resp -> resp.contains("org.osgi.service.servlet.authentication.type : BASIC"))
+						resp -> resp.contains("org.osgi.service.http.authentication.type : BASIC"))
 				.doGET("http://127.0.0.1:8181/status-with-auth")
 				.executeTest();
 	}

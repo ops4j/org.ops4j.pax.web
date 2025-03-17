@@ -28,7 +28,7 @@ import io.undertow.servlet.handlers.ServletRequestContext;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.undertow.internal.security.OsgiSecurityContext;
-import org.osgi.service.http.context.ServletContextHelper;
+import org.osgi.service.servlet.context.ServletContextHelper;
 
 public class PaxWebSecurityHandler implements HandlerWrapper {
 

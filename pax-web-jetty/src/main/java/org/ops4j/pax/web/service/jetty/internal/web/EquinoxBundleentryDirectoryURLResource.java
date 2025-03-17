@@ -17,12 +17,11 @@ package org.ops4j.pax.web.service.jetty.internal.web;
 
 import org.eclipse.jetty.util.resource.Resource;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.nio.channels.ReadableByteChannel;
+import java.nio.file.Path;
+import java.time.Instant;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Special wrapper for {@link Resource} to handle URLs representing roots of the bundles.
@@ -36,13 +35,13 @@ public class EquinoxBundleentryDirectoryURLResource extends Resource {
 	}
 
 	@Override
-	public boolean isContainedIn(Resource r) throws MalformedURLException {
-		return delegate.isContainedIn(r);
+	public Path getPath() {
+		return delegate.getPath();
 	}
 
 	@Override
-	public void close() {
-		delegate.close();
+	public boolean isContainedIn(Resource r) {
+		return delegate.isContainedIn(r);
 	}
 
 	@Override
@@ -56,8 +55,13 @@ public class EquinoxBundleentryDirectoryURLResource extends Resource {
 	}
 
 	@Override
-	public long lastModified() {
-		return 0;
+	public boolean isReadable() {
+		return true;
+	}
+
+	@Override
+	public Instant lastModified() {
+		return Instant.ofEpochSecond(0);
 	}
 
 	@Override
@@ -71,43 +75,23 @@ public class EquinoxBundleentryDirectoryURLResource extends Resource {
 	}
 
 	@Override
-	public File getFile() throws IOException {
-		return delegate.getFile();
-	}
-
-	@Override
 	public String getName() {
 		return delegate.getName();
 	}
 
 	@Override
-	public InputStream getInputStream() {
-		return null;
+	public String getFileName() {
+		return "";
 	}
 
 	@Override
-	public ReadableByteChannel getReadableByteChannel() {
-		return null;
+	public List<Resource> list() {
+		return Collections.emptyList();
 	}
 
 	@Override
-	public boolean delete() throws SecurityException {
-		return false;
-	}
-
-	@Override
-	public boolean renameTo(Resource dest) throws SecurityException {
-		return false;
-	}
-
-	@Override
-	public String[] list() {
-		return new String[0];
-	}
-
-	@Override
-	public Resource addPath(String path) throws IOException {
-		return delegate.addPath(path);
+	public Resource resolve(String subUriPath) {
+		return delegate.resolve(subUriPath);
 	}
 
 }
