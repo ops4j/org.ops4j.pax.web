@@ -42,6 +42,7 @@ import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.util.resource.PathResourceFactory;
 import org.eclipse.jetty.util.resource.Resource;
+import org.eclipse.jetty.util.resource.URLResourceFactory;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.ops4j.pax.web.service.spi.config.Configuration;
@@ -73,6 +74,7 @@ class JettyFactory {
 	private boolean http2Available;
 
 	private final PathResourceFactory resourceFactory = new PathResourceFactory();
+	private final URLResourceFactory urlResourceFactory = new URLResourceFactory();
 
 	JettyFactory(Bundle paxWebJettyBundle, ClassLoader classLoader) {
 		this.paxWebJettyBundle = paxWebJettyBundle;
@@ -585,7 +587,7 @@ class JettyFactory {
 	}
 
 	public Resource newResource(URL path) {
-		return resourceFactory.newResource(path);
+		return urlResourceFactory.newResource(path);
 	}
 
 	public Resource newResource(File file) {
