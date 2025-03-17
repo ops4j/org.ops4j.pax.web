@@ -18,8 +18,8 @@ package org.ops4j.pax.web.itest.container.war;
 import org.junit.Before;
 import org.junit.Test;
 import org.ops4j.pax.exam.options.UrlProvisionOption;
-import org.ops4j.pax.tinybundles.core.InnerClassStrategy;
-import org.ops4j.pax.tinybundles.core.TinyBundles;
+import org.ops4j.pax.tinybundles.InnerClassStrategy;
+import org.ops4j.pax.tinybundles.TinyBundles;
 import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
 import org.ops4j.pax.web.itest.utils.web.TestServlet;
@@ -36,15 +36,15 @@ public abstract class AbstractWarContainerInitializerIntegrationTest extends Abs
 
 	protected UrlProvisionOption theWab() {
 		return streamBundle(TinyBundles.bundle()
-				.add(TestServlet.class, InnerClassStrategy.NONE)
-				.add(TestServletContainerInitializer.class, InnerClassStrategy.NONE)
-				.set(Constants.BUNDLE_SYMBOLICNAME, "war-bundle")
-				.set(PaxWebConstants.HEADER_CONTEXT_PATH, "/contextroot")
-				.set(Constants.IMPORT_PACKAGE, "jakarta.servlet, jakarta.servlet.annotation, jakarta.servlet.http")
-				.set(Constants.DYNAMICIMPORT_PACKAGE, "*")
-				.add("WEB-INF/web.xml",
+				.addClass(TestServlet.class, InnerClassStrategy.NONE)
+				.addClass(TestServletContainerInitializer.class, InnerClassStrategy.NONE)
+				.setHeader(Constants.BUNDLE_SYMBOLICNAME, "war-bundle")
+				.setHeader(PaxWebConstants.HEADER_CONTEXT_PATH, "/contextroot")
+				.setHeader(Constants.IMPORT_PACKAGE, "jakarta.servlet, jakarta.servlet.annotation, jakarta.servlet.http")
+				.setHeader(Constants.DYNAMICIMPORT_PACKAGE, "*")
+				.addResource("WEB-INF/web.xml",
 						AbstractWarContainerInitializerIntegrationTest.class.getClassLoader().getResourceAsStream("web-3.0.xml"))
-				.add("META-INF/services/jakarta.servlet.ServletContainerInitializer",
+				.addResource("META-INF/services/jakarta.servlet.ServletContainerInitializer",
 						AbstractWarContainerInitializerIntegrationTest.class.getClassLoader().getResourceAsStream("META-INF/services/jakarta.servlet.ServletContainerInitializer"))
 				.build()).noStart();
 	}

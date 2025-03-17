@@ -23,7 +23,7 @@ import java.nio.file.Files;
 import org.junit.Before;
 import org.junit.Test;
 import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.tinybundles.core.TinyBundles;
+import org.ops4j.pax.tinybundles.TinyBundles;
 import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
 import org.ops4j.pax.web.itest.utils.web.Bundle1Activator;
@@ -50,13 +50,13 @@ public abstract class AbstractSharedFilterIntegrationTest extends AbstractContai
 		dir.mkdirs();
 		try {
 			InputStream b1 = TinyBundles.bundle()
-					.add(Bundle1Servlet.class)
-					.add(Bundle1Filter.class)
-					.add(Bundle1SharedFilter.class)
-					.add(Bundle1Activator.class)
-					.set(Constants.BUNDLE_SYMBOLICNAME, "BundleTest1")
-					.set(Constants.BUNDLE_ACTIVATOR, Bundle1Activator.class.getName())
-					.set(Constants.DYNAMICIMPORT_PACKAGE, "*").build();
+					.addClass(Bundle1Servlet.class)
+					.addClass(Bundle1Filter.class)
+					.addClass(Bundle1SharedFilter.class)
+					.addClass(Bundle1Activator.class)
+					.setHeader(Constants.BUNDLE_SYMBOLICNAME, "BundleTest1")
+					.setHeader(Constants.BUNDLE_ACTIVATOR, Bundle1Activator.class.getName())
+					.setHeader(Constants.DYNAMICIMPORT_PACKAGE, "*").build();
 			Store<InputStream> store = StoreFactory.anonymousStore();
 			File bundle1 = new File("target/bundles/b1.jar");
 			bundle1.delete();
@@ -64,12 +64,12 @@ public abstract class AbstractSharedFilterIntegrationTest extends AbstractContai
 			b1.close();
 
 			InputStream b2 = TinyBundles.bundle()
-					.add(Bundle2SharedServlet.class)
-					.add(Bundle2SharedFilter.class)
-					.add(Bundle2Activator.class)
-					.set(Constants.BUNDLE_SYMBOLICNAME, "BundleTest2")
-					.set(Constants.BUNDLE_ACTIVATOR, Bundle2Activator.class.getName())
-					.set(Constants.DYNAMICIMPORT_PACKAGE, "*").build();
+					.addClass(Bundle2SharedServlet.class)
+					.addClass(Bundle2SharedFilter.class)
+					.addClass(Bundle2Activator.class)
+					.setHeader(Constants.BUNDLE_SYMBOLICNAME, "BundleTest2")
+					.setHeader(Constants.BUNDLE_ACTIVATOR, Bundle2Activator.class.getName())
+					.setHeader(Constants.DYNAMICIMPORT_PACKAGE, "*").build();
 			File bundle2 = new File("target/bundles/b2.jar");
 			bundle2.delete();
 			Files.copy(b2, bundle2.toPath());
