@@ -515,7 +515,7 @@ public class PaxWebServletHandler extends ServletHandler {
 	private static class AuthBridgeConsumer implements Consumer<HttpServletRequest> {
 		private final ServletContextRequest baseRequest;
 
-		public AuthBridgeConsumer(ServletContextRequest baseRequest) {
+		AuthBridgeConsumer(ServletContextRequest baseRequest) {
 			this.baseRequest = baseRequest;
 		}
 

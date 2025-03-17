@@ -54,7 +54,8 @@ public abstract class AbstractSharedContextFilterIntegrationTest extends Abstrac
 					.addClass(ServletBundleActivator.class)
 					.setHeader(Constants.BUNDLE_SYMBOLICNAME, SERVLET_BUNDLE)
 					.setHeader(Constants.BUNDLE_ACTIVATOR, ServletBundleActivator.class.getName())
-					.setHeader(Constants.DYNAMICIMPORT_PACKAGE, "*").build();
+					.setHeader(Constants.DYNAMICIMPORT_PACKAGE, "*")
+					.build(TinyBundles.rawBuilder());
 			Store<InputStream> store = StoreFactory.anonymousStore();
 			File bundle1 = new File("target/bundles/b1.jar");
 			bundle1.delete();
@@ -66,7 +67,8 @@ public abstract class AbstractSharedContextFilterIntegrationTest extends Abstrac
 					.addClass(FilterBundleActivator.class)
 					.setHeader(Constants.BUNDLE_SYMBOLICNAME, FILTER_BUNDLE)
 					.setHeader(Constants.BUNDLE_ACTIVATOR, FilterBundleActivator.class.getName())
-					.setHeader(Constants.DYNAMICIMPORT_PACKAGE, "*").build();
+					.setHeader(Constants.DYNAMICIMPORT_PACKAGE, "*")
+					.build(TinyBundles.rawBuilder());
 			File bundle2 = new File("target/bundles/b2.jar");
 			bundle2.delete();
 			Files.copy(b2, bundle2.toPath());

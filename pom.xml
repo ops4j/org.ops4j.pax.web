@@ -248,7 +248,8 @@
 		<dependency.org.assertj>3.27.3</dependency.org.assertj>
 		<dependency.org.bouncycastle>1.80</dependency.org.bouncycastle>
 		<dependency.org.codehaus.woodstox.stax2-api>4.2.2</dependency.org.codehaus.woodstox.stax2-api>
-		<dependency.org.eclipse.jdt.ecj>3.41.0</dependency.org.eclipse.jdt.ecj>
+		<!-- 3.41.0 doesn't work... -->
+		<dependency.org.eclipse.jdt.ecj>3.40.0</dependency.org.eclipse.jdt.ecj>
 
 		<!-- Please keep Maven and OSGi version in sync -->
         <dependency.org.eclipse.jetty>12.0.17</dependency.org.eclipse.jetty>
@@ -1654,6 +1655,11 @@
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.exam</groupId>
+				<artifactId>pax-exam-spi</artifactId>
+				<version>${dependency.org.ops4j.pax.exam}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.exam</groupId>
 				<artifactId>pax-exam-junit4</artifactId>
 				<version>${dependency.org.ops4j.pax.exam}</version>
 				<exclusions>
@@ -1829,6 +1835,10 @@
 					<exclusion>
 						<groupId>org.osgi</groupId>
 						<artifactId>org.osgi.core</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.osgi</groupId>
+						<artifactId>org.osgi.framework</artifactId>
 					</exclusion>
 				</exclusions>
 			</dependency>

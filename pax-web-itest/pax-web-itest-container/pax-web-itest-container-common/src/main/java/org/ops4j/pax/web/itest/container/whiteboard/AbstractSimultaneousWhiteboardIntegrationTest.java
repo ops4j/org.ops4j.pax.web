@@ -54,7 +54,7 @@ public abstract class AbstractSimultaneousWhiteboardIntegrationTest extends Abst
 					.setHeader(Constants.BUNDLE_ACTIVATOR, TestActivator.class.getName())
 					.setHeader(Constants.BUNDLE_SYMBOLICNAME, "org.ops4j.pax.web.itest.SimultaneousTest")
 					.setHeader(Constants.DYNAMICIMPORT_PACKAGE, "*")
-					.build();
+					.build(TinyBundles.rawBuilder());
 			Store<InputStream> store = StoreFactory.anonymousStore();
 			File bundle1 = new File(dir, "b1.jar");
 			Files.copy(b1, bundle1.toPath());

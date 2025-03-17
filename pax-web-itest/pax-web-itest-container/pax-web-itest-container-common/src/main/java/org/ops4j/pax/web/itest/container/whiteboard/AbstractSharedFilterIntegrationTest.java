@@ -56,7 +56,8 @@ public abstract class AbstractSharedFilterIntegrationTest extends AbstractContai
 					.addClass(Bundle1Activator.class)
 					.setHeader(Constants.BUNDLE_SYMBOLICNAME, "BundleTest1")
 					.setHeader(Constants.BUNDLE_ACTIVATOR, Bundle1Activator.class.getName())
-					.setHeader(Constants.DYNAMICIMPORT_PACKAGE, "*").build();
+					.setHeader(Constants.DYNAMICIMPORT_PACKAGE, "*")
+					.build(TinyBundles.rawBuilder());
 			Store<InputStream> store = StoreFactory.anonymousStore();
 			File bundle1 = new File("target/bundles/b1.jar");
 			bundle1.delete();
@@ -69,7 +70,8 @@ public abstract class AbstractSharedFilterIntegrationTest extends AbstractContai
 					.addClass(Bundle2Activator.class)
 					.setHeader(Constants.BUNDLE_SYMBOLICNAME, "BundleTest2")
 					.setHeader(Constants.BUNDLE_ACTIVATOR, Bundle2Activator.class.getName())
-					.setHeader(Constants.DYNAMICIMPORT_PACKAGE, "*").build();
+					.setHeader(Constants.DYNAMICIMPORT_PACKAGE, "*")
+					.build(TinyBundles.rawBuilder());
 			File bundle2 = new File("target/bundles/b2.jar");
 			bundle2.delete();
 			Files.copy(b2, bundle2.toPath());

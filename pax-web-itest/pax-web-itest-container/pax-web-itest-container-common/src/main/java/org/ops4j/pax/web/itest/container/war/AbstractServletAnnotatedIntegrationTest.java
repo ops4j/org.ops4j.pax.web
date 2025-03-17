@@ -46,7 +46,7 @@ public abstract class AbstractServletAnnotatedIntegrationTest extends AbstractCo
 				.setHeader(PaxWebConstants.HEADER_CONTEXT_PATH, "/annotatedTest")
 				.setHeader(Constants.IMPORT_PACKAGE, "jakarta.servlet")
 				.setHeader(Constants.DYNAMICIMPORT_PACKAGE, "*")
-				.build()).noStart();
+				.build(TinyBundles.rawBuilder())).noStart();
 	}
 
 	@Before

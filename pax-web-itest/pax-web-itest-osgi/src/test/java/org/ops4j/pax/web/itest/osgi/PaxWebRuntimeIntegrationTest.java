@@ -276,7 +276,7 @@ public class PaxWebRuntimeIntegrationTest extends AbstractOsgiTestBase {
 		InputStream bundle1 = TinyBundles.bundle()
 				.setHeader("Bundle-ManifestVersion", "2")
 				.setHeader("Bundle-SymbolicName", "b1")
-				.build();
+				.build(TinyBundles.rawBuilder());
 		File f1 = new File(dir, "empty-bundle1.jar");
 		f1.delete();
 		try (FileOutputStream fos = new FileOutputStream(f1)) {
@@ -286,7 +286,7 @@ public class PaxWebRuntimeIntegrationTest extends AbstractOsgiTestBase {
 		InputStream bundle2 = TinyBundles.bundle()
 				.setHeader("Bundle-ManifestVersion", "2")
 				.setHeader("Bundle-SymbolicName", "b2")
-				.build();
+				.build(TinyBundles.rawBuilder());
 		File f2 = new File(dir, "empty-bundle2.jar");
 		f2.delete();
 		try (FileOutputStream fos = new FileOutputStream(f2)) {

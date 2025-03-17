@@ -46,7 +46,7 @@ public abstract class AbstractWarContainerInitializerIntegrationTest extends Abs
 						AbstractWarContainerInitializerIntegrationTest.class.getClassLoader().getResourceAsStream("web-3.0.xml"))
 				.addResource("META-INF/services/jakarta.servlet.ServletContainerInitializer",
 						AbstractWarContainerInitializerIntegrationTest.class.getClassLoader().getResourceAsStream("META-INF/services/jakarta.servlet.ServletContainerInitializer"))
-				.build()).noStart();
+				.build(TinyBundles.rawBuilder())).noStart();
 	}
 
 	@Before
