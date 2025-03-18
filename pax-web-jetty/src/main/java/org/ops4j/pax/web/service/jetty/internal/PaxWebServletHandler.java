@@ -33,9 +33,9 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.eclipse.jetty.ee10.servlet.ServletContextRequest;
+import org.eclipse.jetty.security.UserIdentity;
 import org.eclipse.jetty.security.UserPrincipal;
 import org.eclipse.jetty.security.authentication.LoginAuthenticator;
-import org.eclipse.jetty.security.internal.DefaultUserIdentity;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.ee10.servlet.FilterHolder;
 import org.eclipse.jetty.ee10.servlet.FilterMapping;
@@ -532,10 +532,36 @@ public class PaxWebServletHandler extends ServletHandler {
 					Principal p = new UserPrincipal(userName, null);
 					Subject s = new Subject(true, Collections.singleton(p), Collections.emptySet(), Collections.emptySet());
 					Request.setAuthenticationState(baseRequest, baseRequest.getServletApiRequest().getAuthentication());
-					LoginAuthenticator.UserAuthenticationSucceeded auth = new LoginAuthenticator.UserAuthenticationSucceeded(authMethod, new DefaultUserIdentity(s, p, new String[0]));
+					LoginAuthenticator.UserAuthenticationSucceeded auth = new LoginAuthenticator.UserAuthenticationSucceeded(authMethod, new DefaultUserIdentity(s, p));
 					Request.setAuthenticationState(baseRequest, auth);
 				}
 			}
 		}
 	}
+
+	private static class DefaultUserIdentity implements UserIdentity {
+		private final Subject subject;
+		private final Principal principal;
+
+		private DefaultUserIdentity(Subject subject, Principal principal) {
+			this.subject = subject;
+			this.principal = principal;
+		}
+
+		@Override
+		public Subject getSubject() {
+			return subject;
+		}
+
+		@Override
+		public Principal getUserPrincipal() {
+			return principal;
+		}
+
+		@Override
+		public boolean isUserInRole(String role) {
+			return false;
+		}
+	}
+
 }

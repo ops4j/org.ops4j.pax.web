@@ -15,7 +15,6 @@
  */
 package org.ops4j.pax.web.samples.jersey;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.logging.Logger;
 import jakarta.servlet.http.Cookie;
@@ -23,8 +22,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
+import org.ops4j.pax.web.service.http.HttpContext;
 import org.osgi.framework.Bundle;
-import org.osgi.service.http.HttpContext;
 
 class CustomHttpContext implements HttpContext {
 
@@ -47,7 +46,7 @@ class CustomHttpContext implements HttpContext {
 	}
 
 	@Override
-	public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
+	public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) {
 		HttpSession session = request.getSession(false);
 		StringBuilder info = new StringBuilder();
 		info.append("\n  Request=").append(request.getClass().getName()).append("\n  Cookies:\n");

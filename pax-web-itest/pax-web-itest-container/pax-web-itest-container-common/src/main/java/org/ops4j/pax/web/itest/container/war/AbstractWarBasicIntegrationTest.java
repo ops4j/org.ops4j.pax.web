@@ -49,20 +49,23 @@ public abstract class AbstractWarBasicIntegrationTest extends AbstractContainerT
 	@Before
 	public void setUp() throws Exception {
 		configureAndWaitForDeployment(() -> {
-			context.installBundle(String.format("mvn:org.ops4j.pax.web/pax-web-compatibility-el2/%s", System.getProperty("pax-web.version")));
-			context.installBundle(String.format("mvn:org.ops4j.pax.web/pax-web-compatibility-interceptor12/%s", System.getProperty("pax-web.version")));
-			context.installBundle(String.format("mvn:org.ops4j.pax.web/pax-web-compatibility-cdi12/%s", System.getProperty("pax-web.version")));
-			context.installBundle(String.format("mvn:org.apache.myfaces.core/myfaces-api/%s", System.getProperty("myfaces.version")));
-			context.installBundle(String.format("mvn:org.apache.myfaces.core/myfaces-impl/%s", System.getProperty("myfaces.version")));
+//			context.installBundle(String.format("mvn:org.ops4j.pax.web/pax-web-compatibility-interceptor12/%s", System.getProperty("pax-web.version")));
+//			context.installBundle(String.format("mvn:org.ops4j.pax.web/pax-web-compatibility-cdi12/%s", System.getProperty("pax-web.version")));
+			context.installBundle(String.format("mvn:org.apache.myfaces.core/myfaces-bundle/%s", System.getProperty("myfaces.version")));
 			context.installBundle(String.format("mvn:commons-beanutils/commons-beanutils/%s", System.getProperty("commons-beanutils.version")));
 			context.installBundle(String.format("mvn:commons-collections/commons-collections/%s", System.getProperty("commons-collections.version")));
 			context.installBundle(String.format("mvn:commons-digester/commons-digester/%s", System.getProperty("commons-digester.version")));
 			context.installBundle(String.format("mvn:jakarta.enterprise/jakarta.enterprise.cdi-api/%s", System.getProperty("jakarta-enterprise-cdi-api.version")));
+			context.installBundle(String.format("mvn:jakarta.enterprise/jakarta.enterprise.lang-model/%s", System.getProperty("jakarta-enterprise-lang-model.version")));
 			context.installBundle(String.format("mvn:jakarta.interceptor/jakarta.interceptor-api/%s", System.getProperty("jakarta-interceptor-api.version")));
 			context.installBundle(String.format("mvn:jakarta.el/jakarta.el-api/%s", System.getProperty("jakarta-el-api.version")));
+			context.installBundle(String.format("mvn:jakarta.validation/jakarta.validation-api/%s", System.getProperty("jakarta-validation-api.version")));
+			context.installBundle(String.format("mvn:org.ops4j.pax.web/pax-web-compatibility-websocket/%s", System.getProperty("pax-web.version")));
 			context.installBundle(String.format("mvn:jakarta.websocket/jakarta.websocket-api/%s", System.getProperty("jakarta-websocket-api.version")));
+			context.installBundle(String.format("mvn:jakarta.websocket/jakarta.websocket-client-api/%s", System.getProperty("jakarta-websocket-api.version")));
+			context.installBundle(String.format("mvn:jakarta.activation/jakarta.activation-api/%s", System.getProperty("jakarta.activation-api.version")));
 			context.installBundle(String.format("mvn:jakarta.xml.bind/jakarta.xml.bind-api/%s", System.getProperty("jakarta-xml-bind-api.version")));
-			context.installBundle(String.format("mvn:com.sun.activation/javax.activation/%s", System.getProperty("activation.version")));
+			context.installBundle(String.format("mvn:com.sun.activation/jakarta.activation/%s", System.getProperty("activation.version")));
 
 			// I'm not refreshing, so fragments need to be installed before their hosts
 			installAndStartBundle(sampleURI("container-bundle-3"));

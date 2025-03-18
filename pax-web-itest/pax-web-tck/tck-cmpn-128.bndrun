@@ -28,7 +28,7 @@
 -runrequires: \
 	bnd.identity;id='org.osgi.test.cases.webcontainer',\
 	bnd.identity;id='org.ops4j.pax.web.pax-web-api', \
-	bnd.identity;id='org.ops4j.pax.web.pax-web-compatibility-el2', \
+	bnd.identity;id='org.ops4j.pax.web.pax-web-compatibility-el', \
 	bnd.identity;id='org.ops4j.pax.web.pax-web-extender-war', \
 	bnd.identity;id='org.ops4j.pax.web.pax-web-jsp', \
 	bnd.identity;id='org.ops4j.pax.web.pax-web-runtime', \

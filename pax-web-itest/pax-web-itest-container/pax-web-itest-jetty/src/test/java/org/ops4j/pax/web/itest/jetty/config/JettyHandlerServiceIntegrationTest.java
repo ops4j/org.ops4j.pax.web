@@ -32,6 +32,8 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceRegistration;
 
+import java.io.File;
+
 import static org.ops4j.pax.exam.OptionUtils.combine;
 
 /**
@@ -76,8 +78,9 @@ public class JettyHandlerServiceIntegrationTest extends AbstractContainerTestBas
 	public void testStaticContent() throws Exception {
 		ContextHandler ctxtHandler = new ContextHandler();
 		ctxtHandler.setContextPath("/static-content");
+		ctxtHandler.setBaseResourceAsString(new File("target").getCanonicalPath());
 		ResourceHandler resourceHandler = new ResourceHandler();
-		resourceHandler.setBaseResourceAsString("target");
+		resourceHandler.setBaseResourceAsString(new File("target").getCanonicalPath());
 		resourceHandler.setDirAllowed(true);
 		ctxtHandler.setHandler(resourceHandler);
 

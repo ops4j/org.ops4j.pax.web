@@ -75,7 +75,7 @@ public class RootBundleURLResource extends Resource {
 
 	@Override
 	public boolean isReadable() {
-		return delegate.isReadable();
+		return true;
 	}
 
 	@Override

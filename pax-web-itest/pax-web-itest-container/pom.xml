@@ -76,9 +76,12 @@
 						<commons-io.version>${dependency.commons-io}</commons-io.version>
 						<org.apache.felix.inventory.version>${dependency.org.apache.felix.inventory}</org.apache.felix.inventory.version>
 						<felix-webconsole.version>${dependency.org.apache.felix.webconsole}</felix-webconsole.version>
+						<jakarta.activation-api.version>${dependency.jakarta.activation-api}</jakarta.activation-api.version>
 						<jakarta-el-api.version>${dependency.jakarta.el-api}</jakarta-el-api.version>
 						<jakarta-enterprise-cdi-api.version>${dependency.jakarta.enterprise.cdi-api}</jakarta-enterprise-cdi-api.version>
+						<jakarta-enterprise-lang-model.version>${dependency.jakarta.enterprise.lang-model}</jakarta-enterprise-lang-model.version>
 						<jakarta-interceptor-api.version>${dependency.jakarta.interceptor-api}</jakarta-interceptor-api.version>
+						<jakarta-validation-api.version>${dependency.jakarta.validation-api}</jakarta-validation-api.version>
 						<jakarta-websocket-api.version>${dependency.jakarta.websocket-api}</jakarta-websocket-api.version>
 						<jakarta-xml-bind-api.version>${dependency.jakarta.xml.bind-api}</jakarta-xml-bind-api.version>
 						<activation.version>${dependency.com.sun.activation}</activation.version>

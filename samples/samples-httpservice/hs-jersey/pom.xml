@@ -23,7 +23,7 @@
 	<parent>
 		<groupId>org.ops4j.pax.web.samples</groupId>
 		<artifactId>samples-httpservice</artifactId>
-		<version>9.0.20-SNAPSHOT</version>
+		<version>10.0.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -49,6 +49,8 @@
 							<!-- OSGi Core R8+ -->
 							org.osgi.framework;version="[1.10,2)",
 							org.osgi.util.tracker;version="[1.5,2)",
+
+							org.glassfish.jersey.server.internal,
 
 							*
 						</Import-Package>

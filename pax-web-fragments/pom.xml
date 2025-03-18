@@ -23,7 +23,7 @@
 	<parent>
 		<groupId>org.ops4j.pax</groupId>
 		<artifactId>web</artifactId>
-		<version>9.0.20-SNAPSHOT</version>
+		<version>10.0.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -38,16 +38,17 @@
 			These are fragments that either export older versions of some packages or add osgi.contracts to
 			JakartaEE _canonical_ API jars
 		-->
-		<module>pax-web-compatibility-cdi12</module>
-		<module>pax-web-compatibility-servlet31</module>
-		<module>pax-web-compatibility-el2</module>
-		<module>pax-web-compatibility-interceptor12</module>
-		<module>pax-web-compatibility-annotation13</module>
-		<module>pax-web-compatibility-jpa2</module>
-		<module>pax-web-compatibility-jaxrs2</module>
+		<module>pax-web-compatibility-annotation</module>
+		<module>pax-web-compatibility-el</module>
+<!--		<module>pax-web-compatibility-cdi12</module>-->
+<!--		<module>pax-web-compatibility-interceptor12</module>-->
+<!--		<module>pax-web-compatibility-jaxrs2</module>-->
+<!--		<module>pax-web-compatibility-jpa2</module>-->
+		<module>pax-web-compatibility-servlet</module>
+		<module>pax-web-compatibility-websocket</module>
 		<!-- These are other support fragments -->
-		<module>pax-web-fragment-myfaces-inject</module>
-		<module>pax-web-fragment-myfaces-spifly</module>
+<!--		<module>pax-web-fragment-myfaces-inject</module>-->
+<!--		<module>pax-web-fragment-myfaces-spifly</module>-->
 	</modules>
 
 </project>

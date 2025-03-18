@@ -16,7 +16,7 @@
     limitations under the License.
 
 -->
-<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "http://www.eclipse.org/jetty/configure_9_3.dtd">
+<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "http://www.eclipse.org/jetty/configure_10_0.dtd">
 <Configure id="Server">
 
 	<New id="httpConfig" class="org.eclipse.jetty.server.HttpConfiguration">
@@ -67,12 +67,13 @@
 	<Get name="handler">
 		<Call name="addHandler">
 			<Arg>
-				<New class="org.eclipse.jetty.server.handler.ContextHandler">
+				<New id="contextHandler" class="org.eclipse.jetty.server.handler.ContextHandler">
 					<Set name="contextPath">/static-content</Set>
+					<Set name="baseResourceAsString"><Property name="user.dir" />/target/logs</Set>
 					<Set name="handler">
 						<New class="org.eclipse.jetty.server.handler.ResourceHandler">
-							<Set name="resourceBase">target/logs</Set>
-							<Set name="directoriesListed">true</Set>
+							<Set name="baseResourceAsString"><Property name="user.dir" />/target/logs</Set>
+							<Set name="dirAllowed">true</Set>
 						</New>
 					</Set>
 				</New>

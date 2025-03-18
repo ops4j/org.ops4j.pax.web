@@ -48,7 +48,7 @@
 					<instructions>
 						<Import-Package>
 							org.osgi.framework;version="[1.8,2)",
-							jakarta.servlet.*;version="[3.1,5)",
+							jakarta.servlet.*;version="[6,7)",
 							*
 						</Import-Package>
 						<Private-Package>

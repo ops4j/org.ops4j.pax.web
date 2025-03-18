@@ -23,15 +23,15 @@
 	<parent>
 		<groupId>org.ops4j.pax.web</groupId>
 		<artifactId>pax-web-fragments</artifactId>
-		<version>9.0.20-SNAPSHOT</version>
+		<version>10.0.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<groupId>org.ops4j.pax.web</groupId>
-	<artifactId>pax-web-compatibility-el2</artifactId>
+	<artifactId>pax-web-compatibility-el</artifactId>
 	<packaging>bundle</packaging>
 
-	<name>OPS4J Pax Web - EL 2.2 compatibility</name>
+	<name>OPS4J Pax Web - EL API compatibility</name>
 
 	<description>
 		This fragment bundle can be used together with _canonical_ (IMO) jakarta.el-api instead of
@@ -46,12 +46,14 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-						<Fragment-Host>javax.el-api</Fragment-Host>
+						<Fragment-Host>jakarta.el-api;bundle-version="${dependency.jakarta.el-api}"</Fragment-Host>
 						<Export-Package>
-							javax.el;version="2.2"
+							jakarta.el;version="4.0",
+							jakarta.el;version="5.0",
+							jakarta.el;version="6.0"
 						</Export-Package>
 						<Provide-Capability><![CDATA[
-							osgi.contract;osgi.contract=JavaEL;uses:="javax.el";version:List<Version>="3.0,2.2,2.1,2.0,1.0"
+							osgi.contract;osgi.contract=JavaEL;uses:="jakarta.el";version:List<Version>="6.0,5.0,4.0"
 						]]></Provide-Capability>
 <!--						<Require-Capability><![CDATA[-->
 <!--							osgi.serviceloader;filter:="(osgi.serviceloader=javax.el.ExpressionFactory)";cardinality:=multiple;resolution:=optional,-->

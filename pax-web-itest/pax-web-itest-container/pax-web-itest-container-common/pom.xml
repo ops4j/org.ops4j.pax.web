@@ -95,6 +95,7 @@
 
 							<!-- test dependencies -->
 							javax.inject,
+							jakarta.inject,
 							javax.net.ssl
 						</Import-Package>
 						<DynamicImport-Package>
@@ -175,26 +176,30 @@
 			<artifactId>pax-web-itest-utils</artifactId>
 		</dependency>
 
-<!--		<dependency>-->
-<!--			<groupId>org.ops4j.pax.web</groupId>-->
-<!--			<artifactId>pax-web-compatibility-servlet31</artifactId>-->
-<!--		</dependency>-->
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-compatibility-servlet</artifactId>
+		</dependency>
 <!--		<dependency>-->
 <!--			<groupId>org.ops4j.pax.web</groupId>-->
 <!--			<artifactId>pax-web-compatibility-cdi12</artifactId>-->
 <!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.ops4j.pax.web</groupId>-->
-<!--			<artifactId>pax-web-compatibility-el2</artifactId>-->
-<!--		</dependency>-->
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-compatibility-el</artifactId>
+		</dependency>
 <!--		<dependency>-->
 <!--			<groupId>org.ops4j.pax.web</groupId>-->
 <!--			<artifactId>pax-web-compatibility-interceptor12</artifactId>-->
 <!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.ops4j.pax.web</groupId>-->
-<!--			<artifactId>pax-web-compatibility-annotation13</artifactId>-->
-<!--		</dependency>-->
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-compatibility-annotation</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-compatibility-websocket</artifactId>
+		</dependency>
 <!--		<dependency>-->
 <!--			<groupId>org.ops4j.pax.web</groupId>-->
 <!--			<artifactId>pax-web-compatibility-jpa2</artifactId>-->
@@ -230,10 +235,22 @@
 		<dependency>
 			<groupId>org.ops4j.pax.web.samples</groupId>
 			<artifactId>config-fragment-tomcat</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.ops4j.pax.web</groupId>
+					<artifactId>pax-web-tomcat</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web.samples</groupId>
 			<artifactId>config-fragment-tomcat-vhosts</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.ops4j.pax.web</groupId>
+					<artifactId>pax-web-tomcat</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web.samples</groupId>
@@ -260,6 +277,12 @@
 		<dependency>
 			<groupId>org.ops4j.pax.web.samples</groupId>
 			<artifactId>limit-post-config-fragment-tomcat</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.ops4j.pax.web</groupId>
+					<artifactId>pax-web-tomcat</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web.samples</groupId>
@@ -445,6 +468,12 @@
 		<dependency>
 			<groupId>org.ops4j.pax.web.samples</groupId>
 			<artifactId>war-limited-post-fragment-tomcat</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.tomcat.embed</groupId>
+					<artifactId>tomcat-embed-core</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web.samples</groupId>
@@ -689,12 +718,20 @@
 		<!-- JakartaEE -->
 
 		<dependency>
+			<groupId>jakarta.activation</groupId>
+			<artifactId>jakarta.activation-api</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>com.sun.activation</groupId>
 			<artifactId>jakarta.activation</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>jakarta.annotation</groupId>
 			<artifactId>jakarta.annotation-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.inject</groupId>
+			<artifactId>jakarta.inject-api</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>jakarta.servlet</groupId>
@@ -734,6 +771,10 @@
 			<artifactId>jakarta.enterprise.cdi-api</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>jakarta.enterprise</groupId>
+			<artifactId>jakarta.enterprise.lang-model</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>jakarta.interceptor</groupId>
 			<artifactId>jakarta.interceptor-api</artifactId>
 		</dependency>
@@ -757,11 +798,7 @@
 
 		<dependency>
 			<groupId>org.apache.myfaces.core</groupId>
-			<artifactId>myfaces-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.myfaces.core</groupId>
-			<artifactId>myfaces-impl</artifactId>
+			<artifactId>myfaces-bundle</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.primefaces</groupId>

@@ -148,7 +148,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-compatibility-el2</artifactId>
+			<artifactId>pax-web-compatibility-el</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
@@ -168,11 +168,11 @@
 
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-compatibility-servlet31</artifactId>
+			<artifactId>pax-web-compatibility-servlet</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-compatibility-annotation13</artifactId>
+			<artifactId>pax-web-compatibility-annotation</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>

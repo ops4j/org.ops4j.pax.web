@@ -62,7 +62,7 @@
 							jakarta.servlet.jsp.jstl.tlv;version="${dependency.jakarta.servlet.jsp.jstl-api}",
 
 							<!-- EL API (only imported - from jakarta.el:jakarta.el-api) -->
-							jakarta.el;version="[5.0,6)",
+							jakarta.el;version="[6,7)",
 
 							<!-- OSGi Core R8+ -->
 							org.osgi.dto;version="[1.1,2)",

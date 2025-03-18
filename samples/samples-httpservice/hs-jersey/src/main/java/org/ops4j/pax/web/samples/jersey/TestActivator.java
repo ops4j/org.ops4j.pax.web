@@ -20,11 +20,11 @@ import java.util.logging.Logger;
 
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
+import org.ops4j.pax.web.service.http.HttpContext;
+import org.ops4j.pax.web.service.http.HttpService;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 
 public class TestActivator implements BundleActivator {
@@ -37,7 +37,7 @@ public class TestActivator implements BundleActivator {
 	@Override
 	public void start(BundleContext context) {
 		logger.info("starting Jersey TestActivator");
-		httpServiceTracker = new ServiceTracker<HttpService, HttpService>(context, HttpService.class, null) {
+		httpServiceTracker = new ServiceTracker<>(context, HttpService.class, null) {
 			@Override
 			public HttpService addingService(ServiceReference<HttpService> serviceRef) {
 				logger.info("registering Jersey servlet");

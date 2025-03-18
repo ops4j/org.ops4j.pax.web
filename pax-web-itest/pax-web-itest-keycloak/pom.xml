@@ -149,7 +149,7 @@
 
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-compatibility-annotation13</artifactId>
+			<artifactId>pax-web-compatibility-annotation</artifactId>
 		</dependency>
 
 		<dependency>

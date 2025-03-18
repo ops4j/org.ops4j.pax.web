@@ -16,7 +16,7 @@
     limitations under the License.
 
 -->
-<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "http://www.eclipse.org/jetty/configure_9_3.dtd">
+<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "http://www.eclipse.org/jetty/configure_10_0.dtd">
 <!--
 	The only working way to configure a context in pax-web-jetty is to:
 	 - put WEB-INF/jetty-web.xml or WEB-INF/web-jetty.xml into the WAB/WAR, or

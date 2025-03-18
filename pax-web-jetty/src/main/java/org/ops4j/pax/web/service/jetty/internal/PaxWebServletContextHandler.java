@@ -48,6 +48,7 @@ import org.eclipse.jetty.session.ManagedSession;
 import org.eclipse.jetty.util.Callback;
 import org.eclipse.jetty.util.resource.PathResourceFactory;
 import org.eclipse.jetty.util.resource.Resource;
+import org.eclipse.jetty.util.resource.URLResourceFactory;
 import org.eclipse.jetty.util.thread.ScheduledExecutorScheduler;
 import org.ops4j.pax.web.service.jetty.internal.web.RootBundleURLResource;
 import org.ops4j.pax.web.service.spi.config.Configuration;
@@ -69,6 +70,7 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 	private static final Logger LOG = LoggerFactory.getLogger(PaxWebServletContextHandler.class);
 
 	private static final PathResourceFactory RESOURCE_FACTORY = new PathResourceFactory();
+	private static final URLResourceFactory URL_RESOURCE_FACTORY = new URLResourceFactory();
 
 	// This collection will be ordered by rank/serviceId of the ContainerInitializerModels
 	private final java.util.Collection<SCIWrapper> servletContainerInitializers = new TreeSet<>();
@@ -137,15 +139,15 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 			if ("bundle".equals(url.getProtocol()) || "bundleentry".equals(url.getProtocol())) {
 				if ("/".equals(url.getPath())) {
 					// Felix, root of the bundle - return a resource which says it's a directory
-					return new RootBundleURLResource(RESOURCE_FACTORY.newResource(url));
+					return new RootBundleURLResource(URL_RESOURCE_FACTORY.newResource(url));
 				} else if (!url.getPath().endsWith("/")) {
 					// unfortunately, due to https://issues.apache.org/jira/browse/FELIX-6294
 					// we have to check ourselves if it's a directory and possibly append a slash
 					// just as org.eclipse.osgi.storage.bundlefile.BundleFile#fixTrailingSlash() does it
-					Resource potentialDirectory = RESOURCE_FACTORY.newResource(url);
+					Resource potentialDirectory = URL_RESOURCE_FACTORY.newResource(url);
 					if (potentialDirectory.exists() && potentialDirectory.length() == 0) {
 						URL fixedURL = new URL(url.toExternalForm() + "/");
-						Resource properDirectory = RESOURCE_FACTORY.newResource(fixedURL);
+						Resource properDirectory = URL_RESOURCE_FACTORY.newResource(fixedURL);
 						if (properDirectory.exists()) {
 							return properDirectory;
 						}
@@ -156,7 +158,7 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 
 		// resource can be provided by custom HttpContext/ServletContextHelper, so we can't really
 		// affect lastModified for caching purposes
-		return RESOURCE_FACTORY.newResource(url);
+		return url == null ? null : URL_RESOURCE_FACTORY.newResource(url);
 	}
 
 	public void setServletContainerInitializers(java.util.Collection<SCIWrapper> wrappers) {
