@@ -339,17 +339,17 @@ public abstract class AbstractControlledTestBase {
 				mavenBundle().groupId("org.eclipse.jetty.http2")
 						.artifactId("jetty-http2-common").versionAsInProject(),
 				mavenBundle().groupId("org.eclipse.jetty.http2")
-						.artifactId("jetty-http2-server").versionAsInProject()
-//				mavenBundle().groupId("org.eclipse.jetty")
-//						.artifactId("jetty-alpn-server").versionAsInProject()
+						.artifactId("jetty-http2-server").versionAsInProject(),
+				mavenBundle().groupId("org.eclipse.jetty")
+						.artifactId("jetty-alpn-server").versionAsInProject()
 		);
-//		return combine(common,
+		return combine(common,
 //				mavenBundle().groupId("org.eclipse.jetty.alpn")
 //						.artifactId("alpn-api").versionAsInProject(),
-//				mavenBundle().groupId("org.eclipse.jetty")
-//						.artifactId("jetty-alpn-java-server").versionAsInProject()
-//		);
-		return common;
+				mavenBundle().groupId("org.eclipse.jetty")
+						.artifactId("jetty-alpn-java-server").versionAsInProject()
+		);
+//		return common;
 	}
 
 	protected Option[] jettyWebSockets() {
@@ -366,6 +366,10 @@ public abstract class AbstractControlledTestBase {
 						.artifactId("jetty-ee10-websocket-jakarta-common").versionAsInProject(),
 				mavenBundle().groupId("org.eclipse.jetty.ee10.websocket")
 						.artifactId("jetty-ee10-websocket-jakarta-client").versionAsInProject(),
+				mavenBundle().groupId("org.eclipse.jetty")
+						.artifactId("jetty-ee").versionAsInProject(),
+				mavenBundle().groupId("org.eclipse.jetty.ee10")
+						.artifactId("jetty-ee10-webapp").versionAsInProject(),
 				mavenBundle().groupId("org.eclipse.jetty.ee10.websocket")
 						.artifactId("jetty-ee10-websocket-jakarta-server").versionAsInProject(),
 //				mavenBundle().groupId("org.eclipse.jetty.websocket")
@@ -378,6 +382,18 @@ public abstract class AbstractControlledTestBase {
 						.artifactId("jetty-websocket-core-server").versionAsInProject(),
 				mavenBundle().groupId("org.eclipse.jetty.ee10.websocket")
 						.artifactId("jetty-ee10-websocket-servlet").versionAsInProject(),
+				mavenBundle("org.apache.aries.spifly", "org.apache.aries.spifly.dynamic.bundle")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.ow2.asm", "asm")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.ow2.asm", "asm-commons")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.ow2.asm", "asm-util")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.ow2.asm", "asm-tree")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.ow2.asm", "asm-analysis")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle("org.ops4j.pax.web", "pax-web-websocket")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1)
 		};
@@ -461,6 +477,8 @@ public abstract class AbstractControlledTestBase {
 
 	protected Option[] scr() {
 		return new Option[] {
+				mavenBundle("org.osgi", "org.osgi.service.component")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle("org.apache.felix", "org.apache.felix.scr")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle("org.osgi", "org.osgi.util.promise")
@@ -476,8 +494,8 @@ public abstract class AbstractControlledTestBase {
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle("jakarta.validation", "jakarta.validation-api")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("com.sun.activation", "jakarta.activation")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+//				mavenBundle("com.sun.activation", "jakarta.activation")
+//						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.aopalliance")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle("jakarta.xml.bind", "jakarta.xml.bind-api")
@@ -533,8 +551,8 @@ public abstract class AbstractControlledTestBase {
 		};
 		if (javaMajorVersion() >= 9) {
 			return combine(options,
-					mavenBundle("jakarta.xml.bind", "jakarta.xml.bind-api").versionAsInProject(),
-					mavenBundle("com.sun.activation", "jakarta.activation").versionAsInProject()
+					mavenBundle("jakarta.xml.bind", "jakarta.xml.bind-api").versionAsInProject()
+//					mavenBundle("com.sun.activation", "jakarta.activation").versionAsInProject()
 			);
 		}
 		return options;
@@ -577,8 +595,8 @@ public abstract class AbstractControlledTestBase {
 		};
 		if (javaMajorVersion() >= 9) {
 			return combine(options,
-					mavenBundle("jakarta.xml.bind", "jakarta.xml.bind-api").versionAsInProject(),
-					mavenBundle("com.sun.activation", "jakarta.activation").versionAsInProject()
+					mavenBundle("jakarta.xml.bind", "jakarta.xml.bind-api").versionAsInProject()
+//					mavenBundle("com.sun.activation", "jakarta.activation").versionAsInProject()
 			);
 		}
 		return options;
@@ -695,8 +713,10 @@ public abstract class AbstractControlledTestBase {
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle("jakarta.xml.soap", "jakarta.xml.soap-api")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("com.sun.activation", "jakarta.activation")
+				mavenBundle("jakarta.activation", "jakarta.activation-api")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+//				mavenBundle("com.sun.activation", "jakarta.activation")
+//						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle("org.ops4j.pax.web", "pax-web-compatibility-servlet")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1).noStart(),
 
@@ -751,8 +771,10 @@ public abstract class AbstractControlledTestBase {
 //						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 2).noStart(),
 				mavenBundle("jakarta.xml.bind", "jakarta.xml.bind-api")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("com.sun.activation", "jakarta.activation")
+				mavenBundle("jakarta.activation", "jakarta.activation-api")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+//				mavenBundle("com.sun.activation", "jakarta.activation")
+//						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle("org.apache.aries.spifly", "org.apache.aries.spifly.dynamic.bundle")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle("org.ow2.asm", "asm")

@@ -15,6 +15,7 @@
  */
 package org.ops4j.pax.web.itest.jetty.whiteboard;
 
+import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
@@ -24,6 +25,7 @@ import org.ops4j.pax.web.itest.container.whiteboard.AbstractWhiteboardR7JaxRsInt
 import static org.ops4j.pax.exam.OptionUtils.combine;
 
 @RunWith(PaxExam.class)
+@Ignore("Latest aries.jaxrs is still based on javax.servlet")
 public class WhiteboardR7JaxRsIntegrationTest extends AbstractWhiteboardR7JaxRsIntegrationTest {
 
 	@Configuration

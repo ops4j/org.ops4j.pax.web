@@ -59,7 +59,7 @@
 							org.ops4j.pax.web.extender.whiteboard.runtime,
 
 							<!-- from pax-logging-api -->
-							org.slf4j;version="[2,3)"
+							org.slf4j;version="[2,3)",
 
 							<!-- Needed to use org.keycloak.KeycloakPrincipal -->
 <!--							org.keycloak;version="[18,22)";resolution:=optional,-->

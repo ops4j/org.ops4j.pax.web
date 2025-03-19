@@ -226,7 +226,7 @@
 		<dependency.org.apache.felix.metatype>1.2.4</dependency.org.apache.felix.metatype>
 		<dependency.org.apache.felix.scr>2.2.12</dependency.org.apache.felix.scr>
 		<dependency.org.apache.felix.utils>1.11.8</dependency.org.apache.felix.utils>
-		<dependency.org.apache.felix.webconsole>4.9.10</dependency.org.apache.felix.webconsole>
+		<dependency.org.apache.felix.webconsole>5.0.10</dependency.org.apache.felix.webconsole>
 
 		<dependency.org.apache.geronimo.bundles.commons-discovery>0.4_1</dependency.org.apache.geronimo.bundles.commons-discovery>
 
@@ -1736,7 +1736,6 @@
 				<groupId>org.osgi</groupId>
 				<artifactId>org.osgi.service.component</artifactId>
 				<version>${dependency.org.osgi.service.component}</version>
-				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.osgi</groupId>

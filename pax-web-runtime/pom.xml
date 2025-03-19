@@ -119,7 +119,7 @@
 						<Provide-Capability>
 							<!-- TODO: JakartaEE 10 -->
 							<!-- 140.12.1 osgi.implementation Capability -->
-							osgi.implementation;osgi.implementation="osgi.http";version:Version="1.1";uses:="jakarta.servlet,jakarta.servlet.http,org.osgi.service.http.context,org.osgi.service.http.whiteboard",
+							osgi.implementation;osgi.implementation="osgi.http";version:Version="2.0";uses:="jakarta.servlet,jakarta.servlet.http,org.osgi.service.servlet.context,org.osgi.service.servlet.whiteboard",
 							<!--
 								140.12.2 osgi.contract Capability - pax-web-runtime does NOT export jakarta.servlet.* packages...
 								https://docs.osgi.org/reference/portable-java-contracts.html

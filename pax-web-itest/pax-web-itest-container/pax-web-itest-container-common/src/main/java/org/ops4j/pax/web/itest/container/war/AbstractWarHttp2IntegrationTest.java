@@ -47,13 +47,14 @@ import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.client5.http.ssl.ClientTlsStrategyBuilder;
 import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
 import org.apache.hc.core5.concurrent.FutureCallback;
+import org.apache.hc.core5.function.Supplier;
 import org.apache.hc.core5.http.EntityDetails;
 import org.apache.hc.core5.http.Header;
-import org.apache.hc.core5.http.HttpException;
 import org.apache.hc.core5.http.HttpHost;
 import org.apache.hc.core5.http.HttpRequest;
 import org.apache.hc.core5.http.HttpResponse;
 import org.apache.hc.core5.http.HttpVersion;
+import org.apache.hc.core5.http.impl.routing.RequestRouter;
 import org.apache.hc.core5.http.message.StatusLine;
 import org.apache.hc.core5.http.nio.AsyncPushConsumer;
 import org.apache.hc.core5.http.nio.CapacityChannel;
@@ -152,40 +153,42 @@ public abstract class AbstractWarHttp2IntegrationTest extends AbstractContainerT
 				.setH2Config(H2Config.custom().setPushEnabled(true).build())
 				.setConnectionManager(cm).build()) {
 
-			client.register("*", () -> new AsyncPushConsumer() {
-				@Override
-				public void consumePromise(HttpRequest promise, HttpResponse response, EntityDetails entityDetails, HttpContext context) throws HttpException {
-					LOG.info("{} -> {}", promise, new StatusLine(response));
-					if (response.getVersion() == HttpVersion.HTTP_2 && response.getCode() == HttpServletResponse.SC_OK) {
-						latch.countDown();
-					}
-				}
+			final RequestRouter<Supplier<AsyncPushConsumer>> pushRequestRouter = RequestRouter.<Supplier<AsyncPushConsumer>>builder()
+					.resolveAuthority(RequestRouter.LOCAL_AUTHORITY_RESOLVER)
+					.addRoute(RequestRouter.LOCAL_AUTHORITY, "*", () -> new AsyncPushConsumer() {
+						@Override
+						public void consumePromise(HttpRequest promise, HttpResponse response, EntityDetails entityDetails, HttpContext context) {
+							LOG.info("{} -> {}", promise, new StatusLine(response));
+							if (response.getVersion() == HttpVersion.HTTP_2 && response.getCode() == HttpServletResponse.SC_OK) {
+								latch.countDown();
+							}
+						}
 
-				@Override
-				public void failed(Exception cause) {
-					System.out.println();
-				}
+						@Override
+						public void failed(Exception cause) {
+							System.out.println();
+						}
 
-				@Override
-				public void updateCapacity(CapacityChannel capacityChannel) {
-					System.out.println();
-				}
+						@Override
+						public void updateCapacity(CapacityChannel capacityChannel) {
+							System.out.println();
+						}
 
-				@Override
-				public void consume(ByteBuffer src) {
-					System.out.println();
-				}
+						@Override
+						public void consume(ByteBuffer src) {
+							System.out.println();
+						}
 
-				@Override
-				public void streamEnd(List<? extends Header> trailers) {
-					System.out.println();
-				}
+						@Override
+						public void streamEnd(List<? extends Header> trailers) {
+							System.out.println();
+						}
 
-				@Override
-				public void releaseResources() {
-					System.out.println();
-				}
-			});
+						@Override
+						public void releaseResources() {
+							System.out.println();
+						}
+					}).build();
 
 			client.start();
 
@@ -202,6 +205,7 @@ public abstract class AbstractWarHttp2IntegrationTest extends AbstractContainerT
 			final Future<SimpleHttpResponse> future = client.execute(
 					SimpleRequestProducer.create(request),
 					SimpleResponseConsumer.create(),
+					HttpAsyncClients.pushRouter(pushRequestRouter),
 					clientContext,
 					new FutureCallback<>() {
 						@Override
@@ -263,40 +267,42 @@ public abstract class AbstractWarHttp2IntegrationTest extends AbstractContainerT
 				.setH2Config(H2Config.custom().setPushEnabled(true).build())
 				.setConnectionManager(cm).build()) {
 
-			client.register("*", () -> new AsyncPushConsumer() {
-				@Override
-				public void consumePromise(HttpRequest promise, HttpResponse response, EntityDetails entityDetails, HttpContext context) throws HttpException {
-					LOG.info("{} -> {}", promise, new StatusLine(response));
-					if (response.getVersion() == HttpVersion.HTTP_2 && response.getCode() == HttpServletResponse.SC_OK) {
-						latch.countDown();
-					}
-				}
+			final RequestRouter<Supplier<AsyncPushConsumer>> pushRequestRouter = RequestRouter.<Supplier<AsyncPushConsumer>>builder()
+					.resolveAuthority(RequestRouter.LOCAL_AUTHORITY_RESOLVER)
+					.addRoute(RequestRouter.LOCAL_AUTHORITY, "*", () -> new AsyncPushConsumer() {
+						@Override
+						public void consumePromise(HttpRequest promise, HttpResponse response, EntityDetails entityDetails, HttpContext context) {
+							LOG.info("{} -> {}", promise, new StatusLine(response));
+							if (response.getVersion() == HttpVersion.HTTP_2 && response.getCode() == HttpServletResponse.SC_OK) {
+								latch.countDown();
+							}
+						}
 
-				@Override
-				public void failed(Exception cause) {
-					System.out.println();
-				}
+						@Override
+						public void failed(Exception cause) {
+							System.out.println();
+						}
 
-				@Override
-				public void updateCapacity(CapacityChannel capacityChannel) {
-					System.out.println();
-				}
+						@Override
+						public void updateCapacity(CapacityChannel capacityChannel) {
+							System.out.println();
+						}
 
-				@Override
-				public void consume(ByteBuffer src) {
-					System.out.println();
-				}
+						@Override
+						public void consume(ByteBuffer src) {
+							System.out.println();
+						}
 
-				@Override
-				public void streamEnd(List<? extends Header> trailers) {
-					System.out.println();
-				}
+						@Override
+						public void streamEnd(List<? extends Header> trailers) {
+							System.out.println();
+						}
 
-				@Override
-				public void releaseResources() {
-					System.out.println();
-				}
-			});
+						@Override
+						public void releaseResources() {
+							System.out.println();
+						}
+					}).build();
 
 			client.start();
 
@@ -313,6 +319,7 @@ public abstract class AbstractWarHttp2IntegrationTest extends AbstractContainerT
 			final Future<SimpleHttpResponse> future = client.execute(
 					SimpleRequestProducer.create(request),
 					SimpleResponseConsumer.create(),
+					HttpAsyncClients.pushRouter(pushRequestRouter),
 					clientContext,
 					new FutureCallback<>() {
 						@Override
