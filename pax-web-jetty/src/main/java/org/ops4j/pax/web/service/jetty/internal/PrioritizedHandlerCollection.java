@@ -95,7 +95,8 @@ public class PrioritizedHandlerCollection extends ContextHandlerCollection {
 					if ("OPTIONS".equals(request.getMethod()) && "*".equals(target)) {
 						response.setStatus(HttpServletResponse.SC_OK);
 						response.getHeaders().add("Allow", "GET, HEAD, POST, PUT, DELETE, OPTIONS");
-//						baseRequest.setHandled(true);
+						callback.succeeded();
+						return true;
 					}
 					// User should know what (s)he's doing - if a handler marks the request as handled, there's
 					// no need to call real context handlers.

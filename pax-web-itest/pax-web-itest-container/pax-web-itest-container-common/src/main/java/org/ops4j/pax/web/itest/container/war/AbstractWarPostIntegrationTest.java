@@ -55,7 +55,7 @@ public abstract class AbstractWarPostIntegrationTest extends AbstractContainerTe
 		HttpTestClientFactory.createDefaultTestClient()
 				.withReturnCode(getPostSizeExceededHttpResponseCode())
 				.doPOST("http://127.0.0.1:8181/war-limited-post/upload-check")
-				.addParameter("data", "01234567890123456789012345678901234567")
+				.addParameter("data", "012345678901234567890123456789012345678")
 				.executeTest();
 	}
 

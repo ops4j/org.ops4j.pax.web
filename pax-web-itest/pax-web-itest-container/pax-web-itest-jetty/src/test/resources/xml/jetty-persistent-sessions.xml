@@ -21,7 +21,7 @@
 
 	<Call name="addBean">
 		<Arg>
-			<New class="org.eclipse.jetty.server.session.FileSessionDataStoreFactory">
+			<New class="org.eclipse.jetty.session.FileSessionDataStoreFactory">
 				<Set name="deleteUnrestorableFiles">true</Set>
 				<Set name="storeDir">target/web-sessions-jetty</Set>
 			</New>

@@ -47,7 +47,7 @@ public abstract class AbstractWarHttpMethodsIntegrationTest extends AbstractCont
 					return headers.anyMatch(e -> {
 						if (e.getKey().equalsIgnoreCase("allow")) {
 							Set<String> values = new HashSet<>(Arrays.asList(e.getValue().split("\\s*,\\s*")));
-							return values.size() == 4 && values.contains("GET") && values.contains("POST")
+							return values.size() == 3 && values.contains("GET")
 									&& values.contains("HEAD") && values.contains("OPTIONS");
 						}
 						return false;

@@ -20,7 +20,6 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.web.itest.container.war.AbstractWarHttpMethodsIntegrationTest;
-import org.ops4j.pax.web.itest.container.war.AbstractWarIntegrationTest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +28,7 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
 @RunWith(PaxExam.class)
 public class WarHttpMethodsIntegrationTest extends AbstractWarHttpMethodsIntegrationTest {
 
-	private static final Logger LOG = LoggerFactory.getLogger(AbstractWarIntegrationTest.class);
+	private static final Logger LOG = LoggerFactory.getLogger(AbstractWarHttpMethodsIntegrationTest.class);
 
 	@Configuration
 	public Option[] configure() {
