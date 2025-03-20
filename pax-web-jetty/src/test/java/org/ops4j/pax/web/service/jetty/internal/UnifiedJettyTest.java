@@ -46,6 +46,7 @@ import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.eclipse.jetty.ee10.servlet.ServletMapping;
 import org.eclipse.jetty.util.resource.PathResource;
 import org.eclipse.jetty.util.resource.PathResourceFactory;
+import org.eclipse.jetty.util.resource.Resource;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.ops4j.pax.web.service.jetty.internal.web.JettyResourceServlet;
@@ -84,7 +85,13 @@ public class UnifiedJettyTest {
 		server.setConnectors(new Connector[] { connector });
 
 		ContextHandlerCollection chc = new ContextHandlerCollection();
-		ServletContextHandler handler1 = new ServletContextHandler("/", ServletContextHandler.NO_SESSIONS);
+		ServletContextHandler handler1 = new ServletContextHandler("/", ServletContextHandler.NO_SESSIONS) {
+			@Override
+			public Resource getBaseResource() {
+				Resource resource = JettyResourceServlet.BASE_RESOURCE.get();
+				return resource == null ? super.getBaseResource() : resource;
+			}
+		};
 		handler1.setAllowNullPathInContext(true);
 
 		// in Jetty, DefaultServlet implements org.eclipse.jetty.util.resource.ResourceFactory used by the
@@ -115,12 +122,12 @@ public class UnifiedJettyTest {
 
 		sh1.setInitParameter("dirAllowed", "false");
 		sh1.setInitParameter("etags", "true");
-		sh1.setInitParameter("baseResource", new File("target").getAbsolutePath());
+//		sh1.setInitParameter("baseResource", new File("target").getAbsolutePath());
 		sh1.setInitParameter("maxCachedFiles", "1000");
 		sh1.setInitParameter("pathInfoOnly", "true");
 		sh2.setInitParameter("dirAllowed", "false");
 		sh2.setInitParameter("etags", "true");
-		sh2.setInitParameter("baseResource", new File("target").getAbsolutePath());
+//		sh2.setInitParameter("baseResource", new File("target").getAbsolutePath());
 		sh2.setInitParameter("maxCachedFiles", "1000");
 		sh2.setInitParameter("pathInfoOnly", "true");
 
@@ -332,6 +339,7 @@ public class UnifiedJettyTest {
 		}
 
 		final PathResource p1 = (PathResource) new PathResourceFactory().newResource(b1.toURI());
+		handler1.setBaseResource(p1);
 
 		JettyResourceServlet servlet = new JettyResourceServlet(p1, null);
 		ServletHolder sh = new ServletHolder("default1", servlet);

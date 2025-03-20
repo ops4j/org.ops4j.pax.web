@@ -15,31 +15,38 @@
  */
 package org.ops4j.pax.web.service.jetty.internal.web;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URL;
-
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 
+import org.eclipse.jetty.ee10.servlet.DefaultServlet;
+import org.eclipse.jetty.ee10.servlet.ResourceServlet;
 import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
 import org.eclipse.jetty.http.content.ValidatingCachingHttpContentFactory;
 import org.eclipse.jetty.server.ResourceService;
 import org.eclipse.jetty.util.resource.PathResource;
 import org.eclipse.jetty.util.resource.Resource;
-import org.ops4j.pax.web.service.jetty.internal.PaxWebServletContextHandler;
+import org.eclipse.jetty.util.resource.ResourceFactory;
 import org.ops4j.pax.web.service.spi.servlet.OsgiScopedServletContext;
-import org.ops4j.pax.web.service.spi.util.Path;
+import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Extension of Jetty's <em>default servlet</em> to satisfy the resource contract from Http Service and Whiteboard
- * Service specifications.
+ * <p>In Jetty 9 (Pax Web 8) and Jetty 10 (Pax Web 9) it was easier. We've shaded Jettty's DefaultServlet
+ * and unprivate some fields related to welcome files.</p>
+ *
+ * <p>In Jetty 12, there's a distinction:<ul>
+ *     <li>{@link DefaultServlet} is supposed to be mapped to {@code /}</li>
+ *     <li>{@link ResourceServlet} is extended by {@link DefaultServlet} and can be mapped to other URLs.</li>
+ * </ul>
+ * Also default/resource servlet is no longer a {@link ResourceFactory} and internal {@link ResourceService} used
+ * so we have harder time configuring the <em>base resource</em>.</p>
  */
-public class JettyResourceServlet extends DefaultServlet {
+public class JettyResourceServlet extends ResourceServlet {
 
 	public static final Logger LOG = LoggerFactory.getLogger(JettyResourceServlet.class);
+
+	public static final ThreadLocal<Resource> BASE_RESOURCE = new ThreadLocal<>();
 
 	/** If specified, this is the directory to fetch resource files from */
 	private final PathResource baseUrlResource;
@@ -50,8 +57,7 @@ public class JettyResourceServlet extends DefaultServlet {
 	 */
 	private final String chroot;
 
-//	// super._welcomes can be cleared after super.init()...
-//	private String[] welcomeFiles;
+	private PaxWebResource baseResource;
 
 	public JettyResourceServlet(PathResource baseUrlResource, String chroot) {
 		this.baseUrlResource = baseUrlResource;
@@ -60,40 +66,32 @@ public class JettyResourceServlet extends DefaultServlet {
 
 	@Override
 	public void init() throws ServletException {
-		super.init();
-//		_welcomes = welcomeFiles;
+		this.baseResource = new PaxWebResource(getServletContext(), baseUrlResource, chroot);
+		try {
+			BASE_RESOURCE.set(baseResource);
+			super.init();
 
-		String maxCacheSize = getInitParameter("maxCacheSize");
-		String maxCachedFileSize = getInitParameter("maxCachedFileSize");
-		String maxCachedFiles = getInitParameter("maxCachedFiles");
-		if (maxCacheSize == null) {
-			maxCacheSize = Integer.toString(256 * 1024 * 1024 / 64);
-		}
-		if (maxCachedFileSize == null) {
-			maxCachedFileSize = Integer.toString(128 * 1024 * 1024 / 64);
-		}
-		if (maxCachedFiles == null) {
-			maxCachedFiles = "2048";
-		}
+			String maxCacheSize = getInitParameter("maxCacheSize");
+			String maxCachedFileSize = getInitParameter("maxCachedFileSize");
+			String maxCachedFiles = getInitParameter("maxCachedFiles");
+			if (maxCacheSize == null) {
+				maxCacheSize = Integer.toString(256 * 1024 * 1024 / 64);
+			}
+			if (maxCachedFileSize == null) {
+				maxCachedFileSize = Integer.toString(128 * 1024 * 1024 / 64);
+			}
+			if (maxCachedFiles == null) {
+				maxCachedFiles = "2048";
+			}
 
-		LOG.info("Initialized Jetty Resource Servlet for base=\"{}\" with cache maxSize={}kB, maxEntrySize={}kB, maxEntries={}",
-				baseUrlResource != null ? baseUrlResource.getPath() : chroot,
-				Integer.parseInt(maxCacheSize) / 1024,
-				Integer.parseInt(maxCachedFileSize) / 1024,
-				maxCachedFiles);
-	}
-
-	@Override
-	protected Resource configureBaseResource() {
-		if (chroot != null) {
-			return new EmptyResource() {
-				@Override
-				public Resource resolve(String subUriPath) {
-					return getResource(URI.create(subUriPath));
-				}
-			};
+			LOG.info("Initialized Jetty Resource Servlet for base=\"{}\" with cache maxSize={}kB, maxEntrySize={}kB, maxEntries={}",
+					baseUrlResource != null ? baseUrlResource.getPath() : chroot,
+					Integer.parseInt(maxCacheSize) / 1024,
+					Integer.parseInt(maxCachedFileSize) / 1024,
+					maxCachedFiles);
+		} finally {
+			BASE_RESOURCE.remove();
 		}
-		return baseUrlResource == null ? new EmptyResource() : baseUrlResource;
 	}
 
 	/**
@@ -108,7 +106,6 @@ public class JettyResourceServlet extends DefaultServlet {
 	}
 
 	public void setWelcomeFilesRedirect(boolean welcomeFilesRedirect) {
-		redirectWelcome = welcomeFilesRedirect;
 		if (getResourceService() != null) {
 			// already init()ed
 			getResourceService().setWelcomeMode(welcomeFilesRedirect
@@ -118,63 +115,16 @@ public class JettyResourceServlet extends DefaultServlet {
 
 	@Override
 	protected ServletContextHandler initContextHandler(ServletContext servletContext) {
-		// necessary for super.init()
+		// necessary for super.init() and to reimplement
+		// org.eclipse.jetty.server.handler.ContextHandler.getBaseResource()
+		ServletContextHandler handler;
+		if (servletContext instanceof OsgiServletContext osgiServletContext) {
+			return super.initContextHandler(osgiServletContext.getContainerServletContext());
+		}
 		if (servletContext instanceof OsgiScopedServletContext osgiScopedServletContext) {
 			return super.initContextHandler(osgiScopedServletContext.getContainerServletContext());
 		}
 		return super.initContextHandler(servletContext);
-	}
-
-	@Override
-	public Resource getResource(URI uri) {
-		String pathInContext = uri.getPath();
-		// our (commons-io) normalized path
-		String childPath = Path.securePath(pathInContext);
-		if (childPath == null) {
-			return null;
-		}
-		if (childPath.startsWith("/")) {
-			childPath = childPath.substring(1);
-		}
-
-		try {
-			if (baseUrlResource != null) {
-				// Pax Web special - direct access to configured directory with proper metadata handling
-				// (size, lastModified) for caching purposes
-				if ("".equals(childPath)) {
-					// root directory access. Just return base resource and let super class handle welcome files
-					return baseUrlResource;
-				}
-				return baseUrlResource.resolve(childPath);
-			} else {
-				// HttpService/Whiteboard behavior - resourceBase is prepended to argument for context resource
-				// remember - under ServletContext there should be WebContainerContext that wraps
-				// HttpContext or ServletContextHelper
-				// before Pax Web 8 there was explicit delegation to HttpContext, but now, it's hidden
-				// under Osgi(Scoped)ServletContext
-				URL url = getServletContext().getResource(chroot + "/" + childPath);
-
-				// See: https://github.com/ops4j/org.ops4j.pax.web/issues/2014
-				// Everything is fine with Felix - it doesn't even seem to support directory-based bundles.
-				// However under Equinox and bundles available from directory (with META-INF/MANIFEST.MF
-				// available) we have problems determining whether given URL is a directory (for the purpose of
-				// welcome files).
-				// In Equinox we have two schemes:
-				//  - org.eclipse.osgi.storage.url.BundleResourceHandler.OSGI_RESOURCE_URL_PROTOCOL = "bundleresource"
-				//  - org.eclipse.osgi.storage.url.BundleResourceHandler.OSGI_ENTRY_URL_PROTOCOL = "bundleentry"
-				// let's ignore the resource one, as it is related to Bundle.getResource() (classloaders). So
-				// we have to return a Jetty Resource that _exists_ and _is directory_ because
-				// that's what org.eclipse.jetty.server.CachedContentFactory.load() checks...
-				if (url != null && "bundleentry".equals(url.getProtocol())
-						&& url.getPath() != null && url.getPath().endsWith("/")) {
-					return new EquinoxBundleentryDirectoryURLResource(PaxWebServletContextHandler.toJettyResource(url));
-				}
-
-				return PaxWebServletContextHandler.toJettyResource(url);
-			}
-		} catch (IOException e) {
-			throw new RuntimeException(e.getMessage(), e);
-		}
 	}
 
 }

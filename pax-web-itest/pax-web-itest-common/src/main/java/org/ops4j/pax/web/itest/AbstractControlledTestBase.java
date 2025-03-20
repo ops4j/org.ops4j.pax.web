@@ -35,7 +35,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TestName;
 import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.options.MavenArtifactUrlReference;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
 import org.ops4j.pax.logging.PaxLoggingConstants;
@@ -527,68 +526,6 @@ public abstract class AbstractControlledTestBase {
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				systemProperty("jakarta.ws.rs.ext.RuntimeDelegate")
 						.value("org.glassfish.jersey.server.internal.RuntimeDelegateImpl")
-		};
-	}
-
-	protected Option[] ariesJaxrs() {
-		return new Option[] {
-//				mavenBundle("org.ops4j.pax.web", "pax-web-compatibility-jaxrs2")
-//						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 2).noStart(),
-				mavenBundle("jakarta.ws.rs", "jakarta.ws.rs-api")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("jakarta.xml.bind", "jakarta.xml.bind-api")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("jakarta.xml.ws", "jakarta.xml.ws-api")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("jakarta.xml.soap", "jakarta.xml.soap-api")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("jakarta.activation", "jakarta.activation-api")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-//				mavenBundle("com.sun.activation", "jakarta.activation")
-//						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.ops4j.pax.web", "pax-web-compatibility-servlet")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1).noStart(),
-
-				mavenBundle("org.osgi", "org.osgi.service.jaxrs")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-
-				mavenBundle("org.apache.aries.spifly", "org.apache.aries.spifly.dynamic.bundle")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.ow2.asm", "asm")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.ow2.asm", "asm-commons")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.ow2.asm", "asm-util")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.ow2.asm", "asm-tree")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.ow2.asm", "asm-analysis")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-
-				mavenBundle("org.apache.aries.component-dsl", "org.apache.aries.component-dsl.component-dsl")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.apache.aries.jax.rs", "org.apache.aries.jax.rs.whiteboard")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-
-				mavenBundle("org.apache.cxf", "cxf-core")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.apache.cxf", "cxf-rt-frontend-jaxrs")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.apache.cxf", "cxf-rt-security")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.apache.cxf", "cxf-rt-transports-http")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.apache.cxf", "cxf-rt-rs-client")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.apache.cxf", "cxf-rt-rs-sse")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.apache.ws.xmlschema", "xmlschema-core")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-
-				mavenBundle("org.codehaus.woodstox", "stax2-api")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("com.fasterxml.woodstox", "woodstox-core")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 		};
 	}
 

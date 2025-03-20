@@ -50,6 +50,7 @@ import org.eclipse.jetty.util.resource.PathResourceFactory;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.resource.URLResourceFactory;
 import org.eclipse.jetty.util.thread.ScheduledExecutorScheduler;
+import org.ops4j.pax.web.service.jetty.internal.web.JettyResourceServlet;
 import org.ops4j.pax.web.service.jetty.internal.web.RootBundleURLResource;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
@@ -388,6 +389,14 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 		response.setStatus(HttpStatus.MOVED_TEMPORARILY_302);
 		response.getHeaders().add(new HttpField(HttpHeader.LOCATION, location));
 		callback.succeeded();
+	}
+
+	@Override
+	public Resource getBaseResource() {
+		// special case for JettyResourceServlet extending Jetty 12 ResourceServlet which, when initialized,
+		// needs servlet's specific base resource
+		Resource resource = JettyResourceServlet.BASE_RESOURCE.get();
+		return resource == null ? super.getBaseResource() : resource;
 	}
 
 	/**

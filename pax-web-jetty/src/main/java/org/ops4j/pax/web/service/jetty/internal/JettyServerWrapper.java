@@ -1583,7 +1583,12 @@ class JettyServerWrapper implements BatchVisitor {
 
 				for (PaxWebFilterHolder fh : newFilterHolders) {
 					if ("org.eclipse.jetty.ee10.websocket.servlet.WebSocketUpgradeFilter".equals(fh.getName())) {
-						sch.getServletContext().removeAttribute("org.eclipse.jetty.websocket.server.WebSocketUpgradeFilter");
+						// {@16296} "org.eclipse.jetty.util.DecoratedObjectFactory" -> {org.eclipse.jetty.util.DecoratedObjectFactory@16216} "org.eclipse.jetty.util.DecoratedObjectFactory[decorators=1]"
+						// {@16297} "org.eclipse.jetty.server.Executor" -> {org.eclipse.jetty.util.thread.QueuedThreadPool@16298} "QueuedThreadPool[qtp29687253]@1c4fdd5{STARTED,0<=11<=200,i=2,r=-1,t=-2339ms,q=0}[ReservedThreadExecutor@3779c475{capacity=16,threads=ThreadIdPool@62fb2029{capacity=16}}]"
+						// {@16299} "org.eclipse.jetty.websocket.core.WebSocketComponents" -> {org.eclipse.jetty.websocket.core.server.WebSocketServerComponents@16300} "oejwcs.WebSocketServerComponents@640ed130{STARTED}"
+						// {@16301} "requestCounter" -> {java.lang.Integer@16302} 1
+						// {@16303} "jakarta.websocket.server.ServerContainer" -> {org.eclipse.jetty.ee10.websocket.jakarta.server.JakartaWebSocketServerContainer@16304} "oeje10wjs.JakartaWebSocketServerContainer@2228281f{STARTED}"
+						sch.getServletContext().removeAttribute("org.eclipse.jetty.ee10.websocket.servlet.WebSocketUpgradeFilter");
 					}
 					sch.getServletHandler().addFilter(fh);
 					if (fh.getMapping() != null) {
@@ -2008,7 +2013,7 @@ class JettyServerWrapper implements BatchVisitor {
 		for (FilterHolder fh : allFilters) {
 			if (fh instanceof PaxWebFilterHolder) {
 				FilterModel model = ((PaxWebFilterHolder) fh).getFilterModel();
-				// org.eclipse.jetty.websocket.server.WebSocketUpgradeFilter.configure() deals directly
+				// org.eclipse.jetty.ee10.websocket.servlet.WebSocketUpgradeFilter.configure() deals directly
 				// with Jetty context, so we can't intercept the registration and the model is null.
 				// we'll treat such registration as dynamic that has to be removed
 				if (model == null || model.isDynamic()) {

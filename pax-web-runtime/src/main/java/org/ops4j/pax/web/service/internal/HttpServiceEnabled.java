@@ -754,7 +754,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 	/**
 	 * Helper method to create a <em>resource servlet</em> using a <em>base</em> which may be either a <em>chroot</em>
-	 * for bundle-resource access of {@code file:} URL.
+	 * for bundle-resource access or {@code file:} URL.
 	 * @param urlPatterns
 	 * @param rawBase
 	 * @return

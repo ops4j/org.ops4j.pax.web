@@ -16,6 +16,8 @@
 package org.ops4j.pax.web.service.jetty.internal.web;
 
 import java.io.IOException;
+import java.util.Enumeration;
+
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.FilterConfig;
@@ -27,6 +29,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
 
 import org.ops4j.pax.web.service.spi.servlet.OsgiHttpServletRequestWrapper;
+import org.ops4j.pax.web.service.spi.servlet.OsgiScopedServletContext;
+import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 
 public class PaxWebWebSocketUpgradeFilter implements Filter {
 
@@ -37,8 +41,35 @@ public class PaxWebWebSocketUpgradeFilter implements Filter {
 	}
 
 	@Override
-	public void init(FilterConfig filterConfig) throws ServletException {
-		delegate.init(filterConfig);
+	public void init(final FilterConfig filterConfig) throws ServletException {
+		delegate.init(new FilterConfig() {
+			@Override
+			public String getFilterName() {
+				return filterConfig.getFilterName();
+			}
+
+			@Override
+			public ServletContext getServletContext() {
+				ServletContext servletContext = filterConfig.getServletContext();
+				if (servletContext instanceof OsgiServletContext osc) {
+					return osc.getContainerServletContext();
+				}
+				if (servletContext instanceof OsgiScopedServletContext osc) {
+					return osc.getContainerServletContext();
+				}
+				return servletContext;
+			}
+
+			@Override
+			public String getInitParameter(String name) {
+				return filterConfig.getInitParameter(name);
+			}
+
+			@Override
+			public Enumeration<String> getInitParameterNames() {
+				return filterConfig.getInitParameterNames();
+			}
+		});
 	}
 
 	@Override
