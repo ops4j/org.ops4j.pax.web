@@ -127,7 +127,7 @@ public abstract class AbstractHttpServiceProcessingWithConfigAdminIntegrationTes
 								.withReturnCode((int[]) null)
 								.doGETandExecuteTest("http://127.0.0.1:8181/alt-images/logo.png");
 						byte[] bytes = result.getBytes();
-						return bytes.length > 4 && bytes[2] == (byte) 'P' && bytes[3] == (byte) 'N' && bytes[4] == (byte) 'G';
+						return bytes.length > 5 && bytes[3] == (byte) 'P' && bytes[4] == (byte) 'N' && bytes[5] == (byte) 'G';
 					} catch (Exception e) {
 						throw new RuntimeException(e.getMessage(), e);
 					}

@@ -128,6 +128,7 @@
 							javax.sql;resolution:=optional,
 							javax.rmi.ssl;resolution:=optional,
 							javax.transaction;resolution:=optional,
+							javax.xml.catalog,
 							javax.xml.parsers,
 
 							org.ietf.jgss;resolution:=optional,
@@ -194,6 +195,10 @@
 <!--		</dependency>-->
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-alpn-java-client</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-alpn-java-server</artifactId>
 		</dependency>
 		<dependency>
@@ -207,6 +212,10 @@
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-deploy</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-ee</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
@@ -229,6 +238,10 @@
 			<artifactId>jetty-jndi</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-plus</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.eclipse.jetty.ee10</groupId>
 			<artifactId>jetty-ee10-plus</artifactId>
 		</dependency>
@@ -243,6 +256,10 @@
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-server</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-session</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty.ee10</groupId>
@@ -289,6 +306,10 @@
 		<dependency>
 			<groupId>org.eclipse.jetty.websocket</groupId>
 			<artifactId>jetty-websocket-jetty-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty.websocket</groupId>
+			<artifactId>jetty-websocket-jetty-client</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty.websocket</groupId>
