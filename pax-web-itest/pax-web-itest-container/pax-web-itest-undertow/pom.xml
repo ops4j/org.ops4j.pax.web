@@ -104,13 +104,6 @@
 			<scope>runtime</scope>
 		</dependency>
 
-		<dependency>
-			<!-- Can't be added to maven-failsafe-plugin classpath -->
-			<groupId>org.apache.aries.cdi</groupId>
-			<artifactId>org.apache.aries.cdi.extender</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-
 		<!-- JakartaEE -->
 
 		<dependency>

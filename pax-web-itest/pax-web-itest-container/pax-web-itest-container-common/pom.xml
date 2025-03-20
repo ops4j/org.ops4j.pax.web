@@ -208,14 +208,6 @@
 <!--			<groupId>org.ops4j.pax.web</groupId>-->
 <!--			<artifactId>pax-web-compatibility-jaxrs2</artifactId>-->
 <!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.ops4j.pax.web</groupId>-->
-<!--			<artifactId>pax-web-fragment-myfaces-inject</artifactId>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.ops4j.pax.web</groupId>-->
-<!--			<artifactId>pax-web-fragment-myfaces-spifly</artifactId>-->
-<!--		</dependency>-->
 
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
@@ -802,11 +794,16 @@
 
 		<dependency>
 			<groupId>org.apache.myfaces.core</groupId>
-			<artifactId>myfaces-bundle</artifactId>
+			<artifactId>myfaces-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.myfaces.core</groupId>
+			<artifactId>myfaces-impl</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.primefaces</groupId>
 			<artifactId>primefaces</artifactId>
+			<classifier>jakarta</classifier>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.myfaces.trinidad</groupId>

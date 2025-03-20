@@ -46,9 +46,6 @@
 <!--		<module>pax-web-compatibility-jpa2</module>-->
 		<module>pax-web-compatibility-servlet</module>
 		<module>pax-web-compatibility-websocket</module>
-		<!-- These are other support fragments -->
-<!--		<module>pax-web-fragment-myfaces-inject</module>-->
-<!--		<module>pax-web-fragment-myfaces-spifly</module>-->
 	</modules>
 
 </project>

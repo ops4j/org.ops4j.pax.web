@@ -51,7 +51,8 @@ public abstract class AbstractWarBasicIntegrationTest extends AbstractContainerT
 		configureAndWaitForDeployment(() -> {
 //			context.installBundle(String.format("mvn:org.ops4j.pax.web/pax-web-compatibility-interceptor12/%s", System.getProperty("pax-web.version")));
 //			context.installBundle(String.format("mvn:org.ops4j.pax.web/pax-web-compatibility-cdi12/%s", System.getProperty("pax-web.version")));
-			context.installBundle(String.format("mvn:org.apache.myfaces.core/myfaces-bundle/%s", System.getProperty("myfaces.version")));
+			context.installBundle(String.format("mvn:org.apache.myfaces.core/myfaces-api/%s", System.getProperty("myfaces.version")));
+			context.installBundle(String.format("mvn:org.apache.myfaces.core/myfaces-impl/%s", System.getProperty("myfaces.version")));
 			context.installBundle(String.format("mvn:commons-beanutils/commons-beanutils/%s", System.getProperty("commons-beanutils.version")));
 			context.installBundle(String.format("mvn:commons-collections/commons-collections/%s", System.getProperty("commons-collections.version")));
 			context.installBundle(String.format("mvn:commons-digester/commons-digester/%s", System.getProperty("commons-digester.version")));

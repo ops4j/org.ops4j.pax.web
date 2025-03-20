@@ -277,39 +277,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.apache.aries.cdi</groupId>
-			<artifactId>org.apache.aries.cdi.spi</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.aries.cdi</groupId>
-			<artifactId>org.apache.aries.cdi.extension.spi</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.aries.cdi</groupId>
-			<artifactId>org.apache.aries.cdi.extender</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.aries.cdi</groupId>
-			<artifactId>org.apache.aries.cdi.weld</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.aries.cdi</groupId>
-			<artifactId>org.apache.aries.cdi.extension.servlet.common</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.aries.cdi</groupId>
-			<artifactId>org.apache.aries.cdi.extension.servlet.weld</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.aries.cdi</groupId>
-			<artifactId>org.apache.aries.cdi.extra</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.aries.cdi</groupId>
-			<artifactId>org.apache.aries.cdi.extension.el.jsp</artifactId>
-		</dependency>
-
-		<dependency>
 			<groupId>org.apache.aries.spifly</groupId>
 			<artifactId>org.apache.aries.spifly.dynamic.bundle</artifactId>
 		</dependency>

@@ -53,7 +53,8 @@
 							jakarta.el;version="6.0"
 						</Export-Package>
 						<Provide-Capability><![CDATA[
-							osgi.contract;osgi.contract=JavaEL;uses:="jakarta.el";version:List<Version>="6.0,5.0,4.0"
+							osgi.contract;osgi.contract=JavaEL;uses:="jakarta.el";version:List<Version>="6.0,5.0,4.0",
+							osgi.contract;osgi.contract=JakartaExpressionLanguage;uses:="jakarta.el";version:List<Version>="6.0,5.0,4.0"
 						]]></Provide-Capability>
 <!--						<Require-Capability><![CDATA[-->
 <!--							osgi.serviceloader;filter:="(osgi.serviceloader=javax.el.ExpressionFactory)";cardinality:=multiple;resolution:=optional,-->

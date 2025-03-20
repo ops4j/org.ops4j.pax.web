@@ -40,12 +40,6 @@
 		<module>jsf-primefaces-commons3</module>
 		<module>jsf-primefaces-embedded</module>
 		<module>jsf-primefaces-embedded-fragment</module>
-		<module>war-jsf23-embedded</module>
-		<module>war-jsf23-wired</module>
-		<module>war-primefaces-embedded</module>
-		<module>war-primefaces-wired</module>
-		<module>war-jsf23-cdi</module>
-		<module>jsf-resourcehandler</module>
 	</modules>
 
 </project>
