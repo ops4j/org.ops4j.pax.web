@@ -52,7 +52,7 @@ import org.apache.catalina.core.StandardService;
 import org.apache.catalina.core.StandardThreadExecutor;
 import org.apache.catalina.core.StandardWrapper;
 import org.apache.catalina.startup.CatalinaBaseConfigurationSource;
-import org.apache.coyote.http11.AbstractHttp11JsseProtocol;
+import org.apache.coyote.http11.AbstractHttp11Protocol;
 import org.apache.coyote.http2.Http2Protocol;
 import org.apache.hc.client5.http.async.methods.SimpleHttpRequest;
 import org.apache.hc.client5.http.async.methods.SimpleHttpResponse;
@@ -121,7 +121,7 @@ public class EmbeddedTomcatHttps2Test {
 		connector.setProperty("SSLEnabled", "true");
 		connector.setPort(0);
 //		connector.setPort(8123);
-		AbstractHttp11JsseProtocol<?> protocol = (AbstractHttp11JsseProtocol<?>) connector.getProtocolHandler();
+		AbstractHttp11Protocol<?> protocol = (AbstractHttp11Protocol<?>) connector.getProtocolHandler();
 		protocol.setSslImplementationName("org.apache.tomcat.util.net.jsse.JSSEImplementation");
 
 		SSLHostConfig sslConfig = new SSLHostConfig();
@@ -242,7 +242,8 @@ public class EmbeddedTomcatHttps2Test {
 				.setDefaultTlsConfig(TlsConfig.custom().setVersionPolicy(HttpVersionPolicy.FORCE_HTTP_2).build())
 				.setTlsStrategy(tlsStrategy).build();
 
-		final CountDownLatch latch = new CountDownLatch(3);
+		// https://github.com/apache/tomcat/commit/d28d6836b80d0709c56a3ab24d515788498c760e
+		final CountDownLatch latch = new CountDownLatch(1);
 
 		try (CloseableHttpAsyncClient client = HttpAsyncClients.custom()
 				.setH2Config(H2Config.custom().setPushEnabled(true).build())

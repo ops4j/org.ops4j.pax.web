@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.Filter;
 import jakarta.servlet.Servlet;
@@ -136,7 +135,7 @@ public class PaxWebStandardContext extends StandardContext {
 		super();
 		getPipeline().addValve(new PaxWebStandardContextValve((ValveBase) getPipeline().getBasic(), defaultServlet));
 		this.osgiSessionsBridge = osgiSessionsBridge;
-		this.setClearReferencesObjectStreamClassCaches(false);
+//		this.setClearReferencesObjectStreamClassCaches(false);
 		this.setClearReferencesRmiTargets(false);
 		this.setClearReferencesThreadLocals(false);
 	}
@@ -176,13 +175,13 @@ public class PaxWebStandardContext extends StandardContext {
 					String userName = user != null ? user.toString() : null;
 					String authMethod = authType != null ? authType.toString() : null;
 					if (tomcatRequest.getPrincipal() == null) {
-						tomcatRequest.setUserPrincipal(new GenericPrincipal(userName, null, Collections.emptyList()));
+						tomcatRequest.setUserPrincipal(new GenericPrincipal(userName, Collections.emptyList(), null));
 					}
 				}
 			};
 
 			final OsgiFilterChain osgiChain;
-			List<Preprocessor> preprocessorInstances = preprocessors.stream().map(PreprocessorFilterConfig::getInstance).collect(Collectors.toList());
+			List<Preprocessor> preprocessorInstances = preprocessors.stream().map(PreprocessorFilterConfig::getInstance).toList();
 			if (wrapper != null && !wrapper.is404()) {
 				osgiChain = new OsgiFilterChain(new ArrayList<>(preprocessorInstances),
 						wrapper.getServletContext(), wrapper.getWebContainerContext(), null, osgiSessionsBridge, authListener);

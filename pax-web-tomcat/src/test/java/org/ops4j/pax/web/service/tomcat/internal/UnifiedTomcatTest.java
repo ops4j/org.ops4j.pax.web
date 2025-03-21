@@ -1428,7 +1428,9 @@ public class UnifiedTomcatTest {
 		response = send(connector.getLocalPort(), "/c1");
 		// if org.apache.catalina.Context.setMapperContextRootRedirectEnabled(true):
 //		assertTrue(response.contains("HTTP/1.1 302"));
-		assertTrue(response.contains("HTTP/1.1 404"));
+//		assertTrue(response.contains("HTTP/1.1 404"));
+		// https://github.com/apache/tomcat/commit/c93e9ea3f69
+		assertTrue(response.contains("HTTP/1.1 200"));
 		response = send(connector.getLocalPort(), "/c1/");
 		// https://bz.apache.org/bugzilla/show_bug.cgi?id=64109
 //		assertTrue("Special, strange Servlet API 4 mapping rule", response.endsWith("|  |  | / |"));

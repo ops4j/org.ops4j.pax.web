@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.connector.CoyoteAdapter;
 import org.apache.coyote.Adapter;
-import org.apache.coyote.http11.AbstractHttp11JsseProtocol;
+import org.apache.coyote.http11.AbstractHttp11Protocol;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 import org.apache.tomcat.util.net.Nio2Channel;
@@ -32,7 +32,7 @@ import org.apache.tomcat.util.threads.ThreadPoolExecutor;
 /**
  * Almost like {@link org.apache.coyote.http11.Http11Nio2Protocol}, but with a slightly changed {@link Nio2Endpoint}.
  */
-public class PaxWebHttp11Nio2Protocol extends AbstractHttp11JsseProtocol<Nio2Channel> {
+public class PaxWebHttp11Nio2Protocol extends AbstractHttp11Protocol<Nio2Channel> {
 
 	private static final Log LOG = LogFactory.getLog(PaxWebHttp11Nio2Protocol.class);
 

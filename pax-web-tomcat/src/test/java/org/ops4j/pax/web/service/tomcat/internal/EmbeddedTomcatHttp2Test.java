@@ -491,8 +491,9 @@ public class EmbeddedTomcatHttp2Test {
 
 		// indexed by HTTP/2 Stream ID
 		assertThat(responses.get(1)).isEqualTo("OK\n");
-		assertThat(responses.get(2)).isEqualTo("body { margin: 0 }\n");
-		assertThat(responses.get(4)).isEqualTo("window.alert(\"hello world\");\n");
+		// https://github.com/apache/tomcat/commit/d28d6836b80d0709c56a3ab24d515788498c760e
+//		assertThat(responses.get(2)).isEqualTo("body { margin: 0 }\n");
+//		assertThat(responses.get(4)).isEqualTo("window.alert(\"hello world\");\n");
 	}
 
 	@Test
@@ -721,8 +722,9 @@ public class EmbeddedTomcatHttp2Test {
 
 		// indexed by HTTP/2 Stream ID
 		assertThat(responses.get(1)).isEqualTo("OK\n");
-		assertThat(responses.get(2)).isEqualTo("body { margin: 0 }\n");
-		assertThat(responses.get(4)).isEqualTo("window.alert(\"hello world\");\n");
+		// https://github.com/apache/tomcat/commit/d28d6836b80d0709c56a3ab24d515788498c760e
+//		assertThat(responses.get(2)).isEqualTo("body { margin: 0 }\n");
+//		assertThat(responses.get(4)).isEqualTo("window.alert(\"hello world\");\n");
 	}
 
 	private void send(Selector selector, SelectionKey key, ByteBuffer buffer) throws IOException {

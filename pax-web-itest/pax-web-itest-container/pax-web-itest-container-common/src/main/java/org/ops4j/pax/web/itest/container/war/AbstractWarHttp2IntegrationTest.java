@@ -141,13 +141,17 @@ public abstract class AbstractWarHttp2IntegrationTest extends AbstractContainerT
 		return false;
 	}
 
+	protected int expectedPushedPromises() {
+		return 3;
+	}
+
 	@Test
 	public void testHttp2ClearText() throws Exception {
 		final PoolingAsyncClientConnectionManager cm = PoolingAsyncClientConnectionManagerBuilder.create()
 				.setDefaultTlsConfig(TlsConfig.custom().setVersionPolicy(HttpVersionPolicy.FORCE_HTTP_2).build())
 				.build();
 
-		final CountDownLatch latch = new CountDownLatch(3);
+		final CountDownLatch latch = new CountDownLatch(expectedPushedPromises());
 
 		try (CloseableHttpAsyncClient client = HttpAsyncClients.custom()
 				.setH2Config(H2Config.custom().setPushEnabled(true).build())
@@ -261,7 +265,7 @@ public abstract class AbstractWarHttp2IntegrationTest extends AbstractContainerT
 				.setDefaultTlsConfig(TlsConfig.custom().setVersionPolicy(HttpVersionPolicy.FORCE_HTTP_2).build())
 				.setTlsStrategy(tlsStrategy).build();
 
-		final CountDownLatch latch = new CountDownLatch(3);
+		final CountDownLatch latch = new CountDownLatch(expectedPushedPromises());
 
 		try (CloseableHttpAsyncClient client = HttpAsyncClients.custom()
 				.setH2Config(H2Config.custom().setPushEnabled(true).build())

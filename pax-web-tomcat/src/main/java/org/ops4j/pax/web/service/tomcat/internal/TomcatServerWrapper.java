@@ -2092,7 +2092,7 @@ class TomcatServerWrapper implements BatchVisitor {
 //				}
 //			};
 			ParallelWebappClassLoader loaderInstance = new ParallelWebappClassLoader(highestRankedContext.getClassLoader());
-			loaderInstance.setClearReferencesObjectStreamClassCaches(false);
+//			loaderInstance.setClearReferencesObjectStreamClassCaches(false);
 			loaderInstance.setClearReferencesRmiTargets(false);
 			loaderInstance.setClearReferencesThreadLocals(false);
 			tomcatLoader.setLoaderInstance(loaderInstance);
