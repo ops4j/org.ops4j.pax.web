@@ -35,6 +35,7 @@ public class WhiteboardUndertowBundleIntegrationTest extends AbstractWhiteboardI
 		return combine(baseConfigureWithoutRuntime(),
 				combine(paxWebJsp(), paxWebExtenderWhiteboard(),
 						mavenBundle("jakarta.websocket", "jakarta.websocket-api").versionAsInProject(),
+						mavenBundle("jakarta.websocket", "jakarta.websocket-client-api").versionAsInProject(),
 						mavenBundle().groupId("org.ops4j.pax.web").artifactId("pax-web-undertow-bundle").versionAsInProject()));
 	}
 

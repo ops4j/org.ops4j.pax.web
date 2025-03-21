@@ -37,6 +37,7 @@ public class HttpServiceUndertowBundleIntegrationTest extends AbstractHttpServic
 	public Option[] configure() {
 		return combine(baseConfigureWithoutRuntime(),
 				mavenBundle().groupId("org.ops4j.pax.web").artifactId("pax-web-undertow-bundle").versionAsInProject(),
+				mavenBundle("jakarta.websocket", "jakarta.websocket-client-api").versionAsInProject(),
 				mavenBundle("jakarta.websocket", "jakarta.websocket-api").versionAsInProject()
 		);
 	}

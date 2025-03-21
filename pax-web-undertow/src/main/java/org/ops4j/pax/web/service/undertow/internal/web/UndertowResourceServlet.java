@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Enumeration;
+
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletConfig;
@@ -53,7 +54,7 @@ import org.slf4j.LoggerFactory;
  * inside the forked version, but if in future, Undertow opens the default servlet more, we could get rid of
  * the fork.</p>
  */
-	public class UndertowResourceServlet extends DefaultServlet implements ResourceManager {
+public class UndertowResourceServlet extends DefaultServlet implements ResourceManager {
 
 	public static final Logger LOG = LoggerFactory.getLogger(UndertowResourceServlet.class);
 
@@ -99,6 +100,7 @@ import org.slf4j.LoggerFactory;
 	/**
 	 * This method should be called if we want to be able to recreate (clean) the cache after setting new
 	 * welcome files.
+	 *
 	 * @param metadataCacheSize
 	 * @param maxEntrySize
 	 * @param maxSize
@@ -341,7 +343,7 @@ import org.slf4j.LoggerFactory;
 		//
 		// instead of relying on reflection used in jakarta.servlet.http.HttpServlet.doOptions()
 		// we simply return fixed set of methods (to be compatible with Jetty and Tomcat)
-		resp.setHeader("Allow", "OPTIONS, GET, HEAD, POST");
+		resp.setHeader("Allow", "GET, HEAD, OPTIONS");
 	}
 
 	@Override

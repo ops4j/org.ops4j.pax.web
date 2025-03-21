@@ -18,23 +18,6 @@
 
 package org.ops4j.pax.web.service.undertow.internal.web;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import jakarta.servlet.DispatcherType;
-import jakarta.servlet.RequestDispatcher;
-import jakarta.servlet.ServletConfig;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
 import io.undertow.io.IoCallback;
 import io.undertow.io.Sender;
 import io.undertow.server.HttpServerExchange;
@@ -59,6 +42,23 @@ import io.undertow.util.Methods;
 import io.undertow.util.StatusCodes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 // CHECKSTYLE:OFF
 /**
@@ -186,18 +186,18 @@ public class DefaultServlet extends HttpServlet {
             }
             return;
         } else if (resource.isDirectory()) {
-            if ("css".equals(req.getQueryString())) {
-                resp.setContentType("text/css");
-                resp.getWriter().write(DirectoryUtils.Blobs.FILE_CSS);
-                return;
-            } else if ("js".equals(req.getQueryString())) {
-                resp.setContentType("application/javascript");
-                resp.getWriter().write(DirectoryUtils.Blobs.FILE_JS);
-                return;
-            }
             if (directoryListingEnabled) {
+                if ("css".equals(req.getQueryString())) {
+                    resp.setContentType("text/css");
+                    resp.getWriter().write(DirectoryUtils.Blobs.FILE_CSS);
+                    return;
+                } else if ("js".equals(req.getQueryString())) {
+                    resp.setContentType("application/javascript");
+                    resp.getWriter().write(DirectoryUtils.Blobs.FILE_JS);
+                    return;
+                }
                 resp.setContentType("text/html");
-                StringBuilder output = DirectoryUtils.renderDirectoryListing(req.getRequestURI(), resource);
+                StringBuilder output = DirectoryUtils.renderDirectoryListing(exchange, req.getRequestURI(), resource);
                 resp.getWriter().write(output.toString());
             } else {
                 // Pax Web 8: directories without slash are redirected to make behavior consistent with
