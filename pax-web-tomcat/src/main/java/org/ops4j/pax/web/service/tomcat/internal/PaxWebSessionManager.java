@@ -22,6 +22,10 @@ import org.apache.catalina.session.StandardManager;
 
 public class PaxWebSessionManager extends StandardManager {
 
+	public PaxWebSessionManager() {
+		this.setPathname("SESSIONS.ser");
+	}
+
 	@Override
 	public Session findSession(String id) throws IOException {
 		String sessionIdPrefix = PaxWebSessionIdGenerator.sessionIdPrefix.get();

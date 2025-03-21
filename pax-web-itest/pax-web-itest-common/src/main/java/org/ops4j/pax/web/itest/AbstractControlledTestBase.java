@@ -409,7 +409,7 @@ public abstract class AbstractControlledTestBase {
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle("org.ops4j.pax.web", "pax-web-tomcat")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("jakarta.security.auth.message", "jakarta.security.auth.message-api")
+				mavenBundle("jakarta.authentication", "jakarta.authentication-api")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1)
 		};
 	}

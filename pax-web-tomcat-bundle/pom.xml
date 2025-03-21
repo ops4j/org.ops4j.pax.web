@@ -69,14 +69,14 @@
 							<!-- OSGi cmpn -->
 							org.osgi.service.cm;version="[1.0,2.0)";resolution:=optional,
 							org.osgi.service.event;resolution:=optional,
-							org.ops4j.pax.web.service.http;version="${pax-web.osgi.version}",
-							org.osgi.service.http.context;version="[1.1,2)",
-							org.osgi.service.http.runtime;version="[1.1,2)",
-							org.osgi.service.http.runtime.dto;version="[1.1,2)",
-							org.osgi.service.http.whiteboard;version="[1.1,2)",
+							org.osgi.service.servlet.context;version="[2,3)",
+							org.osgi.service.servlet.runtime;version="[2,3)",
+							org.osgi.service.servlet.runtime.dto;version="[2,3)",
+							org.osgi.service.servlet.whiteboard;version="[2,3)",
 
 							<!-- from pax-web-api -->
 							org.ops4j.pax.web.service;version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.service.http;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.service.views;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.service.whiteboard;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.utils;version="${pax-web.osgi.version}",
@@ -106,8 +106,8 @@
 
 							<!-- other -->
 							javax.imageio;resolution:=optional,
-							javax.mail;resolution:=optional,
-							javax.mail.internet;resolution:=optional,
+							jakarta.mail;resolution:=optional,
+							jakarta.mail.internet;resolution:=optional,
 							javax.management;resolution:=optional,
 							javax.management.loading;resolution:=optional,
 							javax.management.modelmbean;resolution:=optional,
@@ -124,10 +124,10 @@
 							javax.security.auth;resolution:=optional,
 							javax.security.auth.callback;resolution:=optional,
 							javax.security.auth.login;resolution:=optional,
-							javax.security.auth.message;resolution:=optional,
-							javax.security.auth.message.callback;resolution:=optional,
-							javax.security.auth.message.config;resolution:=optional,
-							javax.security.auth.message.module;resolution:=optional,
+							jakarta.security.auth.message;resolution:=optional,
+							jakarta.security.auth.message.callback;resolution:=optional,
+							jakarta.security.auth.message.config;resolution:=optional,
+							jakarta.security.auth.message.module;resolution:=optional,
 							javax.security.auth.spi;resolution:=optional,
 							javax.security.auth.x500;resolution:=optional,
 

@@ -226,7 +226,9 @@ public class TomcatResourceServlet extends DefaultServlet {
 		RequestDispatcher dispatcher = null;
 		if (resolvedWelcome == null) {
 			for (String welcome : welcomeFiles) {
-				String path = relativePath + welcome;
+				// without servletPath UnifiedTomcatTest passes
+				// where Jetty fails (see jetty/jetty.project/issues/10608)
+				String path = servletPath + relativePath + welcome;
 				dispatcher = request.getRequestDispatcher(path);
 				if (dispatcher != null) {
 					resolvedWelcome = path;
@@ -328,6 +330,12 @@ public class TomcatResourceServlet extends DefaultServlet {
 		}
 
 		return childPath;
+	}
+
+	@Override
+	protected String determineMethodsAllowed(HttpServletRequest req) {
+		// Jetty removed POST as allowed method for DefaultServlet
+		return "GET, HEAD, OPTIONS";
 	}
 
 	public void setHighestRankedContext(OsgiServletContext highestRankedContext) {

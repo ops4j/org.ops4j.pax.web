@@ -62,11 +62,11 @@
 			<artifactId>pax-web-tomcat</artifactId>
 			<scope>runtime</scope>
 		</dependency>
-<!--		<dependency>-->
-<!--			<groupId>org.ops4j.pax.web</groupId>-->
-<!--			<artifactId>pax-web-tomcat-bundle</artifactId>-->
-<!--			<scope>runtime</scope>-->
-<!--		</dependency>-->
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-tomcat-bundle</artifactId>
+			<scope>runtime</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-tomcat-websocket</artifactId>
