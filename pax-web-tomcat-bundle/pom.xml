@@ -165,7 +165,7 @@
 							org.xml.sax.helpers,
 							sun.misc;resolution:=optional,
 							sun.rmi.registry;resolution:=optional,
-							sun.rmi.transport;resolution:=optional,*
+							sun.rmi.transport;resolution:=optional
 						</Import-Package>
 						<Private-Package>
 							org.ops4j.pax.web.service.tomcat.bundle.internal.*,

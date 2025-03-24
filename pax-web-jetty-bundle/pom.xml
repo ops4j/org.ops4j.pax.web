@@ -138,7 +138,7 @@
 							org.w3c.dom,
 							org.xml.sax,
 							org.xml.sax.helpers,
-							sun.misc;resolution:=optional,*
+							sun.misc;resolution:=optional
 						</Import-Package>
 						<Export-Package>
 							org.eclipse.jetty.alpn;version="${dependency.org.eclipse.jetty.alpn.osgi}",

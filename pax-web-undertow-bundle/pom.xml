@@ -133,7 +133,7 @@
 							org.graalvm.nativeimage.c;resolution:=optional,
 							org.graalvm.nativeimage.c.function;resolution:=optional,
 							org.graalvm.nativeimage.c.type;resolution:=optional,
-							org.graalvm.word;resolution:=optional,*
+							org.graalvm.word;resolution:=optional
 						</Import-Package>
 						<Export-Package>
 							io.undertow.*;version="${dependency.io.undertow}",

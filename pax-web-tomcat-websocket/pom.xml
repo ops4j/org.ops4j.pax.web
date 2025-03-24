@@ -62,7 +62,6 @@
 							<!-- pax-web-tomcat-common / tomcat-util -->
 							org.apache.tomcat.util;version="${dependency.org.apache.tomcat}",
 							org.apache.tomcat.util.buf;version="${dependency.org.apache.tomcat}",
-							org.apache.tomcat.util.codec.binary;version="${dependency.org.apache.tomcat}",
 							org.apache.tomcat.util.collections;version="${dependency.org.apache.tomcat}",
 							org.apache.tomcat.util.compat;version="${dependency.org.apache.tomcat}",
 
