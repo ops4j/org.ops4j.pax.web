@@ -210,9 +210,6 @@ jakarta.servlet.context.tempdir = ${karaf.data}/pax-web/tmp
 		<bundle start-level="30" dependency="true">mvn:jakarta.servlet/jakarta.servlet-api/${dependency.jakarta.servlet-api}</bundle>
 		<bundle start-level="30" dependency="true">mvn:jakarta.authentication/jakarta.authentication-api/${dependency.jakarta.authentication-api}</bundle>
 
-		<!-- for JULI logging - should be provided by Karaf -->
-		<bundle start-level="30" dependency="true">mvn:org.ops4j.pax.logging/pax-logging-api/${dependency.org.ops4j.pax.logging}</bundle>
-
 		<bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-tomcat-common/${project.version}</bundle>
 		<bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-tomcat/${project.version}</bundle>
 	</feature>

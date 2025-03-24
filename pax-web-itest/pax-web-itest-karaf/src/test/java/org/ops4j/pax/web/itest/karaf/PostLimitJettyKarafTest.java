@@ -15,14 +15,16 @@
  */
 package org.ops4j.pax.web.itest.karaf;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
+import org.junit.Ignore;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 
 /**
  * @author Achim Nierbeck
  */
+@Ignore("https://github.com/jetty/jetty.project/issues/12926")
 public class PostLimitJettyKarafTest extends PostLimitBaseKarafTest {
 
 	@Configuration

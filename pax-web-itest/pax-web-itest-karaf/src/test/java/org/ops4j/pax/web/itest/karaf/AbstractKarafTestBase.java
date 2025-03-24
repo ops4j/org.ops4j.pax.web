@@ -207,12 +207,8 @@ public class AbstractKarafTestBase extends AbstractControlledTestBase {
 	}
 
 	public Option[] jettyHttp2Config() {
-		String http2Feature = "pax-web-jetty-http2-jdk8";
-		if (javaMajorVersion() > 8) {
-			http2Feature = "pax-web-jetty-http2-jdk9";
-		}
 		return combine(baseConfigure(),
-				features(paxWebFeatures, "pax-web-http-jetty", "pax-web-jetty-http2", http2Feature, "pax-web-war", "pax-web-whiteboard"));
+				features(paxWebFeatures, "pax-web-http-jetty", "pax-web-jetty-http2", "pax-web-war", "pax-web-whiteboard"));
 	}
 
 	public Option[] tomcatConfig() {
@@ -223,10 +219,6 @@ public class AbstractKarafTestBase extends AbstractControlledTestBase {
 	public Option[] undertowConfig() {
 		return combine(baseConfigure(),
 				features(paxWebFeatures, "pax-web-http-undertow", "pax-web-war", "pax-web-whiteboard"));
-	}
-
-	protected static String getMyFacesVersion() {
-		return System.getProperty("myfaces.version");
 	}
 
 	protected static String getProjectVersion() {

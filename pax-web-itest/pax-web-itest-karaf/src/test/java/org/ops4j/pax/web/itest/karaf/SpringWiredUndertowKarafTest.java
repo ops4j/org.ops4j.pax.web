@@ -15,6 +15,7 @@
  */
 package org.ops4j.pax.web.itest.karaf;
 
+import org.junit.Ignore;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 
@@ -23,6 +24,7 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
 /**
  * @author achim
  */
+@Ignore("Spring Web 6.1.x SMX version requires io.micrometer packages")
 public class SpringWiredUndertowKarafTest extends SpringWiredBaseKarafTest {
 
 	@Configuration

@@ -857,26 +857,26 @@
 				<artifactId>pax-web-compatibility-el</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-			<dependency>
-				<groupId>org.ops4j.pax.web</groupId>
-				<artifactId>pax-web-compatibility-interceptor12</artifactId>
-				<version>${project.version}</version>
-			</dependency>
+<!--			<dependency>-->
+<!--				<groupId>org.ops4j.pax.web</groupId>-->
+<!--				<artifactId>pax-web-compatibility-interceptor12</artifactId>-->
+<!--				<version>${project.version}</version>-->
+<!--			</dependency>-->
 			<dependency>
 				<groupId>org.ops4j.pax.web</groupId>
 				<artifactId>pax-web-compatibility-annotation</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-			<dependency>
-				<groupId>org.ops4j.pax.web</groupId>
-				<artifactId>pax-web-compatibility-jpa2</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.ops4j.pax.web</groupId>
-				<artifactId>pax-web-compatibility-jaxrs2</artifactId>
-				<version>${project.version}</version>
-			</dependency>
+<!--			<dependency>-->
+<!--				<groupId>org.ops4j.pax.web</groupId>-->
+<!--				<artifactId>pax-web-compatibility-jpa2</artifactId>-->
+<!--				<version>${project.version}</version>-->
+<!--			</dependency>-->
+<!--			<dependency>-->
+<!--				<groupId>org.ops4j.pax.web</groupId>-->
+<!--				<artifactId>pax-web-compatibility-jaxrs2</artifactId>-->
+<!--				<version>${project.version}</version>-->
+<!--			</dependency>-->
 			<dependency>
 				<groupId>org.ops4j.pax.web</groupId>
 				<artifactId>pax-web-compatibility-websocket</artifactId>

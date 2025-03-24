@@ -15,7 +15,7 @@
  */
 package org.ops4j.pax.web.itest.karaf;
 
-import javax.servlet.Servlet;
+import jakarta.servlet.Servlet;
 
 import org.junit.After;
 import org.junit.Before;

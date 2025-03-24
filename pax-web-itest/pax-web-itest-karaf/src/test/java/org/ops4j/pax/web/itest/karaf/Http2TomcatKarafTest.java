@@ -30,4 +30,14 @@ public class Http2TomcatKarafTest extends Http2BaseKarafTest {
 		return combine(combine(tomcatConfig(), jspConfig()), securityConfig());
 	}
 
+	@Override
+	protected int expectedPushedPromises() {
+		// Tomcat 11 no longer supports push promises
+		// https://github.com/apache/tomcat/commit/d28d6836b80d0709c56a3ab24d515788498c760e
+		// https://tomcat.apache.org/tomcat-11.0-doc/changelog.html#Tomcat_11.0.0-M12_(markt)
+		// https://github.com/jakartaee/servlet/issues/538
+		// https://httpwg.org/specs/rfc8297.html - HTTP Hints are the future...
+		return 1;
+	}
+
 }

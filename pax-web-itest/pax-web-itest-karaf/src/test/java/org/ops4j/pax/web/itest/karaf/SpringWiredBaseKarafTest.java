@@ -16,9 +16,7 @@
 package org.ops4j.pax.web.itest.karaf;
 
 import org.junit.Before;
-import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.options.MavenUrlReference;
 
 import static org.ops4j.pax.exam.CoreOptions.maven;
@@ -27,7 +25,6 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
 /**
  * @author achim
  */
-@RunWith(PaxExam.class)
 public abstract class SpringWiredBaseKarafTest extends SpringEmbeddedBaseKarafTest {
 
 	@Before
@@ -40,7 +37,7 @@ public abstract class SpringWiredBaseKarafTest extends SpringEmbeddedBaseKarafTe
 
 	public Option springConfig() {
 		MavenUrlReference karafSpringFeatures = maven()
-				.groupId("org.apache.karaf.features").artifactId("spring-legacy")
+				.groupId("org.apache.karaf.features").artifactId("spring")
 				.type("xml").classifier("features").version(getKarafVersion());
 
 		return features(karafSpringFeatures, "spring", "spring-web");

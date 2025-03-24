@@ -21,7 +21,7 @@
 <Configure id="Server">
 	<Call name="addBean">
 		<Arg>
-			<New class="org.eclipse.jetty.jaas.JAASLoginService">
+			<New class="org.eclipse.jetty.security.jaas.JAASLoginService">
 				<Set name="name">Test Realm</Set>
 				<Set name="loginModuleName">karaf</Set>
 				<Set name="roleClassNames">

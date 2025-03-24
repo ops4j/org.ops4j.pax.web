@@ -15,7 +15,7 @@
  */
 package org.ops4j.pax.web.itest.karaf;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.junit.Before;
 import org.ops4j.pax.exam.Configuration;

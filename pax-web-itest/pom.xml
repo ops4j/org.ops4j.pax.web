@@ -42,7 +42,7 @@
 		<module>pax-web-itest-server</module>
 		<module>pax-web-itest-jsp</module>
 		<module>pax-web-itest-container</module>
-<!--		<module>pax-web-itest-karaf</module>-->
+		<module>pax-web-itest-karaf</module>
 	</modules>
 
 	<profiles>
