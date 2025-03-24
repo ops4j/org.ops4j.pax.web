@@ -345,6 +345,7 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 		// org.eclipse.jetty.server.Request.getUserIdentityScope() is already available here.
 		// We have to do it in first scoped handler's handle() method, because Keycloak accesses the session
 		// in org.keycloak.adapters.jetty.Jetty94RequestAuthenticator before ServletHandler is called
+		// (this is no longer relevant for Keycloak, but the functionality is fine)
 
 		if (getSessionHandler() instanceof PaxWebSessionHandler sessionHandler) {
 			ServletContextRequest scr = Request.as(baseRequest, ServletContextRequest.class);

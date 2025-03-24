@@ -2661,7 +2661,8 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 
 			// keycloak accesses resources directly inside
 			// org.keycloak.adapters.undertow.KeycloakServletExtension#handleDeployment where we don't have
-			// access to Osgi contexts
+			// access to Osgi contexts - keep it even if Pax Web 10 no longer provides dedicated
+			// Keycloak support
 			deployment.setResourceManager(new OsgiResourceManager("", highestRankedContext));
 
 			// handle Pax Web specific extensions

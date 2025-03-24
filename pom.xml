@@ -279,10 +279,6 @@
 		<dependency.org.jline>3.21.0</dependency.org.jline>
 		<dependency.org.jsoup>1.19.1</dependency.org.jsoup>
 		<dependency.org.junit>5.12.1</dependency.org.junit>
-		<!-- Special version of Keycloak that will never exceed 18.0.x - the last version with OSGi/Karaf/PaxWeb support -->
-		<dependency.org.keycloak18>18.0.2</dependency.org.keycloak18>
-		<!-- Keycloak version newer than 18 - just the latest available upstream version -->
-		<dependency.org.keycloak>22.0.4</dependency.org.keycloak>
 		<dependency.org.mockito>5.16.1</dependency.org.mockito>
 		<dependency.org.mortbay.jasper.apache-jsp>10.1.31</dependency.org.mortbay.jasper.apache-jsp>
 		<dependency.org.mortbay.jetty.alpn>8.1.13.v20181017</dependency.org.mortbay.jetty.alpn>
@@ -1421,44 +1417,6 @@
 <!--				<artifactId>whiteboard-blueprint</artifactId>-->
 <!--				<version>${project.version}</version>-->
 <!--			</dependency>-->
-
-			<dependency>
-				<groupId>org.ops4j.pax.web</groupId>
-				<artifactId>pax-web-jetty-keycloak18</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.ops4j.pax.web</groupId>
-				<artifactId>pax-web-jetty-keycloak</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.ops4j.pax.web</groupId>
-				<artifactId>pax-web-tomcat-keycloak18</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.ops4j.pax.web</groupId>
-				<artifactId>pax-web-tomcat-keycloak</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.ops4j.pax.web</groupId>
-				<artifactId>pax-web-undertow-keycloak</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>org.ops4j.pax.web</groupId>
-				<artifactId>keycloak-common</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>org.ops4j.pax.web</groupId>
-				<artifactId>keycloak-osgi-adapter</artifactId>
-				<version>${project.version}</version>
-			</dependency>
 
 			<!-- OPS4J dependencies -->
 
@@ -3127,9 +3085,6 @@
 
 <!--		<module>pax-web-features</module>-->
 
-<!--		<module>pax-web-archetypes</module>-->
-<!--		<module>pax-web-jaas</module>-->
-
 		<!-- All the samples (Http Service, Whiteboard, JSP, WebSockets, WAR) -->
 		<module>samples</module>
 
@@ -3137,10 +3092,6 @@
 		<module>pax-web-itest</module>
 
 <!--		<module>pax-web-manual</module>-->
-
-		<!-- Keycloak support -->
-<!--		<module>pax-web-keycloak18</module>-->
-<!--		<module>pax-web-keycloak</module>-->
 
     </modules>
 

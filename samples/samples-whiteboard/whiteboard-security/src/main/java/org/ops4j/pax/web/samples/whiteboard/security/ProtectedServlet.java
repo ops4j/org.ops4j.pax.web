@@ -33,13 +33,6 @@ public class ProtectedServlet extends HttpServlet {
 		request.setAttribute("principalClass", className);
 		request.setAttribute("verySecure", false);
 
-//		if (p instanceof KeycloakPrincipal) {
-//			KeycloakSecurityContext context = ((KeycloakPrincipal<?>) p).getKeycloakSecurityContext();
-//			request.setAttribute("kcRealm", context.getRealm());
-//			request.setAttribute("kcTokenString", context.getTokenString());
-//			request.setAttribute("kcIdTokenString", context.getIdTokenString());
-//		}
-
 		request.getRequestDispatcher("/secure.jsp").forward(request, response);
 	}
 

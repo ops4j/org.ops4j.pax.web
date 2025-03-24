@@ -129,7 +129,8 @@ public class Activator implements BundleActivator {
 		security.getSecurityConstraints().add(adminAndViewerConstraint);
 
 		// the servlet invoking jakarta.servlet.http.HttpServletRequest.logout() must be under some constraint,
-		// otherwise Keycloak won't notice it
+		// otherwise Keycloak won't notice it. Keep it even if Pax Web 10 no longer has dedicated
+		// Keycloak support
 		DefaultSecurityConstraintMapping logoutConstraint = new DefaultSecurityConstraintMapping();
 		logoutConstraint.setName("logout-area");
 		logoutConstraint.getAuthRoles().add("*");

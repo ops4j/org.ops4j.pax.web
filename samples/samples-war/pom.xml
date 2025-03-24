@@ -61,7 +61,6 @@
 		<module>war-security</module>
 		<module>war-http-methods</module>
 		<module>war-http2</module>
-		<module>war-keycloak</module>
 		<module>war-dispatcher</module>
 		<module>war-default</module>
 		<module>wab-and-filter</module>
