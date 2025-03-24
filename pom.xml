@@ -1381,42 +1381,6 @@
 <!--				<artifactId>whiteboard-ds-jaxrs</artifactId>-->
 <!--				<version>${project.version}</version>-->
 <!--			</dependency>-->
-<!--			<dependency>-->
-<!--				<groupId>org.ops4j.pax.web.samples.web-fragment</groupId>-->
-<!--				<artifactId>fragment</artifactId>-->
-<!--				<version>${project.version}</version>-->
-<!--			</dependency>-->
-<!--			<dependency>-->
-<!--				<groupId>org.ops4j.pax.web.samples</groupId>-->
-<!--				<artifactId>jsf-resourcehandler-myfaces</artifactId>-->
-<!--				<version>${project.version}</version>-->
-<!--			</dependency>-->
-<!--			<dependency>-->
-<!--				<groupId>org.ops4j.pax.web.samples</groupId>-->
-<!--				<artifactId>jsf-resourcehandler-resourcebundle</artifactId>-->
-<!--				<version>${project.version}</version>-->
-<!--			</dependency>-->
-<!--			<dependency>-->
-<!--				<groupId>org.ops4j.pax.web.samples</groupId>-->
-<!--				<artifactId>jsf-resourcehandler-resourcebundle-override</artifactId>-->
-<!--				<version>${project.version}</version>-->
-<!--			</dependency>-->
-<!--			<dependency>-->
-<!--				<groupId>org.ops4j.pax.web.samples</groupId>-->
-<!--				<artifactId>war-jsf22-cdi</artifactId>-->
-<!--				<version>${project.version}</version>-->
-<!--				<type>war</type>-->
-<!--			</dependency>-->
-<!--			<dependency>-->
-<!--				<groupId>org.ops4j.pax.web.samples.web-fragment</groupId>-->
-<!--				<artifactId>war</artifactId>-->
-<!--				<version>${project.version}</version>-->
-<!--			</dependency>-->
-<!--			<dependency>-->
-<!--				<groupId>org.ops4j.pax.web.samples</groupId>-->
-<!--				<artifactId>whiteboard-blueprint</artifactId>-->
-<!--				<version>${project.version}</version>-->
-<!--			</dependency>-->
 
 			<!-- OPS4J dependencies -->
 
@@ -3083,7 +3047,7 @@
 		<module>pax-web-undertow-websocket</module>
 		<module>pax-web-undertow-bundle</module>
 
-<!--		<module>pax-web-features</module>-->
+		<module>pax-web-features</module>
 
 		<!-- All the samples (Http Service, Whiteboard, JSP, WebSockets, WAR) -->
 		<module>samples</module>

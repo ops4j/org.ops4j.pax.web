@@ -91,6 +91,7 @@
 							org.ops4j.pax.web.service.spi.model;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.service.spi.model.elements;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.service.spi.model.events;version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.service.spi.model.info;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.service.spi.model.views;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.service.spi.util;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.service.spi.servlet;version="${pax-web.osgi.version}",
@@ -164,7 +165,7 @@
 							org.xml.sax.helpers,
 							sun.misc;resolution:=optional,
 							sun.rmi.registry;resolution:=optional,
-							sun.rmi.transport;resolution:=optional
+							sun.rmi.transport;resolution:=optional,*
 						</Import-Package>
 						<Private-Package>
 							org.ops4j.pax.web.service.tomcat.bundle.internal.*,

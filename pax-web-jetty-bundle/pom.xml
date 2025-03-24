@@ -86,6 +86,7 @@
 							org.ops4j.pax.web.service.spi.model;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.service.spi.model.elements;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.service.spi.model.events;version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.service.spi.model.info;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.service.spi.model.views;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.service.spi.util;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.service.spi.servlet;version="${pax-web.osgi.version}",
@@ -115,16 +116,18 @@
 							javax.naming.spi;resolution:=optional,
 							javax.net.ssl;resolution:=optional,
 
-							jakarta.security.auth;resolution:=optional,
-							jakarta.security.auth.callback;resolution:=optional,
-							jakarta.security.auth.login;resolution:=optional,
 							jakarta.security.auth.message;resolution:=optional,
 							jakarta.security.auth.message.callback;resolution:=optional,
 							jakarta.security.auth.message.config;resolution:=optional,
 							jakarta.security.auth.message.module;resolution:=optional,
-							jakarta.security.auth.spi;resolution:=optional,
-							jakarta.security.auth.x500;resolution:=optional,
 
+							jakarta.transaction;resolution:=optional,
+
+							javax.security.auth;resolution:=optional,
+							javax.security.auth.callback;resolution:=optional,
+							javax.security.auth.login;resolution:=optional,
+							javax.security.auth.spi;resolution:=optional,
+							javax.security.auth.x500;resolution:=optional,
 							javax.sql;resolution:=optional,
 							javax.rmi.ssl;resolution:=optional,
 							javax.transaction;resolution:=optional,
@@ -135,7 +138,7 @@
 							org.w3c.dom,
 							org.xml.sax,
 							org.xml.sax.helpers,
-							sun.misc;resolution:=optional
+							sun.misc;resolution:=optional,*
 						</Import-Package>
 						<Export-Package>
 							org.eclipse.jetty.alpn;version="${dependency.org.eclipse.jetty.alpn.osgi}",

@@ -74,6 +74,7 @@
 							org.xnio;version="[3.8,4)",
 							org.xnio.channels;version="[3.8,4)",
 							io.undertow;version="[2.3,3)",
+							io.undertow.attribute;version="[2.3,3)",
 							io.undertow.connector;version="[2.3,3)",
 							io.undertow.io;version="[2.3,3)",
 							io.undertow.predicate;version="[2.3,3)",
@@ -90,6 +91,7 @@
 							io.undertow.server.handlers.resource;version="[2.3,3)",
 							io.undertow.server.protocol.http;version="[2.3,3)",
 							io.undertow.server.protocol.http2;version="[2.3,3)",
+							io.undertow.server.protocol.proxy;version="[2.3,3)",
 							io.undertow.server.session;version="[2.3,3)",
 							io.undertow.servlet;version="[2.3,3)",
 							io.undertow.servlet.api;version="[2.3,3)",
@@ -100,14 +102,18 @@
 							io.undertow.util;version="[2.3,3)",
 
 							<!-- other -->
+							javax.management,
 							javax.net.ssl,
 							javax.security.auth,
 							javax.security.auth.callback,
 							javax.security.auth.login,
+							javax.security.auth.x500,
 							javax.xml.namespace,
 							javax.xml.parsers,
+							javax.xml.stream,
 							org.xml.sax,
-							org.xml.sax.helpers
+							org.xml.sax.helpers,
+							sun.misc;resolution:=optional
 						</Import-Package>
 						<Provide-Capability>
 							osgi.service;effective:=active;objectClass:List&lt;String&gt;="org.ops4j.pax.web.service.spi.ServerControllerFactory"
@@ -120,10 +126,15 @@
 							org.jboss.threads,
 							org.jboss.threads.management,
 							org.wildfly.client.config,
+							org.wildfly.client.config._private,
 							org.wildfly.common,
+							org.wildfly.common._private,
 							org.wildfly.common.context,
 							org.wildfly.common.cpu,
+							org.wildfly.common.expression,
 							org.wildfly.common.function,
+							org.wildfly.common.lock,
+							org.wildfly.common.math,
 							org.wildfly.common.net,
 							org.wildfly.common.ref
 						</Export-Package>

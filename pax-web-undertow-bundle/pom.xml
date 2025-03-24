@@ -89,6 +89,7 @@
 							org.ops4j.pax.web.service.spi.model.elements;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.service.spi.model.events;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.service.spi.model.views;version="${pax-web.osgi.version}",
+							org.ops4j.pax.web.service.spi.model.info;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.service.spi.util;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.service.spi.servlet;version="${pax-web.osgi.version}",
 							org.ops4j.pax.web.service.spi.task;version="${pax-web.osgi.version}",
@@ -111,6 +112,7 @@
 							javax.security.auth.callback;resolution:=optional,
 							javax.security.auth.kerberos;resolution:=optional,
 							javax.security.auth.login;resolution:=optional,
+							javax.security.auth.x500;resolution:=optional,
 							javax.security.cert;resolution:=optional,
 							javax.security.sasl;resolution:=optional,
 
@@ -118,6 +120,7 @@
 							javax.xml.namespace,
 							javax.xml.parsers,
 							javax.xml.stream,
+							javax.xml.transform,
 
 							org.ietf.jgss;resolution:=optional,
 							org.w3c.dom,
@@ -130,7 +133,7 @@
 							org.graalvm.nativeimage.c;resolution:=optional,
 							org.graalvm.nativeimage.c.function;resolution:=optional,
 							org.graalvm.nativeimage.c.type;resolution:=optional,
-							org.graalvm.word;resolution:=optional
+							org.graalvm.word;resolution:=optional,*
 						</Import-Package>
 						<Export-Package>
 							io.undertow.*;version="${dependency.io.undertow}",

@@ -94,7 +94,6 @@
 							<!-- tomcat-util -->
 							org.apache.tomcat.util;version="${dependency.org.apache.tomcat}",
 							org.apache.tomcat.util.buf;version="${dependency.org.apache.tomcat}",
-							org.apache.tomcat.util.codec.binary;version="${dependency.org.apache.tomcat}",
 							org.apache.tomcat.util.collections;version="${dependency.org.apache.tomcat}",
 							org.apache.tomcat.util.compat;version="${dependency.org.apache.tomcat}",
 							org.apache.tomcat.util.file;version="${dependency.org.apache.tomcat}",
@@ -102,7 +101,6 @@
 							org.apache.tomcat.util.res;version="${dependency.org.apache.tomcat}",
 							org.apache.tomcat.util.security;version="${dependency.org.apache.tomcat}",
 							org.apache.tomcat.util.threads;version="${dependency.org.apache.tomcat}",
-							org.apache.tomcat.util.threads.res;version="${dependency.org.apache.tomcat}",
 
 							<!-- tomcat-util-scan -->
 							org.apache.tomcat.util.descriptor;version="${dependency.org.apache.tomcat}";-split-package:=merge-first,

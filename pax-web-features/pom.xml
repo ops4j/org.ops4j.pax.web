@@ -97,16 +97,15 @@
 								<feature>pax-web-specs</feature>
 								<feature>pax-web-core</feature>
 								<feature>pax-web-websockets</feature>
-<!--								<feature>pax-web-jetty</feature>-->
-<!--								<feature>pax-web-jetty-websockets</feature>-->
-<!--								<feature>pax-web-jetty-extras</feature>-->
-<!--								<feature>pax-web-jetty-http2</feature>-->
-<!--								<feature>pax-web-jetty-http2-extras</feature>-->
-<!--								<feature>pax-web-jetty-http2-jdk9</feature>-->
-<!--								<feature>pax-web-http-jetty</feature>-->
-<!--								<feature>pax-web-tomcat</feature>-->
-<!--								<feature>pax-web-tomcat-websockets</feature>-->
-<!--								<feature>pax-web-http-tomcat</feature>-->
+								<feature>pax-web-jetty</feature>
+								<feature>pax-web-jetty-websockets</feature>
+								<feature>pax-web-jetty-extras</feature>
+								<feature>pax-web-jetty-http2</feature>
+								<feature>pax-web-jetty-http2-extras</feature>
+								<feature>pax-web-http-jetty</feature>
+								<feature>pax-web-tomcat</feature>
+								<feature>pax-web-tomcat-websockets</feature>
+								<feature>pax-web-http-tomcat</feature>
 								<feature>pax-web-undertow</feature>
 								<feature>pax-web-undertow-websockets</feature>
 								<feature>pax-web-http-undertow</feature>
