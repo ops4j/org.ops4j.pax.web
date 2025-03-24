@@ -3108,15 +3108,14 @@
 
 		<module>pax-web-fragments</module>
 
-<!--		<module>pax-web-karaf</module>-->
-
-<!--		<module>pax-web-deployer</module>-->
+		<module>pax-web-karaf</module>
+		<module>pax-web-deployer</module>
 
 		<!-- Jetty 12 support -->
 		<module>pax-web-jetty</module>
  		<module>pax-web-jetty-bundle</module>
 
-		<!-- Tomcat 10 support -->
+		<!-- Tomcat 11 support -->
 		<module>pax-web-tomcat</module>
 		<module>pax-web-tomcat-websocket</module>
 		<module>pax-web-tomcat-bundle</module>
