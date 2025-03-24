@@ -3055,7 +3055,7 @@
 		<!-- All the integration tests (OSGi, non-OSGi, Karaf) -->
 		<module>pax-web-itest</module>
 
-<!--		<module>pax-web-manual</module>-->
+		<module>pax-web-manual</module>
 
     </modules>
 
