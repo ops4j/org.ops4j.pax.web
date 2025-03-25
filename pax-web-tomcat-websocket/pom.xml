@@ -54,7 +54,7 @@
 							jakarta.websocket.server;version="[2.1,3)",
 
 							org.apache.coyote.http11.upgrade,
-							org.apache.juli.logging;version="[10.0,11)",
+							org.apache.juli.logging;version="[9,12)",
 
 							<!-- pax-web-tomcat-common / tomcat-api -->
 							org.apache.tomcat;version="${dependency.org.apache.tomcat}",

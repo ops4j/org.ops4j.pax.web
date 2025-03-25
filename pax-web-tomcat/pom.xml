@@ -70,7 +70,7 @@
 
 							<!-- from pax-logging-api -->
 							org.slf4j;version="[2,3)",
-							org.apache.juli.logging,
+							org.apache.juli.logging;version="[9,12)",
 
 							<!-- pax-web-tomcat-common / tomcat-api -->
 							org.apache.tomcat;version="${dependency.org.apache.tomcat}",
