@@ -285,9 +285,9 @@
 
 		<dependency.org.ops4j.base>1.5.1</dependency.org.ops4j.base>
 		<dependency.org.ops4j.pax.exam>4.14.0</dependency.org.ops4j.pax.exam>
-		<dependency.org.ops4j.pax.logging>2.2.9-SNAPSHOT</dependency.org.ops4j.pax.logging>
+		<dependency.org.ops4j.pax.logging>2.3.0</dependency.org.ops4j.pax.logging>
 		<dependency.org.ops4j.pax.swissbox>1.8.5</dependency.org.ops4j.pax.swissbox>
-		<dependency.org.ops4j.pax.url>3.0.0-SNAPSHOT</dependency.org.ops4j.pax.url>
+		<dependency.org.ops4j.pax.url>3.0.0</dependency.org.ops4j.pax.url>
 
 		<dependency.org.osgi.annotation>8.1.0</dependency.org.osgi.annotation>
 		<dependency.org.osgi.core>8.0.0</dependency.org.osgi.core>
