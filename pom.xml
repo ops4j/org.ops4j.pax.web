@@ -159,7 +159,7 @@
 		<plugin.mycila.license-maven-plugin>4.6</plugin.mycila.license-maven-plugin>
 		<plugin.servicemix.depends-maven-plugin>1.5.0</plugin.servicemix.depends-maven-plugin>
 		<plugin.sonatype.nexus-staging-maven-plugin>1.7.0</plugin.sonatype.nexus-staging-maven-plugin>
-		<plugin.bnd.bnd-maven-plugin>6.4.0</plugin.bnd.bnd-maven-plugin>
+		<plugin.bnd.bnd-maven-plugin>7.1.0</plugin.bnd.bnd-maven-plugin>
 
 		<!-- versions of Maven dependencies (sorted and groupped in arbitrary way)  -->
 
@@ -277,11 +277,12 @@
 		<dependency.org.mockito>5.16.1</dependency.org.mockito>
 		<dependency.org.mortbay.jasper.apache-jsp>10.1.31</dependency.org.mortbay.jasper.apache-jsp>
 		<dependency.org.mortbay.jetty.alpn>8.1.13.v20181017</dependency.org.mortbay.jetty.alpn>
+		<dependency.org.opentest4j>1.3.0</dependency.org.opentest4j>
 
 		<dependency.org.ops4j.base>1.5.1</dependency.org.ops4j.base>
 		<dependency.org.ops4j.pax.exam>4.14.0</dependency.org.ops4j.pax.exam>
 		<dependency.org.ops4j.pax.logging>2.3.0</dependency.org.ops4j.pax.logging>
-		<dependency.org.ops4j.pax.swissbox>1.8.5</dependency.org.ops4j.pax.swissbox>
+		<dependency.org.ops4j.pax.swissbox>1.9.0</dependency.org.ops4j.pax.swissbox>
 		<dependency.org.ops4j.pax.url>3.0.0</dependency.org.ops4j.pax.url>
 
 		<dependency.org.osgi.annotation>8.1.0</dependency.org.osgi.annotation>
@@ -1396,11 +1397,6 @@
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.swissbox</groupId>
-				<artifactId>pax-swissbox-optional-jcl</artifactId>
-				<version>${dependency.org.ops4j.pax.swissbox}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.ops4j.pax.swissbox</groupId>
 				<artifactId>pax-swissbox-property</artifactId>
 				<version>${dependency.org.ops4j.pax.swissbox}</version>
 			</dependency>
@@ -1424,6 +1420,10 @@
 					<exclusion>
 						<groupId>biz.aQute.bnd</groupId>
 						<artifactId>biz.aQute.bndlib</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.ops4j.pax.swissbox</groupId>
+						<artifactId>pax-swissbox-optional-jcl</artifactId>
 					</exclusion>
 				</exclusions>
 			</dependency>
@@ -1586,11 +1586,6 @@
 				<artifactId>org.osgi.service.event</artifactId>
 				<version>${dependency.org.osgi.service.event}</version>
 				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.osgi</groupId>
-				<artifactId>org.osgi.service.jakartars</artifactId>
-				<version>${dependency.org.osgi.service.jaxrs}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.osgi</groupId>
@@ -2783,6 +2778,12 @@
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-core</artifactId>
 				<version>${dependency.org.mockito}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.opentest4j</groupId>
+				<artifactId>opentest4j</artifactId>
+				<version>${dependency.org.opentest4j}</version>
 			</dependency>
 
 <!--			<dependency>-->
