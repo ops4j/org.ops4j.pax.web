@@ -195,11 +195,6 @@
 			<groupId>org.apache.myfaces.core</groupId>
 			<artifactId>myfaces-impl</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.primefaces</groupId>
-			<artifactId>primefaces</artifactId>
-			<classifier>jakarta</classifier>
-		</dependency>
 
 	</dependencies>
 

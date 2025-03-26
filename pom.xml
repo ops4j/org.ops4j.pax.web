@@ -191,11 +191,9 @@
 		<dependency.jakarta.enterprise.lang-model>4.1.0</dependency.jakarta.enterprise.lang-model>
 		<dependency.jakarta.inject-api>2.0.1</dependency.jakarta.inject-api>
 		<dependency.jakarta.interceptor-api>2.2.0</dependency.jakarta.interceptor-api>
-		<dependency.jakarta.persistence-api>3.2.0</dependency.jakarta.persistence-api>
 		<dependency.jakarta.servlet-api>6.1.0</dependency.jakarta.servlet-api>
 		<dependency.jakarta.servlet.jsp-api>3.1.1</dependency.jakarta.servlet.jsp-api>
 		<dependency.jakarta.servlet.jsp.jstl-api>3.0.2</dependency.jakarta.servlet.jsp.jstl-api>
-		<dependency.jakarta.transaction-api>2.0.1</dependency.jakarta.transaction-api>
 		<dependency.jakarta.validation-api>3.1.1</dependency.jakarta.validation-api>
 		<dependency.jakarta.websocket-api>2.2.0</dependency.jakarta.websocket-api>
 		<dependency.jakarta.ws.rs-api>3.1.0</dependency.jakarta.ws.rs-api>
@@ -236,9 +234,8 @@
 		<dependency.org.apache.httpcomponents.core5>5.3.3</dependency.org.apache.httpcomponents.core5>
 		<dependency.org.apache.karaf>4.4.7</dependency.org.apache.karaf>
 		<dependency.org.apache.logging.log4j>2.24.3</dependency.org.apache.logging.log4j>
-		<dependency.org.apache.myfaces>4.1.0</dependency.org.apache.myfaces>
-		<dependency.org.apache.myfaces.commons.facelets-examples20>1.0.2.1</dependency.org.apache.myfaces.commons.facelets-examples20>
-		<dependency.org.apache.myfaces.trinidad>2.2.1</dependency.org.apache.myfaces.trinidad>
+		<!-- JSF in general doesn't work because of CDI 4 support in OSGi. We only use it for SCI/initialization tests -->
+		<dependency.org.apache.myfaces>4.1.1</dependency.org.apache.myfaces>
 		<dependency.org.apache.servicemix.bundles.aopalliance>1.0_6</dependency.org.apache.servicemix.bundles.aopalliance>
 		<dependency.org.apache.servicemix.bundles.jasypt>1.9.3_1</dependency.org.apache.servicemix.bundles.jasypt>
 		<dependency.org.apache.servicemix.bundles.javax-inject>1_3</dependency.org.apache.servicemix.bundles.javax-inject>
@@ -263,17 +260,15 @@
 
 		<dependency.org.glassfish.hk2>3.1.1</dependency.org.glassfish.hk2>
 		<!-- yes - it's 1.0.3 required by Jersey 3.1.x -->
-		<dependency.org.glassfish.hk2.osgi-locator>1.0.3</dependency.org.glassfish.hk2.osgi-locator>
+		<dependency.org.glassfish.hk2.osgi-locator>1.0.4</dependency.org.glassfish.hk2.osgi-locator>
 		<dependency.org.glassfish.jersey>3.1.10</dependency.org.glassfish.jersey>
 		<dependency.org.glassfish.web.jsp.jstl>3.0.1</dependency.org.glassfish.web.jsp.jstl>
 
 		<dependency.org.javassist>3.30.2-GA</dependency.org.javassist>
 		<dependency.org.jasypt>1.9.3</dependency.org.jasypt>
-		<dependency.org.jboss.classfilewriter>1.3.1.Final</dependency.org.jboss.classfilewriter>
 		<dependency.org.jboss.logging>3.6.1.Final</dependency.org.jboss.logging>
 		<!-- 3.7.0+ requires Smallrye libraries -->
 		<dependency.org.jboss.threads>3.6.1.Final</dependency.org.jboss.threads>
-		<dependency.org.jboss.weld>5.1.5.Final</dependency.org.jboss.weld>
 		<dependency.org.jboss.xnio>3.8.16.Final</dependency.org.jboss.xnio>
 
 		<dependency.org.jline>3.21.0</dependency.org.jline>
@@ -292,7 +287,6 @@
 		<dependency.org.osgi.annotation>8.1.0</dependency.org.osgi.annotation>
 		<dependency.org.osgi.core>8.0.0</dependency.org.osgi.core>
 		<dependency.org.osgi.namespace.extender>1.0.1</dependency.org.osgi.namespace.extender>
-		<dependency.org.osgi.service.cdi>1.0.1</dependency.org.osgi.service.cdi>
 		<dependency.org.osgi.service.cm>1.6.1</dependency.org.osgi.service.cm>
 		<dependency.org.osgi.service.component>1.5.1</dependency.org.osgi.service.component>
 		<dependency.org.osgi.service.component.annotations>1.5.1</dependency.org.osgi.service.component.annotations>
@@ -882,33 +876,6 @@
 				<artifactId>pax-web-compatibility-websocket</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-			<dependency>
-				<groupId>org.ops4j.pax.web</groupId>
-				<artifactId>pax-web-fragment-myfaces-inject</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.ops4j.pax.web</groupId>
-				<artifactId>pax-web-fragment-myfaces-spifly</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>org.ops4j.pax.web</groupId>
-				<artifactId>pax-web-resources-api</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.ops4j.pax.web</groupId>
-				<artifactId>pax-web-resources-extender</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>org.ops4j.pax.web</groupId>
-				<artifactId>pax-web-resources-jsf</artifactId>
-				<version>${project.version}</version>
-			</dependency>
 
 			<!-- pax-web config samples -->
 
@@ -1252,37 +1219,9 @@
 
 			<dependency>
 				<groupId>org.ops4j.pax.web.samples</groupId>
-				<artifactId>war-jsf23-wired</artifactId>
-				<version>${project.version}</version>
-				<type>war</type>
-			</dependency>
-			<dependency>
-				<groupId>org.ops4j.pax.web.samples</groupId>
-				<artifactId>war-jsf23-embedded</artifactId>
-				<version>${project.version}</version>
-				<type>war</type>
-			</dependency>
-			<dependency>
-				<groupId>org.ops4j.pax.web.samples</groupId>
 				<artifactId>war-dispatcher</artifactId>
 				<version>${project.version}</version>
 				<type>war</type>
-			</dependency>
-
-			<dependency>
-				<groupId>org.ops4j.pax.web.samples</groupId>
-				<artifactId>jsf-resourcehandler-myfaces</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.ops4j.pax.web.samples</groupId>
-				<artifactId>jsf-resourcehandler-resourcebundle</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.ops4j.pax.web.samples</groupId>
-				<artifactId>jsf-resourcehandler-resourcebundle-override</artifactId>
-				<version>${project.version}</version>
 			</dependency>
 
 			<!-- pax-web httpservice/webcontainer samples -->
@@ -1627,11 +1566,6 @@
 
 			<dependency>
 				<groupId>org.osgi</groupId>
-				<artifactId>org.osgi.service.cdi</artifactId>
-				<version>${dependency.org.osgi.service.cdi}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.osgi</groupId>
 				<artifactId>org.osgi.service.cm</artifactId>
 				<version>${dependency.org.osgi.service.cm}</version>
 				<scope>provided</scope>
@@ -1919,35 +1853,6 @@
 			</dependency>
 
 			<dependency>
-				<groupId>org.apache.aries.component-dsl</groupId>
-				<artifactId>org.apache.aries.component-dsl.component-dsl</artifactId>
-				<version>${dependency.org.apache.aries.component-dsl}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.aries.jax.rs</groupId>
-				<artifactId>org.apache.aries.jax.rs.whiteboard</artifactId>
-				<version>${dependency.org.apache.aries.jax.rs}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.apache.geronimo.specs</groupId>
-						<artifactId>geronimo-annotation_1.3_spec</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.apache.geronimo.specs</groupId>
-						<artifactId>geronimo-jaxrs_2.1_spec</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>ch.qos.logback</groupId>
-						<artifactId>logback-classic</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>com.sun.activation</groupId>
-						<artifactId>jakarta.activation</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-
-			<dependency>
 				<groupId>org.apache.aries.spifly</groupId>
 				<artifactId>org.apache.aries.spifly.dynamic.bundle</artifactId>
 				<version>${dependency.org.apache.aries.spifly}</version>
@@ -2000,11 +1905,6 @@
 				<groupId>jakarta.servlet.jsp.jstl</groupId>
 				<artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
 				<version>${dependency.jakarta.servlet.jsp.jstl-api}</version>
-			</dependency>
-			<dependency>
-				<groupId>jakarta.transaction</groupId>
-				<artifactId>jakarta.transaction-api</artifactId>
-				<version>${dependency.jakarta.transaction-api}</version>
 			</dependency>
 			<dependency>
 				<groupId>jakarta.ws.rs</groupId>
@@ -2097,12 +1997,6 @@
 				<groupId>jakarta.interceptor</groupId>
 				<artifactId>jakarta.interceptor-api</artifactId>
 				<version>${dependency.jakarta.interceptor-api}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>jakarta.persistence</groupId>
-				<artifactId>jakarta.persistence-api</artifactId>
-				<version>${dependency.jakarta.persistence-api}</version>
 			</dependency>
 
 			<!-- SMX -->
@@ -2602,30 +2496,6 @@
 				<artifactId>myfaces-impl</artifactId>
 				<version>${dependency.org.apache.myfaces}</version>
 			</dependency>
-			<dependency>
-				<groupId>org.apache.myfaces.trinidad</groupId>
-				<artifactId>trinidad-impl</artifactId>
-				<version>${dependency.org.apache.myfaces.trinidad}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.myfaces.trinidad</groupId>
-				<artifactId>trinidad-demo</artifactId>
-				<version>${dependency.org.apache.myfaces.trinidad}</version>
-				<type>war</type>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.myfaces.commons</groupId>
-				<artifactId>myfaces-commons-facelets-examples20</artifactId>
-				<version>${dependency.org.apache.myfaces.commons.facelets-examples20}</version>
-				<type>war</type>
-			</dependency>
-
-			<dependency>
-				<groupId>org.primefaces</groupId>
-				<artifactId>primefaces</artifactId>
-				<version>${dependency.org.primefaces}</version>
-				<classifier>jakarta</classifier>
-			</dependency>
 
 			<dependency>
 				<groupId>org.eclipse.jdt</groupId>
@@ -2653,40 +2523,6 @@
 				<groupId>org.bouncycastle</groupId>
 				<artifactId>bcutil-jdk18on</artifactId>
 				<version>${dependency.org.bouncycastle}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>org.jboss.weld</groupId>
-				<artifactId>weld-osgi-bundle</artifactId>
-				<version>${dependency.org.jboss.weld}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.jboss.spec.javax.annotation</groupId>
-						<artifactId>jboss-annotations-api_1.3_spec</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.jboss.spec.javax.el</groupId>
-						<artifactId>jboss-el-api_3.0_spec</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.jboss.spec.javax.interceptor</groupId>
-						<artifactId>jboss-interceptors-api_1.2_spec</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.jboss.spec.javax.ejb</groupId>
-						<artifactId>jboss-ejb-api_3.2_spec</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.jboss.spec.javax.transaction</groupId>
-						<artifactId>jboss-transaction-api_1.3_spec</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-
-			<dependency>
-				<groupId>org.jboss.classfilewriter</groupId>
-				<artifactId>jboss-classfilewriter</artifactId>
-				<version>${dependency.org.jboss.classfilewriter}</version>
 			</dependency>
 
 			<dependency>

@@ -75,15 +75,6 @@
 			<scope>runtime</scope>
 		</dependency>
 
-		<!-- OSGi -->
-
-		<dependency>
-			<!-- Can't be added to maven-failsafe-plugin classpath -->
-			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.service.cdi</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-
 		<!-- JakartaEE -->
 
 		<dependency>
@@ -114,13 +105,6 @@
 			<groupId>jakarta.websocket</groupId>
 			<artifactId>jakarta.websocket-client-api</artifactId>
 			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<!-- Can't be added to maven-failsafe-plugin classpath -->
-			<groupId>org.apache.myfaces.core</groupId>
-			<artifactId>myfaces-api</artifactId>
-			<scope>runtime</scope>
 		</dependency>
 
 		<!-- Logging -->

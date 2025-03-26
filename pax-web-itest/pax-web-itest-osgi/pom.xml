@@ -322,7 +322,6 @@
 		<dependency>
 			<groupId>jakarta.inject</groupId>
 			<artifactId>jakarta.inject-api</artifactId>
-			<version>${dependency.jakarta.inject-api}</version>
 		</dependency>
 		<dependency>
 			<groupId>jakarta.servlet</groupId>

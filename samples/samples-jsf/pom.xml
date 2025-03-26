@@ -33,6 +33,14 @@
 
 	<name>OPS4J Pax Web JSF Samples</name>
 
+	<description>
+		Since Pax Web 10, we no longer support JSF (because of OSGi/JakartaEE discrepancy).
+		However these samples/libraries are used to show how complex OSGi WAB deployments work with Servlet API
+		specificaiton (jakarta.servlet.ServletContainerInitializer, web fragments, /META-INF/resources, ...).
+		While jakarta.faces.webapp.FacesServlet initializes correctly, TLDs are loaded, we simply can't run
+		actual JSF applications, because JSF 4.x simply needs CDI container for beans...
+	</description>
+
 	<modules>
 		<module>jsf-primefaces-jar</module>
 		<module>jsf-primefaces-commons1</module>

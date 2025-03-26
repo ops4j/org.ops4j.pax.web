@@ -85,15 +85,6 @@
 			<scope>runtime</scope>
 		</dependency>
 
-		<!-- OSGi -->
-
-		<dependency>
-			<!-- Can't be added to maven-failsafe-plugin classpath -->
-			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.service.cdi</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-
 		<!-- JakartaEE -->
 
 		<dependency>
