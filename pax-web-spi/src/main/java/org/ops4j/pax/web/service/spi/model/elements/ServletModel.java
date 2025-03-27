@@ -326,9 +326,18 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 			}
 		}
 
+		boolean dontIgnore = this.name != null;
+
 		if (this.alias == null && (this.urlPatterns == null || this.urlPatterns.length == 0)) {
-			dtoFailureCode = DTOConstants.FAILURE_REASON_VALIDATION_FAILED;
-			throw new IllegalArgumentException("Neither alias nor URL patterns array is specified");
+			// https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html#org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN
+			// The specified patterns are used to determine whether a request should be mapped to the servlet.
+			// Servlet services without this service property, HTTP_WHITEBOARD_SERVLET_ERROR_PAGE or
+			// HTTP_WHITEBOARD_SERVLET_NAME are ignored.
+			this.urlPatterns = new String[0];
+//			dtoFailureCode = DTOConstants.FAILURE_REASON_VALIDATION_FAILED;
+//			throw new IllegalArgumentException("Neither alias nor URL patterns array is specified");
+		} else {
+			dontIgnore = true;
 		}
 		if (this.alias != null && this.urlPatterns != null && this.urlPatterns.length > 0 && !aliasCopiedToPatterns) {
 			dtoFailureCode = DTOConstants.FAILURE_REASON_VALIDATION_FAILED;
@@ -387,6 +396,7 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 		}
 
 		if (errorDeclarations != null && errorDeclarations.length > 0) {
+			dontIgnore = true;
 			// a tricky way to validate such declaration - embed full ErrorPageModel
 			ErrorPageModel epm = new ErrorPageModel(errorDeclarations);
 			epm.setRegisteringBundle(getRegisteringBundle());
@@ -435,6 +445,11 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 			// see org.apache.jasper.servlet.JspServlet.init() and
 			// org.apache.catalina.startup.ContextConfig.convertJsp()
 			initParams.put("jspFile", jspFile);
+		}
+
+		if (!dontIgnore) {
+			ignored = true;
+			throw new IllegalArgumentException("Servlet doesn't have any of: name, URL patterns, error codes");
 		}
 
 		dtoFailureCode = -1;
@@ -698,6 +713,10 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 
 	public boolean isServletSecurityPresent() {
 		return servletSecurityPresent;
+	}
+
+	public boolean isIgnored() {
+		return ignored;
 	}
 
 	/**
