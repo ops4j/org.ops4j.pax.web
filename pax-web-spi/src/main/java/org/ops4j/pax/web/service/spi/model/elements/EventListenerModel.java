@@ -143,6 +143,9 @@ public class EventListenerModel extends ElementModel<EventListener, EventListene
 
 	@Override
 	public Boolean performValidation() {
+		if (dtoFailureCode != -1) {
+			throw new IllegalArgumentException("Event Listener Model is registered with invalid properties");
+		}
 		int sources = (eventListener != null ? 1 : 0);
 		sources += (getElementReference() != null ? 1 : 0);
 		sources += (getElementSupplier() != null ? 1 : 0);

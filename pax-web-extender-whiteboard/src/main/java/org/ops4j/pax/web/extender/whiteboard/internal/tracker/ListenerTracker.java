@@ -38,6 +38,7 @@ import org.ops4j.pax.web.service.spi.model.events.EventListenerEventData;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.servlet.runtime.dto.DTOConstants;
 import org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
@@ -88,13 +89,14 @@ public class ListenerTracker extends AbstractElementTracker<EventListener, Event
 	@Override
 	protected EventListenerModel createElementModel(ServiceReference<EventListener> serviceReference, Integer rank, Long serviceId) {
 		Boolean isListener = Utils.getBooleanProperty(serviceReference, HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER);
+		Integer dtoFailureCode = null;
 		if (isListener == null || !isListener) {
 			// 140.7 Registering Listeners:
 			// Events are sent to listeners registered in the Service Registry with the osgi.http.whiteboard.listener
 			// service property set to true, independent of case.
 			LOG.debug("Listener service reference doesn't have a property {}=true",
 					HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER);
-			return null;
+			dtoFailureCode = DTOConstants.FAILURE_REASON_VALIDATION_FAILED;
 		}
 
 		EventListenerModel model = new EventListenerModel();
@@ -102,6 +104,9 @@ public class ListenerTracker extends AbstractElementTracker<EventListener, Event
 		model.setElementReference(serviceReference);
 		model.setServiceRank(rank);
 		model.setServiceId(serviceId);
+		if (dtoFailureCode != null) {
+			model.setDtoFailureCode(dtoFailureCode);
+		}
 		return model;
 	}
 
