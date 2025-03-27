@@ -26,6 +26,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.ops4j.pax.web.extender.whiteboard.internal.tracker.AbstractElementTracker;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ElementModel;
@@ -245,7 +246,7 @@ public class WhiteboardExtenderContext implements WebContainerListener, WebConte
 		}
 		lock.lock();
 		try {
-			if (selector == null) {
+			if (selector == null || selector == AbstractElementTracker.DEFAULT_CONTEXT_SELECTOR_FILTER) {
 				// easy - highest ranked "default" context model
 				OsgiContextModel defaultModel
 						= osgiContexts.get(HttpWhiteboardConstants.HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME).iterator().next();

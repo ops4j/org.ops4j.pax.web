@@ -168,6 +168,19 @@ public interface PaxWebConfig {
 	String BUNDLE_CONTEXT_PROPERTY_WHITEBOARD_EXTENDER_SYNCHRONOUS = "org.ops4j.pax.web.extender.whiteboard.synchronous";
 
 	/**
+	 * <p>Context property which can be used to change <em>deferred</em> character of some operations - like updating
+	 * configuration from ConfigurationAdmin or starting Web Contexts. Defaults to {@code true}.</p>
+	 *
+	 * <p>Pax Web 8 emphasized deferred method - CM configuration was passed to a configuration thread without
+	 * synchronization (awaiting results) and target servlet contexts (for Jetty, Tomcat, Undertow) were started
+	 * only after activation of first <em>active</em> Web Component (like servlet). Assuming this feature, Pax Web
+	 * tests did some synchronization in tests (registering web listeners), but for TCK compatibility we have to be
+	 * more harsh and we'll wait for configuration and start servlet contexts immediately by setting this value to
+	 * {@code false}.</p>
+	 */
+	String BUNDLE_CONTEXT_PROPERTY_CONFIGURATION_DEFERRED = "org.ops4j.pax.web.configuration.deferred";
+
+	/**
 	 * <p>Defines the type of TCCL that should be set for service methods (like {@link jakarta.servlet.Servlet#service}).
 	 * It can take two values:<ul>
 	 *     <li>{@code servlet} (the default, assumed value) - {@link ServletContext#getClassLoader()} returns

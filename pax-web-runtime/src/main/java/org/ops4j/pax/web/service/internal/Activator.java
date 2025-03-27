@@ -26,10 +26,12 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.ops4j.pax.swissbox.property.BundleContextPropertyResolver;
@@ -172,6 +174,8 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 	private ScheduledExecutorService runtimeExecutor;
 	private long registrationThreadId;
 
+	private boolean deferredConfiguration = true;
+
 	@Override
 	public void start(final BundleContext context) throws Exception {
 		LOG.debug("Starting Pax Web Runtime");
@@ -183,6 +187,9 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 
 		serverListenerTracker = new ServiceTracker<>(bundleContext, ServerListener.class, new ServerListenerCustomizer());
 		serverListenerTracker.open();
+
+		String flag = bundleContext.getProperty(PaxWebConfig.BUNDLE_CONTEXT_PROPERTY_CONFIGURATION_DEFERRED);
+		deferredConfiguration = flag == null || Boolean.parseBoolean(flag);
 
 		if (Utils.isConfigurationAdminAvailable(this.getClass())) {
 			// ManagedService for org.ops4j.pax.web PID monitoring, so configuration won't happen yet
@@ -312,7 +319,7 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 	public void updateConfiguration(final Dictionary<String, ?> configuration) {
 		LOG.info("Scheduling Pax Web reconfiguration because configuration has changed");
 		// change configuration using new properties (possibly from configadmin) and current ServerControllerFactory
-		runtimeExecutor.submit(() -> {
+		Future<?> future = runtimeExecutor.submit(() -> {
 			String name = Thread.currentThread().getName();
 			try {
 				Thread.currentThread().setName(name + " (change config)");
@@ -321,6 +328,17 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 				Thread.currentThread().setName(name);
 			}
 		});
+		if (!deferredConfiguration) {
+			try {
+				future.get(10, TimeUnit.SECONDS);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				throw new RuntimeException(e);
+			} catch (ExecutionException e) {
+				throw new RuntimeException(e);
+			} catch (TimeoutException ignored) {
+			}
+		}
 	}
 
 	/**
@@ -351,7 +369,7 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 		});
 
 		// Make sure that when destroying the configuration (factory == null), we do things synchronously
-		if (controllerFactory == null) {
+		if (controllerFactory == null || !deferredConfiguration) {
 			try {
 				future.get(20, TimeUnit.SECONDS);
 			} catch (Exception e) {

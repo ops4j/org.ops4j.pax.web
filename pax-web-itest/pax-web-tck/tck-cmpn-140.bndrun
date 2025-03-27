@@ -63,7 +63,8 @@
 	org.osgi.test.testcase.timeout='10000', \
 	org.ops4j.pax.logging.DefaultServiceLog.level='INFO', \
 	org.osgi.test.testcase.scaling='1', \
-	org.ops4j.pax.web.extender.whiteboard.synchronous='true'
+	org.ops4j.pax.web.extender.whiteboard.synchronous='true', \
+	org.ops4j.pax.web.configuration.deferred='false'
 
 -runvm="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"
 

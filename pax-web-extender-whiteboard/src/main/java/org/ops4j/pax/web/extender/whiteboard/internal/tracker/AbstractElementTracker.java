@@ -65,6 +65,12 @@ public abstract class AbstractElementTracker<S, R, D extends WebElementEventData
 
 	private static final String LEGACY_MAPPING_PACKAGE = ContextRelated.class.getPackage().getName();
 
+	// When elements are registered without selector we'll use default one
+	public static final String DEFAULT_CONTEXT_SELECTOR = String.format("(%s=%s)", HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME,
+			HttpWhiteboardConstants.HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME);
+
+	public static Filter DEFAULT_CONTEXT_SELECTOR_FILTER = null;
+
 	protected final Logger log = LoggerFactory.getLogger(getClass());
 
 	protected final BundleContext bundleContext;
@@ -81,6 +87,12 @@ public abstract class AbstractElementTracker<S, R, D extends WebElementEventData
 		this.bundleContext = bundleContext;
 		String flag = bundleContext.getProperty(PaxWebConfig.BUNDLE_CONTEXT_PROPERTY_WHITEBOARD_EXTENDER_SYNCHRONOUS);
 		whiteboardSynchronous = Boolean.parseBoolean(flag);
+
+		try {
+			DEFAULT_CONTEXT_SELECTOR_FILTER = bundleContext.createFilter(DEFAULT_CONTEXT_SELECTOR);
+		} catch (InvalidSyntaxException e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
 	}
 
 	/**
@@ -189,7 +201,9 @@ public abstract class AbstractElementTracker<S, R, D extends WebElementEventData
 		// turn a ServiceReference into ElementModel<R> that can be passed to HttpService/WebContainer
 		// and contains almost _everything_ needed to process it later (for example after WebContainer becomes available)
 		T webElement = createElementModel(serviceReference, rank, serviceId);
-		webElement.setAsynchronusRegistration(!whiteboardSynchronous);
+		if (webElement != null) {
+			webElement.setAsynchronusRegistration(!whiteboardSynchronous);
+		}
 
 		return addingService(serviceReference, webElement);
 	}
@@ -243,7 +257,9 @@ public abstract class AbstractElementTracker<S, R, D extends WebElementEventData
 
 		Filter contextFilter;
 		try {
-			contextFilter = bundleContext.createFilter(selector);
+			//noinspection StringEquality
+			contextFilter = selector == DEFAULT_CONTEXT_SELECTOR
+					? DEFAULT_CONTEXT_SELECTOR_FILTER : bundleContext.createFilter(selector);
 		} catch (InvalidSyntaxException e) {
 			log.error("Can't register web element from reference {}, skipping registration."
 					+ " Bad context selector: {}", serviceReference, selector, e);
@@ -373,8 +389,7 @@ public abstract class AbstractElementTracker<S, R, D extends WebElementEventData
 		// org.ops4j.pax.web.service.whiteboard package, because those classes (related to elements, not contexts)
 		// extend org.ops4j.pax.web.service.whiteboard.ContextRelated which specify context ref(s) directly
 		if (!legacyMapping && selector == null) {
-			selector = String.format("(%s=%s)", HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME,
-					HttpWhiteboardConstants.HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME);
+			selector = DEFAULT_CONTEXT_SELECTOR;
 		}
 
 		return selector;
