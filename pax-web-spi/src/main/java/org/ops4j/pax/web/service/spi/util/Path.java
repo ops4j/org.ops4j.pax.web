@@ -121,7 +121,7 @@ public class Path {
 	 */
 	public static String normalizePattern(final String pattern) {
 		if (pattern == null || "".equals(pattern.trim())) {
-			return "/";
+			return "";
 		}
 		if (!pattern.startsWith("/") && !pattern.startsWith("*")) {
 			return "/" + pattern;
