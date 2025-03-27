@@ -150,6 +150,7 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 	 * {@link ErrorPageModel} - but only if it's valid.
 	 */
 	private ErrorPageModel errorPageModel;
+	private boolean errorPagesOnly;
 
 	/**
 	 * Flag used for models registered using {@link ServletContext#addServlet}
@@ -171,6 +172,9 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 	 * in the target context.
 	 */
 	private boolean servletSecurityPresent = false;
+
+	/** Failed validation because of empty mapping should be ignored according to 140.16.2.32 */
+	private boolean ignored;
 
 	/**
 	 * Constructor used for servlet unregistration
@@ -677,6 +681,7 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 		this.errorDeclarations = errorDeclarations;
 		if (errorDeclarations != null && (urlPatterns == null || urlPatterns.length == 0) && alias == null) {
 			urlPatterns = new String[] { generateRandomErrorPage() };
+			errorPagesOnly = true;
 			if (Servlet.class.getName().equals(name)) {
 				name = urlPatterns[0];
 			}
@@ -685,6 +690,10 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 
 	public ErrorPageModel getErrorPageModel() {
 		return errorPageModel;
+	}
+
+	public boolean isErrorPagesOnly() {
+		return errorPagesOnly;
 	}
 
 	public void setDynamic(boolean dynamic) {

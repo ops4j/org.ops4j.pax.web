@@ -3221,7 +3221,9 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 					if (sm.isResourceServlet()) {
 						scResources.get(scDTOs.get(ocm)).add(sm.toResourceDTO());
 					} else {
-						scServlets.get(scDTOs.get(ocm)).add(sm.toServletDTO());
+						if (!sm.isErrorPagesOnly()) {
+							scServlets.get(scDTOs.get(ocm)).add(sm.toServletDTO());
+						}
 						if (sm.getErrorPageModel() != null) {
 							scErrorPages.get(scDTOs.get(ocm)).add(sm.getErrorPageModel().toDTO(sm));
 						}
