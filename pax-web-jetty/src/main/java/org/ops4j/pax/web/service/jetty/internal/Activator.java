@@ -104,7 +104,11 @@ public class Activator implements BundleActivator {
 		@Override
 		public Handler addingService(ServiceReference<Handler> reference) {
 			Handler handler = bundleContext.getService(reference);
-			Integer ranking = (Integer) reference.getProperty(Constants.SERVICE_RANKING);
+			Integer ranking = 0;
+			Object rankObject = reference.getProperty(Constants.SERVICE_RANKING);
+			if (rankObject instanceof Integer) {
+				ranking = (Integer) rankObject;
+			}
 
 			LOG.debug("Registered Jetty Handler: {}", handler);
 
@@ -162,6 +166,10 @@ public class Activator implements BundleActivator {
 		public Customizer addingService(ServiceReference<Customizer> reference) {
 			Customizer customizer = bundleContext.getService(reference);
 			Integer ranking = (Integer) reference.getProperty(Constants.SERVICE_RANKING);
+			Object rankObject = reference.getProperty(Constants.SERVICE_RANKING);
+			if (rankObject instanceof Integer) {
+				ranking = (Integer) rankObject;
+			}
 
 			LOG.debug("Registered Jetty Customizer: {}", customizer);
 

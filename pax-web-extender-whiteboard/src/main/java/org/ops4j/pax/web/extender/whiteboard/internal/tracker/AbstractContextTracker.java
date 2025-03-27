@@ -113,9 +113,10 @@ public abstract class AbstractContextTracker<S> implements ServiceTrackerCustomi
 		// now we're doing the same, but at org.ops4j.pax.web.service.spi.model.OsgiContextModel.resolveHttpContext()
 		// stage. Returned WebContainerContext has proper implementation of isShared() method
 
-		Integer rank = (Integer) serviceReference.getProperty(Constants.SERVICE_RANKING);
-		if (rank == null) {
-			rank = 0;
+		Integer rank = 0;
+		Object rankObject = serviceReference.getProperty(Constants.SERVICE_RANKING);
+		if (rankObject instanceof Integer) {
+			rank = (Integer) rankObject;
 		}
 		Long serviceId = (Long) serviceReference.getProperty(Constants.SERVICE_ID);
 		if (serviceId == null) {
@@ -182,9 +183,10 @@ public abstract class AbstractContextTracker<S> implements ServiceTrackerCustomi
 		removedService(reference, model);
 
 		// no service ID change, but some other properties actually MAY change
-		Integer rank = (Integer) reference.getProperty(Constants.SERVICE_RANKING);
-		if (rank == null) {
-			rank = 0;
+		int rank = 0;
+		Object rankObject = reference.getProperty(Constants.SERVICE_RANKING);
+		if (rankObject instanceof Integer) {
+			rank = (Integer) rankObject;
 		}
 		model.setServiceRank(rank);
 

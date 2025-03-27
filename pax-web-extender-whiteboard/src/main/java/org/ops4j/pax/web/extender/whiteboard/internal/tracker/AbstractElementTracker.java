@@ -190,9 +190,10 @@ public abstract class AbstractElementTracker<S, R, D extends WebElementEventData
 
 					//		Boolean sharedHttpContext = ServicePropertiesUtils.extractSharedHttpContext(serviceReference);
 
-		Integer rank = (Integer) serviceReference.getProperty(Constants.SERVICE_RANKING);
-		if (rank == null) {
-			rank = 0;
+		Integer rank = 0;
+		Object rankObject = serviceReference.getProperty(Constants.SERVICE_RANKING);
+		if (rankObject instanceof Integer) {
+			rank = (Integer) rankObject;
 		}
 		Long serviceId = (Long) serviceReference.getProperty(Constants.SERVICE_ID);
 		if (serviceId == null) {
@@ -324,9 +325,10 @@ public abstract class AbstractElementTracker<S, R, D extends WebElementEventData
 		// we have to be sure that we'll use the same instance!
 
 		// the ranking may have changed
-		Integer rank = (Integer) reference.getProperty(Constants.SERVICE_RANKING);
-		if (rank == null) {
-			rank = 0;
+		int rank = 0;
+		Object rankObject = reference.getProperty(Constants.SERVICE_RANKING);
+		if (rankObject instanceof Integer) {
+			rank = (Integer) rankObject;
 		}
 		service.setServiceRank(rank);
 
