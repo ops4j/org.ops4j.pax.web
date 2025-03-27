@@ -137,7 +137,7 @@ public class BundleWhiteboardApplication {
 			});
 			webElements.keySet().forEach(element -> {
 				if (!webElements.get(element)) {
-					if (element.getContextModels().size() > 0) {
+					if (element.isValid() && element.getContextModels().size() > 0) {
 						element.register(view);
 						webElements.put(element, true);
 					}
@@ -232,7 +232,7 @@ public class BundleWhiteboardApplication {
 		}
 
 		// no need to register an element without associated contexts
-		if (webElement.getContextModels().size() > 0) {
+		if (webElement.isValid() && webElement.getContextModels().size() > 0) {
 			webElement.register(view);
 			webElements.put(webElement, true);
 		}
@@ -251,7 +251,7 @@ public class BundleWhiteboardApplication {
 			return;
 		}
 
-		if (webElement.getContextModels().size() > 0) {
+		if (webElement.isValid() && webElement.getContextModels().size() > 0) {
 			// otherwise, this element may have already been unregistered
 			webElement.unregister(view);
 		}

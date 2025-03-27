@@ -422,4 +422,11 @@ public abstract class ElementModel<T, D extends WebElementEventData>
 		return super.hashCode();
 	}
 
+	/**
+	 * Upon service modification we may need to alter existing instance
+	 * @param webElement
+	 */
+	public void alterWithNewModel(ElementModel<T, D> webElement) {
+	}
+
 }

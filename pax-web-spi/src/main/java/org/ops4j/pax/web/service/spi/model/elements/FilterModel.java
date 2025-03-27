@@ -31,6 +31,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.Filter;
@@ -43,6 +45,7 @@ import org.ops4j.pax.web.service.spi.util.Path;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.ServiceObjects;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.servlet.runtime.dto.DTOConstants;
 import org.osgi.service.servlet.runtime.dto.FailedFilterDTO;
@@ -83,7 +86,7 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 	private final List<DynamicMapping> dynamicServletNames = new LinkedList<>();
 
 	/** Filter name that defaults to FQCN of the {@link Filter}. {@code <filter>/<filter-name>} */
-	private final String name;
+	private String name;
 
 	/**
 	 * Init parameters of the filter as specified by {@link FilterConfig#getInitParameterNames()} and
@@ -214,6 +217,24 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 	}
 
 	@Override
+	public void alterWithNewModel(ElementModel<Filter, FilterEventData> webElement) {
+		FilterModel fm = (FilterModel) webElement;
+		this.name = fm.getName();
+		this.initParams.clear();
+		this.initParams.putAll(fm.initParams);
+		this.asyncSupported = fm.asyncSupported;
+		this.ignored = fm.ignored;
+		this.preprocessor = fm.preprocessor;
+		this.flatDispatcherTypes = fm.flatDispatcherTypes;
+		this.flatRegexPatterns = fm.flatRegexPatterns;
+		this.flatUrlPatterns = fm.flatUrlPatterns;
+		this.mappingsPerDispatcherTypes.clear();
+		this.mappingsPerDispatcherTypes.addAll(fm.mappingsPerDispatcherTypes);
+		// reset validation state
+		this.isValid = null;
+	}
+
+	@Override
 	public Boolean performValidation() {
 		int sources = 0;
 		sources += (filter != null ? 1 : 0);
@@ -265,6 +286,44 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 //					dtoFailureCode = DTOConstants.FAILURE_REASON_VALIDATION_FAILED;
 					throw new IllegalArgumentException("Please specify one of: servlet name mapping, url pattern mapping"
 							+ " or regex mapping");
+				}
+
+				if (map.urlPatterns != null) {
+					boolean error = false;
+					for (String p : map.urlPatterns) {
+						if (p.endsWith("/*")) {
+							p = p.substring(0, p.length() - 2);
+							if (p.indexOf('*') != -1) {
+								error = true;
+								break;
+							}
+						} else if (p.startsWith("*.")) {
+							p = p.substring(2);
+							if (p.indexOf('*') != -1) {
+								error = true;
+								break;
+							}
+						}
+						if (p.indexOf('*') != -1) {
+							error = true;
+							break;
+						}
+					}
+					if (error) {
+						dtoFailureCode = DTOConstants.FAILURE_REASON_VALIDATION_FAILED;
+						throw new IllegalArgumentException("Incorrect filter mapping");
+					}
+				}
+				if (map.regexPatterns != null) {
+					boolean error = false;
+					for (String p : map.regexPatterns) {
+						try {
+							Pattern.compile(p);
+						} catch (PatternSyntaxException e) {
+							dtoFailureCode = DTOConstants.FAILURE_REASON_VALIDATION_FAILED;
+							throw new IllegalArgumentException("Incorrect filter mapping");
+						}
+					}
 				}
 			}
 		}
@@ -471,9 +530,27 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 			return s.getClass();
 		}
 		if (getElementReference() != null) {
-			// I don't want to dereference here - especially if the reference was "prototype" scoped
-			// sane default, accepted by Undertow - especially if it has instance factory
-			return Filter.class;
+			// I didn't want to dereference here, but according to 140.16.2.14
+			// the name should be FQCN of the filter
+			Filter f;
+			Class<? extends Filter> c = null;
+			ServiceReference<Filter> ref = getElementReference();
+			Bundle b = ref.getBundle();
+			if (!isPrototype()) {
+				f = b.getBundleContext().getService(ref);
+				if (f != null) {
+					c = f.getClass();
+				}
+			} else {
+				ServiceObjects<Filter> so = b.getBundleContext().getServiceObjects(ref);
+				f = so.getService();
+				if (f != null) {
+					c = f.getClass();
+					b.getBundleContext().ungetService(ref);
+				}
+			}
+
+			return c == null ? Filter.class : c;
 		}
 
 		return null; // even if it can't happen

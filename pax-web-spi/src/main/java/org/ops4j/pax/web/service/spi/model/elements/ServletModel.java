@@ -43,6 +43,7 @@ import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 import org.ops4j.pax.web.service.whiteboard.ServletMapping;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.ServiceObjects;
 import org.osgi.framework.ServiceReference;
 import org.ops4j.pax.web.service.http.HttpService;
 import org.osgi.service.servlet.context.ServletContextHelper;
@@ -58,7 +59,7 @@ import org.osgi.service.servlet.runtime.dto.ServletDTO;
 public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 
 	/** Alias as defined by old {@link HttpService} registration methods */
-	private final String alias;
+	private String alias;
 	private boolean aliasCopiedToPatterns = false;
 
 	/**
@@ -269,6 +270,33 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 			}
 			this.aliasCopiedToPatterns = true;
 		}
+	}
+
+	@Override
+	public void alterWithNewModel(ElementModel<Servlet, ServletEventData> webElement) {
+		ServletModel sm = (ServletModel) webElement;
+		this.name = sm.getName();
+		this.initParams.clear();
+		this.initParams.putAll(sm.initParams);
+		this.asyncSupported = sm.asyncSupported;
+		this.alias = sm.alias;
+		this.aliasCopiedToPatterns = sm.aliasCopiedToPatterns;
+		this.baseFileUrl = sm.baseFileUrl;
+		this.basePath = sm.basePath;
+		this.errorDeclarations = sm.errorDeclarations;
+		this.errorPageModel = sm.errorPageModel;
+		this.jspFile = sm.jspFile;
+		this.jspServlet = sm.jspServlet;
+		this.loadOnStartup = sm.loadOnStartup;
+		this.rawPath = sm.rawPath;
+		this.runAs = sm.runAs;
+		this.urlPatterns = sm.urlPatterns;
+		this.resourceServlet = sm.resourceServlet;
+		this.servletSecurityPresent = sm.servletSecurityPresent;
+		this.roleLinks.clear();
+		this.roleLinks.putAll(sm.roleLinks);
+		// reset validation state
+		this.isValid = null;
 	}
 
 	@Override
@@ -551,9 +579,27 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 			Servlet s = getElementSupplier().get();
 			return s.getClass();
 		} else if (getElementReference() != null) {
-			// I don't want to dereference here - especially if the reference was "prototype" scoped
-			// sane default, accepted by Undertow - especially if it has instance factory
-			return Servlet.class;
+			// I didn't want to dereference here, but according to 140.16.2.31
+			// the name should be FQCN of the servlet
+			Servlet s;
+			Class<? extends Servlet> c = null;
+			ServiceReference<Servlet> ref = getElementReference();
+			Bundle b = ref.getBundle();
+			if (!isPrototype()) {
+				s = b.getBundleContext().getService(ref);
+				if (s != null) {
+					c = s.getClass();
+				}
+			} else {
+				ServiceObjects<Servlet> so = b.getBundleContext().getServiceObjects(ref);
+				s = so.getService();
+				if (s != null) {
+					c = s.getClass();
+					b.getBundleContext().ungetService(ref);
+				}
+			}
+
+			return c == null ? Servlet.class : c;
 		}
 
 		return null; // even if it can't happen

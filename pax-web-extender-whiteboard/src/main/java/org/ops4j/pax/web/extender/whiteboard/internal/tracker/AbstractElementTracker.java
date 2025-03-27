@@ -298,7 +298,10 @@ public abstract class AbstractElementTracker<S, R, D extends WebElementEventData
 			// model. Such failure DTO is never updated, instead its removed and added again, when for example
 			// the service registration properties change
 			whiteboardExtenderContext.configureFailedDTOs(webElement);
-			return null;
+			// we have to return the element even if it's invalid because user may update properties
+			// and make the element valid. This is important for ServiceTracker to call
+			// org.osgi.util.tracker.ServiceTrackerCustomizer.modifiedService() properly
+			return webElement;
 		}
 	}
 
@@ -329,6 +332,15 @@ public abstract class AbstractElementTracker<S, R, D extends WebElementEventData
 
 		// we have to clear the contexts
 		service.resetContextModels();
+
+		Long serviceId = (Long) reference.getProperty(Constants.SERVICE_ID);
+		if (serviceId == null) {
+			serviceId = 0L;
+		}
+
+		// we'll recreate new Model and copy changed properties
+		T webElement = createElementModel(reference, rank, serviceId);
+		service.alterWithNewModel(webElement);
 
 		addingService(reference, service);
 	}
