@@ -3197,34 +3197,37 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 						failedResourceDTOs.add(sm.toFailedResourceDTO(sm.getDtoFailureCode()));
 						return;
 					}
-				} else if (sm.getErrorPageModel() != null) {
-					if (!sm.getErrorPageModel().isValid()) {
+				} else {
+					if (!sm.isValid()) {
+						failedServletDTOs.add(sm.toFailedServletDTO(sm.getDtoFailureCode()));
+						return;
+					}
+					if (sm.getErrorPageModel() != null && !sm.getErrorPageModel().isValid()) {
 						failedErrorPageDTOs.add(sm.getErrorPageModel().toFailedDTO(sm, sm.getErrorPageModel().getDtoFailureCode()));
 						return;
 					}
-				} else if (!sm.isValid()) {
-					failedServletDTOs.add(sm.toFailedServletDTO(sm.getDtoFailureCode()));
-					return;
 				}
 
 				// case of valid models
 				sm.getContextModels().forEach(ocm -> {
 					if (sm.isResourceServlet()) {
 						scResources.get(scDTOs.get(ocm)).add(sm.toResourceDTO());
-					} else if (sm.getErrorPageModel() != null) {
-						scErrorPages.get(scDTOs.get(ocm)).add(sm.getErrorPageModel().toDTO(sm));
 					} else {
 						scServlets.get(scDTOs.get(ocm)).add(sm.toServletDTO());
+						if (sm.getErrorPageModel() != null) {
+							scErrorPages.get(scDTOs.get(ocm)).add(sm.getErrorPageModel().toDTO(sm));
+						}
 					}
 				});
 			});
 			this.disabledServletModels.forEach(sm -> {
 				if (sm.isResourceServlet()) {
 					failedResourceDTOs.add(sm.toFailedResourceDTO(DTOConstants.FAILURE_REASON_SHADOWED_BY_OTHER_SERVICE));
-				} else if (sm.getErrorPageModel() != null) {
-					failedErrorPageDTOs.add(sm.getErrorPageModel().toFailedDTO(sm, DTOConstants.FAILURE_REASON_SHADOWED_BY_OTHER_SERVICE));
 				} else {
 					failedServletDTOs.add(sm.toFailedServletDTO(DTOConstants.FAILURE_REASON_SHADOWED_BY_OTHER_SERVICE));
+					if (sm.getErrorPageModel() != null) {
+						failedErrorPageDTOs.add(sm.getErrorPageModel().toFailedDTO(sm, DTOConstants.FAILURE_REASON_SHADOWED_BY_OTHER_SERVICE));
+					}
 				}
 			});
 			this.disabledErrorPageModels.forEach(epm -> {
@@ -3284,11 +3287,12 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 				} else if (em instanceof ServletModel) {
 					if (((ServletModel) em).isResourceServlet()) {
 						failedResourceDTOs.add(((ServletModel) em).toFailedResourceDTO(em.getDtoFailureCode()));
-					} else if (((ServletModel) em).getErrorPageModel() != null) {
-						failedErrorPageDTOs.add(((ServletModel) em).getErrorPageModel().toFailedDTO((ServletModel) em,
-								((ServletModel) em).getErrorPageModel().getDtoFailureCode()));
 					} else {
 						failedServletDTOs.add(((ServletModel) em).toFailedServletDTO(em.getDtoFailureCode()));
+						if (((ServletModel) em).getErrorPageModel() != null) {
+							failedErrorPageDTOs.add(((ServletModel) em).getErrorPageModel().toFailedDTO((ServletModel) em,
+									((ServletModel) em).getErrorPageModel().getDtoFailureCode()));
+						}
 					}
 				}
 			});
