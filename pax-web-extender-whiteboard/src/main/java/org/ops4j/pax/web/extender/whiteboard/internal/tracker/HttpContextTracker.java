@@ -29,6 +29,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.ops4j.pax.web.service.http.HttpContext;
+import org.osgi.service.servlet.runtime.dto.DTOConstants;
 import org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -60,6 +61,9 @@ public class HttpContextTracker extends AbstractContextTracker<HttpContext> {
 
 		// 1. context name - checked using only legacy property name
 		String name = Utils.getStringProperty(serviceReference, PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID);
+		if (name == null && serviceReference.getProperty(PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID) != null) {
+			model.setDtoFailureCode(DTOConstants.FAILURE_REASON_VALIDATION_FAILED);
+		}
 		if (name == null || "".equals(name.trim())) {
 			name = HttpWhiteboardConstants.HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME;
 		}

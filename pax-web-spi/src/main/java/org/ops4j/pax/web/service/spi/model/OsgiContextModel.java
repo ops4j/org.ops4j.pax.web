@@ -411,6 +411,9 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 	 * @return
 	 */
 	public Boolean performValidation() throws Exception {
+		if (dtoFailureCode != -1) {
+			return Boolean.FALSE;
+		}
 		if (name == null || "".equals(name.trim())) {
 			if (contextReference != null) {
 				LOG.warn("Missing name property for context registered using {} reference", contextReference);
@@ -676,6 +679,10 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 
 	public int getDtoFailureCode() {
 		return dtoFailureCode;
+	}
+
+	public void setDtoFailureCode(int dtoFailureCode) {
+		this.dtoFailureCode = dtoFailureCode;
 	}
 
 // --- methods that are used directly from web.xml (or fragment) parsing and from WebContainer methods
