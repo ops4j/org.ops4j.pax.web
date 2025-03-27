@@ -16,6 +16,7 @@
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import jakarta.servlet.GenericServlet;
@@ -31,6 +32,7 @@ import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.service.spi.util.ServletAnnotationScanner;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.servlet.runtime.dto.DTOConstants;
 import org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -68,14 +70,22 @@ public class ServletTracker extends AbstractElementTracker<Servlet, Servlet, Ser
 		}
 
 		// 2. URL patterns
+		boolean propertiesInvalid = false;
 		String[] urlPatterns = Utils.getPaxWebProperty(serviceReference,
 				PaxWebConstants.SERVICE_PROPERTY_URL_PATTERNS, HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN,
 				Utils::asStringArray);
+		Object v = serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN);
+		if (v != null && !(v instanceof String || v instanceof String[] || v instanceof Collection)) {
+			propertiesInvalid = true;
+		}
 
 		// 3. servlet name
 		String name = Utils.getPaxWebProperty(serviceReference,
 				PaxWebConstants.INIT_PARAM_SERVLET_NAME, HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME,
 				Utils::asString);
+		if (name == null && serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME) != null) {
+			propertiesInvalid = true;
+		}
 
 		// 4. init params
 		Map<String, String> initParams = new LinkedHashMap<>();
@@ -218,7 +228,11 @@ public class ServletTracker extends AbstractElementTracker<Servlet, Servlet, Ser
 				.withMultipartConfigElement(multiPartConfig)
 				.withErrorDeclarations(errorDeclarations);
 
-		return builder.build();
+		ServletModel model = builder.build();
+		if (propertiesInvalid) {
+			model.setDtoFailureCode(DTOConstants.FAILURE_REASON_VALIDATION_FAILED);
+		}
+		return model;
 	}
 
 }

@@ -232,10 +232,14 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 		this.mappingsPerDispatcherTypes.addAll(fm.mappingsPerDispatcherTypes);
 		// reset validation state
 		this.isValid = null;
+		this.dtoFailureCode = -1;
 	}
 
 	@Override
 	public Boolean performValidation() {
+		if (dtoFailureCode != -1) {
+			throw new IllegalArgumentException("Servlet Model is registered with invalid properties");
+		}
 		int sources = 0;
 		sources += (filter != null ? 1 : 0);
 		sources += (filterClass != null ? 1 : 0);

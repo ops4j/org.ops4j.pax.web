@@ -297,10 +297,14 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 		this.roleLinks.putAll(sm.roleLinks);
 		// reset validation state
 		this.isValid = null;
+		this.dtoFailureCode = -1;
 	}
 
 	@Override
 	public Boolean performValidation() throws Exception {
+		if (dtoFailureCode != -1) {
+			throw new IllegalArgumentException("Servlet Model is registered with invalid properties");
+		}
 		if (isValid != null) {
 			return isValid;
 		}

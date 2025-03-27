@@ -16,6 +16,7 @@
 package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import jakarta.servlet.Filter;
@@ -30,6 +31,7 @@ import org.ops4j.pax.web.service.spi.util.FilterAnnotationScanner;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.servlet.runtime.dto.DTOConstants;
 import org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants;
 import org.osgi.service.servlet.whiteboard.Preprocessor;
 import org.osgi.util.tracker.ServiceTracker;
@@ -70,11 +72,19 @@ public class FilterTracker extends AbstractElementTracker<Filter, Filter, Filter
 		String name = Utils.getPaxWebProperty(serviceReference,
 				PaxWebConstants.INIT_PARAM_FILTER_NAME, HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME,
 				Utils::asString);
+		boolean propertiesInvalid = false;
+		if (name == null && serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME) != null) {
+			propertiesInvalid = true;
+		}
 
 		// 2a. URL patterns
 		String[] urlPatterns = preprocessor ? new String[] { "/*" } : Utils.getPaxWebProperty(serviceReference,
 				PaxWebConstants.SERVICE_PROPERTY_URL_PATTERNS, HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN,
 				Utils::asStringArray);
+		Object v = serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN);
+		if (v != null && !(v instanceof String || v instanceof String[] || v instanceof Collection)) {
+			propertiesInvalid = true;
+		}
 
 		// 2b. Regex patterns
 		Object propertyValue = preprocessor ? new String[0] : serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_REGEX);
@@ -214,7 +224,11 @@ public class FilterTracker extends AbstractElementTracker<Filter, Filter, Filter
 				.isPreprocessor(preprocessor)
 				.withDispatcherTypes(dispatcherTypeNames);
 
-		return builder.build();
+		FilterModel model = builder.build();
+		if (propertiesInvalid) {
+			model.setDtoFailureCode(DTOConstants.FAILURE_REASON_VALIDATION_FAILED);
+		}
+		return model;
 	}
 
 	@Override
