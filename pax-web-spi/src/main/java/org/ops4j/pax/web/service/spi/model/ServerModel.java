@@ -2713,7 +2713,9 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 				if (model.getServlet() != null) {
 					servlets.put(model.getServlet(), model);
 				}
-				servletsForDTO.add(model);
+				if (!change.isDisabled()) {
+					servletsForDTO.add(model);
+				}
 				break;
 			}
 			case DELETE: {
@@ -2798,7 +2800,9 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 				if (model.getFilter() != null) {
 					filters.put(model.getFilter(), model);
 				}
-				filtersForDTO.add(model);
+				if (!change.isDisabled()) {
+					filtersForDTO.add(model);
+				}
 				break;
 			}
 			case MODIFY:

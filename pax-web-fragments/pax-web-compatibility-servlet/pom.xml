@@ -60,7 +60,7 @@
 							osgi.contract;osgi.contract=JavaServlet;uses:="jakarta.servlet,jakarta.servlet.http,jakarta.servlet.descriptor,jakarta.servlet.annotation";
 								version:List<Version>="6.1,6.0,5.0,4.0",
 							osgi.contract;osgi.contract=JakartaServlet;uses:="jakarta.servlet,jakarta.servlet.http,jakarta.servlet.descriptor,jakarta.servlet.annotation";
-								version:List<Version>="6.1,6.0,5.0,4.0",
+								version:List<Version>="6.1,6.0,5.0"
 						]]></Provide-Capability>
 					</instructions>
 				</configuration>
