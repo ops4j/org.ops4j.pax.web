@@ -24,7 +24,10 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 
+import jakarta.servlet.UnavailableException;
+import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.osgi.framework.wiring.BundleWiring;
+import org.osgi.service.servlet.runtime.dto.DTOConstants;
 
 /**
  * {@link Servlet} wrapper that uses correct {@link ServletConfig} wrapper that returns correct wrapper
@@ -42,10 +45,16 @@ public class OsgiInitializedServlet implements Servlet {
 	 */
 	private final boolean whiteboardTCCL;
 
-	public OsgiInitializedServlet(Servlet servlet, OsgiScopedServletContext servletSpecificContext, boolean whiteboardTCCL) {
+	/**
+	 * When servlet fails to initialize, we have to reflect it in the {@link ServletModel model}.
+	 */
+	private final ServletModel model;
+
+	public OsgiInitializedServlet(Servlet servlet, OsgiScopedServletContext servletSpecificContext, boolean whiteboardTCCL, ServletModel model) {
 		this.servlet = servlet;
 		this.servletContext = servletSpecificContext;
 		this.whiteboardTCCL = whiteboardTCCL;
+		this.model = model;
 	}
 
 	@Override
@@ -65,27 +74,34 @@ public class OsgiInitializedServlet implements Servlet {
 			if (newCl != null) {
 				Thread.currentThread().setContextClassLoader(newCl);
 			}
-			servlet.init(new ServletConfig() {
-				@Override
-				public String getServletName() {
-					return config.getServletName();
-				}
+			try {
+				servlet.init(new ServletConfig() {
+					@Override
+					public String getServletName() {
+						return config.getServletName();
+					}
 
-				@Override
-				public ServletContext getServletContext() {
-					return OsgiInitializedServlet.this.servletContext;
-				}
+					@Override
+					public ServletContext getServletContext() {
+						return OsgiInitializedServlet.this.servletContext;
+					}
 
-				@Override
-				public String getInitParameter(String name) {
-					return config.getInitParameter(name);
-				}
+					@Override
+					public String getInitParameter(String name) {
+						return config.getInitParameter(name);
+					}
 
-				@Override
-				public Enumeration<String> getInitParameterNames() {
-					return config.getInitParameterNames();
+					@Override
+					public Enumeration<String> getInitParameterNames() {
+						return config.getInitParameterNames();
+					}
+				});
+			} catch (ServletException e) {
+				if (model != null) {
+					model.setDtoFailureCode(DTOConstants.FAILURE_REASON_EXCEPTION_ON_INIT);
 				}
-			});
+				throw new UnavailableException(e.getMessage());
+			}
 		} finally {
 			Thread.currentThread().setContextClassLoader(tccl);
 		}

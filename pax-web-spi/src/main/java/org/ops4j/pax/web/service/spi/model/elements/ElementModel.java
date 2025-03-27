@@ -33,6 +33,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.servlet.runtime.dto.DTOConstants;
 
 /**
  * <p>Base class for all <em>models</em> representing actual elements of a <em>web application</em> (or
@@ -367,6 +368,7 @@ public abstract class ElementModel<T, D extends WebElementEventData>
 
 	public void setDtoFailureCode(int dtoFailureCode) {
 		this.dtoFailureCode = dtoFailureCode;
+		this.isValid = dtoFailureCode == -1;
 	}
 
 	public void setAsynchronusRegistration(boolean async) {

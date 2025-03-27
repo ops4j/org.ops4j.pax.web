@@ -266,7 +266,7 @@ public class PaxWebServletInfo extends ServletInfo {
 				((UndertowResourceServlet) instance).setWelcomeFilesRedirect(osgiScopedServletContext.isWelcomeFilesRedirect());
 			}
 
-			return new ImmediateInstanceHandle<Servlet>(new OsgiInitializedServlet(instance, this.osgiScopedServletContext, whiteboardTCCL)) {
+			return new ImmediateInstanceHandle<Servlet>(new OsgiInitializedServlet(instance, this.osgiScopedServletContext, whiteboardTCCL, model)) {
 				@Override
 				public void release() {
 					if (model.getElementReference() != null) {
