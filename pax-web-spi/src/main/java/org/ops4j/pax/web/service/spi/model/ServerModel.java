@@ -100,8 +100,12 @@ import org.ops4j.pax.web.service.whiteboard.HttpContextMapping;
 import org.ops4j.pax.web.service.whiteboard.ServletContextHelperMapping;
 import org.osgi.dto.DTO;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceFactory;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.dto.ServiceReferenceDTO;
 import org.ops4j.pax.web.service.http.HttpContext;
@@ -411,6 +415,8 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 
 	private final Set<ElementModel<?, ?>> failedWhiteboardElements = new HashSet<>();
 
+	private BundleContext context;
+
 	/**
 	 * Listener to be informed about WAB {@link OsgiContextModel} being registered. There's no need to unregister
 	 * (now), because pax-web-extender-whiteboard does it every time the {@link WebContainer} reference changes, which
@@ -457,6 +463,8 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 	public ServerModel(Executor executor, long threadId) {
 		this.executor = executor;
 		registrationThreadId = threadId;
+		Bundle bundle = FrameworkUtil.getBundle(getClass());
+		this.context = bundle == null ? null : bundle.getBundleContext();
 	}
 
 	public static long getThreadIdFromSingleThreadPool(Executor executor) {
@@ -3635,6 +3643,32 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 
 	public Set<ElementModel<?, ?>> getFailedWhiteboardElements() {
 		return failedWhiteboardElements;
+	}
+
+	/**
+	 * Checks if the element being registered matches <em>this</em> runtime according to
+	 * {@link HttpWhiteboardConstants#HTTP_WHITEBOARD_TARGET} property
+	 * @param ref
+	 * @return
+	 */
+	public boolean matchesRuntime(ServiceReference<?> ref) {
+		if (ref == null || context == null) {
+			return true;
+		}
+		Object targetSelector = ref.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_TARGET);
+		if (targetSelector instanceof String) {
+			try {
+				org.osgi.framework.Filter f = context.createFilter((String) targetSelector);
+				if (f.matches(this.httpServiceRuntimeDTO.properties)) {
+					return true;
+				}
+			} catch (InvalidSyntaxException ignored) {
+			}
+		} else {
+			return true;
+		}
+
+		return false;
 	}
 
 	/**

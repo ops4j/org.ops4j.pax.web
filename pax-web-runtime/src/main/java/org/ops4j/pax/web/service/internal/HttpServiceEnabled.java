@@ -474,6 +474,11 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 					throw new RuntimeException(e.getMessage(), e);
 				}
 
+				if (!serverModel.matchesRuntime(model.getElementReference())) {
+					LOG.info("Skipping {} - target runtime not matched", model);
+					return null;
+				}
+
 				LOG.info("Registering {}", model);
 
 				// adding servlet model may lead to unregistration of some other, lower-ranked models, so batch
@@ -877,6 +882,11 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 						model.performValidation();
 					} catch (Exception e) {
 						throw new RuntimeException(e.getMessage(), e);
+					}
+
+					if (!serverModel.matchesRuntime(model.getElementReference())) {
+						LOG.info("Skipping {} - target runtime not matched", model);
+						return null;
 					}
 
 					LOG.info("Registering {}", model);

@@ -117,14 +117,8 @@
 						</Import-Package>
 						<!-- Nothing is exported from pax-web-runtime -->
 						<Provide-Capability>
-							<!-- TODO: JakartaEE 10 -->
 							<!-- 140.12.1 osgi.implementation Capability -->
 							osgi.implementation;osgi.implementation="osgi.http";version:Version="2.0";uses:="jakarta.servlet,jakarta.servlet.http,org.osgi.service.servlet.context,org.osgi.service.servlet.whiteboard",
-							<!--
-								140.12.2 osgi.contract Capability - pax-web-runtime does NOT export jakarta.servlet.* packages...
-								https://docs.osgi.org/reference/portable-java-contracts.html
-								TODO: JakartaEE 10
-							-->
 <!--							osgi.contract;osgi.contract=JavaServlet;version:Version="${dependency.jakarta.servlet-api}";uses:="jakarta.servlet,jakarta.servlet.http,jakarta.servlet.descriptor,jakarta.servlet.annotation",-->
 <!--							osgi.contract;osgi.contract=JavaWebSockets;version:Version="1";uses:="javax.websocket,javax.websocket.server"-->
 							<!-- 140.12.3 osgi.service Capability (135.4 osgi.service Namespace) -->
