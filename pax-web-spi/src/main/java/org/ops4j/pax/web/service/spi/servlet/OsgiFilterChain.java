@@ -97,8 +97,9 @@ public class OsgiFilterChain implements FilterChain {
 
 		// nothing left - time to call security and if it passes - call the rest of the chain (normal filters
 		// and target servlet)
+		boolean finishRequired = false;
 		try {
-			if (webContext == null || webContext.handleSecurity(req, res)) {
+			if (webContext == null || (finishRequired = webContext.handleSecurity(req, res))) {
 				if (authListener != null && webContext != null) {
 					// it means we've passed the OSGi security handler
 					// here, the listener may translate (if available):
@@ -123,7 +124,7 @@ public class OsgiFilterChain implements FilterChain {
 				}
 			}
 		} finally {
-			if (webContext != null) {
+			if (webContext != null && finishRequired) {
 				webContext.finishSecurity(req, res);
 			}
 		}

@@ -59,8 +59,9 @@ public class PaxWebSecurityHandler implements HandlerWrapper {
 						webContext = defaultWebContainerContext;
 					}
 
+					boolean finishRequired = false;
 					try {
-						if (webContext == null || webContext.handleSecurity(req, res)) {
+						if (webContext == null || (finishRequired = webContext.handleSecurity(req, res))) {
 							if (webContext != null) {
 								final Object user = req.getAttribute(ServletContextHelper.REMOTE_USER);
 								final Object authType = req.getAttribute(ServletContextHelper.AUTHENTICATION_TYPE);
@@ -98,7 +99,7 @@ public class PaxWebSecurityHandler implements HandlerWrapper {
 							}
 						}
 					} finally {
-						if (webContext != null) {
+						if (webContext != null && finishRequired) {
 							webContext.finishSecurity(req, res);
 						}
 					}
