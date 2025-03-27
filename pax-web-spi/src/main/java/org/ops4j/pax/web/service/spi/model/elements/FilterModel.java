@@ -114,6 +114,9 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 	/** Flag to mark a {@link FilterModel} for {@link org.osgi.service.servlet.whiteboard.Preprocessor} */
 	private boolean preprocessor = false;
 
+	/** Failed validation because of empty mapping should be ignored according to 140.16.2.15 */
+	private boolean ignored;
+
 	/**
 	 * Constructor used for filter unregistration
 	 * @param filterName
@@ -253,7 +256,13 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 				sources += (map.regexPatterns != null && map.regexPatterns.length > 0 ? 1 : 0);
 
 				if (sources == 0) {
-					dtoFailureCode = DTOConstants.FAILURE_REASON_VALIDATION_FAILED;
+					// https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html#org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN
+					// The specified patterns are used to determine whether a request should be mapped to the
+					// servlet filter. Filter services without this service property or the
+					// HTTP_WHITEBOARD_FILTER_SERVLET or the HTTP_WHITEBOARD_FILTER_REGEX service
+					// property are ignored.
+					ignored = true;
+//					dtoFailureCode = DTOConstants.FAILURE_REASON_VALIDATION_FAILED;
 					throw new IllegalArgumentException("Please specify one of: servlet name mapping, url pattern mapping"
 							+ " or regex mapping");
 				}
@@ -496,6 +505,10 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 
 	public boolean isDynamic() {
 		return dynamic;
+	}
+
+	public boolean isIgnored() {
+		return ignored;
 	}
 
 	public static class Builder {

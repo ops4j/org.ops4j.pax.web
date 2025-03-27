@@ -22,6 +22,7 @@ import org.ops4j.pax.web.service.PaxWebConfig;
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ElementModel;
+import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 import org.ops4j.pax.web.service.spi.model.events.WebElementEventData;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.service.whiteboard.ContextRelated;
@@ -290,6 +291,9 @@ public abstract class AbstractElementTracker<S, R, D extends WebElementEventData
 			whiteboardExtenderContext.addWebElement(serviceReference.getBundle(), webElement);
 			return webElement;
 		} else {
+			if (webElement instanceof FilterModel && ((FilterModel) webElement).isIgnored()) {
+				return null;
+			}
 			// the failed DTO information have to be passed directly, because we're not registering the web element
 			// model. Such failure DTO is never updated, instead its removed and added again, when for example
 			// the service registration properties change
