@@ -26,11 +26,13 @@
 # but in pure OSGi it should not bother us too much.
 # Maybe one day I'll turn includeDependencyManagement off and list more specific bundles
 -runrequires: \
-	bnd.identity;id='org.osgi.test.cases.webcontainer',\
+	bnd.identity;id='jakarta.annotation-api',\
+	bnd.identity;id='org.ops4j.pax.web.pax-web-compatibility-annotation',\
+	bnd.identity;id='jakarta.servlet-api',\
+	bnd.identity;id='org.osgi.test.cases.servlet',\
 	bnd.identity;id='org.ops4j.pax.web.pax-web-api', \
 	bnd.identity;id='org.ops4j.pax.web.pax-web-compatibility-el', \
 	bnd.identity;id='org.ops4j.pax.web.pax-web-extender-whiteboard', \
-	bnd.identity;id='org.ops4j.pax.web.pax-web-jsp', \
 	bnd.identity;id='org.ops4j.pax.web.pax-web-runtime', \
 	bnd.identity;id='org.ops4j.pax.web.pax-web-spi', \
 	bnd.identity;id='org.ops4j.pax.web.pax-web-tomcat', \
@@ -39,8 +41,6 @@
 	bnd.identity;id='org.ops4j.pax.logging.pax-logging-api', \
 	bnd.identity;id='org.ops4j.pax.logging.pax-logging-log4j2', \
 	bnd.identity;id='org.ops4j.pax.swissbox.property', \
-	bnd.identity;id='org.ops4j.pax.url.commons', \
-	bnd.identity;id='org.ops4j.pax.url.war', \
 	bnd.identity;id='org.osgi.util.function', \
 	bnd.identity;id='org.osgi.util.promise', \
 	bnd.identity;id='org.osgi.test.junit4', \
@@ -58,27 +58,22 @@
 -runproperties: \
 	report='true', \
 	org.osgi.framework.bootdelegation='sun.*,com.sun.*,sun.misc,sun.reflect', \
-	org.osgi.service.webcontainer.hostname='127.0.0.1', \
-	org.osgi.service.webcontainer.http.port='8080', \
+	org.apache.felix.http.host='127.0.0.1', \
+	org.osgi.service.http.port='8080', \
 	org.osgi.test.testcase.timeout='10000', \
 	org.ops4j.pax.logging.DefaultServiceLog.level='INFO', \
-	org.osgi.test.testcase.scaling='1'
+	org.osgi.test.testcase.scaling='1', \
+	org.ops4j.pax.web.extender.whiteboard.synchronous='true'
 
 -runvm="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"
 
 # The following is calculated by the bnd-resolver-maven-plugin and do not edit it manually
 -runbundles: \
 	org.apache.servicemix.bundles.junit;version='[4.13.2,4.13.3)',\
-	org.osgi.test.cases.webcontainer;version='[8.1.0,8.1.1)',\
-	org.ops4j.base;version='[1.5.1,1.5.2)',\
-	org.osgi.test.common;version='[1.2.0,1.2.1)',\
-	org.osgi.test.junit4;version='[1.2.0,1.2.1)',\
-	org.osgi.test.junit5;version='[1.2.0,1.2.1)',\
-	org.osgi.util.function;version='[1.2.0,1.2.1)',\
-	org.osgi.util.promise;version='[1.3.0,1.3.1)',\
-	jakarta.annotation-api;version='[3.0.0,3.0.1)',\
+	assertj-core;version='[3.27.3,3.27.4)',\
 	jakarta.el-api;version='[6.0.1,6.0.2)',\
 	jakarta.security.auth.message-api;version='[3.1.0,3.1.1)',\
+	jakarta.servlet-api;version='[6.1.0,6.1.1)',\
 	junit-jupiter-api;version='[5.12.1,5.12.2)',\
 	junit-jupiter-engine;version='[5.12.1,5.12.2)',\
 	junit-jupiter-params;version='[5.12.1,5.12.2)',\
@@ -86,22 +81,26 @@
 	junit-platform-engine;version='[1.12.1,1.12.2)',\
 	junit-platform-launcher;version='[1.12.1,1.12.2)',\
 	junit-vintage-engine;version='[5.12.1,5.12.2)',\
-	org.apache.tomcat-servlet-api;version='[11.0.5,11.0.6)',\
-	org.eclipse.jdt.core.compiler.batch;version='[3.40.0,3.40.1)',\
+	net.bytebuddy.byte-buddy;version='[1.15.11,1.15.12)',\
 	org.eclipse.jetty.servlet-api;version='[4.0.6,4.0.7)',\
 	org.opentest4j;version='[1.3.0,1.3.1)',\
+	org.ops4j.base;version='[1.5.1,1.5.2)',\
 	org.ops4j.pax.logging.pax-logging-api;version='[2.3.0,2.3.1)',\
 	org.ops4j.pax.logging.pax-logging-log4j2;version='[2.3.0,2.3.1)',\
 	org.ops4j.pax.swissbox.property;version='[1.9.0,1.9.1)',\
-	org.ops4j.pax.url.commons;version='[3.0.0,3.0.1)',\
-	org.ops4j.pax.url.war;version='[3.0.0,3.0.1)',\
 	org.ops4j.pax.web.pax-web-api;version='[10.0.0,10.0.1)',\
-	org.ops4j.pax.web.pax-web-compatibility-annotation;version='[10.0.0,10.0.1)',\
 	org.ops4j.pax.web.pax-web-compatibility-el;version='[10.0.0,10.0.1)',\
-	org.ops4j.pax.web.pax-web-extender-war;version='[10.0.0,10.0.1)',\
-	org.ops4j.pax.web.pax-web-jsp;version='[10.0.0,10.0.1)',\
+	org.ops4j.pax.web.pax-web-compatibility-servlet;version='[10.0.0,10.0.1)',\
+	org.ops4j.pax.web.pax-web-extender-whiteboard;version='[10.0.0,10.0.1)',\
 	org.ops4j.pax.web.pax-web-runtime;version='[10.0.0,10.0.1)',\
 	org.ops4j.pax.web.pax-web-spi;version='[10.0.0,10.0.1)',\
 	org.ops4j.pax.web.pax-web-tomcat;version='[10.0.0,10.0.1)',\
 	org.ops4j.pax.web.pax-web-tomcat-common;version='[10.0.0,10.0.1)',\
-	org.osgi.service.event;version='[1.4.1,1.4.2)'
+	org.osgi.test.cases.servlet;version='[8.1.0,8.1.1)',\
+	org.osgi.test.common;version='[1.2.0,1.2.1)',\
+	org.osgi.test.junit4;version='[1.2.0,1.2.1)',\
+	org.osgi.test.junit5;version='[1.2.0,1.2.1)',\
+	org.osgi.util.function;version='[1.2.0,1.2.1)',\
+	org.osgi.util.promise;version='[1.3.0,1.3.1)',\
+	jakarta.annotation-api;version='[3.0.0,3.0.1)',\
+	org.ops4j.pax.web.pax-web-compatibility-annotation;version='[10.0.0,10.0.1)'

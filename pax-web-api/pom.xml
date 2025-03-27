@@ -135,6 +135,7 @@
 							<!-- OSGi Core R8+ -->
 							org.osgi.dto;version="[1.1,2)",
 							org.osgi.framework;version="[1.10,2)",
+							org.osgi.framework.dto;version="[1.8,2)",
 							org.osgi.framework.wiring;version="[1.2,2)",
 
 							<!-- from pax-logging-api -->

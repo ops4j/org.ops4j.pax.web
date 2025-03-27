@@ -39,6 +39,7 @@
 	</properties>
 
 	<!--
+		Notes for CMPN 128 tests and Pax Web 8 (old):
 		https://aries.apache.org/documentation/development/compliancetesting.html
 		to debug the TCK tests when running in canonical way, add `-runvm="-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005"`
 		to $GITHUB_PROJECTS/osgi/osgi/osgi.tck/generated/osgi.tck.cmpn/org.osgi.test.cases.webcontainer.bnd
@@ -200,8 +201,13 @@
 
 	<dependencyManagement>
 		<dependencies>
+			<!-- `gradle :org.osgi.test.cases.webcontainer:release` installs the suite into local Maven repo -->
 			<dependency>
-				<!-- `gradle :org.osgi.test.cases.webcontainer:release` installs the suite into local Maven repo -->
+				<groupId>org.osgi</groupId>
+				<artifactId>org.osgi.test.cases.servlet</artifactId>
+				<version>${version.org.osgi.tck}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.osgi</groupId>
 				<artifactId>org.osgi.test.cases.webcontainer</artifactId>
 				<version>${version.org.osgi.tck}</version>
@@ -217,6 +223,10 @@
 			Here we specify only OSGi TCK artifacts and bnd jar (to extract testreport.xsl)
 		-->
 
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.test.cases.servlet</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.test.cases.webcontainer</artifactId>

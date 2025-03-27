@@ -1,0 +1,260 @@
+= Running OSGi CMPN TCK tests with Pax Web 10
+
+I was able to run OSGi CMPN TCK tests for Pax Web 8.0.18 and `org.osgi.test.cases.webcontainer` tests from https://github.com/osgi/osgi/tree/main/org.osgi.test.cases.webcontainer.
+
+Latests `webcontainer` tests are still based on JakartaEE 8 (`javax.servlet` packages), so we'll leave these in Pax Web 8.
+
+However the more important goal is to run https://github.com/osgi/osgi/tree/main/org.osgi.test.cases.servlet tests which are related to Chapter 140 "Whiteboard Service" of OSGi CMPN 8.1 specificaiton (JakartaEE 10, `jakarta.servlet` packages).
+
+Thanks to bnd Maven plugins, We can run TCK tests like this using Maven:
+
+----
+$ mvn clean verify -f pax-web-itest/pax-web-tck/ -Ptck
+$ mvn org.apache.maven.plugins:maven-antrun-plugin:run@generate-html-test-report -f pax-web-itest/pax-web-tck/ -Ptck
+----
+
+The trick is that at first shot (ever!) we had:
+
+* tests: 147
+* skipped: 0
+* failures: 81
+* errors: 15
+
+Which is not bad actually! Pax Web heavily relies on underlying containers (Jetty, Tomcat, Undertow) and I didn't simply expect these tests to pass at all..
+
+But when I see failures, it'd be good to run the tests one at a time, with debugging support (to check what TCK is expecting... yes that's how it works) and using _canonical_ `bnd runtests` method.
+
+So we need few things:
+
+1. A `bnd` tool:
++
+----
+$ which bnd
+~/.local/bin/bnd
+
+$ cat $(which bnd)
+#!/bin/bash
+
+java -jar /home/ggrzybek/.m2/repository/biz/aQute/bnd/biz.aQute.bnd/7.1.0/biz.aQute.bnd-7.1.0.jar $@
+----
+
+2. A clone of https://github.com/osgi/osgi repository
+
+It'd be great to _run_ `tck-cmpn-140.bndrun` file straight from here, but that's not how _bnd workspaces_ work...
+
+The only way I could run individual TCK tests was to modify 3 files in osgi/osgi in own local working copy:
+
+* `cnf/ext/central.mvn` - this defines _libraries_ referenced from `.bnd` files/definitions. We need to add several libraries there as needed (it changes with versions of dependencies) - these are Maven coordinates. Here's mine as of 2025-03-26:
++
+----
+diff --git a/cnf/ext/central.mvn b/cnf/ext/central.mvn
+index 5e2eb83bf3..7d3fa5f785 100644
+--- a/cnf/ext/central.mvn
++++ b/cnf/ext/central.mvn
+@@ -48,6 +48,9 @@ org.osgi:org.osgi.util.function:1.1.0
+ org.osgi:org.osgi.util.promise:1.1.1
+ org.osgi:org.osgi.util.pushstream:1.0.1
+
++org.osgi:org.osgi.util.function:1.2.0
++org.osgi:org.osgi.util.promise:1.3.0
++
+ # bnd_version is set in gradle.properties
+ biz.aQute.bnd:biz.aQute.bnd:${bnd_version}
+ biz.aQute.bnd:biz.aQute.bndlib:${bnd_version}
+@@ -85,7 +88,13 @@ org.objenesis:objenesis:${objenesis.version}
+ javax.ejb:javax.ejb-api:3.2
+ javax.transaction:javax.transaction-api:1.2
+
++jakarta.annotation:jakarta.annotation-api:1.3.5
++jakarta.annotation:jakarta.annotation-api:3.0.0
++jakarta.authentication:jakarta.authentication-api:3.1.0
++jakarta.el:jakarta.el-api:3.0.3
++jakarta.el:jakarta.el-api:6.0.1
+ jakarta.xml.soap:jakarta.xml.soap-api:1.4.2
++jakarta.security.auth.message:jakarta.security.auth.message-api:1.1.3
+
+ org.apache.aries:org.apache.aries.util:1.1.3
+ org.apache.aries.cdi:org.apache.aries.cdi.extender:1.1.4
+@@ -97,7 +106,9 @@ org.apache.aries.jpa:org.apache.aries.jpa.eclipselink.adapter:2.4.0
+ org.apache.aries.spifly:org.apache.aries.spifly.dynamic.bundle:1.0.8
+ org.apache.aries.spifly:org.apache.aries.spifly.dynamic.framework.extension:1.3.3
+
++jakarta.servlet:jakarta.servlet-api:4.0.4
+ jakarta.servlet:jakarta.servlet-api:5.0.0
++jakarta.servlet:jakarta.servlet-api:6.1.0
+ org.apache.felix:org.apache.felix.configadmin:1.9.26
+ org.apache.felix:org.apache.felix.configurator:1.0.14
+ org.apache.felix:org.apache.felix.cm.json:1.0.6
+@@ -181,10 +192,10 @@ org.springframework:spring-beans:3.1.0.RELEASE
+ org.springframework:spring-context:3.1.0.RELEASE
+ org.springframework:spring-core:3.1.0.RELEASE
+
+-org.slf4j:slf4j-api:1.7.7
+-org.slf4j:slf4j-nop:1.7.7
+-org.slf4j:slf4j-simple:1.7.7
+-org.slf4j:log4j-over-slf4j:1.7.7
++org.slf4j:slf4j-api:1.7.36
++org.slf4j:slf4j-nop:1.7.36
++org.slf4j:slf4j-simple:1.7.36
++org.slf4j:log4j-over-slf4j:1.7.36
+
+ org.apache.aries.component-dsl:org.apache.aries.component-dsl.component-dsl:1.2.2
+ org.apache.aries.typedevent:org.apache.aries.typedevent.bus:1.1.0-SNAPSHOT
+@@ -194,6 +205,40 @@ org.apache.geronimo.specs:geronimo-json_1.1_spec:1.5
+ org.apache.johnzon:johnzon-core:1.2.14
+ org.apache.felix:org.apache.felix.cm.json:1.0.6
+
++org.eclipse.jdt:ecj:3.26.0
++
++org.ops4j.base:ops4j-base:1.5.1
++org.ops4j.pax.swissbox:pax-swissbox-bnd:1.8.5
++org.ops4j.pax.swissbox:pax-swissbox-property:1.8.5
++biz.aQute.bnd:biz.aQute.bndlib:6.4.0
++biz.aQute.bnd:biz.aQute.bnd.util:6.4.0
++biz.aQute.bnd:biz.aQute.bnd.transform:6.4.0
++org.ops4j.pax.url:pax-url-commons:2.6.12
++org.ops4j.pax.url:pax-url-war:2.6.12
++
++org.ops4j.pax.logging:pax-logging-api:2.3.0
++org.ops4j.pax.logging:pax-logging-log4j2:2.3.0
++
++org.ops4j.pax.web:pax-web-api:8.0.18
++org.ops4j.pax.web:pax-web-spi:8.0.18
++org.ops4j.pax.web:pax-web-runtime:8.0.18
++org.ops4j.pax.web:pax-web-tomcat-common:8.0.18
++org.ops4j.pax.web:pax-web-tomcat:8.0.18
++org.ops4j.pax.web:pax-web-compatibility-el2:8.0.18
++org.ops4j.pax.web:pax-web-jsp:8.0.18
++org.ops4j.pax.web:pax-web-extender-war:8.0.18
++org.ops4j.pax.web:pax-web-api:10.0.0-SNAPSHOT
++org.ops4j.pax.web:pax-web-spi:10.0.0-SNAPSHOT
++org.ops4j.pax.web:pax-web-compatibility-annotation:10.0.0-SNAPSHOT
++org.ops4j.pax.web:pax-web-compatibility-el:10.0.0-SNAPSHOT
++org.ops4j.pax.web:pax-web-compatibility-servlet:10.0.0-SNAPSHOT
++org.ops4j.pax.web:pax-web-runtime:10.0.0-SNAPSHOT
++org.ops4j.pax.web:pax-web-tomcat-common:10.0.0-SNAPSHOT
++org.ops4j.pax.web:pax-web-tomcat:10.0.0-SNAPSHOT
++org.ops4j.pax.web:pax-web-jsp:10.0.0-SNAPSHOT
++org.ops4j.pax.web:pax-web-extender-war:10.0.0-SNAPSHOT
++org.ops4j.pax.web:pax-web-extender-whiteboard:10.0.0-SNAPSHOT
++
+ # Jakarta EE API
+ jakarta.ws.rs:jakarta.ws.rs-api:3.0.0
+
+@@ -267,4 +312,4 @@ com.sun.activation:jakarta.activation:2.0.1
+ com.sun.xml.bind:jaxb-osgi:4.0.1
+
+ commons-logging:commons-logging:1.3.5
+-org.apache.derby:derby:10.14.2.0
+\ No newline at end of file
++org.apache.derby:derby:10.14.2.0
+----
++
+(mind that it contains also changes for Pax Web 8 and OSGi CMPN 128 tests)
+* `cnf/repo/org.osgi.impl.service.servlet/org.osgi.impl.service.servlet-8.0.0.lib` - this is a definition of a _library_ with bundles (this time it contains symbolic names, not Maven coordinates) that constitute an OSGi CMPN 140 WhHiteboard implementation, which is Pax Web 10.
++
+----
+diff --git a/cnf/repo/org.osgi.impl.service.servlet/org.osgi.impl.service.servlet-8.0.0.lib b/cnf/repo/org.osgi.impl.service.servlet/org.osgi.impl.service.servlet-8.0.0.lib
+index 9efd4650a1..b5298b0878 100644
+--- a/cnf/repo/org.osgi.impl.service.servlet/org.osgi.impl.service.servlet-8.0.0.lib
++++ b/cnf/repo/org.osgi.impl.service.servlet/org.osgi.impl.service.servlet-8.0.0.lib
+@@ -1,6 +1,18 @@
+-org.apache.felix.http.servlet-api; version=2.1
+-org.apache.felix.http.jetty; version=5.0
+-org.osgi.service.cm; version=latest
+-org.osgi.service.event; version=latest
+-slf4j.api;version=1.7
+-slf4j.simple;version=1.7
++jakarta.servlet-api;version="[6.1,6.2)"
++jakarta.el-api;version=6.0.1
++jakarta.annotation-api;version=3.0.0
++jakarta.security.auth.message-api;version=3.1.0
++org.osgi.util.promise;version=1.3.0
++org.osgi.util.function;version=1.2.0
++org.ops4j.pax.logging.pax-logging-api;version=2.3.0
++org.ops4j.pax.logging.pax-logging-log4j2;version=2.3.0
++org.ops4j.pax.web.pax-web-api;version=10.0.0.SNAPSHOT
++org.ops4j.pax.web.pax-web-spi;version=10.0.0.SNAPSHOT
++org.ops4j.pax.web.pax-web-compatibility-annotation;version=10.0.0.SNAPSHOT
++org.ops4j.pax.web.pax-web-compatibility-el;version=10.0.0.SNAPSHOT
++org.ops4j.pax.web.pax-web-compatibility-servlet;version=10.0.0.SNAPSHOT
++org.ops4j.pax.web.pax-web-runtime;version=10.0.0.SNAPSHOT
++org.ops4j.pax.web.pax-web-tomcat-common;version=10.0.0.SNAPSHOT
++org.ops4j.pax.web.pax-web-tomcat;version=10.0.0.SNAPSHOT
++org.ops4j.pax.web.pax-web-extender-whiteboard;version=10.0.0.SNAPSHOT
++
+----
+* `org.osgi.test.cases.servlet/bnd.bnd` - this is a definition of the test itself - I needed to tweak it more for Pax Web 8 OSGi CMPN 128 Web Applications tests, but this time it's only (because `javax.servlet` import somehow sneaked into the bundle):
++
+----
+diff --git a/org.osgi.test.cases.servlet/bnd.bnd b/org.osgi.test.cases.servlet/bnd.bnd
+index b2488fb6a6..4380c6522c 100644
+--- a/org.osgi.test.cases.servlet/bnd.bnd
++++ b/org.osgi.test.cases.servlet/bnd.bnd
+@@ -13,6 +13,7 @@ Import-Package: ${-signaturetest},\
+  org.apache.avalon.framework.logger;resolution:=optional,\
+  org.apache.log;resolution:=optional,\
+  org.apache.log4j;resolution:=optional,\
++ !javax.servlet,\
+  *
+ Export-Package: ${p}.junit.mock
+
+----
+
+Now we have to rebuild (using gradle...) our changes:
+----
+$ pwd
+/home/ggrzybek/sources/github.com/osgi/osgi
+
+$ ./gradlew :osgi.impl:clean :osgi.impl:build :osgi.tck:clean :osgi.tck:preptck.cmpn
+
+BUILD SUCCESSFUL in 15s
+526 actionable tasks: 5 executed, 521 up-to-date
+----
+
+Now to run single test we can do:
+----
+$ pwd
+/home/ggrzybek/sources/github.com/osgi/osgi
+
+$ cd osgi.tck/generated/osgi.tck.cmpn
+$ pwd
+/home/ggrzybek/sources/github.com/osgi/osgi/osgi.tck/generated/osgi.tck.cmpn
+
+$ bnd runtests -t 'org.osgi.test.cases.servlet.junit.AuthenticationTestCase' org.osgi.test.cases.servlet.bnd
+# startlevel: not handled because launch.startlevel.default not set
+# java.class.path /data/sources/github.com/osgi/osgi/osgi.tck/generated/osgi.tck.cmpn/cnf/cache/7.1.0/bnd-cache/biz.aQute.launcher/biz.aQute.launcher.pre.jar
+...
+#
+Test run finished after 3385 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         4 tests found           ]
+[         0 tests skipped         ]
+[         4 tests started         ]
+[         0 tests aborted         ]
+[         3 tests successful      ]
+[         1 tests failed          ]
+
+
+# test ran
+# queue []
+-----------------
+...
+----
+
+It's pretty fast, so we can quickly iterate and achieve TCK compatibility.
+
+To debug the tests add:
+----
+-runvm="-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005"
+----
+
+to `osgi.tck/generated/osgi.tck.cmpn/org.osgi.test.cases.servlet.secure.bnd` (this time regeneration/rebuild is not needed) and run `bnd runtests` again. For example for single test _and_ method:
+----
+$ bnd runtests -t 'org.osgi.test.cases.servlet.junit.AuthenticationTestCase#test_exceptionFromServlet' org.osgi.test.cases.servlet.bnd
+----

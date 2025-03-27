@@ -1222,7 +1222,7 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 	 *
 	 * <p>None of the returned contexts will have a registration property named
 	 * {@link HttpWhiteboardConstants#HTTP_WHITEBOARD_CONTEXT_NAME} because they should match LDAP filters with
-	 * {@link HttpWhiteboardConstants#HTTP_SERVICE_CONTEXT_PROPERTY} property <strong>only</strong>.</p>
+	 * {@link PaxWebConstants#HTTP_SERVICE_CONTEXT_PROPERTY} property <strong>only</strong>.</p>
 	 *
 	 * <p>This method is used during Whiteboard registration of web elements to get the highest ranked bundle-scoped
 	 * {@link OsgiContextModel}. It doesn't return <strong>all</strong> context models for given bundle</p>

@@ -135,10 +135,11 @@
 							-->
 							osgi.service;effective:=active;objectClass:List&lt;String&gt;="org.ops4j.pax.web.service.http.HttpService,org.ops4j.pax.web.service.WebContainer"
 						</Provide-Capability>
-						<Require-Capability>
-							<!-- ServerControllerFactory services are registered by pax-web-jetty, pax-web-tomcat and pax-web-undertow -->
-							osgi.service;effective:=active;filter:="(objectClass=org.ops4j.pax.web.service.spi.ServerControllerFactory)"
-						</Require-Capability>
+						<!-- ServerControllerFactory services are registered by pax-web-jetty, pax-web-tomcat and pax-web-undertow -->
+						<Require-Capability><![CDATA[
+							osgi.service;effective:=active;filter:="(objectClass=org.ops4j.pax.web.service.spi.ServerControllerFactory)",
+							osgi.contract;filter:="(&(osgi.contract=JakartaServlet)(version=6.1))"
+						]]></Require-Capability>
 						<Embed-Dependency>
 							ops4j-base-lang;inline=true,
 							ops4j-base-util-collections;inline=true,

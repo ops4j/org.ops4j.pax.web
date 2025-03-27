@@ -203,6 +203,8 @@
 
 		<dependency.junit>4.13.2</dependency.junit>
 
+		<dependency.net.bytebuddy>1.15.11</dependency.net.bytebuddy>
+
 		<dependency.org.apache.aries.component-dsl>1.2.2</dependency.org.apache.aries.component-dsl>
 		<dependency.org.apache.aries.jax.rs>2.0.2</dependency.org.apache.aries.jax.rs>
 		<dependency.org.apache.aries.spifly>1.3.7</dependency.org.apache.aries.spifly>
@@ -2784,6 +2786,17 @@
 				<groupId>org.opentest4j</groupId>
 				<artifactId>opentest4j</artifactId>
 				<version>${dependency.org.opentest4j}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>net.bytebuddy</groupId>
+				<artifactId>byte-buddy</artifactId>
+				<version>${dependency.net.bytebuddy}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.bytebuddy</groupId>
+				<artifactId>byte-buddy-agent</artifactId>
+				<version>${dependency.net.bytebuddy}</version>
 			</dependency>
 
 <!--			<dependency>-->
