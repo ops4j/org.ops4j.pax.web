@@ -187,4 +187,12 @@ public interface ServerConfiguration {
 	 */
 	String getTCCLType();
 
+	/**
+	 * OSGi CMPN Whiteboard TCK assumes whiteboard elements to be registered <em>synchronously</em>, while
+	 * Pax Web is by design asynchronous (its tests wait for relevant events instead). But for TCK's sake, we
+	 * can turn the asynchronous registration off.
+	 * @return
+	 */
+	boolean isWhiteboardSynchronous();
+
 }

@@ -248,6 +248,7 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 		private final String[] connectors;
 
 		private final String tcclType;
+		private final boolean whiteboardSynchronous;
 
 		private ServerConfigurationImpl() {
 			// eager resolution of some important properties
@@ -343,6 +344,9 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 				LOG.warn("Unknown value of {} property. Falling back to \"servlet\".", PaxWebConfig.PID_CFG_TCCL_TYPE);
 			}
 			tcclType = tcclTypeValue;
+
+			Boolean sync = resolveBooleanProperty(PaxWebConfig.BUNDLE_CONTEXT_PROPERTY_WHITEBOARD_EXTENDER_SYNCHRONOUS);
+			whiteboardSynchronous = sync != null && sync;
 		}
 
 		@Override
@@ -448,6 +452,11 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 		@Override
 		public String getTCCLType() {
 			return tcclType;
+		}
+
+		@Override
+		public boolean isWhiteboardSynchronous() {
+			return whiteboardSynchronous;
 		}
 	}
 

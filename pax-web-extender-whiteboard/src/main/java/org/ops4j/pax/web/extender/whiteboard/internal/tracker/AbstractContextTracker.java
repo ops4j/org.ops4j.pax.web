@@ -18,6 +18,7 @@ package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 import java.util.Hashtable;
 
 import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardExtenderContext;
+import org.ops4j.pax.web.service.PaxWebConfig;
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.util.Utils;
@@ -54,9 +55,17 @@ public abstract class AbstractContextTracker<S> implements ServiceTrackerCustomi
 	protected final BundleContext bundleContext;
 	private final WhiteboardExtenderContext whiteboardExtenderContext;
 
+	/**
+	 * Flag to indicate sync/async registration of Whiteboard elements. Pax Web was always asynchronous, but TCK
+	 * requires synchronous registration.
+	 */
+	protected boolean whiteboardSynchronous = false;
+
 	protected AbstractContextTracker(WhiteboardExtenderContext whiteboardExtenderContext, BundleContext bundleContext) {
 		this.whiteboardExtenderContext = whiteboardExtenderContext;
 		this.bundleContext = bundleContext;
+		String flag = bundleContext.getProperty(PaxWebConfig.BUNDLE_CONTEXT_PROPERTY_WHITEBOARD_EXTENDER_SYNCHRONOUS);
+		whiteboardSynchronous = Boolean.parseBoolean(flag);
 	}
 
 	protected final ServiceTracker<S, OsgiContextModel> create(final Class<? extends S> trackedClass) {
@@ -113,7 +122,7 @@ public abstract class AbstractContextTracker<S> implements ServiceTrackerCustomi
 			serviceId = 0L;
 		}
 		OsgiContextModel model = new OsgiContextModel(serviceReference.getBundle(), rank, serviceId, true);
-		model.setAsynchronusRegistration(true);
+		model.setAsynchronusRegistration(!whiteboardSynchronous);
 
 		LOG.debug("Configuring OSGi context model from Whiteboard service {} (id={})", serviceReference, serviceId);
 

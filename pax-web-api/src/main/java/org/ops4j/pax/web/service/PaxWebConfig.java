@@ -162,6 +162,12 @@ public interface PaxWebConfig {
 	String BUNDLE_CONTEXT_PROPERTY_WAR_EXTENDER_JARS_TO_SCAN = "org.ops4j.pax.web.extender.war.jarsToScan";
 
 	/**
+	 * Context property with which we can enforce synchronous registration of Whiteboard elements. By default this
+	 * is {@code false}, but we'll switch it to {@code true} in TCK tests.
+	 */
+	String BUNDLE_CONTEXT_PROPERTY_WHITEBOARD_EXTENDER_SYNCHRONOUS = "org.ops4j.pax.web.extender.whiteboard.synchronous";
+
+	/**
 	 * <p>Defines the type of TCCL that should be set for service methods (like {@link jakarta.servlet.Servlet#service}).
 	 * It can take two values:<ul>
 	 *     <li>{@code servlet} (the default, assumed value) - {@link ServletContext#getClassLoader()} returns

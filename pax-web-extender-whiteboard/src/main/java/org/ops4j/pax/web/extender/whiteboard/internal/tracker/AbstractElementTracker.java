@@ -18,6 +18,7 @@ package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 import java.util.List;
 
 import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardExtenderContext;
+import org.ops4j.pax.web.service.PaxWebConfig;
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ElementModel;
@@ -69,9 +70,17 @@ public abstract class AbstractElementTracker<S, R, D extends WebElementEventData
 	protected final BundleContext bundleContext;
 	private final WhiteboardExtenderContext whiteboardExtenderContext;
 
+	/**
+	 * Flag to indicate sync/async registration of Whiteboard elements. Pax Web was always asynchronous, but TCK
+	 * requires synchronous registration.
+	 */
+	protected boolean whiteboardSynchronous = false;
+
 	protected AbstractElementTracker(WhiteboardExtenderContext whiteboardExtenderContext, BundleContext bundleContext) {
 		this.whiteboardExtenderContext = whiteboardExtenderContext;
 		this.bundleContext = bundleContext;
+		String flag = bundleContext.getProperty(PaxWebConfig.BUNDLE_CONTEXT_PROPERTY_WHITEBOARD_EXTENDER_SYNCHRONOUS);
+		whiteboardSynchronous = Boolean.parseBoolean(flag);
 	}
 
 	/**
@@ -180,7 +189,7 @@ public abstract class AbstractElementTracker<S, R, D extends WebElementEventData
 		// turn a ServiceReference into ElementModel<R> that can be passed to HttpService/WebContainer
 		// and contains almost _everything_ needed to process it later (for example after WebContainer becomes available)
 		T webElement = createElementModel(serviceReference, rank, serviceId);
-		webElement.setAsynchronusRegistration(true);
+		webElement.setAsynchronusRegistration(!whiteboardSynchronous);
 
 		return addingService(serviceReference, webElement);
 	}
