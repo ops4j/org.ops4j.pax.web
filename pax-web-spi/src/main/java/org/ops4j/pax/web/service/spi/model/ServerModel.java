@@ -3468,7 +3468,17 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 							}
 						}
 					}
-					dto.filterDTOs = matchingFilters.toArray(new FilterDTO[0]);
+					dto.filterDTOs = matchingFilters.stream().filter(fdto -> {
+						if (fdto.dispatcher == null || fdto.dispatcher.length == 0) {
+							return true;
+						}
+						for (String d : fdto.dispatcher) {
+							if ("REQUEST".equals(d)) {
+								return true;
+							}
+						}
+						return false;
+					}).toArray(FilterDTO[]::new);
 
 					// end of searching through context paths
 					break;
