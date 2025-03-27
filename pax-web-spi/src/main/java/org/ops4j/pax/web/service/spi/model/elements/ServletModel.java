@@ -176,6 +176,9 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 	/** Failed validation because of empty mapping should be ignored according to 140.16.2.32 */
 	private boolean ignored;
 
+	/** Flag for models which were targeted for different runtime */
+	private boolean notMatched;
+
 	/**
 	 * Constructor used for servlet unregistration
 	 * @param alias
@@ -726,6 +729,14 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 
 	public boolean isIgnored() {
 		return ignored;
+	}
+
+	public void setNotMatched() {
+		this.notMatched = true;
+	}
+
+	public boolean isNotMatched() {
+		return notMatched;
 	}
 
 	/**

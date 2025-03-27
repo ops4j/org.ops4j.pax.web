@@ -120,6 +120,9 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 	/** Failed validation because of empty mapping should be ignored according to 140.16.2.15 */
 	private boolean ignored;
 
+	/** Flag for models which were targeted for different runtime */
+	private boolean notMatched;
+
 	/**
 	 * Constructor used for filter unregistration
 	 * @param filterName
@@ -590,6 +593,14 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 
 	public boolean isIgnored() {
 		return ignored;
+	}
+
+	public void setNotMatched() {
+		this.notMatched = true;
+	}
+
+	public boolean isNotMatched() {
+		return notMatched;
 	}
 
 	public static class Builder {
