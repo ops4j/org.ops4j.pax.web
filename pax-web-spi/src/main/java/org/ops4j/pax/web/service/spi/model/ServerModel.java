@@ -1492,7 +1492,7 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 				ServletModel existing = sc.getServletUrlPatternMapping().get(pattern);
 				if (existing != null) {
 					// service.ranking/service.id checking
-					if (model.compareTo(existing) < 0) {
+					if (model.compareTo(existing) < 0 || existing.getDtoFailureCode() >= DTOConstants.FAILURE_REASON_UNKNOWN) {
 						// we won, but still can lose, because it's not the only pattern (or the only context)
 						newlyDisabled.add(existing);
 					} else {

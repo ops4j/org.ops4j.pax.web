@@ -28,6 +28,7 @@ public class ContextStartChange extends Change {
 
 	private final String contextPath;
 	private final OsgiContextModel osgiContextModel;
+	private boolean async = true;
 
 	public ContextStartChange(OpCode op, String contextPath) {
 		super(op);
@@ -52,6 +53,14 @@ public class ContextStartChange extends Change {
 
 	public OsgiContextModel getOsgiContextModel() {
 		return osgiContextModel;
+	}
+
+	public boolean isAsync() {
+		return async;
+	}
+
+	public void setAsync(boolean async) {
+		this.async = async;
 	}
 
 }

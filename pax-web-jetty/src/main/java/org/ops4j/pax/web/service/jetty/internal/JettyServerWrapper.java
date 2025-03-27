@@ -64,6 +64,7 @@ import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.xml.XmlConfiguration;
 import org.ops4j.pax.web.service.AuthenticatorService;
+import org.ops4j.pax.web.service.PaxWebConfig;
 import org.ops4j.pax.web.service.jetty.internal.web.JettyResourceServlet;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.config.LogConfiguration;
@@ -245,6 +246,13 @@ class JettyServerWrapper implements BatchVisitor {
 
 	private final Map<String, TreeMap<OsgiContextModel, SecurityConfigurationModel>> contextSecurityConstraints = new HashMap<>();
 
+	/**
+	 * Whether contexts should be started immediately or only after some <em>active</em> element
+	 * (like Servlet) was registered. Pax Web runs with deferred configuration, but for TCK we switch
+	 * to immediate;
+	 */
+	private boolean deferredConfiguration = true;
+
 	JettyServerWrapper(Configuration config, JettyFactory jettyFactory,
 			Bundle paxWebJettyBundle, ClassLoader classLoader) {
 		this.configuration = config;
@@ -253,6 +261,10 @@ class JettyServerWrapper implements BatchVisitor {
 		this.classLoader = classLoader;
 
 		this.mainHandler = new PrioritizedHandlerCollection();
+
+		String flag = paxWebJettyBundle == null ? null
+				: paxWebJettyBundle.getBundleContext().getProperty(PaxWebConfig.BUNDLE_CONTEXT_PROPERTY_CONFIGURATION_DEFERRED);
+		deferredConfiguration = flag == null || Boolean.parseBoolean(flag);
 	}
 
 	// --- lifecycle and configuration methods
@@ -1127,6 +1139,10 @@ class JettyServerWrapper implements BatchVisitor {
 					return;
 				}
 
+				if (!deferredConfiguration && model.getLoadOnStartup() == null) {
+					model.setLoadOnStartup(0);
+				}
+
 				LOG.debug("Adding servlet {} to {}", model.getName(), contextPath);
 
 				// there may be many instances of ServletHolder using the same instance of servlet (added to
@@ -1668,12 +1684,18 @@ class JettyServerWrapper implements BatchVisitor {
 				// if there are many OsgiServletContexts per ServletContext)
 				servletContextHandler.addEventListener(eventListenerModel, eventListener);
 
-				if (stopped) {
+				if (stopped || !deferredConfiguration) {
 					// we have to start it again
 					// register a "callback batch operation", which will be submitted within a new batch
 					// as new task in single paxweb-config thread pool's thread
-					LOG.info("Scheduling start of the {} context after listener registration for already started context", contextPath);
-					change.registerBatchCompletedAction(new ContextStartChange(OpCode.MODIFY, contextPath));
+					if (stopped) {
+						LOG.info("Scheduling start of the {} context after listener registration for already started context", contextPath);
+					} else {
+						LOG.info("Scheduling start of the {} context after listener registration for immediately started context", contextPath);
+					}
+					ContextStartChange action = new ContextStartChange(OpCode.MODIFY, contextPath);
+					action.setAsync(change.getEventListenerModel().isAsynchronusRegistration());
+					change.registerBatchCompletedAction(action);
 				}
 			});
 		}

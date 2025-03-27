@@ -110,6 +110,7 @@ import io.undertow.servlet.handlers.ServletRequestContext;
 import io.undertow.servlet.util.ImmediateInstanceFactory;
 import io.undertow.servlet.util.InMemorySessionPersistence;
 import org.ops4j.pax.web.service.AuthenticatorService;
+import org.ops4j.pax.web.service.PaxWebConfig;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.config.LogConfiguration;
 import org.ops4j.pax.web.service.spi.config.SessionConfiguration;
@@ -386,12 +387,23 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 
 	private final Map<String, TreeMap<OsgiContextModel, SecurityConfigurationModel>> contextSecurityConstraints = new HashMap<>();
 
+	/**
+	 * Whether contexts should be started immediately or only after some <em>active</em> element
+	 * (like Servlet) was registered. Pax Web runs with deferred configuration, but for TCK we switch
+	 * to immediate;
+	 */
+	private boolean deferredConfiguration = true;
+
 	UndertowServerWrapper(Configuration config, UndertowFactory undertowFactory,
 			Bundle paxWebUndertowBundle, ClassLoader classLoader) {
 		this.configuration = config;
 		this.undertowFactory = undertowFactory;
 		this.paxWebUndertowBundle = paxWebUndertowBundle;
 		this.classLoader = classLoader;
+
+		String flag = paxWebUndertowBundle == null ? null
+				: paxWebUndertowBundle.getBundleContext().getProperty(PaxWebConfig.BUNDLE_CONTEXT_PROPERTY_CONFIGURATION_DEFERRED);
+		deferredConfiguration = flag == null || Boolean.parseBoolean(flag);
 	}
 
 	// --- lifecycle and configuration methods
@@ -1501,6 +1513,10 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 					return;
 				}
 
+				if (!deferredConfiguration && model.getLoadOnStartup() == null) {
+					model.setLoadOnStartup(0);
+				}
+
 				LOG.debug("Adding servlet {} to {}", model.getName(), contextPath);
 
 				// manager (lifecycle manager of the deployment) - null until
@@ -2108,12 +2124,18 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 					}
 				}
 
-				if (stopped) {
+				if (stopped || !deferredConfiguration) {
 					// we have to start it again
 					// register a "callback batch operation", which will be submitted within a new batch
 					// as new task in single paxweb-config thread pool's thread
-					LOG.info("Scheduling start of the {} context after listener registration for already started context", contextPath);
-					change.registerBatchCompletedAction(new ContextStartChange(OpCode.MODIFY, contextPath));
+					if (stopped) {
+						LOG.info("Scheduling start of the {} context after listener registration for already started context", contextPath);
+					} else {
+						LOG.info("Scheduling start of the {} context after listener registration for immediately started context", contextPath);
+					}
+					ContextStartChange action = new ContextStartChange(OpCode.MODIFY, contextPath);
+					action.setAsync(change.getEventListenerModel().isAsynchronusRegistration());
+					change.registerBatchCompletedAction(action);
 				}
 			});
 		}

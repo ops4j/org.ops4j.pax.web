@@ -1085,17 +1085,29 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 					// registration change may contain a "callback change" that has to be scheduled in another tick
 					// of the event (config) thread
 					Batch toSchedule = new Batch("After registration of " + model);
+					boolean sync = false;
 					for (Change c : batch.getOperations()) {
-						if (c.getBatchCompletedAction() != null) {
-							toSchedule.getOperations().add(c.getBatchCompletedAction());
+						Change action = c.getBatchCompletedAction();
+						if (action != null) {
+							toSchedule.getOperations().add(action);
+							if (action instanceof ContextStartChange) {
+								sync |= !((ContextStartChange) action).isAsync();
+							}
 						}
 					}
 					if (!toSchedule.getOperations().isEmpty()) {
 						LOG.info("Scheduling {}", toSchedule);
-						serverModel.runAsync(() -> {
-							serverController.sendBatch(toSchedule);
-							return null;
-						});
+						if (sync) {
+							serverModel.run(() -> {
+								serverController.sendBatch(toSchedule);
+								return null;
+							}, false);
+						} else {
+							serverModel.runAsync(() -> {
+								serverController.sendBatch(toSchedule);
+								return null;
+							});
+						}
 					}
 
 					event(WebElementEvent.State.DEPLOYED, model);

@@ -78,6 +78,7 @@ import org.apache.tomcat.util.descriptor.web.WebXmlParser;
 import org.apache.tomcat.util.digester.Digester;
 import org.apache.tomcat.util.http.Rfc6265CookieProcessor;
 import org.apache.tomcat.util.http.SameSiteCookies;
+import org.ops4j.pax.web.service.PaxWebConfig;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.config.LogConfiguration;
 import org.ops4j.pax.web.service.spi.config.SessionConfiguration;
@@ -159,6 +160,13 @@ class TomcatServerWrapper implements BatchVisitor {
 	 * Outside of OSGi, let's use passed ClassLoader
 	 */
 	private final ClassLoader classLoader;
+
+	/**
+	 * Whether contexts should be started immediately or only after some <em>active</em> element
+	 * (like Servlet) was registered. Pax Web runs with deferred configuration, but for TCK we switch
+	 * to immediate;
+	 */
+	private boolean deferredConfiguration = true;
 
 	/**
 	 * Actual instance of {@link org.apache.catalina.core.StandardServer}. In Jetty we had extended class. Here
@@ -272,6 +280,10 @@ class TomcatServerWrapper implements BatchVisitor {
 		this.tomcatFactory = tomcatFactory;
 		this.paxWebTomcatBundle = paxWebTomcatBundle;
 		this.classLoader = classLoader;
+
+		String flag = paxWebTomcatBundle == null ? null
+				: paxWebTomcatBundle.getBundleContext().getProperty(PaxWebConfig.BUNDLE_CONTEXT_PROPERTY_CONFIGURATION_DEFERRED);
+		deferredConfiguration = flag == null || Boolean.parseBoolean(flag);
 	}
 
 	// --- lifecycle and configuration methods
@@ -1148,6 +1160,10 @@ class TomcatServerWrapper implements BatchVisitor {
 					return;
 				}
 
+				if (!deferredConfiguration && model.getLoadOnStartup() == null) {
+					model.setLoadOnStartup(0);
+				}
+
 				LOG.debug("Adding servlet {} to {}", model.getName(), contextPath);
 
 				// there should already be a context for this path
@@ -1537,12 +1553,18 @@ class TomcatServerWrapper implements BatchVisitor {
 					standardContext.addApplicationEventListener(eventListenerModel, eventListener);
 				}
 
-				if (stopped) {
+				if (stopped || !deferredConfiguration) {
 					// we have to start it again
 					// register a "callback batch operation", which will be submitted within a new batch
 					// as new task in single paxweb-config thread pool's thread
-					LOG.info("Scheduling start of the {} context after listener registration for already started context", contextPath);
-					change.registerBatchCompletedAction(new ContextStartChange(OpCode.MODIFY, contextPath));
+					if (stopped) {
+						LOG.info("Scheduling start of the {} context after listener registration for already started context", contextPath);
+					} else {
+						LOG.info("Scheduling start of the {} context after listener registration for immediately started context", contextPath);
+					}
+					ContextStartChange action = new ContextStartChange(OpCode.MODIFY, contextPath);
+					action.setAsync(change.getEventListenerModel().isAsynchronusRegistration());
+					change.registerBatchCompletedAction(action);
 				}
 			});
 		}
