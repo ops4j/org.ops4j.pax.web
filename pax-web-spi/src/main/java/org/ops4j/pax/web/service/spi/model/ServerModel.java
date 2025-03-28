@@ -1611,6 +1611,9 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 		prepareServletsSnapshot(currentlyEnabledByName, currentlyEnabledByPattern, currentlyDisabled,
 				null, new HashSet<>(models));
 
+		// no need to enable currently disabled if these are just being removed!
+		models.forEach(currentlyDisabled::remove);
+
 		// review all disabled servlet models (in ranking order) to verify if they can be enabled again
 		reEnableServletModels(currentlyDisabled, currentlyEnabledByName, currentlyEnabledByPattern, null, batch);
 	}
@@ -1931,6 +1934,9 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 		Map<String, TreeMap<FilterModel, List<OsgiContextModel>>> currentlyEnabledByPath = new HashMap<>();
 		Set<FilterModel> currentlyDisabled = new TreeSet<>();
 		prepareFiltersSnapshot(currentlyEnabledByPath, currentlyDisabled, null, new HashSet<>(models));
+
+		// no need to enable currently disabled if these are just being removed!
+		models.forEach(currentlyDisabled::remove);
 
 		// review all disabled filter models (in ranking order) to verify if they can be enabled again
 		reEnableFilterModels(currentlyDisabled, currentlyEnabledByPath, null, batch);
@@ -2763,6 +2769,7 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 				// enable a servlet in all associated contexts
 				Set<ServletContextModel> servletContexts = getServletContextModels(model);
 				servletContexts.forEach(sc -> sc.enableServletModel(model));
+//				if (model.getDtoFailureCode() == -1) {
 				disabledServletModels.remove(model);
 				if (model.getErrorPageModel() != null) {
 					servletContexts.forEach(sc -> sc.enableErrorPageModel(model.getErrorPageModel()));
@@ -2771,6 +2778,7 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 					}
 					disabledErrorPageModels.remove(model.getErrorPageModel());
 				}
+//				}
 				break;
 			}
 			case DISABLE: {

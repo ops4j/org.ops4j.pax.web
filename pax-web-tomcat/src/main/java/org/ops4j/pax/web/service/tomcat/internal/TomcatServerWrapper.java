@@ -40,6 +40,7 @@ import jakarta.servlet.Servlet;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletContextAttributeListener;
 import jakarta.servlet.ServletContextListener;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.SessionCookieConfig;
 import jakarta.servlet.http.HttpSessionAttributeListener;
 import jakarta.servlet.http.HttpSessionListener;
@@ -1232,7 +1233,14 @@ class TomcatServerWrapper implements BatchVisitor {
 				}
 
 				if (!change.isDynamic()) {
-					ensureServletContextStarted(realContext);
+					boolean alreadyStarted = ensureServletContextStarted(realContext);
+					if (alreadyStarted && model.getLoadOnStartup() != null && model.getLoadOnStartup() >= 0) {
+						try {
+							wrapper.load();
+						} catch (ServletException | IllegalStateException e) {
+							LOG.warn("Exception loading {} added to already started context: {}", model, e.getMessage());
+						}
+					}
 				} else if (model.isServletSecurityPresent()) {
 					// let's check the dynamic servlet security constraints - not necessarily from the highest
 					// ranked OsgiContextModel, but from OsgiContextModel of the servlet
@@ -2084,11 +2092,12 @@ class TomcatServerWrapper implements BatchVisitor {
 	 * {@link org.ops4j.pax.web.service.spi.model.ServerModel}.</p>
 	 *
 	 * @param context
+	 * @return {@code true} if the context was already started
 	 */
-	private void ensureServletContextStarted(PaxWebStandardContext context) {
+	private boolean ensureServletContextStarted(PaxWebStandardContext context) {
 		String contextPath = context == null || context.getPath().equals("") ? "/" : context.getPath();
 		if (context == null || context.isStarted() || context.getState() == LifecycleState.DESTROYED || pendingTransaction(contextPath)) {
-			return;
+			return context != null && context.isStarted();
 		}
 		try {
 			OsgiContextModel highestRanked = context.getDefaultOsgiContextModel();
@@ -2218,6 +2227,7 @@ class TomcatServerWrapper implements BatchVisitor {
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
 		}
+		return false;
 	}
 
 	private boolean pendingTransaction(String contextPath) {

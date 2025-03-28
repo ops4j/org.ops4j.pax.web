@@ -1238,7 +1238,14 @@ class JettyServerWrapper implements BatchVisitor {
 				}
 
 				if (!change.isDynamic()) {
-					ensureServletContextStarted(sch);
+					boolean alreadyStarted = ensureServletContextStarted(sch);
+					if (alreadyStarted && model.getLoadOnStartup() != null && model.getLoadOnStartup() >= 0) {
+						try {
+							holder.initialize();
+						} catch (Exception e) {
+							LOG.warn("Exception loading {} added to already started context: {}", model, e.getMessage());
+						}
+					}
 				} else if (model.isServletSecurityPresent() && sch.getSecurityHandler() != null) {
 					// let's check the dynamic servlet security constraints - not necessarily from the highest
 					// ranked OsgiContextModel, but from OsgiContextModel of the servlet
@@ -2186,11 +2193,12 @@ class JettyServerWrapper implements BatchVisitor {
 	 * it's called in visit() methods for servlets (including resources) and filters, so we can safely access
 	 * {@link org.ops4j.pax.web.service.spi.model.ServerModel}.</p>
 	 * @param sch
+	 * @return {@code true} if the context was already started
 	 */
-	private void ensureServletContextStarted(PaxWebServletContextHandler sch) {
+	private boolean ensureServletContextStarted(PaxWebServletContextHandler sch) {
 		String contextPath = sch.getContextPath().equals("") ? "/" : sch.getContextPath();
 		if (sch.isStarted() || pendingTransaction(contextPath)) {
-			return;
+			return sch.isStarted();
 		}
 		try {
 			OsgiContextModel highestRanked = ((PaxWebServletHandler) sch.getServletHandler()).getDefaultOsgiContextModel();
@@ -2460,6 +2468,7 @@ class JettyServerWrapper implements BatchVisitor {
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
 		}
+		return false;
 	}
 
 	private Authenticator getAuthenticator(String authMethod) {

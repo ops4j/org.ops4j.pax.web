@@ -251,7 +251,7 @@ public class BundleWhiteboardApplication {
 			return;
 		}
 
-		if (webElement.isValid() && webElement.getContextModels().size() > 0) {
+		if (/*webElement.isValid() && */webElement.getContextModels().size() > 0) {
 			// otherwise, this element may have already been unregistered
 			webElement.unregister(view);
 		}

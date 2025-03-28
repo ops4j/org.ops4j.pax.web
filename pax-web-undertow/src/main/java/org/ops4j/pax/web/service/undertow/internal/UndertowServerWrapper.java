@@ -1583,8 +1583,9 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 				// because this is possible (as required by methods like jakarta.servlet.ServletContext.addServlet())
 				// we can't go the easy way when _removing_ servlets
 				deploymentInfo.addServlet(info);
+				ServletHandler servletHandler = null;
 				if (deployment != null) {
-					deployment.getServlets().addServlet(info);
+					servletHandler = deployment.getServlets().addServlet(info);
 				}
 
 				// are there any error page declarations in the model?
@@ -1630,6 +1631,17 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 
 				if (!change.isDynamic()) {
 					ensureServletContextStarted(contextPath);
+					boolean alreadyStarted = ensureServletContextStarted(contextPath);
+					if (alreadyStarted && model.getLoadOnStartup() != null && model.getLoadOnStartup() >= 0) {
+						try {
+							ManagedServlet managedServlet = servletHandler.getManagedServlet();
+							if (managedServlet != null) {
+								managedServlet.start();
+							}
+						} catch (ServletException | IllegalStateException e) {
+							LOG.warn("Exception loading {} added to already started context: {}", model, e.getMessage());
+						}
+					}
 				} else if (model.isServletSecurityPresent()) {
 					List<SecurityConstraintModel> dynamicModels = new ArrayList<>();
 					model.getContextModels().forEach(ocm -> {
@@ -2637,13 +2649,14 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 	 * it's called in visit() methods for servlets (including resources) and filters, so we can safely access
 	 * {@link org.ops4j.pax.web.service.spi.model.ServerModel}.</p>
 	 * @param contextPath
+	 * @return {@code true} if the context was already started
 	 */
-	private void ensureServletContextStarted(final String contextPath) {
+	private boolean ensureServletContextStarted(final String contextPath) {
 		DeploymentManager manager = getDeploymentManager(contextPath);
 
 		if (manager != null || pendingTransaction(contextPath) || !deploymentInfos.containsKey(contextPath)
 				|| securityHandlers.get(contextPath).getDefaultOsgiContextModel() == null) {
-			return;
+			return manager != null;
 		}
 		try {
 			OsgiContextModel highestRanked = securityHandlers.get(contextPath).getDefaultOsgiContextModel();
@@ -2978,6 +2991,7 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 			throw new IllegalStateException("Can't start Undertow context "
 					+ contextPath + ": " + e.getMessage(), e);
 		}
+		return false;
 	}
 
 	private boolean pendingTransaction(String contextPath) {
