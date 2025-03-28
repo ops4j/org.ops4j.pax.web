@@ -133,7 +133,6 @@
 <!--								<latestStableVersion>${baseline.version}</latestStableVersion>-->
 <!--								<servletVersion>${dependency.jakarta.servlet-api}</servletVersion>-->
 <!--								<jspVersion>${dependency.jakarta.servlet.jsp-api}</jspVersion>-->
-<!--								<jsfVersion>${dependency.dependency.org.apache.myfaces}</jsfVersion>-->
 <!--							</attributes>-->
 <!--						</configuration>-->
 <!--					</execution>-->

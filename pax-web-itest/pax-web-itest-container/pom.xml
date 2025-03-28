@@ -86,7 +86,6 @@
 						<jakarta-xml-bind-api.version>${dependency.jakarta.xml.bind-api}</jakarta-xml-bind-api.version>
 						<activation.version>${dependency.com.sun.activation}</activation.version>
 						<karaf.version>${dependency.org.apache.karaf}</karaf.version>
-						<myfaces.version>${dependency.org.apache.myfaces}</myfaces.version>
 						<owasp-encoder.version>${dependency.org.owasp.encoder}</owasp-encoder.version>
 						<pax-web.version>${project.version}</pax-web.version>
 					</systemPropertyVariables>

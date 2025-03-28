@@ -738,15 +738,6 @@
 			<artifactId>jakarta.websocket-client-api</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>org.apache.myfaces.core</groupId>
-			<artifactId>myfaces-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.myfaces.core</groupId>
-			<artifactId>myfaces-impl</artifactId>
-		</dependency>
-
 		<!-- ServiceMIX -->
 
 		<dependency>

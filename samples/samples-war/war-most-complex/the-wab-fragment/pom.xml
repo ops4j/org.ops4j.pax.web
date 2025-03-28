@@ -42,9 +42,6 @@
 				<configuration>
 					<instructions>
 						<Require-Bundle>org.ops4j.pax.web.samples.container-bundle-2</Require-Bundle>
-						<Import-Package>
-							org.apache.myfaces.application
-						</Import-Package>
 						<Private-Package />
 						<Fragment-Host>org.ops4j.pax.web.samples.the-wab-itself</Fragment-Host>
 					</instructions>

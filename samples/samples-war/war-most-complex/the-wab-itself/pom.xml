@@ -57,8 +57,7 @@
 								wiring to container-bundle-1, which is wired to container-bundle-3, which itself
 								won't be wired directly to the-wab-itself
 							-->
-							org.ops4j.pax.web.samples.war.cb1.utils,
-							org.apache.myfaces.config
+							org.ops4j.pax.web.samples.war.cb1.utils
 						</Import-Package>
 						<Private-Package>
 							org.ops4j.pax.web.samples.war,
@@ -119,12 +118,6 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.myfaces.core</groupId>
-			<artifactId>myfaces-impl</artifactId>
 			<scope>provided</scope>
 		</dependency>
 

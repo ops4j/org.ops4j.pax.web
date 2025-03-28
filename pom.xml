@@ -236,8 +236,6 @@
 		<dependency.org.apache.httpcomponents.core5>5.3.3</dependency.org.apache.httpcomponents.core5>
 		<dependency.org.apache.karaf>4.4.7</dependency.org.apache.karaf>
 		<dependency.org.apache.logging.log4j>2.24.3</dependency.org.apache.logging.log4j>
-		<!-- JSF in general doesn't work because of CDI 4 support in OSGi. We only use it for SCI/initialization tests -->
-		<dependency.org.apache.myfaces>4.1.1</dependency.org.apache.myfaces>
 		<dependency.org.apache.servicemix.bundles.aopalliance>1.0_6</dependency.org.apache.servicemix.bundles.aopalliance>
 		<dependency.org.apache.servicemix.bundles.jasypt>1.9.3_1</dependency.org.apache.servicemix.bundles.jasypt>
 		<dependency.org.apache.servicemix.bundles.javax-inject>1_3</dependency.org.apache.servicemix.bundles.javax-inject>
@@ -2478,23 +2476,6 @@
 			</dependency>
 
 			<dependency>
-				<groupId>org.apache.myfaces.core</groupId>
-				<artifactId>myfaces-api</artifactId>
-				<version>${dependency.org.apache.myfaces}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.apache.geronimo.specs</groupId>
-						<artifactId>geronimo-atinject_1.0_spec</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.myfaces.core</groupId>
-				<artifactId>myfaces-impl</artifactId>
-				<version>${dependency.org.apache.myfaces}</version>
-			</dependency>
-
-			<dependency>
 				<groupId>org.eclipse.jdt</groupId>
 				<artifactId>ecj</artifactId>
 				<version>${dependency.org.eclipse.jdt.ecj}</version>
@@ -3109,78 +3090,6 @@
 				</plugins>
 			</build>
 		</profile>
-
-<!--		<profile>-->
-<!--			<id>code-coverage</id>-->
-<!--			<build>-->
-<!--				<plugins>-->
-<!--					<plugin>-->
-<!--						<groupId>org.jacoco</groupId>-->
-<!--						<artifactId>jacoco-maven-plugin</artifactId>-->
-<!--						<inherited>true</inherited>-->
-<!--						<executions>-->
-<!--							<execution>-->
-<!--								<id>prepare-agent-tests</id>-->
-<!--								<goals>-->
-<!--									<goal>prepare-agent</goal>-->
-<!--								</goals>-->
-<!--								<phase>process-sources</phase>-->
-<!--								<configuration>-->
-<!--									<includes>-->
-<!--										<include>org.ops4j.pax.web.*</include>-->
-<!--									</includes>-->
-<!--									<propertyName>jcoverage.command</propertyName>-->
-<!--									<excludes>-->
-<!--										<exclude>org.apache.jasper</exclude>-->
-<!--										<exclude>org.apache.jasper.compiler</exclude>-->
-<!--										<exclude>org.apache.jasper.servlet</exclude>-->
-<!--										<exclude>org.apache.myfaces.test</exclude>-->
-<!--										<exclude>org.ops4j.pax.web.extender.samples.*</exclude>-->
-<!--										<exclude>org.ops4j.pax.web.itest.*</exclude>-->
-<!--										<exclude>org.ops4j.pax.web.samples.*</exclude>-->
-<!--										<exclude>org.apache.xbean.*</exclude>-->
-<!--									</excludes>-->
-<!--									<append>true</append>-->
-<!--								</configuration>-->
-<!--							</execution>-->
-<!--							<execution>-->
-<!--								<id>prepare-agent-integration</id>-->
-<!--								<goals>-->
-<!--									<goal>prepare-agent-integration</goal>-->
-<!--								</goals>-->
-<!--								<phase>pre-integration-test</phase>-->
-<!--								<configuration>-->
-<!--									<propertyName>jcoverage.command</propertyName>-->
-<!--									<destFile>${sonar.jacoco.itReportPath}</destFile>-->
-<!--									<includes>-->
-<!--										<include>org.ops4j.pax.web.*</include>-->
-<!--									</includes>-->
-<!--									<excludes>-->
-<!--										<exclude>org.apache.jasper</exclude>-->
-<!--										<exclude>org.apache.jasper.compiler</exclude>-->
-<!--										<exclude>org.apache.jasper.servlet</exclude>-->
-<!--										<exclude>org.apache.myfaces.test</exclude>-->
-<!--										<exclude>org.ops4j.pax.web.utils.ClassPathUtil</exclude>-->
-<!--										<exclude>org.ops4j.pax.web.extender.samples.*</exclude>-->
-<!--										<exclude>org.ops4j.pax.web.itest.*</exclude>-->
-<!--										<exclude>org.ops4j.pax.web.samples.*</exclude>-->
-<!--										<exclude>org.apache.xbean.*</exclude>-->
-<!--										<exclude>org.objectweb.asm.*</exclude>-->
-<!--									</excludes>-->
-<!--									<append>true</append>-->
-<!--								</configuration>-->
-<!--							</execution>-->
-<!--							<execution>-->
-<!--								<id>report-test</id>-->
-<!--								<goals>-->
-<!--									<goal>report</goal>-->
-<!--								</goals>-->
-<!--							</execution>-->
-<!--						</executions>-->
-<!--					</plugin>-->
-<!--				</plugins>-->
-<!--			</build>-->
-<!--		</profile>-->
 
 		<!-- License generation: `mvn -Plicense process-sources` -->
 		<profile>

@@ -103,13 +103,6 @@
 			<scope>runtime</scope>
 		</dependency>
 
-		<dependency>
-			<!-- Can't be added to maven-failsafe-plugin classpath -->
-			<groupId>org.apache.myfaces.core</groupId>
-			<artifactId>myfaces-api</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-
 	</dependencies>
 
 </project>
