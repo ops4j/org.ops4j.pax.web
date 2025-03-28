@@ -172,7 +172,7 @@ public abstract class AbstractHttpServiceBundleIntegrationTest extends AbstractC
 		assertEquals(fullContent, writer.toString());
 
 		// Now register the Filter under some alias...
-		service.registerFilter(filter, new String[] { "*", "/*", "/", "/some/random/path" }, null, null, null);
+		service.registerFilter(filter, new String[] { "/*", "/", "/some/random/path" }, null, null, null);
 
 		// If it works, always the filter should take over and return the same string regardeless of the URL
 		HttpTestClientFactory.createDefaultTestClient()

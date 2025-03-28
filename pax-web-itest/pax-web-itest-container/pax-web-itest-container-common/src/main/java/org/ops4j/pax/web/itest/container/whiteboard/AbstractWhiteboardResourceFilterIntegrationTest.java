@@ -60,7 +60,7 @@ public abstract class AbstractWhiteboardResourceFilterIntegrationTest extends Ab
 	@Test
 	public void testWhiteBoardFiltered() throws Exception {
 		Dictionary<String, String> props = new Hashtable<>();
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "*");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/*");
 		SimpleFilter simpleFilter = new SimpleFilter();
 		ServiceRegistration<Filter> filter = context.registerService(Filter.class, simpleFilter, props);
 

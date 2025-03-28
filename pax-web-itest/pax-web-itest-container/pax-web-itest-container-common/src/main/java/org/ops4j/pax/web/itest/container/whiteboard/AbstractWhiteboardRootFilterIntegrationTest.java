@@ -66,7 +66,7 @@ public abstract class AbstractWhiteboardRootFilterIntegrationTest extends Abstra
 	@Test
 	public void testWhiteBoardFiltered() throws Exception {
 		Dictionary<String, String> props = new Hashtable<>();
-		props.put("urlPatterns", "*");
+		props.put("urlPatterns", "/*");
 		ServiceRegistration<Filter> filter = context.registerService(
 				Filter.class, new WhiteboardFilter(), props);
 
