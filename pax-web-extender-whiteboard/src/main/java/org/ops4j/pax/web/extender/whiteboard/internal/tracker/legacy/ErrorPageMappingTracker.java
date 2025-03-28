@@ -43,6 +43,7 @@ public class ErrorPageMappingTracker extends AbstractMappingTracker<ErrorPageMap
 	@Override
 	protected ErrorPageModel doCreateElementModel(Bundle bundle, ErrorPageMapping service, Integer rank, Long serviceId) {
 		ErrorPageModel errorPageModel = new ErrorPageModel(service.getErrors(), service.getLocation());
+		errorPageModel.setName(errorPageModel.getId());
 		errorPageModel.setRegisteringBundle(bundle);
 		errorPageModel.setServiceRank(rank);
 		errorPageModel.setServiceId(serviceId);

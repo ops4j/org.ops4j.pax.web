@@ -21,8 +21,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.ops4j.pax.web.service.spi.model.events.ErrorPageEventData;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 import org.ops4j.pax.web.service.whiteboard.ErrorPageMapping;
@@ -53,6 +57,8 @@ public class ErrorPageModel extends ElementModel<ErrorPageMapping, ErrorPageEven
 	private boolean xx5 = false;
 	private final List<Integer> errorCodes = new ArrayList<>();
 	private final List<String> exceptionClassNames = new ArrayList<>();
+
+	private String name;
 
 	/**
 	 * Constructor used for unregistration purposes.
@@ -89,6 +95,14 @@ public class ErrorPageModel extends ElementModel<ErrorPageMapping, ErrorPageEven
 		return data;
 	}
 
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
 	public String[] getErrorPages() {
 		return errorPages;
 	}
@@ -109,14 +123,30 @@ public class ErrorPageModel extends ElementModel<ErrorPageMapping, ErrorPageEven
 			dto.initParams = new HashMap<>(sm.getInitParams());
 			dto.serviceId = sm.getServiceId();
 		} else {
-			dto.name = getId();
+			dto.name = name;
 			dto.asyncSupported = false;
 			dto.initParams = new HashMap<>();
 			dto.serviceId = getServiceId();
 		}
 		dto.servletContextId = 0L;
 		dto.servletInfo = null;
-		dto.errorCodes = errorCodes.stream().mapToLong(Integer::longValue).toArray();
+		Set<Long> codes = errorCodes.stream().map(Integer::longValue)
+				.collect(Collectors.toCollection(TreeSet::new));
+		for (String ep : errorPages) {
+			if ("4xx".equals(ep)) {
+				// 140.16.2.24: "all error codes in the 400 range"
+				// hard to tell what is "all error codes"...
+				for (int c = 400; c <= HttpServletResponse.SC_UPGRADE_REQUIRED; c++) {
+					codes.add((long) c);
+				}
+			}
+			if ("5xx".equals(ep)) {
+				for (int c = 500; c <= HttpServletResponse.SC_HTTP_VERSION_NOT_SUPPORTED; c++) {
+					codes.add((long) c);
+				}
+			}
+		}
+		dto.errorCodes = codes.stream().mapToLong(Long::longValue).toArray();
 		dto.exceptions = exceptionClassNames.toArray(new String[0]);
 		dto.failureReason = dtoFailureCode;
 		return dto;
@@ -138,7 +168,23 @@ public class ErrorPageModel extends ElementModel<ErrorPageMapping, ErrorPageEven
 		// will be set later
 		dto.servletContextId = 0L;
 		dto.servletInfo = null;
-		dto.errorCodes = errorCodes.stream().mapToLong(Integer::longValue).toArray();
+		Set<Long> codes = errorCodes.stream().map(Integer::longValue)
+				.collect(Collectors.toCollection(TreeSet::new));
+		for (String ep : errorPages) {
+			if ("4xx".equals(ep)) {
+				// 140.16.2.24: "all error codes in the 400 range"
+				// hard to tell what is "all error codes"...
+				for (int c = 400; c <= HttpServletResponse.SC_UPGRADE_REQUIRED; c++) {
+					codes.add((long) c);
+				}
+			}
+			if ("5xx".equals(ep)) {
+				for (int c = 500; c <= HttpServletResponse.SC_HTTP_VERSION_NOT_SUPPORTED; c++) {
+					codes.add((long) c);
+				}
+			}
+		}
+		dto.errorCodes = codes.stream().mapToLong(Long::longValue).toArray();
 		dto.exceptions = exceptionClassNames.toArray(new String[0]);
 		return dto;
 	}

@@ -140,6 +140,7 @@ public class ServerControllerErrorPagesTest extends MultiContainerTestSupport {
 
 		// errorPages#1 registered in /c1 and /c2
 		ErrorPageModel em1 = new ErrorPageModel(new String[] { "461", th }, "/error/ep1");
+		em1.setName(em1.getId());
 		em1.setServiceRank(0);
 		em1.setServiceId(++serviceId);
 		view.registerErrorPages(Arrays.asList(wcc1, wcc2), em1);

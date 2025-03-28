@@ -406,7 +406,13 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 			dontIgnore = true;
 			// a tricky way to validate such declaration - embed full ErrorPageModel
 			ErrorPageModel epm = new ErrorPageModel(errorDeclarations);
+			// name comes from ServletModel
+			epm.setName(this.name);
+			epm.setServiceRank(this.getServiceRank());
 			epm.setRegisteringBundle(getRegisteringBundle());
+			for (OsgiContextModel cm : getContextModels()) {
+				epm.addContextModel(cm);
+			}
 			String errorPageExact = null;
 			String errorPagePrefix = null;
 			String errorPageExtension = null;

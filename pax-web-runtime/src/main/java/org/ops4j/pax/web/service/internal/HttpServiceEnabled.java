@@ -482,6 +482,21 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 				LOG.info("Registering {}", model);
 
+				if (model.getErrorPageModel() != null) {
+					translateContexts(httpContexts, model.getErrorPageModel(), batch);
+					try {
+						model.performValidation();
+					} catch (Exception e) {
+						throw new RuntimeException(e.getMessage(), e);
+					}
+
+					LOG.info("Registering (as part of ServletModel) {}", model.getErrorPageModel());
+
+					// error page models are a bit like servlets - there may be mapping conflicts and shadowing
+					// of error page models by service ranking
+					serverModel.addErrorPageModel(model.getErrorPageModel(), batch);
+				}
+
 				// adding servlet model may lead to unregistration of some other, lower-ranked models, so batch
 				// may have some unregistration changes added
 				serverModel.addServletModel(model, batch);
@@ -1339,6 +1354,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 	@Override
 	public void registerErrorPages(String[] errors, String location, HttpContext httpContext) {
 		ErrorPageModel model = new ErrorPageModel(errors, location);
+		model.setName(model.getName());
 		doRegisterErrorPages(Collections.singletonList(httpContext), model);
 	}
 

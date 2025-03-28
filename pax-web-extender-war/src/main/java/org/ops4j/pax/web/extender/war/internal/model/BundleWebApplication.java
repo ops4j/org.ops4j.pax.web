@@ -1870,6 +1870,8 @@ public class BundleWebApplication {
 		});
 		locationToPage.forEach((l, pages) -> {
 			ErrorPageModel epm = new ErrorPageModel(pages.toArray(new String[0]), l);
+			// there's no associated ServletModel
+			epm.setName(epm.getId());
 			epm.setRegisteringBundle(bundle);
 			epm.addContextModel(ocm);
 			epm.performValidation();

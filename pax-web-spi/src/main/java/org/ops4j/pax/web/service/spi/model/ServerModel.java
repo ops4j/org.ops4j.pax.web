@@ -2766,6 +2766,9 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 				disabledServletModels.remove(model);
 				if (model.getErrorPageModel() != null) {
 					servletContexts.forEach(sc -> sc.enableErrorPageModel(model.getErrorPageModel()));
+					if (model.getErrorPageModel().getDtoFailureCode() == DTOConstants.FAILURE_REASON_SHADOWED_BY_OTHER_SERVICE) {
+						model.getErrorPageModel().setDtoFailureCode(-1);
+					}
 					disabledErrorPageModels.remove(model.getErrorPageModel());
 				}
 				break;
@@ -2779,6 +2782,7 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 				if (model.getErrorPageModel() != null) {
 					servletContexts.forEach(sc -> sc.disableErrorPageModel(model.getErrorPageModel()));
 					disabledErrorPageModels.add(model.getErrorPageModel());
+					model.getErrorPageModel().setDtoFailureCode(DTOConstants.FAILURE_REASON_SHADOWED_BY_OTHER_SERVICE);
 				}
 				break;
 			}
@@ -3210,8 +3214,10 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 						failedServletDTOs.add(sm.toFailedServletDTO(sm.getDtoFailureCode()));
 						return;
 					}
-					if (sm.getErrorPageModel() != null && !sm.getErrorPageModel().isValid()) {
-						failedErrorPageDTOs.add(sm.getErrorPageModel().toFailedDTO(sm, sm.getErrorPageModel().getDtoFailureCode()));
+					ErrorPageModel epm = sm.getErrorPageModel();
+					// DTO failure may be set dynamically after validation
+					if (epm != null && (!epm.isValid() || epm.getDtoFailureCode() != -1)) {
+						failedErrorPageDTOs.add(epm.toFailedDTO(sm, epm.getDtoFailureCode()));
 						return;
 					}
 				}
