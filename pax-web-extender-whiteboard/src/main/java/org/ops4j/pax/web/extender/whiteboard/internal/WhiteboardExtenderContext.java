@@ -246,7 +246,7 @@ public class WhiteboardExtenderContext implements WebContainerListener, WebConte
 		}
 		lock.lock();
 		try {
-			if (selector == null || selector == AbstractElementTracker.DEFAULT_CONTEXT_SELECTOR_FILTER) {
+			if (selector == null/* || selector == AbstractElementTracker.DEFAULT_CONTEXT_SELECTOR_FILTER*/) {
 				// easy - highest ranked "default" context model
 				OsgiContextModel defaultModel
 						= osgiContexts.get(HttpWhiteboardConstants.HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME).iterator().next();

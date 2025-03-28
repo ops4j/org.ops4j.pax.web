@@ -109,6 +109,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import org.ops4j.pax.web.service.http.HttpContext;
 import org.ops4j.pax.web.service.http.NamespaceException;
+import org.osgi.service.servlet.runtime.dto.DTOConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -482,19 +483,34 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 
 				LOG.info("Registering {}", model);
 
+				// when ServletModel comes with ErrorPage model there's one special TCK
+				// scenario where ErrorPages are invalid because there's a conflict
+				// however it is dicovered only by calling ServerModel.addErrorPageModel()...
+				// but because we kind of carry the error model with servlet model and update ServerModel and
+				// server wrappers, we need to be clever here...
 				if (model.getErrorPageModel() != null) {
-					translateContexts(httpContexts, model.getErrorPageModel(), batch);
+					for (OsgiContextModel m : model.getContextModels()) {
+						model.getErrorPageModel().addContextModel(m);
+					}
+
 					try {
 						model.performValidation();
 					} catch (Exception e) {
 						throw new RuntimeException(e.getMessage(), e);
 					}
 
-					LOG.info("Registering (as part of ServletModel) {}", model.getErrorPageModel());
-
+					Batch tmpBatch = new Batch("Error Page model validation batch");
 					// error page models are a bit like servlets - there may be mapping conflicts and shadowing
 					// of error page models by service ranking
-					serverModel.addErrorPageModel(model.getErrorPageModel(), batch);
+					serverModel.addErrorPageModel(model.getErrorPageModel(), tmpBatch);
+					for (Change op : tmpBatch.getOperations()) {
+						if (op instanceof ErrorPageModelChange && op.getKind() == OpCode.ADD) {
+							ErrorPageModelChange c = (ErrorPageModelChange) op;
+							if (c.getErrorPageModel() == model.getErrorPageModel() && c.isDisabled()) {
+								model.getErrorPageModel().setDtoFailureCode(DTOConstants.FAILURE_REASON_SHADOWED_BY_OTHER_SERVICE);
+							}
+						}
+					}
 				}
 
 				// adding servlet model may lead to unregistration of some other, lower-ranked models, so batch
@@ -666,7 +682,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 							LOG.info("Unregistering servlet by refernce \"{}\"", reference);
 
 							for (ServletModel existing : serviceModel.getServletModels()) {
-								if (existing.getElementReference().equals(reference)) {
+								if (existing.getElementReference() != null && existing.getElementReference().equals(reference)) {
 									toUnregister.add(existing);
 								}
 							}

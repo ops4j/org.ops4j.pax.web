@@ -2716,7 +2716,7 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 						}
 						Arrays.stream(model.getUrlPatterns()).forEach(p -> sc.getServletUrlPatternMapping().put(p, model));
 						ErrorPageModel epModel = model.getErrorPageModel();
-						if (epModel != null && epModel.isValid()) {
+						if (epModel != null && epModel.isValid() && epModel.getDtoFailureCode() == -1) {
 							for (String page : epModel.getErrorPages()) {
 								sc.getErrorPageMapping().put(page, epModel);
 							}
@@ -2742,6 +2742,10 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 					}
 					// could be among disabled ones
 					boolean wasDisabled = disabledServletModels.remove(model);
+
+					if (model.getErrorPageModel() != null) {
+						disabledErrorPageModels.remove(model.getErrorPageModel());
+					}
 
 					if (!wasDisabled) {
 						// remove ServletModel from all target contexts. disabled model was not available there

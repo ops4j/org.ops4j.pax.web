@@ -1740,7 +1740,7 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 		// we'll be redeploying the deployment info, so we don't have to change error pages
 		// in existing (the one being undeployed) deployment
 		ErrorPageModel epm = model.getErrorPageModel();
-		if (epm != null && deploymentInfo != null) {
+		if (epm != null && deploymentInfo != null && epm.isValid() && epm.getDtoFailureCode() == -1) {
 			String location = epm.getLocation();
 			FlexibleErrorPages currentState = errorPages.computeIfAbsent(contextPath, cp -> new FlexibleErrorPages());
 			for (String ex : epm.getExceptionClassNames()) {

@@ -1224,7 +1224,7 @@ class JettyServerWrapper implements BatchVisitor {
 
 				// are there any error page declarations in the model?
 				ErrorPageModel epm = model.getErrorPageModel();
-				if (epm != null && epm.isValid()) {
+				if (epm != null && epm.isValid() && epm.getDtoFailureCode() == -1) {
 					// location will be the first URL mapping (even if there may be more)
 					// in pure OSGi CMPN Whiteboard case, initially there could be no mapping at all, but in such
 					// case a default would be generated for us to use

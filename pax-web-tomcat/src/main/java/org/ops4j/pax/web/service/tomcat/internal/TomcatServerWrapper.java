@@ -1200,7 +1200,7 @@ class TomcatServerWrapper implements BatchVisitor {
 
 				// are there any error page declarations in the model?
 				ErrorPageModel epm = model.getErrorPageModel();
-				if (epm != null && epm.isValid()) {
+				if (epm != null && epm.isValid() && epm.getDtoFailureCode() == -1) {
 					String location = epm.getLocation();
 					for (String ex : epm.getExceptionClassNames()) {
 						ErrorPage errorPage = new ErrorPage();
