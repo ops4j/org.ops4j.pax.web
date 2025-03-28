@@ -94,9 +94,6 @@ class OsgiStandardRoot extends StandardRoot {
 					// chroot is without trailing slash, path is always with leading slash because that's
 					// a requirement of org.apache.catalina.webresources.StandardRoot.validate()
 					String fullPath = chroot + path;
-					if (fullPath.startsWith("/")) {
-						fullPath = fullPath.substring(1);
-					}
 					URL resource = null;
 					try {
 						resource = osgiScopedServletContext.getResource(fullPath);

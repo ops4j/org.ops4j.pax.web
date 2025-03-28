@@ -28,10 +28,12 @@ import java.util.Map;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ElementModel;
+import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.util.WebContainerManager;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.servlet.runtime.dto.DTOConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -223,6 +225,7 @@ public class BundleWhiteboardApplication {
 			LOG.info("No matching target context(s) for Whiteboard element {}. Filter: {}."
 							+ " Element may be re-registered later, when matching context/s is/are registered.",
 					webElement, webElement.getContextFilter());
+			webElement.setDtoFailureCode(DTOConstants.FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING);
 		}
 
 		WhiteboardWebContainerView view = webContainerManager.whiteboardView(bundle, webContainerServiceRef);
@@ -235,6 +238,14 @@ public class BundleWhiteboardApplication {
 		if (webElement.isValid() && webElement.getContextModels().size() > 0) {
 			webElement.register(view);
 			webElements.put(webElement, true);
+		} else {
+			// however there's one special case - if we have FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING
+			// we have to pass it to registration, so it's reflected in DTOs...
+			// for now only Servlets (for TCK...)
+			if (webElement instanceof ServletModel && webElement.getDtoFailureCode() == DTOConstants.FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING) {
+				webElement.register(view);
+				webElements.put(webElement, false);
+			}
 		}
 	}
 

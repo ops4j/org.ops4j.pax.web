@@ -455,6 +455,16 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 			model.setRegisteringBundle(this.serviceBundle);
 		}
 
+		// fail fast for elements without contexts associated
+		if (model.getDtoFailureCode() == DTOConstants.FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING) {
+			final Batch batch = new Batch("DTO/NO_SERVLET_CONTEXT_MATCHING information for " + model);
+			serverModel.run(() -> {
+				serverModel.addNotMatchedModel(model);
+				return null;
+			}, false);
+			return;
+		}
+
 		event(WebElementEvent.State.DEPLOYING, model);
 
 		final Batch batch = new Batch("Registration of " + model);
@@ -475,10 +485,18 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 					throw new RuntimeException(e.getMessage(), e);
 				}
 
-				if (!serverModel.matchesRuntime(model.getElementReference())) {
-					model.setNotMatched();
-					LOG.info("Skipping {} - target runtime not matched", model);
-					return null;
+				if (model.isResourceServlet()) {
+					if (!serverModel.matchesRuntime(model.getOriginalReference())) {
+						model.setNotMatched();
+						LOG.info("Skipping {} - target runtime not matched", model);
+						return null;
+					}
+				} else {
+					if (!serverModel.matchesRuntime(model.getElementReference())) {
+						model.setNotMatched();
+						LOG.info("Skipping {} - target runtime not matched", model);
+						return null;
+					}
 				}
 
 				LOG.info("Registering {}", model);

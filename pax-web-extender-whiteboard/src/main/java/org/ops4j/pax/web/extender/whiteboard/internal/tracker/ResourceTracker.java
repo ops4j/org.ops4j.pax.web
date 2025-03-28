@@ -65,8 +65,14 @@ public class ResourceTracker extends AbstractElementTracker<Object, Servlet, Ser
 
 		// prefix
 		String path = Utils.getStringProperty(serviceReference, HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PREFIX);
-		if (path == null || "".equals(path.trim())) {
-			path = "/";
+		v = serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PREFIX);
+		if (v != null && !(v instanceof String)) {
+			propertiesInvalid = true;
+		} else {
+			// Just ignore
+//			if (path == null || "".equals(path.trim())) {
+//				path = "/";
+//			}
 		}
 
 		// pass everything to a handy builder - there's no servlet/servletSupplier/servletReference/servletClass
@@ -74,6 +80,8 @@ public class ResourceTracker extends AbstractElementTracker<Object, Servlet, Ser
 		ServletModel.Builder builder = new ServletModel.Builder()
 				.withServiceRankAndId(rank, serviceId)
 				.withRegisteringBundle(serviceReference.getBundle())
+				// we add ServiceReference here, but we won't be using it
+				.withOriginalServletReference(serviceReference.getBundle(), serviceReference)
 				.withUrlPatterns(urlPatterns)
 				.withLoadOnStartup(1)
 				.withAsyncSupported(true)

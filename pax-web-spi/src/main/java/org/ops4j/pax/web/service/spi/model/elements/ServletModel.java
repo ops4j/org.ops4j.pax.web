@@ -179,6 +179,9 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 	/** Flag for models which were targeted for different runtime */
 	private boolean notMatched;
 
+	/** Original {@link ServiceReference} used when registering resource */
+	private ServiceReference<?> originalReference;
+
 	/**
 	 * Constructor used for servlet unregistration
 	 * @param alias
@@ -304,7 +307,8 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 		this.roleLinks.putAll(sm.roleLinks);
 		// reset validation state
 		this.isValid = null;
-		this.dtoFailureCode = -1;
+		// but not the DTO code
+		this.dtoFailureCode = sm.dtoFailureCode;
 	}
 
 	@Override
@@ -389,7 +393,9 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 
 		if (resourceServlet) {
 			if (rawPath == null && basePath == null && baseFileUrl == null) {
-				dtoFailureCode = DTOConstants.FAILURE_REASON_VALIDATION_FAILED;
+				if (dtoFailureCode == -1) {
+					ignored = true;
+				}
 				throw new IllegalArgumentException("Base path or base directory is required for resource servlets");
 			}
 			sources = 0;
@@ -460,7 +466,7 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 			initParams.put("jspFile", jspFile);
 		}
 
-		if (!dontIgnore) {
+		if (!dontIgnore && dtoFailureCode == -1) {
 			ignored = true;
 			throw new IllegalArgumentException("Servlet doesn't have any of: name, URL patterns, error codes");
 		}
@@ -888,6 +894,18 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 		return dto;
 	}
 
+	/**
+	 * Used for ServletModels that are resources to use original reference properties for matching
+	 * @param originalReference
+	 */
+	private void setOriginalReference(ServiceReference<?> originalReference) {
+		this.originalReference = originalReference;
+	}
+
+	public ServiceReference<?> getOriginalReference() {
+		return originalReference;
+	}
+
 	@Override
 	public String toString() {
 		return "ServletModel{id=" + getId()
@@ -913,6 +931,8 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 		private Servlet servlet;
 		private Class<? extends Servlet> servletClass;
 		private ServiceReference<Servlet> reference;
+		// reference used by resource servlet
+		private ServiceReference<?> originalReference;
 		private Supplier<? extends Servlet> supplier;
 		private final List<OsgiContextModel> list = new LinkedList<>();
 		private Bundle bundle;
@@ -982,6 +1002,12 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 
 		public Builder withServletReference(ServiceReference<Servlet> reference) {
 			this.reference = reference;
+			return this;
+		}
+
+		public Builder withOriginalServletReference(Bundle bundle, ServiceReference<?> reference) {
+			this.bundle = bundle;
+			this.originalReference = reference;
 			return this;
 		}
 
@@ -1072,6 +1098,7 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 			model.setOverridable(overridable);
 			model.setRunAs(runAs);
 			model.getRoleLinks().putAll(roleLinks);
+			model.setOriginalReference(originalReference);
 			return model;
 		}
 	}

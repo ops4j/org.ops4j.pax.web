@@ -235,7 +235,8 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 		this.mappingsPerDispatcherTypes.addAll(fm.mappingsPerDispatcherTypes);
 		// reset validation state
 		this.isValid = null;
-		this.dtoFailureCode = -1;
+		// but not the DTO code
+		this.dtoFailureCode = fm.dtoFailureCode;
 	}
 
 	@Override

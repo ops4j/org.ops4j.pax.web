@@ -3216,6 +3216,9 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 
 			// ------ servlets, resources and error pages
 			this.servletsForDTO.forEach(sm -> {
+				if (sm.isNotMatched()) {
+					return;
+				}
 				if (sm.isResourceServlet()) {
 					if (!sm.isValid()) {
 						failedResourceDTOs.add(sm.toFailedResourceDTO(sm.getDtoFailureCode()));
@@ -3692,6 +3695,15 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 		}
 
 		return false;
+	}
+
+	/**
+	 * This method should be used when adding {@link ServletModel} which was registered without associated
+	 * context for the purpose of DTO information.
+	 * @param model
+	 */
+	public void addNotMatchedModel(ServletModel model) {
+		servletsForDTO.add(model);
 	}
 
 	/**
