@@ -3462,6 +3462,9 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 								if (!p.contains("*") && p.equals(remaining)) {
 									// found exact match
 									match = true;
+								} else if ("".equals(p) && "/".equals(remaining)) {
+									// special 12.2. Specification of Mappings mapping
+									match = true;
 								} else if (p.contains("*")) {
 									if (p.endsWith("/*") && remaining.startsWith(p.substring(0, p.length() - 2))) {
 										// found prefix match

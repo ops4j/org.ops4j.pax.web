@@ -618,7 +618,7 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 			ServiceReference<Servlet> ref = getElementReference();
 			Bundle b = ref.getBundle();
 			if (!isPrototype()) {
-				s = b.getBundleContext().getService(ref);
+				s = b == null ? null : b.getBundleContext().getService(ref);
 				if (s != null) {
 					c = s.getClass();
 				}

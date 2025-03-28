@@ -23,8 +23,11 @@ import org.ops4j.pax.web.service.spi.model.events.ServletEventData;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.servlet.runtime.dto.DTOConstants;
 import org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants;
 import org.osgi.util.tracker.ServiceTracker;
+
+import java.util.Collection;
 
 /**
  * Tracks OSGi services that should result in registration of a {@link jakarta.servlet.Servlet} acting as
@@ -51,9 +54,14 @@ public class ResourceTracker extends AbstractElementTracker<Object, Servlet, Ser
 		log.debug("Creating resource model from R7 whiteboard service {} (id={})", serviceReference, serviceId);
 
 		// URL patterns
+		boolean propertiesInvalid = false;
 		String[] urlPatterns = Utils.getPaxWebProperty(serviceReference,
 				null, HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PATTERN,
 				Utils::asStringArray);
+		Object v = serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PATTERN);
+		if (v != null && !(v instanceof String || v instanceof String[] || v instanceof Collection)) {
+			propertiesInvalid = true;
+		}
 
 		// prefix
 		String path = Utils.getStringProperty(serviceReference, HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PREFIX);
@@ -72,7 +80,11 @@ public class ResourceTracker extends AbstractElementTracker<Object, Servlet, Ser
 				.withRawPath(path) // could be file: or a chroot inside a bundle - we'll check and validate later
 				.resourceServlet(true);
 
-		return builder.build();
+		ServletModel model = builder.build();
+		if (propertiesInvalid) {
+			model.setDtoFailureCode(DTOConstants.FAILURE_REASON_VALIDATION_FAILED);
+		}
+		return model;
 	}
 
 }

@@ -544,7 +544,7 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 			ServiceReference<Filter> ref = getElementReference();
 			Bundle b = ref.getBundle();
 			if (!isPrototype()) {
-				f = b.getBundleContext().getService(ref);
+				f = b == null ? null : b.getBundleContext().getService(ref);
 				if (f != null) {
 					c = f.getClass();
 				}

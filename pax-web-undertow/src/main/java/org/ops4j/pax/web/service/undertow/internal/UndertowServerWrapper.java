@@ -1632,7 +1632,8 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 				if (!change.isDynamic()) {
 					ensureServletContextStarted(contextPath);
 					boolean alreadyStarted = ensureServletContextStarted(contextPath);
-					if (alreadyStarted && model.getLoadOnStartup() != null && model.getLoadOnStartup() >= 0) {
+					if (alreadyStarted && model.getLoadOnStartup() != null
+							&& model.getLoadOnStartup() >= 0 && servletHandler != null) {
 						try {
 							ManagedServlet managedServlet = servletHandler.getManagedServlet();
 							if (managedServlet != null) {

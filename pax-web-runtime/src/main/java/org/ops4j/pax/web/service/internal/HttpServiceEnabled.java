@@ -670,7 +670,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 									toUnregister.add(existing);
 								}
 							}
-							if (toUnregister.size() == 0 && !model.isNotMatched()) {
+							if (toUnregister.size() == 0 && !model.isNotMatched() && model.isValid()) {
 								throw new IllegalArgumentException("Servlet with reference \"" + reference + "\" "
 										+ "was never registered by " + registeringBundle);
 							}
@@ -682,14 +682,14 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 									toUnregister.add(existing);
 								}
 							}
-							if (toUnregister.size() == 0) {
+							if (toUnregister.size() == 0 && model.isValid()) {
 								throw new IllegalArgumentException("Servlet named \"" + name + "\" was never registered by "
 										+ registeringBundle);
 							}
 						}
 					}
 					if (toUnregister.isEmpty()) {
-						if (model.isNotMatched()) {
+						if (model.isNotMatched() || !model.isValid()) {
 							return null;
 						}
 						throw new IllegalArgumentException("Can't find a servlet to unregister using criteria from " + model);
@@ -995,7 +995,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 									toUnregister.add(existing);
 								}
 							}
-							if (toUnregister.size() == 0) {
+							if (toUnregister.size() == 0 && model.isValid()) {
 								throw new IllegalArgumentException("Filter named \"" + name + "\" was never registered by "
 										+ registeringBundle);
 							}
@@ -1019,7 +1019,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 									toUnregister.add(existing);
 								}
 							}
-							if (toUnregister.size() == 0 && !model.isNotMatched()) {
+							if (toUnregister.size() == 0 && !model.isNotMatched() && model.isValid()) {
 								throw new IllegalArgumentException("Filter with reference \"" + reference + "\" "
 										+ "was never registered by " + registeringBundle);
 							}
@@ -1038,7 +1038,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 						}
 					}
 					if (toUnregister.isEmpty()) {
-						if (model.isNotMatched()) {
+						if (model.isNotMatched() || !model.isValid()) {
 							return null;
 						}
 						throw new IllegalArgumentException("Can't find a filter to unregister using criteria from " + model);
