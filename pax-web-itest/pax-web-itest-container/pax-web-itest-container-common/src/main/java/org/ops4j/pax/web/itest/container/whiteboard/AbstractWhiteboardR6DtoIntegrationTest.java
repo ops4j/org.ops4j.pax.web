@@ -321,7 +321,7 @@ public abstract class AbstractWhiteboardR6DtoIntegrationTest extends AbstractCon
 				context.registerService(ServletContextHelper.class, new InvalidServletContextHelper(), props);
 		long serviceIdFailedContext = (Long) failedContextReg.getReference().getProperty(Constants.SERVICE_ID);
 
-		// add a Servlet with missing properties
+		// add a Servlet with missing properties - it's no longer a problem on Servlet Whiteboard 2.0
 		props = new Hashtable<>(1);
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "FailedServletName");
 		ServiceRegistration<Servlet> failedServletReg =
@@ -335,10 +335,10 @@ public abstract class AbstractWhiteboardR6DtoIntegrationTest extends AbstractCon
 		assertThat("Invalid ServletContext doesn't match",
 				runtimeDTO.failedServletContextDTOs[0],
 				failedServletContextDTO -> failedServletContextDTO.serviceId == serviceIdFailedContext);
-		assertEquals("Incorrect number of invalid ServletContexts", 1, runtimeDTO.failedServletDTOs.length);
-		assertThat("Invalid ServletContext doesn't match",
-				runtimeDTO.failedServletDTOs[0],
-				failedServletDTO -> failedServletDTO.serviceId == serviceIdFailedServlet);
+		assertEquals("Incorrect number of invalid ServletContexts", 0, runtimeDTO.failedServletDTOs.length);
+//		assertThat("Invalid ServletContext doesn't match",
+//				runtimeDTO.failedServletDTOs[0],
+//				failedServletDTO -> failedServletDTO.serviceId == serviceIdFailedServlet);
 	}
 
 	@Test
