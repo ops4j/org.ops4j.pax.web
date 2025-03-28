@@ -44,6 +44,7 @@
 		</details>
 
 		<bundle start-level="30">mvn:jakarta.servlet/jakarta.servlet-api/${dependency.jakarta.servlet-api}</bundle>
+		<bundle start-level="30" start="false">mvn:org.ops4j.pax.web/pax-web-compatibility-servlet/${project.version}</bundle>
 
 		<bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-api/${project.version}</bundle>
 		<bundle start-level="30">mvn:org.ops4j.pax.web/pax-web-spi/${project.version}</bundle>
