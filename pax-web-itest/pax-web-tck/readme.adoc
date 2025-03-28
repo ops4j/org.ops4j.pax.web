@@ -258,3 +258,19 @@ to `osgi.tck/generated/osgi.tck.cmpn/org.osgi.test.cases.servlet.secure.bnd` (th
 ----
 $ bnd runtests -t 'org.osgi.test.cases.servlet.junit.AuthenticationTestCase#test_exceptionFromServlet' org.osgi.test.cases.servlet.bnd
 ----
+
+In addition, I've created some symbolic links in `osgi/osgi/osgi.tck/generated/osgi.tck.cmpn/jar/`
+----
+$ pwd
+/home/ggrzybek/sources/github.com/osgi/osgi/osgi.tck/generated/osgi.tck.cmpn/jar
+
+$ find -type l | xargs file
+./org.ops4j.pax.web.pax-web-api-10.0.0.jar:                   symbolic link to /data/sources/github.com/ops4j/org.ops4j.pax.web-jakarta-new/pax-web-api/target/pax-web-api-10.0.0-SNAPSHOT.jar
+./org.ops4j.pax.web.pax-web-spi-10.0.0.jar:                   symbolic link to /data/sources/github.com/ops4j/org.ops4j.pax.web-jakarta-new/pax-web-spi/target/pax-web-spi-10.0.0-SNAPSHOT.jar
+./org.ops4j.pax.web.pax-web-runtime-10.0.0.jar:               symbolic link to /data/sources/github.com/ops4j/org.ops4j.pax.web-jakarta-new/pax-web-runtime/target/pax-web-runtime-10.0.0-SNAPSHOT.jar
+./org.ops4j.pax.web.pax-web-extender-whiteboard-10.0.0.jar:   symbolic link to /data/sources/github.com/ops4j/org.ops4j.pax.web-jakarta-new/pax-web-extender-whiteboard/target/pax-web-extender-whiteboard-10.0.0-SNAPSHOT.jar
+./org.ops4j.pax.web.pax-web-compatibility-servlet-10.0.0.jar: symbolic link to /data/sources/github.com/ops4j/org.ops4j.pax.web-jakarta-new/pax-web-fragments/pax-web-compatibility-servlet/target/pax-web-compatibility-servlet-10.0.0-SNAPSHOT.jar
+./org.ops4j.pax.web.pax-web-tomcat-10.0.0.jar:                symbolic link to /data/sources/github.com/ops4j/org.ops4j.pax.web-jakarta-new/pax-web-tomcat/target/pax-web-tomcat-10.0.0-SNAPSHOT.jar
+----
+
+So I can simply rebuild Pax Web and run `bnd` test immediately.
