@@ -1242,6 +1242,16 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 						}
 					}
 					if (toUnregister.isEmpty()) {
+						// finally search failed elements
+						for (ElementModel<?, ?> failed : serverModel.getFailedWhiteboardElements()) {
+							if (failed == model) {
+								toUnregister.add(model);
+								break;
+							}
+						}
+
+					}
+					if (toUnregister.isEmpty()) {
 						throw new IllegalArgumentException("Can't find an event listener to unregister using criteria from " + model);
 					}
 

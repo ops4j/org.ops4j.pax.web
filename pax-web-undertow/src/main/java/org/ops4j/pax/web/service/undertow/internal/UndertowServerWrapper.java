@@ -2568,8 +2568,10 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 
 	@Override
 	public void visitContextStartChange(ContextStartChange change) {
-		String contextPath = change.getContextPath();
-		ensureServletContextStarted(contextPath);
+		String[] contextPaths = change.getContextPaths();
+		for (String contextPath : contextPaths) {
+			ensureServletContextStarted(contextPath);
+		}
 	}
 
 	@Override

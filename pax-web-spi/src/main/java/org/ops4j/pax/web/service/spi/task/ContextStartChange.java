@@ -20,25 +20,25 @@ import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 /**
  * An action that's registered not during web element registration (the registering side), but during action handling
  * (the invoking side). This special action was created to prevent deadlocks described in the Aries-CDI example
- * case at https://github.com/ops4j/org.ops4j.pax.web/issues/1622.
+ * case at <a hreaf="https://github.com/ops4j/org.ops4j.pax.web/issues/1622">pax.web/issues/1622</a>
  * For HTTP context processing (to alter security configuration) this action may also be registered when configuration
  * changes.
  */
 public class ContextStartChange extends Change {
 
-	private final String contextPath;
+	private final String[] contextPaths;
 	private final OsgiContextModel osgiContextModel;
 	private boolean async = true;
 
-	public ContextStartChange(OpCode op, String contextPath) {
+	public ContextStartChange(OpCode op, String ... contextPath) {
 		super(op);
-		this.contextPath = contextPath;
+		this.contextPaths = contextPath;
 		this.osgiContextModel = null;
 	}
 
 	public ContextStartChange(OpCode op, OsgiContextModel osgiContextModel) {
 		super(op);
-		this.contextPath = osgiContextModel.getContextPath();
+		this.contextPaths = new String[] { osgiContextModel.getContextPath() };
 		this.osgiContextModel = osgiContextModel;
 	}
 
@@ -47,8 +47,8 @@ public class ContextStartChange extends Change {
 		visitor.visitContextStartChange(this);
 	}
 
-	public String getContextPath() {
-		return contextPath;
+	public String[] getContextPaths() {
+		return contextPaths;
 	}
 
 	public OsgiContextModel getOsgiContextModel() {

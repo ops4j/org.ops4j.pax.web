@@ -1515,6 +1515,7 @@ class TomcatServerWrapper implements BatchVisitor {
 		if (change.getKind() == OpCode.ADD) {
 			EventListenerModel eventListenerModel = change.getEventListenerModel();
 			List<OsgiContextModel> contextModels = change.getContextModels();
+			final List<String> contextsToRestart = new ArrayList<>();
 			contextModels.forEach((context) -> {
 				String contextPath = context.getContextPath();
 				if (!done.add(contextPath)) {
@@ -1535,7 +1536,8 @@ class TomcatServerWrapper implements BatchVisitor {
 
 				boolean stopped = false;
 				if (standardContext.isStarted() && standardContext.getState() != LifecycleState.STARTING_PREP
-						&& ServletContextListener.class.isAssignableFrom(eventListener.getClass())) {
+						&& (ServletContextListener.class.isAssignableFrom(eventListener.getClass())
+						|| HttpSessionListener.class.isAssignableFrom(eventListener.getClass()))) {
 					// we have to stop the context, so existing ServletContextListeners are called
 					// with contextDestroyed() and new listener is added according to ranking rules of
 					// the EventListenerModel
@@ -1571,11 +1573,14 @@ class TomcatServerWrapper implements BatchVisitor {
 					} else {
 						LOG.info("Scheduling start of the {} context after listener registration for immediately started context", contextPath);
 					}
-					ContextStartChange action = new ContextStartChange(OpCode.MODIFY, contextPath);
-					action.setAsync(change.getEventListenerModel().isAsynchronusRegistration());
-					change.registerBatchCompletedAction(action);
+					contextsToRestart.add(contextPath);
 				}
 			});
+			if (!contextsToRestart.isEmpty()) {
+				ContextStartChange action = new ContextStartChange(OpCode.MODIFY, contextsToRestart.toArray(new String[0]));
+				action.setAsync(change.getEventListenerModel().isAsynchronusRegistration());
+				change.registerBatchCompletedAction(action);
+			}
 		}
 
 		if (change.getKind() == OpCode.DELETE) {
@@ -2004,12 +2009,14 @@ class TomcatServerWrapper implements BatchVisitor {
 
 	@Override
 	public void visitContextStartChange(ContextStartChange change) {
-		String contextPath = change.getContextPath();
-		PaxWebStandardContext standardContext = contextHandlers.get(contextPath);
-		if (standardContext != null) {
-			ensureServletContextStarted(standardContext);
-		} else {
-			LOG.debug("Not starting unknown context {}.", contextPath);
+		String[] contextPaths = change.getContextPaths();
+		for (String contextPath : contextPaths) {
+			PaxWebStandardContext standardContext = contextHandlers.get(contextPath);
+			if (standardContext != null) {
+				ensureServletContextStarted(standardContext);
+			} else {
+				LOG.debug("Not starting unknown context {}.", contextPath);
+			}
 		}
 	}
 

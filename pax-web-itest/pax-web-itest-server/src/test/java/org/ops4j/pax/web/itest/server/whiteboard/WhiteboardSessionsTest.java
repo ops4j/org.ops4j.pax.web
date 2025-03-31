@@ -339,6 +339,191 @@ public class WhiteboardSessionsTest extends MultiContainerTestSupport {
 		getListenerCustomizer().removedService(sessionListenerRef, elModel1);
 	}
 
+	@Test
+	public void sessionListenersAfterServlets() throws Exception {
+		Bundle sample1 = mockBundle("sample1");
+
+		ServletContextHelper helper1 = new ServletContextHelper() { };
+		getServletContextHelperCustomizer().addingService(mockServletContextHelperReference(sample1, "c1",
+				() -> helper1, 0L, 0, "/c"));
+
+		ServletContextHelper helper2 = new ServletContextHelper() { };
+		getServletContextHelperCustomizer().addingService(mockServletContextHelperReference(sample1, "d1",
+				() -> helper2, 0L, 0, "/d"));
+
+		// 2nd /d context with different helper and higher ranking
+		ServletContextHelper helper3 = new ServletContextHelper() { };
+		getServletContextHelperCustomizer().addingService(mockServletContextHelperReference(sample1, "d2",
+				() -> helper3, 0L, 1, "/d"));
+
+		// servlet registered to /c and /d (with helper d1)
+		ServiceReference<Servlet> servlet1Ref = mockServletReference(sample1, "servlet1",
+				() -> new SessionServlet("1"), 0L, 0, "/s");
+		when(servlet1Ref.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT))
+				.thenReturn("(|(osgi.http.whiteboard.context.name=c1)(osgi.http.whiteboard.context.name=d1))");
+		ServletModel model1 = getServletCustomizer().addingService(servlet1Ref);
+
+		// servlet registered to /c and /d (with helper d2)
+		ServiceReference<Servlet> servlet2Ref = mockServletReference(sample1, "servlet2",
+				() -> new SessionServlet("2"), 0L, 0, "/t");
+		when(servlet2Ref.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT))
+				.thenReturn("(|(osgi.http.whiteboard.context.name=c1)(osgi.http.whiteboard.context.name=d2))");
+		ServletModel model2 = getServletCustomizer().addingService(servlet2Ref);
+
+		final Map<String, HttpSession> sessions = new ConcurrentHashMap<>();
+
+		ServiceReference<EventListener> sessionListenerRef = mockListenerReference(sample1, () -> new HttpSessionListener() {
+			@Override
+			public void sessionCreated(HttpSessionEvent se) {
+				LOG.info("Session created: {}", se.getSession());
+				sessions.put(se.getSession().getId(), se.getSession());
+			}
+
+			@Override
+			public void sessionDestroyed(HttpSessionEvent se) {
+				LOG.info("Session destroyed: {}", se.getSession());
+				sessions.remove(se.getSession().getId(), se.getSession());
+			}
+		}, 0L, 0);
+		when(sessionListenerRef.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT))
+				.thenReturn("(|(osgi.http.whiteboard.context.name=c1)(osgi.http.whiteboard.context.name=d1)(osgi.http.whiteboard.context.name=d2))");
+		when(sessionListenerRef.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER)).thenReturn("true");
+		EventListenerModel elModel1 = getListenerCustomizer().addingService(sessionListenerRef);
+
+		ServiceReference<EventListener> sessionAttributeListenerRef = mockListenerReference(sample1, () -> new HttpSessionAttributeListener() {
+			@Override
+			public void attributeAdded(HttpSessionBindingEvent event) {
+				LOG.info("Attribute added: {} ({})", event.getName(), event);
+			}
+
+			@Override
+			public void attributeRemoved(HttpSessionBindingEvent event) {
+				LOG.info("Attribute removed: {} ({})", event.getName(), event);
+			}
+
+			@Override
+			public void attributeReplaced(HttpSessionBindingEvent event) {
+				LOG.info("Attribute replaced: {} ({})", event.getName(), event);
+			}
+		}, 0L, 0);
+		when(sessionAttributeListenerRef.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT))
+				.thenReturn("(|(osgi.http.whiteboard.context.name=c1)(osgi.http.whiteboard.context.name=d1)(osgi.http.whiteboard.context.name=d2))");
+		when(sessionAttributeListenerRef.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER)).thenReturn("true");
+		EventListenerModel elModel2 = getListenerCustomizer().addingService(sessionAttributeListenerRef);
+
+		// sessions managed with httpclient5
+		BasicCookieStore store = new BasicCookieStore();
+
+		RequestConfig rc = RequestConfig.custom()
+				.setResponseTimeout(3600, TimeUnit.SECONDS)
+				.build();
+		ConnectionConfig cc = ConnectionConfig.custom()
+				.setConnectTimeout(3600, TimeUnit.SECONDS)
+				.build();
+		final HttpClientConnectionManager cm
+				= PoolingHttpClientConnectionManagerBuilder.create()
+				.setDefaultConnectionConfig(cc)
+				.build();
+		CloseableHttpClient client = HttpClients.custom()
+				.setConnectionManager(cm)
+				.setDefaultCookieStore(store).build();
+		HttpClientContext clientContext = HttpClientContext.create();
+		clientContext.setRequestConfig(rc);
+
+		String res;
+
+		// request to non-existing servlet - 404 and no session should be created
+		BasicHttpClientResponseHandler responseHandler = new BasicHttpClientResponseHandler() {
+			@Override
+			public String handleResponse(ClassicHttpResponse response) throws IOException {
+				try {
+					return super.handleResponse(response);
+				} catch (HttpResponseException e) {
+					if (e.getStatusCode() == HttpStatus.SC_NOT_FOUND) {
+						return null;
+					} else {
+						throw e;
+					}
+				}
+			}
+		};
+		client.execute(new HttpGet("http://127.0.0.1:" + port + "/c/x"), clientContext, responseHandler);
+		client.execute(new HttpGet("http://127.0.0.1:" + port + "/d/x"), clientContext, responseHandler);
+		assertThat(sessions.size(), equalTo(0));
+		assertThat(store.getCookies().size(), equalTo(0));
+
+		res = client.execute(new HttpGet("http://127.0.0.1:" + port + "/c/s?op=create"), clientContext, responseHandler);
+		assertThat(res, endsWith("session=not-null"));
+		res = client.execute(new HttpGet("http://127.0.0.1:" + port + "/c/s?op=dont_create"), clientContext, responseHandler);
+		assertThat(res, endsWith("session=not-null"));
+
+		// session should be created now:
+		//  - from runtime perspective in context /c
+		//  - from whitebord perspective in helper c1 for /c
+		assertThat(sessions.size(), equalTo(1));
+		assertThat(store.getCookies().size(), equalTo(1));
+
+		// session should be visible through servlet /t in context /c
+		res = client.execute(new HttpGet("http://127.0.0.1:" + port + "/c/t?op=dont_create"), clientContext, responseHandler);
+		assertThat(res, endsWith("session=not-null"));
+		// but not in /d through any servlet
+		res = client.execute(new HttpGet("http://127.0.0.1:" + port + "/d/s?op=dont_create"), clientContext, responseHandler);
+		assertThat(res, endsWith("session=null"));
+		res = client.execute(new HttpGet("http://127.0.0.1:" + port + "/d/t?op=dont_create"), clientContext, responseHandler);
+		assertThat(res, endsWith("session=null"));
+		assertThat(sessions.size(), equalTo(1));
+		assertThat(store.getCookies().size(), equalTo(1));
+
+		// we'll create a session in /d through servlet /s (thus using d1)
+		res = client.execute(new HttpGet("http://127.0.0.1:" + port + "/d/s?op=create"), clientContext, responseHandler);
+		assertThat(res, endsWith("session=not-null"));
+		assertThat(sessions.size(), equalTo(2));
+		assertThat(store.getCookies().size(), equalTo(2));
+		// which means that /t in /d should NOT see the session, because it's using d2
+		res = client.execute(new HttpGet("http://127.0.0.1:" + port + "/d/t?op=dont_create"), clientContext, responseHandler);
+		assertThat(res, endsWith("session=null"));
+		assertThat(sessions.size(), equalTo(2));
+		assertThat(store.getCookies().size(), equalTo(2));
+
+		// now we'll create new /d session through /t (d2)
+		res = client.execute(new HttpGet("http://127.0.0.1:" + port + "/d/t?op=create"), clientContext, responseHandler);
+		assertThat(res, endsWith("session=not-null"));
+		assertThat(sessions.size(), equalTo(3));
+		assertThat(store.getCookies().size(), equalTo(2));
+
+		// set the same attribute in two sessions
+		client.execute(new HttpGet("http://127.0.0.1:" + port + "/d/s?op=set1"), clientContext, responseHandler);
+		client.execute(new HttpGet("http://127.0.0.1:" + port + "/d/t?op=set2"), clientContext, responseHandler);
+		// and check the values
+		res = client.execute(new HttpGet("http://127.0.0.1:" + port + "/d/s?op=get"), clientContext, responseHandler);
+		assertThat(res, endsWith("v=1"));
+		res = client.execute(new HttpGet("http://127.0.0.1:" + port + "/d/t?op=get"), clientContext, responseHandler);
+		assertThat(res, endsWith("v=2"));
+
+		// change the attribute in d2
+		client.execute(new HttpGet("http://127.0.0.1:" + port + "/d/t?op=change3"), clientContext, responseHandler);
+		res = client.execute(new HttpGet("http://127.0.0.1:" + port + "/d/s?op=get"), clientContext, responseHandler);
+		assertThat(res, endsWith("v=1"));
+		res = client.execute(new HttpGet("http://127.0.0.1:" + port + "/d/t?op=get"), clientContext, responseHandler);
+		assertThat(res, endsWith("v=3"));
+
+		// delete the attribute in d1
+		client.execute(new HttpGet("http://127.0.0.1:" + port + "/d/s?op=delete"), clientContext, responseHandler);
+		res = client.execute(new HttpGet("http://127.0.0.1:" + port + "/d/s?op=get"), clientContext, responseHandler);
+		assertThat(res, endsWith("v=null"));
+		res = client.execute(new HttpGet("http://127.0.0.1:" + port + "/d/t?op=get"), clientContext, responseHandler);
+		assertThat(res, endsWith("v=3"));
+
+		assertThat(sessions.size(), equalTo(3));
+
+		client.close();
+
+		getServletCustomizer().removedService(servlet1Ref, model1);
+		getServletCustomizer().removedService(servlet2Ref, model2);
+		getListenerCustomizer().removedService(sessionAttributeListenerRef, elModel2);
+		getListenerCustomizer().removedService(sessionListenerRef, elModel1);
+	}
+
 	private static class SessionServlet extends Utils.MyIdServlet {
 
 		SessionServlet(String id) {

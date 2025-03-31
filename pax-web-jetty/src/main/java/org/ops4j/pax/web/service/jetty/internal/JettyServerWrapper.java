@@ -2108,12 +2108,14 @@ class JettyServerWrapper implements BatchVisitor {
 
 	@Override
 	public void visitContextStartChange(ContextStartChange change) {
-		String contextPath = change.getContextPath();
-		PaxWebServletContextHandler servletContextHandler = contextHandlers.get(contextPath);
-		if (servletContextHandler != null) {
-			ensureServletContextStarted(servletContextHandler);
-		} else {
-			LOG.debug("Not starting unknown context {}.", contextPath);
+		String[] contextPaths = change.getContextPaths();
+		for (String contextPath : contextPaths) {
+			PaxWebServletContextHandler servletContextHandler = contextHandlers.get(contextPath);
+			if (servletContextHandler != null) {
+				ensureServletContextStarted(servletContextHandler);
+			} else {
+				LOG.debug("Not starting unknown context {}.", contextPath);
+			}
 		}
 	}
 
