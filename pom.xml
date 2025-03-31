@@ -230,10 +230,9 @@
 		<dependency.org.apache.geronimo.bundles.commons-discovery>0.4_1</dependency.org.apache.geronimo.bundles.commons-discovery>
 
 		<dependency.org.apache.httpcomponents.client4>4.5.14</dependency.org.apache.httpcomponents.client4>
-		<dependency.org.apache.httpcomponents.client5>5.4.2</dependency.org.apache.httpcomponents.client5>
+		<dependency.org.apache.httpcomponents.client5>5.4.3</dependency.org.apache.httpcomponents.client5>
 		<dependency.org.apache.httpcomponents.core4>4.4.16</dependency.org.apache.httpcomponents.core4>
-		<!-- 5.3.4 only after https://github.com/apache/httpcomponents-client/commit/1ec5c38d9f5d6c3775ad69cf7e0c75e9303725d3 -->
-		<dependency.org.apache.httpcomponents.core5>5.3.3</dependency.org.apache.httpcomponents.core5>
+		<dependency.org.apache.httpcomponents.core5>5.3.4</dependency.org.apache.httpcomponents.core5>
 		<dependency.org.apache.karaf>4.4.7</dependency.org.apache.karaf>
 		<dependency.org.apache.logging.log4j>2.24.3</dependency.org.apache.logging.log4j>
 		<dependency.org.apache.servicemix.bundles.aopalliance>1.0_6</dependency.org.apache.servicemix.bundles.aopalliance>
