@@ -53,6 +53,7 @@ class OsgiStandardRoot extends StandardRoot {
 	private final String chroot;
 	private final WebResourceRoot root;
 	private final int maxEntrySize;
+	private boolean directFileMapping = false;
 
 	OsgiStandardRoot(WebResourceRoot root, File baseDirectory, String chroot, ServletContext osgiScopedServletContext, int maxEntrySize) {
 		super(root.getContext());
@@ -60,7 +61,22 @@ class OsgiStandardRoot extends StandardRoot {
 		this.baseDirectory = baseDirectory;
 		this.chroot = chroot;
 		this.osgiScopedServletContext = osgiScopedServletContext;
+		try {
+			URL url = chroot == null ? null : this.osgiScopedServletContext.getResource(chroot);
+			directFileMapping = url != null && !url.getPath().endsWith("/");
+		} catch (MalformedURLException ignored) {
+		}
+
 		this.maxEntrySize = maxEntrySize;
+	}
+
+	/**
+	 * Returns {@code true} if chroot is existing non-directory resource - it is possible to register
+	 * such resources with {@code HTTP_WHITEBOARD_RESOURCE_PREFIX}.
+	 * @return
+	 */
+	public boolean isDirectFileMapping() {
+		return directFileMapping;
 	}
 
 	@Override
@@ -93,7 +109,7 @@ class OsgiStandardRoot extends StandardRoot {
 				public WebResource getResource(String path) {
 					// chroot is without trailing slash, path is always with leading slash because that's
 					// a requirement of org.apache.catalina.webresources.StandardRoot.validate()
-					String fullPath = chroot + path;
+					String fullPath = OsgiStandardRoot.this.directFileMapping ? chroot : chroot + path;
 					URL resource = null;
 					try {
 						resource = osgiScopedServletContext.getResource(fullPath);

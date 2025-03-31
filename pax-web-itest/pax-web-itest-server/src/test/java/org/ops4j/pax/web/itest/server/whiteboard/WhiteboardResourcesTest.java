@@ -97,6 +97,40 @@ public class WhiteboardResourcesTest extends MultiContainerTestSupport {
 	}
 
 	@Test
+	public void nonDirectoryResources() throws Exception {
+		// see org.osgi.test.cases.servlet.junit.ResourceTestCase.test_140_6_20to21()
+		File base = new File("target/www");
+		FileUtils.deleteDirectory(base);
+		base.mkdirs();
+		try (FileWriter fw = new FileWriter(new File(base, "file.txt"))) {
+			IOUtils.write("hello1", fw);
+		}
+
+		Bundle sample1 = mockBundle("sample1");
+		when(sample1.getEntry("resources/file.txt")).thenReturn(new File(base, "file.txt").toURI().toURL());
+
+		// 1. Whiteboard registration as an OSGi service of any objectClass
+
+		Hashtable<String, Object> properties = new Hashtable<>();
+		// OSGi CMPN Whiteboard properties
+		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PATTERN, new String[] { "/files/other.txt" });
+		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PREFIX, "/resources/file.txt");
+		ServiceReference<Object> resourcesRef = mockReference(sample1, Object.class, properties, Object::new, 0L, 0);
+		ServletModel model = getResourceCustomizer().addingService(resourcesRef);
+		assertThat(httpGET(port, "/files/other.txt"), endsWith("hello1"));
+
+		getResourceCustomizer().removedService(resourcesRef, model);
+		assertThat(httpGET(port, "/files/other.txt"), startsWith("HTTP/1.1 404"));
+
+		ServerModelInternals serverModelInternals = serverModelInternals(serverModel);
+		ServiceModelInternals serviceModelInternals = serviceModelInternals(sample1);
+
+		assertTrue(serverModelInternals.isClean(whiteboardBundle));
+		assertTrue(serverModelInternals.isClean(sample1));
+		assertTrue(serviceModelInternals.isEmpty());
+	}
+
+	@Test
 	public void twoWaysToRegisterResourcesInCustomContext() throws Exception {
 		File base = new File("target/www");
 		FileUtils.deleteDirectory(base);

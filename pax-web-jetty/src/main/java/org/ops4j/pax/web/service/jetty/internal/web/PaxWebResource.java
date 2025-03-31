@@ -6,6 +6,7 @@ import org.eclipse.jetty.util.resource.Resource;
 import org.ops4j.pax.web.service.jetty.internal.PaxWebServletContextHandler;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
@@ -34,6 +35,7 @@ public class PaxWebResource extends Resource {
 	private final String chroot;
 
 	private final Resource realBaseResource;
+	private boolean directFileMapping = false;
 
 	public PaxWebResource(ServletContext servletContext, PathResource baseUrlResource, String chroot) {
 		this.servletContext = servletContext;
@@ -48,6 +50,11 @@ public class PaxWebResource extends Resource {
 					return PaxWebResource.this.resolve(subUriPath);
 				}
 			};
+			try {
+				URL url = this.servletContext.getResource(chroot);
+				directFileMapping = url != null && !url.getPath().endsWith("/");
+			} catch (MalformedURLException ignored) {
+			}
 		} else {
 			throw new IllegalArgumentException("baseUrlResource and chroot can't both be null");
 		}
@@ -109,7 +116,7 @@ public class PaxWebResource extends Resource {
 				// HttpContext or ServletContextHelper
 				// before Pax Web 8 there was explicit delegation to HttpContext, but now, it's hidden
 				// under Osgi(Scoped)ServletContext
-				URL url = servletContext.getResource(chroot + "/" + childPath);
+				URL url = servletContext.getResource(directFileMapping ? chroot : chroot + "/" + childPath);
 
 				// See: https://github.com/ops4j/org.ops4j.pax.web/issues/2014
 				// Everything is fine with Felix - it doesn't even seem to support directory-based bundles.

@@ -63,6 +63,10 @@ public class TomcatResourceServlet extends DefaultServlet {
 	// this flag has to be set if resource/default servlet is mapped to "/", as pathInfo is null in such case
 	private boolean pathInfoOnly = true;
 
+	// this flag is set when Whiteboard resources are registered by mapping URL to existing file instead
+	// of directory prefix
+	private boolean directFileMapping = false;
+
 	private OsgiServletContext highestRankedContext;
 
 	public TomcatResourceServlet(File baseDirectory, String chroot, ResourceConfiguration resourceConfig) {
@@ -122,6 +126,7 @@ public class TomcatResourceServlet extends DefaultServlet {
 
 		// and tweak org.apache.catalina.servlets.DefaultServlet.resources
 		resources = new OsgiStandardRoot(this.resources, baseDirectory, chroot, osgiScopedServletContext, maxEntrySize * 1024);
+		directFileMapping = ((OsgiStandardRoot) resources).isDirectFileMapping();
 
 		resources.setCachingAllowed(true);
 		// org.apache.catalina.webresources.Cache.maxSize
@@ -316,7 +321,7 @@ public class TomcatResourceServlet extends DefaultServlet {
 
 		String pathInContext = pathInfo;
 
-		if (!pathInfoOnly) {
+		if (!pathInfoOnly || directFileMapping) {
 			pathInContext = servletPath + pathInfo;
 		}
 

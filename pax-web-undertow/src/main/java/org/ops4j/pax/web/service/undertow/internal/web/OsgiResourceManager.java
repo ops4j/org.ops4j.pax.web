@@ -55,6 +55,8 @@ public class OsgiResourceManager implements ResourceManager {
 	private final FileETagFunction fileETagFunction;
 	private final PathResourceManager pathResourceManager;
 
+	private boolean directFileMapping = false;
+
 	public OsgiResourceManager(String chroot, ServletContext osgiScopedServletContext) {
 		this.chroot = chroot;
 		this.osgiScopedServletContext = osgiScopedServletContext;
@@ -67,6 +69,12 @@ public class OsgiResourceManager implements ResourceManager {
 				// base won't be used
 				.setBase(location.toPath())
 				.build();
+
+		try {
+			URL url = chroot == null ? null : this.osgiScopedServletContext.getResource(chroot);
+			directFileMapping = url != null && !url.getPath().endsWith("/");
+		} catch (MalformedURLException ignored) {
+		}
 	}
 
 	@Override
@@ -74,7 +82,7 @@ public class OsgiResourceManager implements ResourceManager {
 		// Almost the same as in org.ops4j.pax.web.service.tomcat.internal.web.TomcatResourceServlet.OsgiStandardRoot
 
 		// chroot is without trailing slash, path is always without leading slash
-		String fullPath = chroot + "/" + path;
+		String fullPath = directFileMapping ? chroot : chroot + "/" + path;
 		if (!fullPath.startsWith("/")) {
 			fullPath = "/" + fullPath;
 		}
