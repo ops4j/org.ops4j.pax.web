@@ -1847,17 +1847,21 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 		// a conflict may stop doing so because it may be lower ranked wrt URL mapping
 		// with filters we can quickly determine the name conflict and potentially know which existing (currently
 		// enabled) servlets to disable
-		for (ServletContextModel sc : targetServletContexts) {
-			FilterModel existing = sc.getFilterNameMapping().get(model.getName());
-			if (existing != null) {
-				if (model.compareTo(existing) < 0) {
-					// new model wins the name conflict.
-					newlyDisabled.add(existing);
-				} else {
-					LOG.warn("{} can't be registered now in context {}. Name conflict with {}.",
-							model, sc.getContextPath(), existing);
-					register = false;
-					break;
+		if (!model.isPreprocessor()) {
+			// https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html#service.http.whiteboard.servlet.preprocessors
+			// doesn't mention anything about preprocessor's name and potential conflicts, so we always register.
+			for (ServletContextModel sc : targetServletContexts) {
+				FilterModel existing = sc.getFilterNameMapping().get(model.getName());
+				if (existing != null) {
+					if (model.compareTo(existing) < 0) {
+						// new model wins the name conflict.
+						newlyDisabled.add(existing);
+					} else {
+						LOG.warn("{} can't be registered now in context {}. Name conflict with {}.",
+								model, sc.getContextPath(), existing);
+						register = false;
+						break;
+					}
 				}
 			}
 		}
@@ -2021,29 +2025,33 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 
 			Set<ServletContextModel> contextsOfDisabledModel = getServletContextModels(disabled);
 
-			for (ServletContextModel sc : contextsOfDisabledModel) {
-				String cp = sc.getContextPath();
+			if (!disabled.isPreprocessor()) {
+				// only currently disabled non-preprocessors when enabled may cause reactivation
+				// preprocessors are always added
+				for (ServletContextModel sc : contextsOfDisabledModel) {
+					String cp = sc.getContextPath();
 
-				// name conflict check
-				for (FilterModel enabled : currentlyEnabledByPath.get(cp).keySet()) {
-					boolean nameConflict = haveAnyNameConflict(disabled.getName(), enabled.getName(), disabled, enabled);
-					if (nameConflict) {
-						// name conflict with existing, enabled model. BUT currently disabled model may have
-						// higher ranking...
-						if (disabled.compareTo(enabled) < 0) {
-							// still can be enabled (but we have to check everything) and currently disabled
-							// may potentially get disabled
-							newlyDisabled.add(enabled);
-						} else {
-							canBeEnabled = false;
-							break;
+					// name conflict check
+					for (FilterModel enabled : currentlyEnabledByPath.get(cp).keySet()) {
+						boolean nameConflict = haveAnyNameConflict(disabled.getName(), enabled.getName(), disabled, enabled);
+						if (nameConflict) {
+							// name conflict with existing, enabled model. BUT currently disabled model may have
+							// higher ranking...
+							if (disabled.compareTo(enabled) < 0) {
+								// still can be enabled (but we have to check everything) and currently disabled
+								// may potentially get disabled
+								newlyDisabled.add(enabled);
+							} else {
+								canBeEnabled = false;
+								break;
+							}
 						}
 					}
-				}
-				if (!canBeEnabled) {
-					break;
-				}
-			} // end of check for the conflicts in all the contexts
+					if (!canBeEnabled) {
+						break;
+					}
+				} // end of check for the conflicts in all the contexts
+			}
 
 			// disabled model can be enabled again - in all its contexts
 			if (canBeEnabled) {
@@ -2817,7 +2825,11 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 						// registered initially as disabled
 						disabledFilterModels.add(model);
 					} else {
-						sc.getFilterNameMapping().put(model.getName(), model);
+						if (model.isPreprocessor()) {
+							sc.getFilterNameMapping().put(model.getName() + "-" + model.getId(), model);
+						} else {
+							sc.getFilterNameMapping().put(model.getName(), model);
+						}
 					}
 				});
 
@@ -2847,7 +2859,11 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 						Set<ServletContextModel> servletContexts = getServletContextModels(model);
 						servletContexts.forEach(sc -> {
 							// use special, 2-arg version of map.remove()
-							sc.getFilterNameMapping().remove(model.getName(), model);
+							if (model.isPreprocessor()) {
+								sc.getFilterNameMapping().remove(model.getName() + "-" + model.getId(), model);
+							} else {
+								sc.getFilterNameMapping().remove(model.getName(), model);
+							}
 						});
 					}
 				});

@@ -140,7 +140,11 @@ public final class ServletContextModel extends Identity {
 	 * @param model
 	 */
 	public void enableFilterModel(FilterModel model) {
-		filterNameMapping.put(model.getName(), model);
+		if (model.isPreprocessor()) {
+			filterNameMapping.put(model.getName() + "-" + model.getId(), model);
+		} else {
+			filterNameMapping.put(model.getName(), model);
+		}
 	}
 
 	/**
@@ -149,7 +153,11 @@ public final class ServletContextModel extends Identity {
 	 * @param model
 	 */
 	public void disableFilterModel(FilterModel model) {
-		filterNameMapping.remove(model.getName());
+		if (model.isPreprocessor()) {
+			filterNameMapping.remove(model.getName() + "-" + model.getId());
+		} else {
+			filterNameMapping.remove(model.getName());
+		}
 	}
 
 	/**
