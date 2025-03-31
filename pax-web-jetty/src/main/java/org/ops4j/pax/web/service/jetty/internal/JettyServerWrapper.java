@@ -19,6 +19,7 @@ import jakarta.servlet.Servlet;
 import jakarta.servlet.ServletContainerInitializer;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletContextAttributeListener;
+import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.SessionCookieConfig;
@@ -1737,6 +1738,14 @@ class JettyServerWrapper implements BatchVisitor {
 					}
 
 					removeEventListenerModel(servletContextHandler, eventListenerModel);
+
+					if (eventListener instanceof ServletContextListener) {
+						try {
+							((ServletContextListener) eventListener).contextDestroyed(new ServletContextEvent(servletContextHandler.getServletContext()));
+						} catch (Exception e) {
+							LOG.warn("Exception calling contextDestroyed on removed ServletContextListener: {}", e.getMessage(), e);
+						}
+					}
 				});
 			}
 		}

@@ -58,6 +58,7 @@ import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.context.UniqueMultiBundleWebContainerContextWrapper;
 import org.ops4j.pax.web.service.spi.context.UniqueWebContainerContextWrapper;
 import org.ops4j.pax.web.service.spi.context.WebContainerContextWrapper;
+import org.ops4j.pax.web.service.spi.model.ModelRegistrationTask;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServerModel;
 import org.ops4j.pax.web.service.spi.model.ServiceModel;
@@ -1208,48 +1209,59 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 			// was kept by the unregistration thread.
 			// So in this case we're doing it fully async without waiting for the result
 
-			serverModel.runAsync(() -> {
-				List<EventListenerModel> toUnregister = new LinkedList<>();
+			// however for TCK we need synchronous unregistration...
 
-				// This loop checks Whiteboard unregistration - reference identity
-				for (EventListenerModel existing : serviceModel.getEventListenerModels()) {
-					if (existing == model) {
-						// Whiteboard scenario, where actual "customized" object is unregistered
-						toUnregister.add(model);
-						break;
-					}
-				}
-				if (toUnregister.isEmpty()) {
-					// search by criteria
-					if (listener != null) {
-						for (EventListenerModel existing : serviceModel.getEventListenerModels()) {
-							if (existing.getEventListener() == listener) {
-								toUnregister.add(existing);
-							}
-						}
-					} else if (reference != null) {
-						for (EventListenerModel existing : serviceModel.getEventListenerModels()) {
-							if (existing.getElementReference() == reference) {
-								toUnregister.add(existing);
-							}
+			@SuppressWarnings("Convert2Lambda")
+			ModelRegistrationTask<Object> task = new ModelRegistrationTask<>() {
+				@Override
+				public Object run() throws IllegalArgumentException, IllegalStateException {
+					List<EventListenerModel> toUnregister = new LinkedList<>();
+
+					// This loop checks Whiteboard unregistration - reference identity
+					for (EventListenerModel existing : serviceModel.getEventListenerModels()) {
+						if (existing == model) {
+							// Whiteboard scenario, where actual "customized" object is unregistered
+							toUnregister.add(model);
+							break;
 						}
 					}
+					if (toUnregister.isEmpty()) {
+						// search by criteria
+						if (listener != null) {
+							for (EventListenerModel existing : serviceModel.getEventListenerModels()) {
+								if (existing.getEventListener() == listener) {
+									toUnregister.add(existing);
+								}
+							}
+						} else if (reference != null) {
+							for (EventListenerModel existing : serviceModel.getEventListenerModels()) {
+								if (existing.getElementReference() == reference) {
+									toUnregister.add(existing);
+								}
+							}
+						}
+					}
+					if (toUnregister.isEmpty()) {
+						throw new IllegalArgumentException("Can't find an event listener to unregister using criteria from " + model);
+					}
+
+					final Batch batch = new Batch("Unregistration of EventListener: " + toUnregister);
+
+					serverModel.removeEventListenerModels(toUnregister, batch);
+
+					serverController.sendBatch(batch);
+
+					batch.accept(serviceModel);
+
+					HttpServiceEnabled.this.event(WebElementEvent.State.UNDEPLOYED, model);
+					return null;
 				}
-				if (toUnregister.isEmpty()) {
-					throw new IllegalArgumentException("Can't find an event listener to unregister using criteria from " + model);
-				}
-
-				final Batch batch = new Batch("Unregistration of EventListener: " + toUnregister);
-
-				serverModel.removeEventListenerModels(toUnregister, batch);
-
-				serverController.sendBatch(batch);
-
-				batch.accept(serviceModel);
-
-				event(WebElementEvent.State.UNDEPLOYED, model);
-				return null;
-			});
+			};
+			if (model.isAsynchronusRegistration()) {
+				serverModel.runAsync(task);
+			} else {
+				serverModel.run(task, false);
+			}
 		} catch (RuntimeException e) {
 			// if toUnregister is null, IllegalArgumentException is thrown anyway
 			event(WebElementEvent.State.FAILED, model, e);

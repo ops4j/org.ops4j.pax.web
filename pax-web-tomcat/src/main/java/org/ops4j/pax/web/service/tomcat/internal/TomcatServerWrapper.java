@@ -39,6 +39,7 @@ import java.util.function.Supplier;
 import jakarta.servlet.Servlet;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletContextAttributeListener;
+import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.SessionCookieConfig;
@@ -1607,6 +1608,14 @@ class TomcatServerWrapper implements BatchVisitor {
 					}
 
 					removeEventListenerModel(standardContext, eventListenerModel, eventListener);
+
+					if (eventListener instanceof ServletContextListener) {
+						try {
+							((ServletContextListener) eventListener).contextDestroyed(new ServletContextEvent(standardContext.getServletContext()));
+						} catch (Exception e) {
+							LOG.warn("Exception calling contextDestroyed on removed ServletContextListener: {}", e.getMessage(), e);
+						}
+					}
 				});
 			}
 		}
