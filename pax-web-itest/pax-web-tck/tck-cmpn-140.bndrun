@@ -82,7 +82,6 @@
 	junit-platform-engine;version='[1.12.1,1.12.2)',\
 	junit-platform-launcher;version='[1.12.1,1.12.2)',\
 	junit-vintage-engine;version='[5.12.1,5.12.2)',\
-	net.bytebuddy.byte-buddy;version='[1.15.11,1.15.12)',\
 	org.eclipse.jetty.servlet-api;version='[4.0.6,4.0.7)',\
 	org.opentest4j;version='[1.3.0,1.3.1)',\
 	org.ops4j.base;version='[1.5.1,1.5.2)',\
@@ -104,4 +103,5 @@
 	org.osgi.util.function;version='[1.2.0,1.2.1)',\
 	org.osgi.util.promise;version='[1.3.0,1.3.1)',\
 	jakarta.annotation-api;version='[3.0.0,3.0.1)',\
-	org.ops4j.pax.web.pax-web-compatibility-annotation;version='[10.0.0,10.0.1)'
+	org.ops4j.pax.web.pax-web-compatibility-annotation;version='[10.0.0,10.0.1)',\
+	net.bytebuddy.byte-buddy;version='[1.17.5,1.17.6)'
