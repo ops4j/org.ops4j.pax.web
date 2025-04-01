@@ -392,22 +392,22 @@ public class OsgiServletContext implements ServletContext {
 
 	@Override
 	public void declareRoles(String... roleNames) {
-		throw new UnsupportedOperationException("declareRoles() is not supported.");
+		throw new IllegalStateException("declareRoles() is not supported.");
 	}
 
 	@Override
 	public boolean setInitParameter(String name, String value) {
-		throw new UnsupportedOperationException("setInitParameter() is not supported.");
+		throw new IllegalStateException("setInitParameter() is not supported.");
 	}
 
 	@Override
 	public void setSessionTrackingModes(Set<SessionTrackingMode> sessionTrackingModes) {
-		throw new UnsupportedOperationException("setSessionTrackingModes() is not supported.");
+		throw new IllegalStateException("setSessionTrackingModes() is not supported.");
 	}
 
 	@Override
 	public ServletRegistration.Dynamic addJspFile(String servletName, String jspFile) {
-		throw new UnsupportedOperationException("addJspFile() is not supported.");
+		throw new IllegalStateException("addJspFile() is not supported.");
 	}
 
 	// --- methods that are scoped to HttpContext/ServletContextHelper
