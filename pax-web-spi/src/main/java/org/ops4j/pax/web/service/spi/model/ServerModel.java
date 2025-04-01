@@ -3181,7 +3181,7 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 
 			// --- context information
 
-			Map<OsgiContextModel, ServletContextDTO> scDTOs = new LinkedHashMap<>();
+			Map<OsgiContextModel, OsgiContextModel.RankedServletContextDTO> scDTOs = new LinkedHashMap<>();
 			List<FailedServletContextDTO> failedScDTOs = new ArrayList<>();
 
 			// OsgiContextModels from WABs - we don't care about contexts "awaiting allocation"
@@ -3766,6 +3766,18 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 			if (cp1.length() != cp2.length()) {
 				// order by length, so "/" is at the end
 				return Integer.compare(cp2.length(), cp1.length());
+			}
+			// by rank
+			if (o1 instanceof OsgiContextModel.RankedServletContextDTO && o2 instanceof OsgiContextModel.RankedServletContextDTO) {
+				OsgiContextModel.RankedServletContextDTO ro1 = (OsgiContextModel.RankedServletContextDTO) o1;
+				OsgiContextModel.RankedServletContextDTO ro2 = (OsgiContextModel.RankedServletContextDTO) o2;
+				if (ro1.rank != ro2.rank) {
+					return ro1.rank < ro2.rank ? 1 : -1;
+				}
+			}
+			// by id
+			if (o1.serviceId != o2.serviceId) {
+				return o1.serviceId < o2.serviceId ? -1 : 1;
 			}
 			// alphabetlically
 			return cp1.compareTo(cp2);

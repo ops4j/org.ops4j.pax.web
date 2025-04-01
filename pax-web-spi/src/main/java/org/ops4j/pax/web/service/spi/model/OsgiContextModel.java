@@ -849,11 +849,12 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 	 * {@link OsgiContextModel}
 	 * @return
 	 */
-	public ServletContextDTO toDTO() {
-		ServletContextDTO scDTO = new ServletContextDTO();
+	public RankedServletContextDTO toDTO() {
+		RankedServletContextDTO scDTO = new RankedServletContextDTO();
 		scDTO.name = getName();
 		scDTO.contextPath = getContextPath();
 		scDTO.serviceId = getServiceId();
+		scDTO.rank = getServiceRank();
 		// they're kept at OsgiServletContext, not OsgiContextModel level
 		scDTO.attributes = new HashMap<>();
 		// but I can include the initial attributes
@@ -882,6 +883,10 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 		scDTO.initParams.putAll(getContextParams());
 		scDTO.failureReason = failureReason;
 		return scDTO;
+	}
+
+	public static class RankedServletContextDTO extends ServletContextDTO {
+		public int rank;
 	}
 
 }
