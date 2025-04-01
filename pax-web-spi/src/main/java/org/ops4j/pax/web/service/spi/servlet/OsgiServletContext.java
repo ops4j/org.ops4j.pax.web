@@ -49,6 +49,7 @@ import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
+import org.ops4j.pax.web.service.spi.util.Utils;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -77,6 +78,8 @@ public class OsgiServletContext implements ServletContext {
 	private final ServletContextModel servletContextModel;
 
 	private final ClassLoader classLoader;
+
+	private final boolean jspAvailable;
 
 	/**
 	 * {@link WebContainerContext} obtained from {@link OsgiContextModel} in the context of the bundle registering
@@ -158,6 +161,9 @@ public class OsgiServletContext implements ServletContext {
 		} else {
 			this.classLoader = loader;
 		}
+
+		jspAvailable = FrameworkUtil.getBundle(getClass()) == null
+				|| Utils.getPaxWebJspBundle(FrameworkUtil.getBundle(getClass())) != null;
 	}
 
 	public WebContainerContext getResolvedWebContainerContext() {
@@ -598,7 +604,7 @@ public class OsgiServletContext implements ServletContext {
 	public JspConfigDescriptor getJspConfigDescriptor() {
 		// according to 140.2.6 "Behavior of the Servlet Context", this method should return null
 		// but I don't agree - I hope TCK won't mind
-		return osgiContextModel.getJspConfigDescriptor();
+		return jspAvailable ? osgiContextModel.getJspConfigDescriptor() : null;
 	}
 
 	// --- methods also delegating to server-specific ServletContext, but added in Servlet spec 4.0

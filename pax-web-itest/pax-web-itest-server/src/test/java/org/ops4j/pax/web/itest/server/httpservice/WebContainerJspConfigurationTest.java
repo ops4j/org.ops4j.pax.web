@@ -38,6 +38,11 @@ import static org.ops4j.pax.web.itest.server.support.Utils.httpGET;
 @RunWith(Parameterized.class)
 public class WebContainerJspConfigurationTest extends MultiContainerTestSupport {
 
+	@Override
+	protected boolean enableJSP() {
+		return true;
+	}
+
 	@Test
 	public void jspTaglibsAndConfiguration() throws Exception {
 		Bundle sample1 = mockBundle("sample1");
