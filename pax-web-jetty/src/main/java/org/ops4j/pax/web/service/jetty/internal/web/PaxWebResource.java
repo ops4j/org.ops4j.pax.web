@@ -53,7 +53,7 @@ public class PaxWebResource extends Resource {
 			try {
 				URL url = this.servletContext.getResource(chroot);
 				directFileMapping = url != null && !url.getPath().endsWith("/");
-			} catch (MalformedURLException ignored) {
+			} catch (Exception ignored) {
 			}
 		} else {
 			throw new IllegalArgumentException("baseUrlResource and chroot can't both be null");

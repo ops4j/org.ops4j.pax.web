@@ -73,7 +73,7 @@ public class OsgiResourceManager implements ResourceManager {
 		try {
 			URL url = chroot == null ? null : this.osgiScopedServletContext.getResource(chroot);
 			directFileMapping = url != null && !url.getPath().endsWith("/");
-		} catch (MalformedURLException ignored) {
+		} catch (Exception ignored) {
 		}
 	}
 
