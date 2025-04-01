@@ -3207,11 +3207,19 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 			});
 			// OsgiContextModels from Whiteboard (excluding ones with direct context instance) - failed and non-failed
 			// they're not kept at ServerModel level at all
-			whiteboardContexts.values().stream().flatMap(Collection::stream).forEach(ocm -> {
-				if (ocm.getDtoFailureCode() >= 0) {
-					failedScDTOs.add(ocm.toFailedDTO(ocm.getDtoFailureCode()));
-				} else {
-					scDTOs.put(ocm, ocm.toDTO());
+			whiteboardContexts.values().stream().forEach(ocms -> {
+				boolean first = true;
+				for (OsgiContextModel ocm : ocms) {
+					if (ocm.getDtoFailureCode() >= 0) {
+						failedScDTOs.add(ocm.toFailedDTO(ocm.getDtoFailureCode()));
+					} else {
+						if (first) {
+							scDTOs.put(ocm, ocm.toDTO());
+						} else {
+							failedScDTOs.add(ocm.toFailedDTO(DTOConstants.FAILURE_REASON_SHADOWED_BY_OTHER_SERVICE));
+						}
+					}
+					first = false;
 				}
 			});
 			// we don't care about shared HttpService/WebContainer contexts as these are Pax Web specific
