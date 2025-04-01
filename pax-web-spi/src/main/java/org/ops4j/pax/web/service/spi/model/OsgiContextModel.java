@@ -161,11 +161,12 @@ public final class OsgiContextModel extends Identity implements Comparable<OsgiC
 		// actual servlet was registered.
 		Bundle bundle = FrameworkUtil.getBundle(OsgiContextModel.class);
 
-		// in Whiteboard, rank of "default" context is 0, so it can be overriden by any service ranked higher than 0
+		// in Whiteboard, rank of "default" context is arbitrary -100, so it can be overriden by any service ranked
+		// higher or equal to 0
 		// "140.4 Registering Servlets":
 		//     The Servlet Context of the Http Service is treated in the same way as all contexts managed by the
 		//     Whiteboard implementation. The highest ranking is associated with the context of the Http Service.
-		DEFAULT_CONTEXT_MODEL = new OsgiContextModel(bundle, 0, 0L, true);
+		DEFAULT_CONTEXT_MODEL = new OsgiContextModel(bundle, -100, 0L, true);
 		DEFAULT_CONTEXT_MODEL.setName(HttpWhiteboardConstants.HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME);
 		DEFAULT_CONTEXT_MODEL.setContextPath(PaxWebConstants.DEFAULT_CONTEXT_PATH);
 
