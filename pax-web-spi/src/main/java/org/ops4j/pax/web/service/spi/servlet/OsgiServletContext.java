@@ -398,7 +398,7 @@ public class OsgiServletContext implements ServletContext {
 
 	@Override
 	public void declareRoles(String... roleNames) {
-		throw new IllegalStateException("declareRoles() is not supported.");
+		throw new UnsupportedOperationException("declareRoles() is not supported.");
 	}
 
 	@Override
