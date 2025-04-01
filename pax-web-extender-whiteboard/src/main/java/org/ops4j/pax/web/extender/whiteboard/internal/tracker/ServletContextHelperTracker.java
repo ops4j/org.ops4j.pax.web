@@ -18,6 +18,7 @@ package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardExtenderContext;
 import org.ops4j.pax.web.service.PaxWebConstants;
@@ -39,6 +40,8 @@ import org.osgi.util.tracker.ServiceTracker;
  * @since 0.2.0, August 21, 2007
  */
 public class ServletContextHelperTracker extends AbstractContextTracker<ServletContextHelper> {
+
+	private final Pattern SN = Pattern.compile("^[\\p{Alnum}_-]+[.\\p{Alnum}]*$");
 
 	private ServletContextHelperTracker(final WhiteboardExtenderContext whiteboardExtenderContext, final BundleContext bundleContext) {
 		super(whiteboardExtenderContext, bundleContext);
@@ -66,6 +69,17 @@ public class ServletContextHelperTracker extends AbstractContextTracker<ServletC
 		}
 		if (name == null || "".equals(name.trim())) {
 			name = HttpWhiteboardConstants.HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME;
+		} else {
+			// 140.16.2.7: The value must follow the "symbolic-name" specification from Section 1.3.2 of the OSGi Core Specification.
+			// 1.3.2 General Syntax Definitions:
+			// digit           ::= [0..9]
+			// alpha           ::= [a..zA..Z]
+			// alphanum        ::= alpha | digit
+			// token           ::= ( alphanum | '_' | '-' )+
+			// symbolic-name   ::= token ( '.' token )*
+			if (!SN.matcher(name).matches()) {
+				model.setDtoFailureCode(DTOConstants.FAILURE_REASON_VALIDATION_FAILED);
+			}
 		}
 		model.setName(name);
 

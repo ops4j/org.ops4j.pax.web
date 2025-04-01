@@ -3207,7 +3207,7 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 			});
 			// OsgiContextModels from Whiteboard (excluding ones with direct context instance) - failed and non-failed
 			// they're not kept at ServerModel level at all
-			whiteboardContexts.values().stream().forEach(ocms -> {
+			whiteboardContexts.values().forEach(ocms -> {
 				boolean first = true;
 				for (OsgiContextModel ocm : ocms) {
 					if (ocm.getDtoFailureCode() >= 0) {
