@@ -32,7 +32,9 @@ import jakarta.servlet.http.HttpSessionListener;
 import org.ops4j.pax.web.service.spi.model.events.EventListenerEventData;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceObjects;
 import org.osgi.service.servlet.runtime.dto.DTOConstants;
 import org.osgi.service.servlet.runtime.dto.FailedListenerDTO;
 import org.osgi.service.servlet.runtime.dto.ListenerDTO;
@@ -64,15 +66,7 @@ public class EventListenerModel extends ElementModel<EventListener, EventListene
 	private EventListener eventListener;
 
 	// According to 140.7 Registering Listeners, there's no requirement to handle prototype-scoped listeners
-	// It'd be quite hard to do, because in case of servlets and filters, all the runtimes have specific, extensible
-	// (to different degree) "holder" classes with getInstance()/destroy() methods, where we can keep the instance
-	// of org.osgi.framework.ServiceObjects.
-	// There's usually no "holder" for listeners and also we (in Tomcat and Undertow) create proxied instances
-	// of listeners for specific purposes (passing correct servlet context for example), so we explicitly do NOT
-	// handle prototype-scope.
-	// That's why we can keep single resolved instance of the listener (singleton or registering bundle-scoped)
-	// Also, we don't have to unget(), because we cache the instance and it'll be unget() anyway when the bundle
-	// is stopped
+	// However TCK tests that and we support it since 2025-04-01
 	private EventListener resolvedListener;
 
 	/**
@@ -129,7 +123,12 @@ public class EventListenerModel extends ElementModel<EventListener, EventListene
 	 */
 	public EventListener resolveEventListener() {
 		if (resolvedListener != null) {
-			return resolvedListener;
+			if (!isPrototype()) {
+				return resolvedListener;
+			} else {
+				getRegisteringBundle().getBundleContext().ungetService(getElementReference());
+				resolvedListener = null;
+			}
 		}
 		synchronized (this) {
 			if (resolvedListener != null) {
@@ -144,7 +143,13 @@ public class EventListenerModel extends ElementModel<EventListener, EventListene
 			if (getElementReference() != null) {
 				BundleContext context = getRegisteringBundle().getBundleContext();
 				if (context != null) {
-					resolvedListener = context.getService(getElementReference());
+					if (!isPrototype()) {
+						resolvedListener = context.getService(getElementReference());
+					} else {
+						Bundle b = getRegisteringBundle();
+						ServiceObjects<EventListener> so = b.getBundleContext().getServiceObjects(getElementReference());
+						resolvedListener = so.getService();
+					}
 				}
 			}
 			if (resolvedListener == null) {
