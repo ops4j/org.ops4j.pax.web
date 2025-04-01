@@ -1496,9 +1496,24 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 						// we won, but still can lose, because it's not the only pattern (or the only context)
 						newlyDisabled.add(existing);
 					} else {
-						LOG.warn("{} can't be registered now in context {} under \"{}\" mapping. Conflict with {}.",
-								model, sc.getContextPath(), pattern, existing);
-						register = false;
+						// let's maybe compare their associated whiteboard contexts (TCK)
+						List<OsgiContextModel> ours = model.getContextModels();
+						List<OsgiContextModel> theirs = existing.getContextModels();
+						if (ours.size() == 1 && theirs.size() == 1) {
+							// a bit special, because we may have URL conflict, but be registered to more contexts
+							// so it's hard to determine which servlet should eventually win...
+							if (ours.get(0).compareTo(theirs.get(0)) < 0) {
+								newlyDisabled.add(existing);
+							} else {
+								register = false;
+							}
+						} else {
+							register = false;
+						}
+						if (!register) {
+							LOG.warn("{} can't be registered now in context {} under \"{}\" mapping. Conflict with {}.",
+									model, sc.getContextPath(), pattern, existing);
+						}
 						break;
 					}
 				}
