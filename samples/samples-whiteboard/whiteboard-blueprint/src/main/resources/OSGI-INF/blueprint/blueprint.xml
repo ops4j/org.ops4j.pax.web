@@ -23,10 +23,9 @@
 
 	<!-- Registering the Forbidden Servlet first -->
 	<bean id="forbiddenContext" class="org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardContext" />
-	<service id="forbiddenCtxtService" ref="forbiddenContext" interface="org.ops4j.pax.web.service.http.HttpContext">
+	<service id="forbiddenCtxtService" ref="forbiddenContext" ranking="-2147483648" interface="org.ops4j.pax.web.service.http.HttpContext">
 		<service-properties>
 			<entry key="httpContext.id" value="forbidden" />
-			<entry key="service.ranking" value="-2147483648" />
 		</service-properties>
 	</service>
 
