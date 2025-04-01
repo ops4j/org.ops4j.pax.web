@@ -74,6 +74,9 @@ public class EventListenerModel extends ElementModel<EventListener, EventListene
 	 */
 	private boolean dynamic = false;
 
+	/** Flag for models which were targeted for different runtime */
+	private boolean notMatched;
+
 	public EventListenerModel() {
 	}
 
@@ -196,6 +199,14 @@ public class EventListenerModel extends ElementModel<EventListener, EventListene
 
 		dtoFailureCode = -1;
 		return Boolean.TRUE;
+	}
+
+	public void setNotMatched() {
+		this.notMatched = true;
+	}
+
+	public boolean isNotMatched() {
+		return notMatched;
 	}
 
 	public ListenerDTO toDTO() {

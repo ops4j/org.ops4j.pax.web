@@ -1130,6 +1130,12 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 						throw new RuntimeException(e.getMessage(), e);
 					}
 
+					if (!serverModel.matchesRuntime(model.getElementReference())) {
+						model.setNotMatched();
+						LOG.info("Skipping {} - target runtime not matched", model);
+						return null;
+					}
+
 					LOG.info("Registering {}", model);
 
 					serverModel.addEventListenerModel(model, batch);

@@ -60,6 +60,8 @@ public class ServletContextHelperTracker extends AbstractContextTracker<ServletC
 		// always shared
 		model.setShared(true);
 
+		boolean propertiesInvalid = false;
+
 		// 1. context name
 		String name = Utils.getPaxWebProperty(serviceReference,
 				PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_ID, HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME,
@@ -68,6 +70,7 @@ public class ServletContextHelperTracker extends AbstractContextTracker<ServletC
 			model.setDtoFailureCode(DTOConstants.FAILURE_REASON_VALIDATION_FAILED);
 		}
 		if (name == null || "".equals(name.trim())) {
+			propertiesInvalid = true;
 			name = HttpWhiteboardConstants.HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME;
 		} else {
 			// 140.16.2.7: The value must follow the "symbolic-name" specification from Section 1.3.2 of the OSGi Core Specification.
@@ -85,7 +88,6 @@ public class ServletContextHelperTracker extends AbstractContextTracker<ServletC
 
 		// 2. context path
 		// NOTE: Pax Web 7 was stripping leading "/" and was mixing concepts of "name" and "path"
-		boolean propertiesInvalid = false;
 		String contextPath = Utils.getPaxWebProperty(serviceReference,
 				PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_PATH, HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH,
 				Utils::asString);
