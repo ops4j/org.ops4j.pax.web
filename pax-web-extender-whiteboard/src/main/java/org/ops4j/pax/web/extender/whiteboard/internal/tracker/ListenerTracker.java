@@ -19,19 +19,6 @@ package org.ops4j.pax.web.extender.whiteboard.internal.tracker;
 
 import java.util.EventListener;
 
-import jakarta.servlet.AsyncListener;
-import jakarta.servlet.ReadListener;
-import jakarta.servlet.ServletContextAttributeListener;
-import jakarta.servlet.ServletContextListener;
-import jakarta.servlet.ServletRequestAttributeListener;
-import jakarta.servlet.ServletRequestListener;
-import jakarta.servlet.WriteListener;
-import jakarta.servlet.http.HttpSessionActivationListener;
-import jakarta.servlet.http.HttpSessionAttributeListener;
-import jakarta.servlet.http.HttpSessionBindingListener;
-import jakarta.servlet.http.HttpSessionIdListener;
-import jakarta.servlet.http.HttpSessionListener;
-
 import org.ops4j.pax.web.extender.whiteboard.internal.WhiteboardExtenderContext;
 import org.ops4j.pax.web.service.spi.model.elements.EventListenerModel;
 import org.ops4j.pax.web.service.spi.model.events.EventListenerEventData;

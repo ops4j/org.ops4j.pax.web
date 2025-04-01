@@ -125,7 +125,7 @@
 		<!-- See http://checkstyle.sf.net/config_coding.html -->
 		<module name="EmptyStatement" />
 		<module name="EqualsHashCode" />
-		<module name="InnerAssignment" />
+<!--		<module name="InnerAssignment" />-->
 		<module name="DefaultComesLast" />
 		<module name="MissingSwitchDefault" />
 		<module name="FallThrough" />

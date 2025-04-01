@@ -298,7 +298,8 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 
 				if (map.urlPatterns != null) {
 					boolean error = false;
-					for (String p : map.urlPatterns) {
+					for (String up : map.urlPatterns) {
+						String p = up;
 						if (p.endsWith("/*")) {
 							p = p.substring(0, p.length() - 2);
 							if (p.indexOf('*') != -1) {

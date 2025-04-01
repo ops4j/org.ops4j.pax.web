@@ -46,7 +46,7 @@ public abstract class AbstractWhiteboardScopesIntegrationTest extends AbstractCo
 				() -> {
 					bundle = installAndStartBundle(sampleURI("whiteboard-scopes"));
 
-					Dictionary<String, Object> props; props = new Hashtable<>();
+					Dictionary<String, Object> props = new Hashtable<>();
 					props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(osgi.http.whiteboard.context.name=c1)");
 					props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
 					ourScl = new TestSCL();
@@ -55,7 +55,7 @@ public abstract class AbstractWhiteboardScopesIntegrationTest extends AbstractCo
 	}
 
 	@Test
-	public void testDifferentServletContextListeners() throws Exception{
+	public void testDifferentServletContextListeners() throws Exception {
 		ServiceTracker<?, ?> t1 = new ServiceTracker<>(context, context.createFilter("(test=true)"), null);
 		t1.open();
 		TestSCL scl1 = (TestSCL) t1.getService();

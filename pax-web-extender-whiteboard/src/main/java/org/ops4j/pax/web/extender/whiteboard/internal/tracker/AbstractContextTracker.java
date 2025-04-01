@@ -53,13 +53,14 @@ public abstract class AbstractContextTracker<S> implements ServiceTrackerCustomi
 	protected static final Logger LOG = LoggerFactory.getLogger(AbstractElementTracker.class);
 
 	protected final BundleContext bundleContext;
-	private final WhiteboardExtenderContext whiteboardExtenderContext;
 
 	/**
 	 * Flag to indicate sync/async registration of Whiteboard elements. Pax Web was always asynchronous, but TCK
 	 * requires synchronous registration.
 	 */
 	protected boolean whiteboardSynchronous = false;
+
+	private final WhiteboardExtenderContext whiteboardExtenderContext;
 
 	protected AbstractContextTracker(WhiteboardExtenderContext whiteboardExtenderContext, BundleContext bundleContext) {
 		this.whiteboardExtenderContext = whiteboardExtenderContext;

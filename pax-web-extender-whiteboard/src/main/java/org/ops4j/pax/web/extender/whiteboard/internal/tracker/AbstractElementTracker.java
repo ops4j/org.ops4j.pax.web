@@ -65,24 +65,25 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractElementTracker<S, R, D extends WebElementEventData, T extends ElementModel<R, D>>
 		implements ServiceTrackerCustomizer<S, T> {
 
-	private static final String LEGACY_MAPPING_PACKAGE = ContextRelated.class.getPackage().getName();
-
 	// When elements are registered without selector we'll use default one
 	public static final String DEFAULT_CONTEXT_SELECTOR = String.format("(%s=%s)", HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME,
 			HttpWhiteboardConstants.HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME);
 
-	public static Filter DEFAULT_CONTEXT_SELECTOR_FILTER = null;
+	public static Filter defaultContextSelectorFilter = null;
+
+	private static final String LEGACY_MAPPING_PACKAGE = ContextRelated.class.getPackage().getName();
 
 	protected final Logger log = LoggerFactory.getLogger(getClass());
 
 	protected final BundleContext bundleContext;
-	private final WhiteboardExtenderContext whiteboardExtenderContext;
 
 	/**
 	 * Flag to indicate sync/async registration of Whiteboard elements. Pax Web was always asynchronous, but TCK
 	 * requires synchronous registration.
 	 */
 	protected boolean whiteboardSynchronous = false;
+
+	private final WhiteboardExtenderContext whiteboardExtenderContext;
 
 	protected AbstractElementTracker(WhiteboardExtenderContext whiteboardExtenderContext, BundleContext bundleContext) {
 		this.whiteboardExtenderContext = whiteboardExtenderContext;
@@ -91,7 +92,7 @@ public abstract class AbstractElementTracker<S, R, D extends WebElementEventData
 		whiteboardSynchronous = Boolean.parseBoolean(flag);
 
 		try {
-			DEFAULT_CONTEXT_SELECTOR_FILTER = bundleContext.createFilter(DEFAULT_CONTEXT_SELECTOR);
+			defaultContextSelectorFilter = bundleContext.createFilter(DEFAULT_CONTEXT_SELECTOR);
 		} catch (InvalidSyntaxException e) {
 			throw new RuntimeException(e.getMessage(), e);
 		}
@@ -262,7 +263,7 @@ public abstract class AbstractElementTracker<S, R, D extends WebElementEventData
 		try {
 			//noinspection StringEquality
 			contextFilter = selector == DEFAULT_CONTEXT_SELECTOR
-					? DEFAULT_CONTEXT_SELECTOR_FILTER : bundleContext.createFilter(selector);
+					? defaultContextSelectorFilter : bundleContext.createFilter(selector);
 		} catch (InvalidSyntaxException e) {
 			log.error("Can't register web element from reference {}, skipping registration."
 					+ " Bad context selector: {}", serviceReference, selector, e);

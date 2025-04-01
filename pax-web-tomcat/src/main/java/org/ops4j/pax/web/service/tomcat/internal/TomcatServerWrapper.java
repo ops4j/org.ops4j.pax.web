@@ -106,7 +106,6 @@ import org.ops4j.pax.web.service.spi.servlet.DynamicRegistrations;
 import org.ops4j.pax.web.service.spi.servlet.OsgiDynamicServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiInitializedServlet;
 import org.ops4j.pax.web.service.spi.servlet.OsgiScopedListener;
-import org.ops4j.pax.web.service.spi.servlet.OsgiScopedServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContextClassLoader;
 import org.ops4j.pax.web.service.spi.servlet.OsgiSessionAttributeListener;
@@ -1646,7 +1645,8 @@ class TomcatServerWrapper implements BatchVisitor {
 			Object[] lcListeners = standardContext.getApplicationLifecycleListeners();
 			List<Object> newEvListeners = new ArrayList<>();
 			List<Object> newLcListeners = new ArrayList<>();
-			for (Object l : evListeners) {
+			for (Object el : evListeners) {
+				Object l = el;
 				if (l instanceof OsgiScopedListener) {
 					l = ((OsgiScopedListener) l).getDelegate();
 				} else if (Proxy.isProxyClass(l.getClass())) {
@@ -1659,7 +1659,8 @@ class TomcatServerWrapper implements BatchVisitor {
 					newEvListeners.add(l);
 				}
 			}
-			for (Object l : lcListeners) {
+			for (Object el : lcListeners) {
+				Object l = el;
 				if (l instanceof OsgiScopedListener) {
 					l = ((OsgiScopedListener) l).getDelegate();
 				} else if (Proxy.isProxyClass(l.getClass())) {

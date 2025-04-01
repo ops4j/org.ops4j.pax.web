@@ -41,7 +41,7 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public class ServletContextHelperTracker extends AbstractContextTracker<ServletContextHelper> {
 
-	private final Pattern SN = Pattern.compile("^[\\p{Alnum}_-]+[.\\p{Alnum}]*$");
+	private static final Pattern SN = Pattern.compile("^[\\p{Alnum}_-]+[.\\p{Alnum}]*$");
 
 	private ServletContextHelperTracker(final WhiteboardExtenderContext whiteboardExtenderContext, final BundleContext bundleContext) {
 		super(whiteboardExtenderContext, bundleContext);
