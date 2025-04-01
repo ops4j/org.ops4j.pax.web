@@ -39,6 +39,7 @@ public class Activator implements BundleActivator {
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "custom");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/");
 		contextReg = bundleContext.registerService(ServletContextHelper.class, new ServletContextHelper() { }, props);
 
 		props = new Hashtable<>();
