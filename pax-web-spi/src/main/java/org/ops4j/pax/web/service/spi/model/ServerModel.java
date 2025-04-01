@@ -3218,8 +3218,8 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 						} else {
 							failedScDTOs.add(ocm.toFailedDTO(DTOConstants.FAILURE_REASON_SHADOWED_BY_OTHER_SERVICE));
 						}
+						first = false;
 					}
-					first = false;
 				}
 			});
 			// we don't care about shared HttpService/WebContainer contexts as these are Pax Web specific
@@ -3706,6 +3706,11 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 			models.remove(ocm);
 			if (models.isEmpty()) {
 				whiteboardContexts.remove(ocm.getContextPath());
+			} else {
+				OsgiContextModel next = models.iterator().next();
+				if (next.getDtoFailureCode() == DTOConstants.FAILURE_REASON_SHADOWED_BY_OTHER_SERVICE) {
+					next.setDtoFailureCode(-1);
+				}
 			}
 		}
 	}
