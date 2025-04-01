@@ -176,6 +176,10 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 		this.osgiServletContext = osgiServletContext;
 	}
 
+	public ServletContext getOsgiServletContext() {
+		return osgiServletContext;
+	}
+
 	@Override
 	public void callContextInitialized(ServletContextListener l, ServletContextEvent e) {
 		super.callContextInitialized(l, new ServletContextEvent(osgiServletContext));

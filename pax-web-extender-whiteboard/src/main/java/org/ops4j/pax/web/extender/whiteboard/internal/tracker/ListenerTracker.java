@@ -54,23 +54,6 @@ public class ListenerTracker extends AbstractElementTracker<EventListener, Event
 
 	public static final Logger LOG = LoggerFactory.getLogger(ListenerTracker.class);
 
-	private static final Class<?>[] SUPPORTED_LISTENER_CLASSES = new Class[] {
-			// OSGi CMPN R7 Whiteboard Service
-			ServletContextListener.class,
-			ServletContextAttributeListener.class,
-			ServletRequestListener.class,
-			ServletRequestAttributeListener.class,
-			HttpSessionAttributeListener.class,
-			HttpSessionIdListener.class,
-			HttpSessionListener.class,
-			// Pax Web additions
-			HttpSessionActivationListener.class,
-			HttpSessionBindingListener.class,
-			AsyncListener.class,
-			ReadListener.class,
-			WriteListener.class
-	};
-
 	private ListenerTracker(final WhiteboardExtenderContext whiteboardExtenderContext, final BundleContext bundleContext) {
 		super(whiteboardExtenderContext, bundleContext);
 	}
@@ -79,7 +62,7 @@ public class ListenerTracker extends AbstractElementTracker<EventListener, Event
 			final BundleContext bundleContext) {
 
 		StringBuilder classes = new StringBuilder();
-		for (Class<?> c : SUPPORTED_LISTENER_CLASSES) {
+		for (Class<?> c : EventListenerModel.SUPPORTED_LISTENER_CLASSES) {
 			classes.append("(objectClass=").append(c.getName()).append(")");
 		}
 		String filter = String.format("(&(|%s)(%s=*))", classes.toString(), HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER);

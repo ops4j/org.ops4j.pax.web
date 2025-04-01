@@ -108,7 +108,11 @@ public class OsgiDynamicServletContext implements ServletContext {
 		return osgiContext.getContainerServletContext();
 	}
 
-	// --- methods that throw UnsupportedOperationException (when context is started)
+	public OsgiServletContext getOsgiContext() {
+		return osgiContext;
+	}
+
+// --- methods that throw UnsupportedOperationException (when context is started)
 
 	// these methods allow OSGi-unaware registration of filters, servlets and listeners and according to
 	// Servlet specification, should be used to configure "the context" from within ServletContainerInitializers

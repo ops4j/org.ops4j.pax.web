@@ -18,6 +18,8 @@ package org.ops4j.pax.web.service.tomcat.internal;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Proxy;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
@@ -103,6 +105,8 @@ import org.ops4j.pax.web.service.spi.servlet.Default404Servlet;
 import org.ops4j.pax.web.service.spi.servlet.DynamicRegistrations;
 import org.ops4j.pax.web.service.spi.servlet.OsgiDynamicServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiInitializedServlet;
+import org.ops4j.pax.web.service.spi.servlet.OsgiScopedListener;
+import org.ops4j.pax.web.service.spi.servlet.OsgiScopedServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContextClassLoader;
 import org.ops4j.pax.web.service.spi.servlet.OsgiSessionAttributeListener;
@@ -1555,6 +1559,13 @@ class TomcatServerWrapper implements BatchVisitor {
 				if (eventListener instanceof HttpSessionListener || eventListener instanceof ServletContextListener) {
 					// we're adding these listeners to overriden method, so Tomcat doesn't know about
 					// "no pluggability listeners"
+					if (eventListener instanceof ServletContextListener) {
+						// we have to proxy the listener, so its contextInitialized is called with
+						// such even where ServletContext is scoped to proper bundle
+						eventListener = OsgiScopedListener.proxyListener(
+								standardContext.getDefaultServletContext(),
+								standardContext::getOsgiServletContext, eventListener, eventListenerModel);
+					}
 					standardContext.addApplicationLifecycleListener(eventListenerModel, eventListener);
 				} else {
 					// org.apache.catalina.core.StandardContext.addApplicationEventListener() is called from
@@ -1636,11 +1647,27 @@ class TomcatServerWrapper implements BatchVisitor {
 			List<Object> newEvListeners = new ArrayList<>();
 			List<Object> newLcListeners = new ArrayList<>();
 			for (Object l : evListeners) {
+				if (l instanceof OsgiScopedListener) {
+					l = ((OsgiScopedListener) l).getDelegate();
+				} else if (Proxy.isProxyClass(l.getClass())) {
+					InvocationHandler ih = Proxy.getInvocationHandler(l);
+					if (ih instanceof OsgiScopedListener.Handler) {
+						l = ((OsgiScopedListener.Handler) ih).getDelegate();
+					}
+				}
 				if (l != eventListener) {
 					newEvListeners.add(l);
 				}
 			}
 			for (Object l : lcListeners) {
+				if (l instanceof OsgiScopedListener) {
+					l = ((OsgiScopedListener) l).getDelegate();
+				} else if (Proxy.isProxyClass(l.getClass())) {
+					InvocationHandler ih = Proxy.getInvocationHandler(l);
+					if (ih instanceof OsgiScopedListener.Handler) {
+						l = ((OsgiScopedListener.Handler) ih).getDelegate();
+					}
+				}
 				if (l != eventListener) {
 					newLcListeners.add(l);
 				}

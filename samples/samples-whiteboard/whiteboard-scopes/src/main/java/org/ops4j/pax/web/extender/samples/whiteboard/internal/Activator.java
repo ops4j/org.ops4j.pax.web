@@ -24,7 +24,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import jakarta.servlet.Filter;
 import jakarta.servlet.Servlet;
 
+import jakarta.servlet.ServletContextListener;
 import org.ops4j.pax.web.extender.samples.whiteboard.Control;
+import org.ops4j.pax.web.extender.samples.whiteboard.TestSCL;
 import org.ops4j.pax.web.service.PaxWebConstants;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
@@ -57,6 +59,8 @@ public class Activator implements BundleActivator, Control {
 	private ServiceRegistration<Preprocessor> p2Reg;
 	private ServiceRegistration<Preprocessor> p3Reg;
 
+	private ServiceRegistration<ServletContextListener> sclReg;
+
 	@SuppressWarnings("deprecation")
 	public void start(final BundleContext bundleContext) {
 		Dictionary<String, Object> props;
@@ -64,6 +68,13 @@ public class Activator implements BundleActivator, Control {
 		WhiteboardServlet.counter = new AtomicInteger(0);
 		WhiteboardFilter.counter = new AtomicInteger(0);
 		WhiteboardPreprocessor.counter = new AtomicInteger(0);
+
+		// register a listener that can then be obtained to check what ServletContext it got
+		props = new Hashtable<>();
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(osgi.http.whiteboard.context.name=c1)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
+		props.put("test", "true");
+		sclReg = bundleContext.registerService(ServletContextListener.class, new TestSCL(), props);
 
 		// two contexts with different paths
 
@@ -283,7 +294,7 @@ public class Activator implements BundleActivator, Control {
 
 	public void stop(BundleContext bundleContext) {
 		for (ServiceRegistration<?> r : new ServiceRegistration<?>[] {
-				p1Reg, p2Reg, p3Reg, f1Reg, f2Reg, f3Reg, s1Reg, s2Reg, s3Reg, c1Reg, c2Reg
+				p1Reg, p2Reg, p3Reg, f1Reg, f2Reg, f3Reg, s1Reg, s2Reg, s3Reg, c1Reg, c2Reg, sclReg
 		}) {
 			if (r != null) {
 				r.unregister();

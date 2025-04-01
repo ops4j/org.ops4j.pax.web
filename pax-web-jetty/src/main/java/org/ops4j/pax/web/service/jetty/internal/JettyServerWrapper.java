@@ -90,6 +90,7 @@ import org.ops4j.pax.web.service.spi.servlet.Default404Servlet;
 import org.ops4j.pax.web.service.spi.servlet.DynamicRegistrations;
 import org.ops4j.pax.web.service.spi.servlet.OsgiDynamicServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiInitializedServlet;
+import org.ops4j.pax.web.service.spi.servlet.OsgiScopedListener;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContextClassLoader;
 import org.ops4j.pax.web.service.spi.servlet.OsgiSessionAttributeListener;
@@ -1685,6 +1686,16 @@ class JettyServerWrapper implements BatchVisitor {
 						stopped = true;
 					} catch (Exception e) {
 						LOG.warn("Problem stopping {}: {}", servletContextHandler, e.getMessage());
+					}
+				}
+
+				if (eventListener instanceof ServletContextListener) {
+					// we have to proxy the listener, so its contextInitialized is called with
+					// such even where ServletContext is scoped to proper bundle
+					OsgiServletContext c = osgiServletContexts.get(context);
+					if (c != null) {
+						eventListener = OsgiScopedListener.proxyListener(c, servletContextHandler::getOsgiServletContext,
+								eventListener, eventListenerModel);
 					}
 				}
 

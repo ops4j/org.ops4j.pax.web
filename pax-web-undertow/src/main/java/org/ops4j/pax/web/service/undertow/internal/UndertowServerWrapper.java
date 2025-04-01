@@ -136,6 +136,7 @@ import org.ops4j.pax.web.service.spi.servlet.DefaultSessionCookieConfig;
 import org.ops4j.pax.web.service.spi.servlet.DynamicRegistrations;
 import org.ops4j.pax.web.service.spi.servlet.OsgiDynamicServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiInitializedServlet;
+import org.ops4j.pax.web.service.spi.servlet.OsgiScopedServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContext;
 import org.ops4j.pax.web.service.spi.servlet.OsgiServletContextClassLoader;
 import org.ops4j.pax.web.service.spi.servlet.OsgiSessionAttributeListener;
@@ -829,7 +830,11 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 
 	@Override
 	public EventListener proxiedServletContextListener(EventListener eventListener, OsgiContextModel context) {
-		ContextLinkingInvocationHandler handler = new ContextLinkingInvocationHandler(eventListener);
+		return proxiedServletContextListener(eventListener, null, context);
+	}
+
+	public EventListener proxiedServletContextListener(EventListener eventListener, EventListenerModel model, OsgiContextModel context) {
+		ContextLinkingInvocationHandler handler = new ContextLinkingInvocationHandler(eventListener, model);
 		ClassLoader cl = context.getClassLoader();
 		if (cl == null) {
 			// for test scenario
@@ -2106,7 +2111,7 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 				// we have to wrap the listener, so proper OsgiServletContext is passed there
 				EventListener wrapper = eventListener;
 				if (eventListener instanceof ServletContextListener) {
-					wrapper = proxiedServletContextListener(eventListener, context);
+					wrapper = proxiedServletContextListener(eventListener, eventListenerModel, context);
 				}
 				PaxWebListenerInfo info = new PaxWebListenerInfo(eventListener.getClass(), new ImmediateInstanceFactory<>(wrapper));
 				info.setModel(eventListenerModel);
@@ -3210,10 +3215,12 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 
 	private static class ContextLinkingInvocationHandler implements InvocationHandler {
 		private final EventListener eventListener;
+		private final EventListenerModel eventListenerModel;
 		private ServletContext osgiContext;
 
-		ContextLinkingInvocationHandler(EventListener eventListener) {
+		ContextLinkingInvocationHandler(EventListener eventListener, EventListenerModel model) {
 			this.eventListener = eventListener;
+			this.eventListenerModel = model;
 		}
 
 		@Override
@@ -3230,6 +3237,18 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 
 		public void setOsgiContext(ServletContext osgiContext) {
 			this.osgiContext = osgiContext;
+			if (eventListenerModel != null && eventListenerModel.getRegisteringBundle() != null) {
+				if (osgiContext instanceof OsgiServletContext) {
+					this.osgiContext = new OsgiScopedServletContext(
+							(OsgiServletContext) osgiContext, eventListenerModel.getRegisteringBundle());
+					((OsgiScopedServletContext) this.osgiContext).setContextSupplier(() -> osgiContext);
+				} else if (osgiContext instanceof OsgiDynamicServletContext) {
+					this.osgiContext = new OsgiScopedServletContext(
+							((OsgiDynamicServletContext) osgiContext).getOsgiContext(),
+							eventListenerModel.getRegisteringBundle());
+					((OsgiScopedServletContext) this.osgiContext).setContextSupplier(() -> osgiContext);
+				}
+			}
 		}
 	}
 

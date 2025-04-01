@@ -15,14 +15,20 @@
  */
 package org.ops4j.pax.web.itest.container.whiteboard;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.List;
 
+import jakarta.servlet.ServletContextListener;
 import org.junit.Before;
 import org.junit.Test;
 import org.ops4j.pax.web.extender.samples.whiteboard.Control;
+import org.ops4j.pax.web.extender.samples.whiteboard.TestSCL;
 import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants;
 import org.osgi.util.tracker.ServiceTracker;
 
 import static org.junit.Assert.assertEquals;
@@ -31,11 +37,37 @@ import static org.junit.Assert.assertNotEquals;
 public abstract class AbstractWhiteboardScopesIntegrationTest extends AbstractContainerTestBase {
 
 	protected Bundle bundle;
+	private ServiceRegistration<ServletContextListener> sclReg;
+	private ServletContextListener ourScl;
 
 	@Before
 	public void setUp() throws Exception {
 		configureAndWaitForServletWithMapping("/s3",
-				() -> bundle = installAndStartBundle(sampleURI("whiteboard-scopes")));
+				() -> {
+					bundle = installAndStartBundle(sampleURI("whiteboard-scopes"));
+
+					Dictionary<String, Object> props; props = new Hashtable<>();
+					props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(osgi.http.whiteboard.context.name=c1)");
+					props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
+					ourScl = new TestSCL();
+					sclReg = context.registerService(ServletContextListener.class, ourScl, props);
+				});
+	}
+
+	@Test
+	public void testDifferentServletContextListeners() throws Exception{
+		ServiceTracker<?, ?> t1 = new ServiceTracker<>(context, context.createFilter("(test=true)"), null);
+		t1.open();
+		TestSCL scl1 = (TestSCL) t1.getService();
+		t1.close();
+
+		TestSCL scl2 = (TestSCL) this.ourScl;
+
+		// Listeners should get special ServletContext where getClassLoader() returns their own classloader
+		// see org.osgi.test.cases.servlet.junit.ServletContextHelperTestCase.test_140_2_10to12()
+		assertNotEquals(scl1.getRef().get().getClassLoader(), scl2.getRef().get().getClassLoader());
+
+		sclReg.unregister();
 	}
 
 	@Test

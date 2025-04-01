@@ -232,6 +232,14 @@ public class PaxWebStandardContext extends StandardContext {
 		this.osgiServletContext = osgiServletContext;
 	}
 
+	/**
+	 * Getter of {@link ServletContext} for scoped {@link OsgiScopedServletContext}
+	 * @return
+	 */
+	public ServletContext getOsgiServletContext() {
+		return osgiServletContext;
+	}
+
 	@Override
 	public void addServletContainerInitializer(ServletContainerInitializer sci, Set<Class<?>> classes) {
 		// we don't want initializers in Tomcat's context, because we manage them ourselves

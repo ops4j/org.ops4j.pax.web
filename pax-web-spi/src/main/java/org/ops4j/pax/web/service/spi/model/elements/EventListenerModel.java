@@ -17,6 +17,18 @@
  */
 package org.ops4j.pax.web.service.spi.model.elements;
 
+import jakarta.servlet.AsyncListener;
+import jakarta.servlet.ReadListener;
+import jakarta.servlet.ServletContextAttributeListener;
+import jakarta.servlet.ServletContextListener;
+import jakarta.servlet.ServletRequestAttributeListener;
+import jakarta.servlet.ServletRequestListener;
+import jakarta.servlet.WriteListener;
+import jakarta.servlet.http.HttpSessionActivationListener;
+import jakarta.servlet.http.HttpSessionAttributeListener;
+import jakarta.servlet.http.HttpSessionBindingListener;
+import jakarta.servlet.http.HttpSessionIdListener;
+import jakarta.servlet.http.HttpSessionListener;
 import org.ops4j.pax.web.service.spi.model.events.EventListenerEventData;
 import org.ops4j.pax.web.service.spi.util.Utils;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
@@ -31,6 +43,23 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class EventListenerModel extends ElementModel<EventListener, EventListenerEventData> {
+
+	public static final Class<?>[] SUPPORTED_LISTENER_CLASSES = new Class[] {
+			// OSGi CMPN R7 Whiteboard Service
+			ServletContextListener.class,
+			ServletContextAttributeListener.class,
+			ServletRequestListener.class,
+			ServletRequestAttributeListener.class,
+			HttpSessionAttributeListener.class,
+			HttpSessionIdListener.class,
+			HttpSessionListener.class,
+			// Pax Web additions
+			HttpSessionActivationListener.class,
+			HttpSessionBindingListener.class,
+			AsyncListener.class,
+			ReadListener.class,
+			WriteListener.class
+	};
 
 	private EventListener eventListener;
 
@@ -221,4 +250,5 @@ public class EventListenerModel extends ElementModel<EventListener, EventListene
 				+ ",contexts=" + getContextModelsInfo()
 				+ "}";
 	}
+
 }
