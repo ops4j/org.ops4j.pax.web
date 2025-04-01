@@ -90,7 +90,7 @@ public class ServletContextHelperTracker extends AbstractContextTracker<ServletC
 				PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_PATH, HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH,
 				Utils::asString);
 		Object p = serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH);
-		if (p != null && !(p instanceof String)) {
+		if (!(p instanceof String)) {
 			propertiesInvalid = true;
 		}
 		if (contextPath == null || "".equals(contextPath.trim())) {
