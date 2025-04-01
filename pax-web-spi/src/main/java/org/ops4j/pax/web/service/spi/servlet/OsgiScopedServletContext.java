@@ -315,7 +315,12 @@ public class OsgiScopedServletContext implements ServletContext {
 
 	@Override
 	public SessionCookieConfig getSessionCookieConfig() {
-		return osgiContext.getSessionCookieConfig();
+		SessionCookieConfig scc = osgiContext.getSessionCookieConfig();
+		if (getOsgiContextModel().isWhiteboard()) {
+			return new ReadOnlySessionCookieConfig(scc);
+		} else {
+			return scc;
+		}
 	}
 
 	@Override
@@ -426,6 +431,100 @@ public class OsgiScopedServletContext implements ServletContext {
 
 		// Whiteboard/HttpService case
 		return bundle.adapt(BundleWiring.class).getClassLoader();
+	}
+
+	private static class ReadOnlySessionCookieConfig implements SessionCookieConfig {
+
+		private final SessionCookieConfig delegate;
+
+		private ReadOnlySessionCookieConfig(SessionCookieConfig delegate) {
+			this.delegate = delegate;
+		}
+
+		@Override
+		public Map<String, String> getAttributes() {
+			return delegate.getAttributes();
+		}
+
+		@Override
+		public String getAttribute(String name) {
+			return delegate.getAttribute(name);
+		}
+
+		@Override
+		public void setAttribute(String name, String value) {
+			delegate.setAttribute(name, value);
+		}
+
+		@Override
+		public int getMaxAge() {
+			return delegate.getMaxAge();
+		}
+
+		@Override
+		public void setMaxAge(int maxAge) {
+			throw new IllegalStateException("Operation not supported");
+		}
+
+		@Override
+		public boolean isSecure() {
+			return delegate.isSecure();
+		}
+
+		@Override
+		public void setSecure(boolean secure) {
+			throw new IllegalStateException("Operation not supported");
+		}
+
+		@Override
+		public boolean isHttpOnly() {
+			return delegate.isHttpOnly();
+		}
+
+		@Override
+		public void setHttpOnly(boolean httpOnly) {
+			throw new IllegalStateException("Operation not supported");
+		}
+
+		@Override
+		public String getComment() {
+			return delegate.getComment();
+		}
+
+		@Override
+		public void setComment(String comment) {
+			throw new IllegalStateException("Operation not supported");
+		}
+
+		@Override
+		public String getPath() {
+			return delegate.getPath();
+		}
+
+		@Override
+		public void setPath(String path) {
+			throw new IllegalStateException("Operation not supported");
+		}
+
+		@Override
+		public String getDomain() {
+			return delegate.getDomain();
+		}
+
+		@Override
+		public void setDomain(String domain) {
+			throw new IllegalStateException("Operation not supported");
+		}
+
+		@Override
+		public String getName() {
+			return delegate.getName();
+		}
+
+		@Override
+		public void setName(String name) {
+			throw new IllegalStateException("Operation not supported");
+		}
 	}
 
 }

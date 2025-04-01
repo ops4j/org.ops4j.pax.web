@@ -3419,7 +3419,7 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 			for (ServletContextDTO scdto : orderedServletContexts) {
 				if (path.startsWith(scdto.contextPath)) {
 					String remaining = path.substring(scdto.contextPath.length());
-					if (!("".equals(remaining) || remaining.startsWith("/"))) {
+					if (!("/".equals(scdto.contextPath) || "".equals(remaining) || remaining.startsWith("/"))) {
 						continue;
 					}
 					dto.servletContextId = scdto.serviceId;
