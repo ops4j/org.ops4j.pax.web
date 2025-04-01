@@ -26,7 +26,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.ops4j.pax.web.extender.whiteboard.internal.tracker.AbstractElementTracker;
 import org.ops4j.pax.web.service.WebContainer;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ElementModel;
@@ -431,7 +430,9 @@ public class WhiteboardExtenderContext implements WebContainerListener, WebConte
 	public void removeWebContext(Bundle bundle, OsgiContextModel model) {
 		lock.lock();
 		try {
-			osgiContexts.get(model.getName()).remove(model);
+			if (osgiContexts.containsKey(model.getName())) {
+				osgiContexts.get(model.getName()).remove(model);
+			}
 			osgiContextsList.remove(model);
 
 			reRegisterWebElements();

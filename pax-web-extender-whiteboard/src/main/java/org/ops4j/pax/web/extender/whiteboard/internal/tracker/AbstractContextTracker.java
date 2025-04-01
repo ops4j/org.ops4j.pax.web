@@ -168,7 +168,7 @@ public abstract class AbstractContextTracker<S> implements ServiceTrackerCustomi
 			// model. Such failure DTO is never updated, instead its removed and added again, when for example
 			// the service registration properties change
 			whiteboardExtenderContext.configureFailedDTOs(model);
-			return null;
+			return model;
 		}
 	}
 

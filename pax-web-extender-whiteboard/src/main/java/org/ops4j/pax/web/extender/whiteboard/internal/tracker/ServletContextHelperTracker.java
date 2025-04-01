@@ -85,9 +85,14 @@ public class ServletContextHelperTracker extends AbstractContextTracker<ServletC
 
 		// 2. context path
 		// NOTE: Pax Web 7 was stripping leading "/" and was mixing concepts of "name" and "path"
+		boolean propertiesInvalid = false;
 		String contextPath = Utils.getPaxWebProperty(serviceReference,
 				PaxWebConstants.SERVICE_PROPERTY_HTTP_CONTEXT_PATH, HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH,
 				Utils::asString);
+		Object p = serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH);
+		if (p != null && !(p instanceof String)) {
+			propertiesInvalid = true;
+		}
 		if (contextPath == null || "".equals(contextPath.trim())) {
 			contextPath = PaxWebConstants.DEFAULT_CONTEXT_PATH;
 		}
@@ -135,6 +140,10 @@ public class ServletContextHelperTracker extends AbstractContextTracker<ServletC
 		// this is the standard Whiteboard Service specification scenario
 		// even if the scope is "singleton", remember the reference
 		model.setContextReference(serviceReference);
+
+		if (propertiesInvalid) {
+			model.setDtoFailureCode(DTOConstants.FAILURE_REASON_VALIDATION_FAILED);
+		}
 	}
 
 }

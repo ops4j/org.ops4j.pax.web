@@ -2713,7 +2713,7 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 			}
 			case ADD:
 			case DELETE:
-				// actuall it's NOOP at ServerModel level
+				// actually it's NOOP at ServerModel level
 				break;
 			default:
 				break;
@@ -3697,7 +3697,7 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 	}
 
 	public void addWhiteboardContext(OsgiContextModel ocm) {
-		whiteboardContexts.computeIfAbsent(ocm.getContextPath(), cp -> new TreeSet<>()).add(ocm);
+		whiteboardContexts.computeIfAbsent(ocm.getName(), cp -> new TreeSet<>()).add(ocm);
 	}
 
 	public void removeWhiteboardContext(OsgiContextModel ocm) {
