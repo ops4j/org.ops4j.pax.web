@@ -125,7 +125,7 @@
 		<plugin.maven-archetype-plugin>3.3.1</plugin.maven-archetype-plugin>
 		<plugin.maven-assembly-plugin>3.7.1</plugin.maven-assembly-plugin>
 		<plugin.maven-checkstyle-plugin>3.6.0</plugin.maven-checkstyle-plugin>
-		<plugin.dependency.com.puppycrawl.tools.checkstyle>10.21.4</plugin.dependency.com.puppycrawl.tools.checkstyle>
+		<plugin.dependency.com.puppycrawl.tools.checkstyle>10.22.0</plugin.dependency.com.puppycrawl.tools.checkstyle>
 		<plugin.maven-clean-plugin>3.4.1</plugin.maven-clean-plugin>
 		<plugin.maven-compiler-plugin>3.14.0</plugin.maven-compiler-plugin>
 		<plugin.maven-dependency-plugin>3.8.1</plugin.maven-dependency-plugin>
