@@ -157,19 +157,20 @@ public class BundleWhiteboardApplication {
 
 		// no need to uninstall current contexts and elements - they'll get unregistered when bundle-scoped
 		// HttpService/WebContainer is stopped. Here we only mark them as unregistered
-		WhiteboardWebContainerView view = webContainerManager.whiteboardView(bundle, ref);
-		if (view != null) {
-			webElements.keySet().forEach(element -> {
-				if (element.getContextModels().size() > 0 && webElements.get(element)) {
-					webElements.put(element, false);
-				}
-			});
-			webContexts.keySet().forEach(ctx -> {
-				if (webContexts.get(ctx)) {
-					webContexts.put(ctx, false);
-				}
-			});
-		}
+		webElements.keySet().forEach(element -> {
+			if (element.getContextModels().size() > 0 && webElements.get(element)) {
+				webElements.put(element, false);
+			}
+			if (element instanceof ServletModel && ((ServletModel) element).isResourceServlet()) {
+				// we have to clear up the supplier which is related to old HttpService instance
+				element.setElementSupplier(null);
+			}
+		});
+		webContexts.keySet().forEach(ctx -> {
+			if (webContexts.get(ctx)) {
+				webContexts.put(ctx, false);
+			}
+		});
 
 		webContainerManager.releaseContainer(bundle, ref);
 		webContainerServiceRef = null;
