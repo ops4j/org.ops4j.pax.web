@@ -6,7 +6,6 @@ import org.eclipse.jetty.util.resource.Resource;
 import org.ops4j.pax.web.service.jetty.internal.PaxWebServletContextHandler;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
