@@ -45,7 +45,7 @@
 	-->
 
 	<!-- Uncomment these two elements to enable GZIP compression -->
-	<!-- https://www.eclipse.org/jetty/javadoc/jetty-9/org/eclipse/jetty/server/handler/gzip/GzipHandler.html -->
+	<!-- https://javadoc.jetty.org/jetty-12/org/eclipse/jetty/server/handler/gzip/GzipHandler.html -->
 	<!--
 	<Get id="OrigHandler" name="handler" />
 
@@ -106,7 +106,7 @@
 	<!--
 	<Call name="addBean">
 		<Arg>
-			<New class="org.eclipse.jetty.jaas.JAASLoginService">
+			<New class="org.eclipse.jetty.security.jaas.JAASLoginService">
 				<Set name="name">karaf</Set>
 				<Set name="loginModuleName">karaf</Set>
 				<Set name="roleClassNames">
@@ -119,7 +119,7 @@
 	</Call>
 	<Call name="addBean">
 		<Arg>
-			<New class="org.eclipse.jetty.jaas.JAASLoginService">
+			<New class="org.eclipse.jetty.security.jaas.JAASLoginService">
 				<Set name="name">default</Set>
 				<Set name="loginModuleName">karaf</Set>
 				<Set name="roleClassNames">

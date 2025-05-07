@@ -28,7 +28,7 @@ import java.nio.file.Path;
 public class PaxWebResource extends Resource {
 
 	private final ServletContext servletContext;
-	// used when the context has based resource using absolute file: URI
+	// used when the context has base resource using absolute file: URI
 	private final PathResource baseUrlResource;
 	// used in normal OSGi cases, where chroot is a base for WAB or the web context to prepend before resolved path
 	private final String chroot;
@@ -47,6 +47,16 @@ public class PaxWebResource extends Resource {
 				@Override
 				public Resource resolve(String subUriPath) {
 					return PaxWebResource.this.resolve(subUriPath);
+				}
+
+				@Override
+				public boolean isReadable() {
+					return true;
+				}
+
+				@Override
+				public boolean isDirectory() {
+					return true;
 				}
 			};
 			try {
