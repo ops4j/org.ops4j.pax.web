@@ -69,15 +69,20 @@ class HttpServiceProxy implements WebContainer, StoppableHttpService {
 	public void stop() {
 		if (delegate instanceof StoppableHttpService) {
 			LOG.debug("Stopping http service: {}", delegate);
-			final StoppableHttpService stopping = (StoppableHttpService) delegate;
+			StoppableHttpService stopping;
+			synchronized (this) {
+				stopping = (StoppableHttpService) delegate;
 
-			// PAXWEB-1077: ServletContext becomes unavailable on restart when using Whiteboard and CustomContexts
+				// PAXWEB-1077: ServletContext becomes unavailable on restart when using Whiteboard and CustomContexts
 
-			// first replace the delegate
-			delegate = new HttpServiceDisabled(serviceBundle);
+				// first replace the delegate
+				delegate = new HttpServiceDisabled(serviceBundle);
+			}
 
 			// then cleanup the delegate without a risk of problems happening at user side
-			stopping.stop();
+			if (stopping != null) {
+				stopping.stop();
+			}
 		} else {
 			LOG.warn("Http service has already been stopped");
 		}

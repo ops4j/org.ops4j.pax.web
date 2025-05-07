@@ -19,23 +19,34 @@ import java.io.IOException;
 import java.util.Map;
 import jakarta.servlet.MultipartConfigElement;
 import jakarta.servlet.Servlet;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.ops4j.pax.web.service.whiteboard.ServletMapping;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 
 @Component
 public class PaxWebWhiteboardServletMapping implements ServletMapping {
 
-	private static final Servlet SERVLET = new HttpServlet() {
-		@Override
-		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-			resp.getWriter().println("Hello from " + PaxWebWhiteboardServletMapping.class.getName());
-		}
-	};
+	private Servlet servlet = null;
+
+	@Activate
+	protected void activate() {
+		servlet = new HttpServlet() {
+			@Override
+			protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+				resp.getWriter().println("Hello from " + PaxWebWhiteboardServletMapping.class.getName());
+			}
+		};
+	}
+
+	@Deactivate
+	protected void deactivate() {
+		servlet = null;
+	}
 
 	@Override
 	public Class<? extends Servlet> getServletClass() {
@@ -64,7 +75,7 @@ public class PaxWebWhiteboardServletMapping implements ServletMapping {
 
 	@Override
 	public Servlet getServlet() {
-		return SERVLET;
+		return servlet;
 	}
 
 	@Override

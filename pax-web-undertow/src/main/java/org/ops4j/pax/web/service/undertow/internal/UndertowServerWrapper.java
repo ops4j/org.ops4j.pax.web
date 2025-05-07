@@ -1717,8 +1717,7 @@ class UndertowServerWrapper implements BatchVisitor, UndertowSupport {
 	private void removeServletModel(String contextPath, ServletModel model, ServletModelChange change) {
 		// this time we just assume that the servlet context is started
 
-		LOG.info("Removing servlet {}", model);
-		LOG.debug("Removing servlet {} from context {}", model.getName(), contextPath);
+		LOG.info("Removing servlet {} from context {}", model, contextPath);
 
 		// take existing deployment manager and the deployment info from its deployment
 		DeploymentManager manager = getDeploymentManager(contextPath);

@@ -1334,8 +1334,7 @@ class TomcatServerWrapper implements BatchVisitor {
 	}
 
 	private void removeServletModel(String contextPath, ServletModel model) {
-		LOG.info("Removing servlet {}", model);
-		LOG.debug("Removing servlet {} from context {}", model.getName(), contextPath);
+		LOG.info("Removing servlet {} from context {}", model, contextPath);
 
 		// there should already be a ServletContextHandler
 		Context realContext = contextHandlers.get(contextPath);

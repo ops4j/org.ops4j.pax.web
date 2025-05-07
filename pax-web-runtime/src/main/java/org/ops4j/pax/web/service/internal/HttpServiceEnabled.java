@@ -269,11 +269,13 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 			b.getOperations().add(new TransactionStateChange(OpCode.DISASSOCIATE, ctx));
 		}
 
-		serverModel.runSilently(() -> {
-			serverController.sendBatch(b);
-			b.accept(serviceModel);
-			return null;
-		}, true);
+		if (!b.getOperations().isEmpty()) {
+			serverModel.runSilently(() -> {
+				serverController.sendBatch(b);
+				b.accept(serviceModel);
+				return null;
+			}, true);
+		}
 
 		stopped = true;
 	}
@@ -508,8 +510,10 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 				// but because we kind of carry the error model with servlet model and update ServerModel and
 				// server wrappers, we need to be clever here...
 				if (model.getErrorPageModel() != null) {
-					for (OsgiContextModel m : model.getContextModels()) {
-						model.getErrorPageModel().addContextModel(m);
+					if (!model.getErrorPageModel().hasContextModels()) {
+						for (OsgiContextModel m : model.getContextModels()) {
+							model.getErrorPageModel().addContextModel(m);
+						}
 					}
 
 					try {
@@ -557,7 +561,9 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 						jspSCIModel = serverModel.createJSPServletContainerInitializerModel(serviceBundle);
 						jspSCIModel.setRegisteringBundle(model.getRegisteringBundle());
 						jspSCIModel.getRelatedServletModels().add(model);
-						model.getContextModels().forEach(jspSCIModel::addContextModel);
+						if (!jspSCIModel.hasContextModels()) {
+							model.getContextModels().forEach(jspSCIModel::addContextModel);
+						}
 						newBatch = new Batch("JSP Configuration and registration of " + model);
 
 						// whether or not the target context is started, we're adding an SCI that'll have to be run.
@@ -698,7 +704,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 										+ "was never registered by " + registeringBundle);
 							}
 						} else if (reference != null) {
-							LOG.info("Unregistering servlet by refernce \"{}\"", reference);
+							LOG.info("Unregistering servlet by reference \"{}\"", reference);
 
 							for (ServletModel existing : serviceModel.getServletModels()) {
 								if (existing.getElementReference() != null && existing.getElementReference().equals(reference)) {
@@ -1047,7 +1053,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 										+ "was never registered by " + registeringBundle);
 							}
 						} else if (reference != null) {
-							LOG.info("Unregistering filter by refernce \"{}\"", reference);
+							LOG.info("Unregistering filter by reference \"{}\"", reference);
 
 							for (FilterModel existing : serviceModel.getFilterModels()) {
 								if (existing.getElementReference().equals(reference)) {
@@ -2037,7 +2043,9 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 						cimForGenericWSSupport.setServiceId(0);
 						cimForGenericWSSupport.setServiceRank(0);
 
-						model.getContextModels().forEach(cimForGenericWSSupport::addContextModel);
+						if (!cimForGenericWSSupport.hasContextModels()) {
+							model.getContextModels().forEach(cimForGenericWSSupport::addContextModel);
+						}
 						cimForGenericWSSupport.setRegisteringBundle(model.getRegisteringBundle());
 
 						// now the important part - according to JSR-356 (WebSockets), user is registering endpoints
@@ -2102,7 +2110,9 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		cim.setServiceId(0);
 		cim.setServiceRank(Integer.MAX_VALUE);
 
-		model.getContextModels().forEach(cim::addContextModel);
+		if (!cim.hasContextModels()) {
+			model.getContextModels().forEach(cim::addContextModel);
+		}
 		cim.setRegisteringBundle(model.getRegisteringBundle());
 
 		return cim;
@@ -2160,7 +2170,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 										+ "was never registered by " + registeringBundle);
 							}
 						} else if (reference != null) {
-							LOG.info("Unregistering webs ocket by refernce \"{}\"", reference);
+							LOG.info("Unregistering webs ocket by reference \"{}\"", reference);
 
 							for (WebSocketModel existing : serviceModel.getWebSocketModels()) {
 								if (existing.getElementReference().equals(reference)) {
@@ -2606,7 +2616,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 				try {
 					serverController.sendBatch(batch);
 					batch.accept(serviceModel);
-					handleReRegistrationEvents(WebElementEvent.State.DEPLOYED, batch, null);
+					handleReRegistrationEvents(WebElementEvent.State.UNDEPLOYED, batch, null);
 				} catch (Exception e) {
 					handleReRegistrationEvents(WebElementEvent.State.FAILED, batch, e);
 				}

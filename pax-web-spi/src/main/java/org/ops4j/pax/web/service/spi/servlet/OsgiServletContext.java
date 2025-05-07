@@ -221,9 +221,10 @@ public class OsgiServletContext implements ServletContext {
 	public void unregister() {
 		if (registration != null) {
 			try {
-				LOG.info("Unegistering {} as OSGi service for \"{}\" context path", this, osgiContextModel.getContextPath());
+				LOG.info("Unregistering {} as OSGi service for \"{}\" context path", this, osgiContextModel.getContextPath());
 
 				registration.unregister();
+			} catch (IllegalStateException ignored) {
 			} catch (Exception e) {
 				if (osgiContextModel.getOwnerBundle().getState() == Bundle.ACTIVE) {
 					LOG.error("Error unregistering {} from OSGi registry: {}", this, e.getMessage(), e);

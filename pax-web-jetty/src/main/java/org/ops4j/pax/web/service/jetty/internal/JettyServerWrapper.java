@@ -1300,8 +1300,7 @@ class JettyServerWrapper implements BatchVisitor {
 
 		((PaxWebServletHandler) sch.getServletHandler()).removeServletWithMapping(model);
 
-		LOG.info("Removing servlet {}", model);
-		LOG.debug("Removing servlet {} from context {}", model.getName(), contextPath);
+		LOG.info("Removing servlet {} from context {}", model, contextPath);
 
 		// are there any error page declarations in the model?
 		ErrorPageModel epm = model.getErrorPageModel();
