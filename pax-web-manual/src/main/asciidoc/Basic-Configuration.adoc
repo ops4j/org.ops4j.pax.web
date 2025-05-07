@@ -58,8 +58,8 @@ This property specifies if the connections established use the nio
 classes from java. If ``true'' connections are established using NIO, if
 ``false'' connections are established the standard way.
 
-[[BasicConfiguration-javax.servlet.context.tempdir]]
-`javax.servlet.context.tempdir`
+[[BasicConfiguration-jakarta.servlet.context.tempdir]]
+`jakarta.servlet.context.tempdir`
 
 A temporary directory that can be accessed via the servlet context
 attribute with the same name. If not set a default temporary directory

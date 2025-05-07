@@ -81,16 +81,18 @@ WEB-INF/classes
 ** `lib/<dependency>.jar` — you should have an entry for each jar you
 have in your lib directory, where _<dependency>_ is the name of jar +
  So, as an example the header can look like: +
-
++
 `Bundle-ClassPath: WEB-INF/classes,lib/commons-logging.jar,lib/spring.jar`
 * *_Import-Package_* : should contain any package that your web
 application depends on but is not included into one of your dependencies
 that you listed in the _Bundle-ClassPath_ header. Usually a war will not
 include _J2EE_ apis:
-** `javax.servlet` - servlet api
-** `javax.servlet.http` - servlet api +
++
+** `jakarta.servlet` - servlet api
+** `jakarta.servlet.http` - servlet api +
+
  So, as an example the header can look like: +
- `Import-Package: javax.servlet,javax.servlet.http`
+ `Import-Package: jakarta.servlet,jakarta.servlet.http`
 
 Now you are ready to
 https://ops4j1.jira.com/wiki/display/paxrunner/Pax+Runner[deploy your

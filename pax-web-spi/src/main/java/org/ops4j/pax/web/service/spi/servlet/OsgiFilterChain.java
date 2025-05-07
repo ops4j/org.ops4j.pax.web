@@ -106,8 +106,8 @@ public class OsgiFilterChain implements FilterChain {
 					// - org.osgi.service.http.context.ServletContextHelper.REMOTE_USER
 					// - org.osgi.service.http.context.ServletContextHelper.AUTHENTICATION_TYPE
 					// into runtime-specific data available through:
-					// - javax.servlet.http.HttpServletRequest.getUserPrincipal()
-					// - javax.servlet.http.HttpServletRequest.getRemoteUser()
+					// - jakarta.servlet.http.HttpServletRequest.getUserPrincipal()
+					// - jakarta.servlet.http.HttpServletRequest.getRemoteUser()
 					authListener.accept(req);
 				}
 				// continue normally with normal filters and target servlet

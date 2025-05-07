@@ -42,9 +42,9 @@ image::images/140-servletcontext.png[140.2.7 Relation to the Servlet Container]
 
 Here's a quick summary of the three types of _contexts_:
 
-1. An implementation of `javax.servlet.ServletContext` provided by target runtime (Jetty, Tomcat and Undertow)
+1. An implementation of `jakarta.servlet.ServletContext` provided by target runtime (Jetty, Tomcat and Undertow)
 2. An implementation of either `org.osgi.service.http.HttpContext` or `org.osgi.service.http.context.ServletContextHelper` which user passes to `org.osgi.service.http.HttpService` or registers as Whiteboard OSGi service
-3. An implementation of `javax.servlet.ServletContext` that bridges the two above together.
+3. An implementation of `jakarta.servlet.ServletContext` that bridges the two above together.
 
 (It's obvious that I don't mention `org.osgi.framework.BundleContext` as one of the _contexts_ described here).
 
@@ -55,14 +55,14 @@ This problem is more visible when reading chapter https://docs.osgi.org/specific
 [quote]
 Whiteboard servlet, servlet filter, resource and listener services support common service registration properties to associate them with a ServletContextHelper and/or a Http Whiteboard implementation.
 
-The point is that when user reqisters for example a `javax.servlet.Servlet` OSGi service, this service registration property can be used:
+The point is that when user reqisters for example a `jakarta.servlet.Servlet` OSGi service, this service registration property can be used:
 
 [listing]
 ----
 osgi.http.whiteboard.context.select = (osgi.http.whiteboard.context.name=*)
 ----
 
-This simple rule is both powerful and game-changing (when talking about Pax Web before version 8). It means that a single servlet can be registered to *many* contexts. Period. It literally means that single registered `javax.servlet.Servlet` with e.g., `/my-servlet` mapping may be accessible under many URLs:
+This simple rule is both powerful and game-changing (when talking about Pax Web before version 8). It means that a single servlet can be registered to *many* contexts. Period. It literally means that single registered `jakarta.servlet.Servlet` with e.g., `/my-servlet` mapping may be accessible under many URLs:
 
 * \http://localhost:8181/my-servlet
 * \http://localhost:8181/my-context1/my-servlet
@@ -80,7 +80,7 @@ These are quite simple - they literally represent a _servlet context_ specific t
 * Tomcat: `org.apache.catalina.core.ApplicationContext`
 * Undertow: `io.undertow.servlet.spec.ServletContextImpl`
 
-These implementation classes are always visible to developer (and web applications) through `javax.servlet.ServletContext` interface.
+These implementation classes are always visible to developer (and web applications) through `jakarta.servlet.ServletContext` interface.
 
 For completeness, these implementations are always backed by more specific _context_ provided by target runtime which manages the lifecycle and registration of _web elements_ these are:
 
@@ -104,17 +104,17 @@ It is important to be aware how it translates to real context managed by target 
 
 == Resources
 
-From the perspective of JakartaEE web developer, the proper interface to access web resources is `javax.servlet.ServletContext` and its resource accessing methods:
+From the perspective of JakartaEE web developer, the proper interface to access web resources is `jakarta.servlet.ServletContext` and its resource accessing methods:
 
-* `javax.servlet.ServletContext.getResourcePaths` - a directory listing for entries beginning with the passed argument which is a _base_. The _base_ is a directory directly stored in a WAR, but also a path inside _all_ the `/WEB-INF/lib/\*.jar!/META-INF/resources/`. This method returns _names_ and doesn't restrict access to `/WEB-INF` directory!
-* `javax.servlet.ServletContext.getResource[AsStream]` - this method returns a URL (a stream from it). Passed argument _must_ start with `/` and is a base inside a WAR or a base of each of the `/WEB-INF/lib/\*.jar!/META-INF/resources/`. According to JavaDoc, this method doesn't involve classloaders. Also this method doesn't prevent accessing `/WEB-INF/` or `/META-INF`!
-* `javax.servlet.ServletContext.getRealPath` - used to translate request URI to a real location of a file mapped by given URI. This is only useful within the context of default (resource) servlet and even Servlet specification says that resource paths from `/META-INF/resources` of embedded JARs should be returned only if the JARs are unpacked - this is even less likely in an OSGi environment (with fragments, bundles, etc.).
+* `jakarta.servlet.ServletContext.getResourcePaths` - a directory listing for entries beginning with the passed argument which is a _base_. The _base_ is a directory directly stored in a WAR, but also a path inside _all_ the `/WEB-INF/lib/\*.jar!/META-INF/resources/`. This method returns _names_ and doesn't restrict access to `/WEB-INF` directory!
+* `jakarta.servlet.ServletContext.getResource[AsStream]` - this method returns a URL (a stream from it). Passed argument _must_ start with `/` and is a base inside a WAR or a base of each of the `/WEB-INF/lib/\*.jar!/META-INF/resources/`. According to JavaDoc, this method doesn't involve classloaders. Also this method doesn't prevent accessing `/WEB-INF/` or `/META-INF`!
+* `jakarta.servlet.ServletContext.getRealPath` - used to translate request URI to a real location of a file mapped by given URI. This is only useful within the context of default (resource) servlet and even Servlet specification says that resource paths from `/META-INF/resources` of embedded JARs should be returned only if the JARs are unpacked - this is even less likely in an OSGi environment (with fragments, bundles, etc.).
 
 We can skip `getRealPath` method which actually doesn't make any sense in an OSGi environment.
 
 And `getResource[AsStream]` and `getResourcePaths` do not have protection mechanism (to skip `/WEB-INF` or `/META-INF` directories) because many frameworks (like JSF or JSP) need access to these directories.
 
-From the perspective of OSGi web developer, `javax.servlet.ServletContext` is not the only interface that can be used. There are also:
+From the perspective of OSGi web developer, `jakarta.servlet.ServletContext` is not the only interface that can be used. There are also:
 
 * (from chapter 102, "Http Service specification"): `org.osgi.service.http.HttpContext`
 * (from chapter 140, "Whiteboard specification"): `org.osgi.service.http.context.ServletContextHelper`
@@ -124,7 +124,7 @@ The getResource and getResourceAsStream methods of the ServletContext interface 
 
 Only chapter "128.3.5 Static Content" mentions about the protection of `WEB-INF/`, `OSGI-INF/`, `META-INF/` and `OSGI-OPT/` directories. But because we _can't_ filter them out when calling any resource access methods, the only place we can prevent access to these entries is the default servlet (used to serve the resources and usually mapped to `/`).
 
-So no protection is implemented in `javax.servlet.ServletContext` implementations and in any implementation of `org.osgi.service.http.HttpService` or `org.osgi.service.http.context.ServletContextHelper`.
+So no protection is implemented in `jakarta.servlet.ServletContext` implementations and in any implementation of `org.osgi.service.http.HttpService` or `org.osgi.service.http.context.ServletContextHelper`.
 
 Actual runtimes have their own protection mechanisms:
 

@@ -158,10 +158,10 @@ registering.
 Following specialization of java.util.EventListener are
 tracked by the Whiteboard-Extender:
 
-* javax.servlet.ServletContextListener
-* javax.servlet.ServletContextAttributeListener
-* javax.servlet.ServletRequestListener
-* javax.servlet.ServletRequestAttributeListener
+* jakarta.servlet.ServletContextListener
+* jakarta.servlet.ServletContextAttributeListener
+* jakarta.servlet.ServletRequestListener
+* jakarta.servlet.ServletRequestAttributeListener
 
 
 [[WhiteboardExtender-Webelements]]
