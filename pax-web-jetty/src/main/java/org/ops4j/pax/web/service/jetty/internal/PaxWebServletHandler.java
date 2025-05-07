@@ -205,7 +205,7 @@ public class PaxWebServletHandler extends ServletHandler {
 		}
 
 		// Jetty 10+ keeps only "durable" servlets/filters/listeners. We're handling it a bit differently,
-		// so we have to preservet them (because there's no reflection-free access to
+		// so we have to preserve them (because there's no reflection-free access to
 		// org.eclipse.jetty.servlet.ServletHandler._durable field)
 
 		ServletHolder[] servlets = getServlets();
