@@ -201,12 +201,13 @@
 
 	<dependencyManagement>
 		<dependencies>
-			<!-- `gradle :org.osgi.test.cases.webcontainer:release` installs the suite into local Maven repo -->
+			<!-- `gradle :org.osgi.test.cases.servlet:release` installs the suite into local Maven repo -->
 			<dependency>
 				<groupId>org.osgi</groupId>
 				<artifactId>org.osgi.test.cases.servlet</artifactId>
 				<version>${version.org.osgi.tck}</version>
 			</dependency>
+			<!-- `gradle :org.osgi.test.cases.webcontainer:release` installs the suite into local Maven repo -->
 			<dependency>
 				<groupId>org.osgi</groupId>
 				<artifactId>org.osgi.test.cases.webcontainer</artifactId>
