@@ -125,7 +125,7 @@
 		<plugin.maven-archetype-plugin>3.3.1</plugin.maven-archetype-plugin>
 		<plugin.maven-assembly-plugin>3.7.1</plugin.maven-assembly-plugin>
 		<plugin.maven-checkstyle-plugin>3.6.0</plugin.maven-checkstyle-plugin>
-		<plugin.dependency.com.puppycrawl.tools.checkstyle>10.22.0</plugin.dependency.com.puppycrawl.tools.checkstyle>
+		<plugin.dependency.com.puppycrawl.tools.checkstyle>10.23.1</plugin.dependency.com.puppycrawl.tools.checkstyle>
 		<plugin.maven-clean-plugin>3.4.1</plugin.maven-clean-plugin>
 		<plugin.maven-compiler-plugin>3.14.0</plugin.maven-compiler-plugin>
 		<plugin.maven-dependency-plugin>3.8.1</plugin.maven-dependency-plugin>
@@ -149,7 +149,7 @@
 		<!-- Other Maven plugins (and their dependencies) -->
 		<plugin.apache.apache-rat-plugin>0.16.1</plugin.apache.apache-rat-plugin>
 		<plugin.asciidoctor-maven-plugin>2.2.6</plugin.asciidoctor-maven-plugin>
-		<plugin.dependency.org.asciidoctor.diagram>2.3.1</plugin.dependency.org.asciidoctor.diagram>
+		<plugin.dependency.org.asciidoctor.diagram>2.3.2</plugin.dependency.org.asciidoctor.diagram>
 		<plugin.felix.maven-bundle-plugin>5.1.9</plugin.felix.maven-bundle-plugin>
 		<plugin.felix.maven-scr-plugin>1.26.4</plugin.felix.maven-scr-plugin>
 		<plugin.gatling.gatling-maven-plugin>3.1.2</plugin.gatling.gatling-maven-plugin>
@@ -170,10 +170,10 @@
 		<dependency.commons-collections3>3.2.2</dependency.commons-collections3>
 		<dependency.commons-digester>2.1</dependency.commons-digester>
 		<dependency.commons-fileupload>1.5</dependency.commons-fileupload>
-		<dependency.commons-io>2.18.0</dependency.commons-io>
+		<dependency.commons-io>2.19.0</dependency.commons-io>
 		<dependency.com.fasterxml.classmate>1.7.0</dependency.com.fasterxml.classmate>
-		<dependency.com.fasterxml.jackson.core>2.18.3</dependency.com.fasterxml.jackson.core>
-		<dependency.com.fasterxml.jackson.core.databind>2.18.3</dependency.com.fasterxml.jackson.core.databind>
+		<dependency.com.fasterxml.jackson.core>2.19.0</dependency.com.fasterxml.jackson.core>
+		<dependency.com.fasterxml.jackson.core.databind>2.19.0</dependency.com.fasterxml.jackson.core.databind>
 		<dependency.com.fasterxml.woodstox>6.7.0</dependency.com.fasterxml.woodstox>
 		<dependency.com.sun.activation>2.0.1</dependency.com.sun.activation>
 		<dependency.com.sun.istack>4.2.0</dependency.com.sun.istack>
@@ -212,7 +212,7 @@
 
 		<dependency.org.apache.cxf>3.6.6</dependency.org.apache.cxf>
 
-		<dependency.org.apache.commons.collections4>4.4</dependency.org.apache.commons.collections4>
+		<dependency.org.apache.commons.collections4>4.5.0</dependency.org.apache.commons.collections4>
 		<dependency.org.apache.commons.compress>1.27.1</dependency.org.apache.commons.compress>
 		<dependency.org.apache.commons.lang3>3.17.0</dependency.org.apache.commons.lang3>
 
@@ -230,7 +230,7 @@
 		<dependency.org.apache.geronimo.bundles.commons-discovery>0.4_1</dependency.org.apache.geronimo.bundles.commons-discovery>
 
 		<dependency.org.apache.httpcomponents.client4>4.5.14</dependency.org.apache.httpcomponents.client4>
-		<dependency.org.apache.httpcomponents.client5>5.4.3</dependency.org.apache.httpcomponents.client5>
+		<dependency.org.apache.httpcomponents.client5>5.4.4</dependency.org.apache.httpcomponents.client5>
 		<dependency.org.apache.httpcomponents.core4>4.4.16</dependency.org.apache.httpcomponents.core4>
 		<dependency.org.apache.httpcomponents.core5>5.3.4</dependency.org.apache.httpcomponents.core5>
 		<dependency.org.apache.karaf>4.4.7</dependency.org.apache.karaf>
@@ -241,7 +241,7 @@
 		<dependency.org.apache.taglibs>1.2.5</dependency.org.apache.taglibs>
 		<dependency.org.apache.tomcat>11.0.6</dependency.org.apache.tomcat>
 		<dependency.org.apache.ws.xmlschema>2.3.1</dependency.org.apache.ws.xmlschema>
-		<dependency.org.apache.xbean>4.26</dependency.org.apache.xbean>
+		<dependency.org.apache.xbean>4.27</dependency.org.apache.xbean>
 
 		<dependency.org.assertj>3.27.3</dependency.org.assertj>
 		<dependency.org.bouncycastle>1.80</dependency.org.bouncycastle>
@@ -267,9 +267,9 @@
 		<dependency.org.jboss.xnio>3.8.16.Final</dependency.org.jboss.xnio>
 
 		<dependency.org.jline>3.21.0</dependency.org.jline>
-		<dependency.org.jsoup>1.19.1</dependency.org.jsoup>
-		<dependency.org.junit>5.12.1</dependency.org.junit>
-		<dependency.org.mockito>5.16.1</dependency.org.mockito>
+		<dependency.org.jsoup>1.20.1</dependency.org.jsoup>
+		<dependency.org.junit>5.12.2</dependency.org.junit>
+		<dependency.org.mockito>5.17.0</dependency.org.mockito>
 		<dependency.org.mortbay.jasper.apache-jsp>10.1.31</dependency.org.mortbay.jasper.apache-jsp>
 		<dependency.org.mortbay.jetty.alpn>8.1.13.v20181017</dependency.org.mortbay.jetty.alpn>
 		<dependency.org.opentest4j>1.3.0</dependency.org.opentest4j>
@@ -299,7 +299,7 @@
 		<dependency.org.owasp.encoder>1.3.1</dependency.org.owasp.encoder>
 		<dependency.org.primefaces>15.0.1</dependency.org.primefaces>
 		<dependency.org.slf4j>2.0.17</dependency.org.slf4j>
-		<dependency.org.springframework>6.2.5</dependency.org.springframework>
+		<dependency.org.springframework>6.2.6</dependency.org.springframework>
 		<dependency.org.vaadin.artur>1.7.1</dependency.org.vaadin.artur>
 
 		<dependency.org.wildfly.client>1.0.1.Final</dependency.org.wildfly.client>
