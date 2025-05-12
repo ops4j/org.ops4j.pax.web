@@ -55,7 +55,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.felix.utils.extender.Extension;
 import org.apache.jasper.servlet.JspServlet;
 import org.apache.tomcat.websocket.server.WsSci;
-import org.eclipse.jetty.websocket.javax.server.config.JavaxWebSocketServletContainerInitializer;
+import org.eclipse.jetty.ee8.websocket.javax.server.config.JavaxWebSocketServletContainerInitializer;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;

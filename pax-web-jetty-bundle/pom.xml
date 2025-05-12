@@ -136,8 +136,7 @@
 							sun.misc;resolution:=optional
 						</Import-Package>
 						<Export-Package>
-							org.eclipse.jetty.alpn;version="${dependency.org.eclipse.jetty.alpn.osgi}",
-							org.eclipse.jetty.*;version="${dependency.org.eclipse.jetty.osgi}"
+							org.eclipse.jetty.*;version="${dependency.org.eclipse.jetty}"
 						</Export-Package>
 						<Embed-Dependency>*;scope=compile;type=!pom;inline=true|!module-info.class</Embed-Dependency>
 						<Embed-Transitive>false</Embed-Transitive>
@@ -188,16 +187,16 @@
 			<artifactId>jetty-alpn-server</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.eclipse.jetty.alpn</groupId>
-			<artifactId>alpn-api</artifactId>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-alpn-java-client</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-alpn-java-server</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-annotations</artifactId>
+			<groupId>org.eclipse.jetty.ee8</groupId>
+			<artifactId>jetty-ee8-annotations</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
@@ -209,16 +208,20 @@
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-ee</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-http</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-io</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-jaas</artifactId>
-		</dependency>
+		<!--		<dependency>-->
+		<!--			<groupId>org.eclipse.jetty.ee8</groupId>-->
+		<!--			<artifactId>jetty-ee8-jaas</artifactId>-->
+		<!--		</dependency>-->
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-jmx</artifactId>
@@ -230,6 +233,16 @@
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-plus</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty.ee8</groupId>
+			<artifactId>jetty-ee8-plus</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>jakarta.transaction</groupId>
+					<artifactId>jakarta.transaction-api</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
@@ -245,11 +258,15 @@
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-servlet</artifactId>
+			<artifactId>jetty-session</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-servlets</artifactId>
+			<groupId>org.eclipse.jetty.ee8</groupId>
+			<artifactId>jetty-ee8-servlet</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty.ee8</groupId>
+			<artifactId>jetty-ee8-servlets</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
@@ -260,8 +277,8 @@
 			<artifactId>jetty-util-ajax</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-webapp</artifactId>
+			<groupId>org.eclipse.jetty.ee8</groupId>
+			<artifactId>jetty-ee8-webapp</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
@@ -270,52 +287,56 @@
 
 		<dependency>
 			<groupId>org.eclipse.jetty.http2</groupId>
-			<artifactId>http2-client</artifactId>
+			<artifactId>jetty-http2-client</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty.http2</groupId>
-			<artifactId>http2-common</artifactId>
+			<artifactId>jetty-http2-common</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty.http2</groupId>
-			<artifactId>http2-hpack</artifactId>
+			<artifactId>jetty-http2-hpack</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty.http2</groupId>
-			<artifactId>http2-server</artifactId>
+			<artifactId>jetty-http2-server</artifactId>
 		</dependency>
 
 		<dependency>
 			<groupId>org.eclipse.jetty.websocket</groupId>
-			<artifactId>websocket-jetty-api</artifactId>
+			<artifactId>jetty-websocket-jetty-api</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty.websocket</groupId>
-			<artifactId>websocket-core-client</artifactId>
+			<artifactId>jetty-websocket-jetty-client</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty.websocket</groupId>
-			<artifactId>websocket-core-common</artifactId>
+			<artifactId>jetty-websocket-core-client</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty.websocket</groupId>
-			<artifactId>websocket-core-server</artifactId>
+			<artifactId>jetty-websocket-core-common</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty.websocket</groupId>
-			<artifactId>websocket-servlet</artifactId>
+			<artifactId>jetty-websocket-core-server</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.eclipse.jetty.websocket</groupId>
-			<artifactId>websocket-javax-common</artifactId>
+			<groupId>org.eclipse.jetty.ee8.websocket</groupId>
+			<artifactId>jetty-ee8-websocket-servlet</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.eclipse.jetty.websocket</groupId>
-			<artifactId>websocket-javax-client</artifactId>
+			<groupId>org.eclipse.jetty.ee8.websocket</groupId>
+			<artifactId>jetty-ee8-websocket-javax-common</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.eclipse.jetty.websocket</groupId>
-			<artifactId>websocket-javax-server</artifactId>
+			<groupId>org.eclipse.jetty.ee8.websocket</groupId>
+			<artifactId>jetty-ee8-websocket-javax-client</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty.ee8.websocket</groupId>
+			<artifactId>jetty-ee8-websocket-javax-server</artifactId>
 		</dependency>
 
 	</dependencies>

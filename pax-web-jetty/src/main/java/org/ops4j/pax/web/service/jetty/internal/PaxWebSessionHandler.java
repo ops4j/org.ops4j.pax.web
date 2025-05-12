@@ -15,18 +15,53 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
-import javax.servlet.http.HttpSession;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 
-import org.eclipse.jetty.server.session.SessionHandler;
+import org.eclipse.jetty.ee8.nested.SessionHandler;
+import org.eclipse.jetty.http.HttpCookie;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.session.AbstractSessionManager;
+import org.eclipse.jetty.session.ManagedSession;
+import org.eclipse.jetty.session.SessionManager;
 
-public class PaxWebSessionHandler extends SessionHandler {
+public class PaxWebSessionHandler extends SessionHandler implements InvocationHandler {
 
-	@Override
-	public HttpSession getHttpSession(String extendedId) {
-		return super.getHttpSession(extendedId);
+	private final AbstractSessionManager original;
+	private final SessionManager wrapped;
+
+	public PaxWebSessionHandler(Server server) {
+		this.original = (AbstractSessionManager) super.getSessionManager();
+		this.wrapped = (SessionManager) Proxy.newProxyInstance(getClass().getClassLoader(), new Class[] { SessionManager.class }, this);
 	}
 
 	@Override
+	public SessionManager getSessionManager() {
+		return wrapped;
+	}
+
+	@Override
+	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+		if (method.getName().equals("getSessionCookie")) {
+			return getSessionCookie((ManagedSession) args[0], (Boolean) args[1]);
+		}
+		if (method.getName().equals("renewSessionId")) {
+			renewSessionId((String) args[0], (String) args[1], (String) args[2], (String) args[3]);
+			return null;
+		}
+		return method.invoke(original, args);
+	}
+
+	public HttpCookie getSessionCookie(ManagedSession session, boolean requestIsSecure) {
+		HttpCookie cookie = original.getSessionCookie(session, requestIsSecure);
+		if (cookie != null) {
+			String id = getExtendedId(cookie.getValue());
+			return HttpCookie.from(cookie.getName(), id, original.getSessionCookieAttributes());
+		}
+		return cookie;
+	}
+
 	public void renewSessionId(String oldId, String oldExtendedId, String newId, String newExtendedId) {
 		int id1 = oldId.indexOf("~");
 		int id2 = oldExtendedId.indexOf("~");
@@ -35,15 +70,13 @@ public class PaxWebSessionHandler extends SessionHandler {
 		if (id1 > 0 && id2 > 0 && id3 == -1 && id4 == -1) {
 			String s1 = oldId.substring(id1);
 			String s2 = oldExtendedId.substring(id2);
-			super.renewSessionId(oldId, oldExtendedId, newId + s1, newExtendedId + s2);
+			original.renewSessionId(oldId, oldExtendedId, newId + s1, newExtendedId + s2);
 		} else {
-			super.renewSessionId(oldId, oldExtendedId, newId, newExtendedId);
+			original.renewSessionId(oldId, oldExtendedId, newId, newExtendedId);
 		}
 	}
 
-	@Override
-	public String getExtendedId(HttpSession session) {
-		String eid = super.getExtendedId(session);
+	public String getExtendedId(String eid) {
 		int tilde = eid.indexOf("~");
 		if (tilde == -1) {
 			return eid;

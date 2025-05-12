@@ -17,7 +17,6 @@ package org.ops4j.pax.web.service.jetty.internal;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.AccessControlContext;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -33,15 +32,25 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpServletResponse;
 
-import org.eclipse.jetty.server.HandlerContainer;
-import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.ee8.nested.Request;
+import org.eclipse.jetty.ee8.nested.SessionHandler;
+import org.eclipse.jetty.ee8.servlet.ServletContextHandler;
+import org.eclipse.jetty.http.HttpField;
+import org.eclipse.jetty.http.HttpHeader;
+import org.eclipse.jetty.http.HttpStatus;
+import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.server.handler.ContextHandler;
-import org.eclipse.jetty.server.session.SessionHandler;
-import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.server.handler.ContextRequest;
+import org.eclipse.jetty.session.ManagedSession;
+import org.eclipse.jetty.util.Callback;
+import org.eclipse.jetty.util.resource.PathResourceFactory;
 import org.eclipse.jetty.util.resource.Resource;
+import org.eclipse.jetty.util.resource.URLResourceFactory;
 import org.eclipse.jetty.util.thread.ScheduledExecutorScheduler;
+import org.ops4j.pax.web.service.jetty.internal.web.JettyResourceServlet;
 import org.ops4j.pax.web.service.jetty.internal.web.RootBundleURLResource;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.model.ServletContextModel;
@@ -61,11 +70,11 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 
 	private static final Logger LOG = LoggerFactory.getLogger(PaxWebServletContextHandler.class);
 
+	private static final PathResourceFactory RESOURCE_FACTORY = new PathResourceFactory();
+	private static final URLResourceFactory URL_RESOURCE_FACTORY = new URLResourceFactory();
+
 	// This collection will be ordered by rank/serviceId of the ContainerInitializerModels
 	private final Collection<SCIWrapper> servletContainerInitializers = new TreeSet<>();
-
-				private AccessControlContext accessControllerContext;
-				private List<String> virtualHosts;
 
 	private ServletContext osgiServletContext;
 
@@ -101,13 +110,13 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 	 * @param contextPath
 	 * @param configuration
 	 */
-	public PaxWebServletContextHandler(HandlerContainer parent, String contextPath, Configuration configuration) {
+	public PaxWebServletContextHandler(Handler.Container parent, String contextPath, Configuration configuration) {
 		super(parent, contextPath, true, true);
 
 		// TCCL of sessionManager timer threads will be set to thread of pax-web-jetty bundle, not to current TCCL
 		ScheduledExecutorScheduler executorScheduler = new ScheduledExecutorScheduler(getSessionHandler().toString() + "Timer", true,
 				getClass().getClassLoader());
-		_scontext.setAttribute("org.eclipse.jetty.server.session.timer", executorScheduler);
+		super.setAttribute("org.eclipse.jetty.server.session.timer", executorScheduler);
 
 		// need to initialize the logger as super doStart is too late already
 		setLogger(LoggerFactory.getLogger(getDisplayName() == null ? getContextPath() : getDisplayName()));
@@ -115,6 +124,47 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 		// "128.3.5 Static Content" is the only place where protected directories are mentioned. We'll handle them
 		// at request processing stage and configure here
 		setProtectedTargets(new String[] { "/WEB-INF", "/META-INF", "/OSGI-INF", "/OSGI-OPT" });
+	}
+
+	@Override
+	protected CoreContextHandler createCoreContextHandler() {
+		return new CoreContextHandler(this) {
+
+			@Override
+			protected boolean handleByContextHandler(String pathInContext, ContextRequest request, Response response, Callback callback) {
+				if ("TRACE".equals(request.getMethod())) {
+					// PAXWEB-229 - prevent https://owasp.org/www-community/attacks/Cross_Site_Tracing
+					Response.writeError(request, response, callback, HttpServletResponse.SC_METHOD_NOT_ALLOWED, null);
+					return true;
+				}
+
+				return super.handleByContextHandler(pathInContext, request, response, callback);
+			}
+
+			@Override
+			protected void handleMovedPermanently(org.eclipse.jetty.server.Request request, Response response, Callback callback) {
+				// Pax Web - copied original code, but switching 301 to 302 (just as for Tomcat and Undertow)
+				String location = getContextPath() + "/";
+				if (request.getHttpURI().getParam() != null) {
+					location += ";" + request.getHttpURI().getParam();
+				}
+				if (request.getHttpURI().getQuery() != null) {
+					location += ";" + request.getHttpURI().getQuery();
+				}
+
+				response.setStatus(HttpStatus.MOVED_TEMPORARILY_302);
+				response.getHeaders().add(new HttpField(HttpHeader.LOCATION, location));
+				callback.succeeded();
+			}
+
+			@Override
+			public Resource getBaseResource() {
+				// special case for JettyResourceServlet extending Jetty 12 ResourceServlet which, when initialized,
+				// needs servlet's specific base resource
+				Resource resource = JettyResourceServlet.BASE_RESOURCE.get();
+				return resource == null ? super.getBaseResource() : resource;
+			}
+		};
 	}
 
 	/**
@@ -132,18 +182,17 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 			if ("bundle".equals(url.getProtocol()) || "bundleentry".equals(url.getProtocol())) {
 				if ("/".equals(url.getPath())) {
 					// Felix, root of the bundle - return a resource which says it's a directory
-					return new RootBundleURLResource(Resource.newResource(url));
+					return new RootBundleURLResource(URL_RESOURCE_FACTORY.newResource(url));
 				} else if (!url.getPath().endsWith("/")) {
 					// unfortunately, due to https://issues.apache.org/jira/browse/FELIX-6294
 					// we have to check ourselves if it's a directory and possibly append a slash
 					// just as org.eclipse.osgi.storage.bundlefile.BundleFile#fixTrailingSlash() does it
-					try (Resource potentialDirectory = Resource.newResource(url)) {
-						if (potentialDirectory.exists() && potentialDirectory.length() == 0) {
-							URL fixedURL = new URL(url.toExternalForm() + "/");
-							Resource properDirectory = Resource.newResource(fixedURL);
-							if (properDirectory.exists()) {
-								return properDirectory;
-							}
+					Resource potentialDirectory = URL_RESOURCE_FACTORY.newResource(url);
+					if (potentialDirectory.exists() && potentialDirectory.length() == 0) {
+						URL fixedURL = new URL(url.toExternalForm() + "/");
+						Resource properDirectory = URL_RESOURCE_FACTORY.newResource(fixedURL);
+						if (properDirectory.exists()) {
+							return properDirectory;
 						}
 					}
 				}
@@ -152,9 +201,8 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 
 		// resource can be provided by custom HttpContext/ServletContextHelper, so we can't really
 		// affect lastModified for caching purposes
-		return Resource.newResource(url);
+		return url == null ? null : URL_RESOURCE_FACTORY.newResource(url);
 	}
-
 
 	public void setServletContainerInitializers(Collection<SCIWrapper> wrappers) {
 		this.servletContainerInitializers.clear();
@@ -284,11 +332,11 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 	}
 
 	@Override
-	public void setAttribute(String name, Object value) {
+	public Object setAttribute(String name, Object value) {
 		if (isCallingSCI.get()) {
 			attributesToClearBeforeRestart.add(name);
 		}
-		super.setAttribute(name, value);
+		return super.setAttribute(name, value);
 	}
 
 	@Override
@@ -340,19 +388,20 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 		// We have to do it in first scoped handler's handle() method, because Keycloak accesses the session
 		// in org.keycloak.adapters.jetty.Jetty94RequestAuthenticator before ServletHandler is called
 
-		if (getSessionHandler() instanceof PaxWebSessionHandler) {
-			PaxWebSessionHandler sessionHandler = (PaxWebSessionHandler) getSessionHandler();
+		if (getSessionHandler() instanceof PaxWebSessionHandler sessionHandler) {
+			baseRequest.getCoreRequest().setSessionManager(sessionHandler.getSessionManager());
 			String sid = baseRequest.getRequestedSessionId();
 			if (sid != null && baseRequest.getSession(false) == null) {
 				String baseSid = sessionHandler.getSessionIdManager().getId(sid);
 				baseSid += PaxWebSessionIdManager.getSessionIdSuffix(baseRequest);
-				sid = sessionHandler.getSessionIdManager().getExtendedId(baseSid, request);
-				HttpSession session = sessionHandler.getHttpSession(sid);
-
-				if (session != null && sessionHandler.isValid(session)) {
-					baseRequest.enterSession(session);
-					baseRequest.setSession(session);
-				}
+				sid = sessionHandler.getSessionIdManager().getExtendedId(baseSid, baseRequest.getCoreRequest());
+                try {
+                    ManagedSession session = sessionHandler.getSessionManager().getManagedSession(sid);
+					if (session != null && session.isValid()) {
+						baseRequest.getCoreRequest().setManagedSession(session);
+					}
+                } catch (Exception ignored) {
+                }
 			}
 		}
 
@@ -386,7 +435,7 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 
 	@Override
 	protected SessionHandler newSessionHandler() {
-		return new PaxWebSessionHandler();
+		return new PaxWebSessionHandler(getServer());
 	}
 
 }

@@ -30,7 +30,7 @@ public class PathTest {
 		assertThat(URIUtil.canonicalPath("/"), equalTo("/"));
 		assertThat(URIUtil.canonicalPath("c:"), equalTo("c:"));
 		assertThat(URIUtil.canonicalPath("c:/"), equalTo("c:/"));
-		assertThat(URIUtil.canonicalPath("c:\\"), equalTo("c:\\"));
+		assertThat(URIUtil.canonicalPath("c:\\"), equalTo("c:%5C"));
 		assertThat(URIUtil.canonicalPath("//"), equalTo("//"));
 		assertThat(URIUtil.canonicalPath("."), equalTo(""));
 		assertThat(URIUtil.canonicalPath(".."), nullValue());

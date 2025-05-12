@@ -48,7 +48,7 @@ public abstract class AbstractWebSocketIntegrationTest extends AbstractContainer
 
 	@Before
 	public void setUp() throws Exception {
-		// Jetty uses org.eclipse.jetty.websocket.javax.server.config.JavaxWebSocketServletContainerInitializer SCI that handles:
+		// Jetty uses org.eclipse.jetty.ee8.websocket.javax.server.config.JavaxWebSocketServletContainerInitializer SCI that handles:
 		//  - classes implementing javax.websocket.server.ServerApplicationConfig
 		//  - classes implementing javax.websocket.Endpoint
 		//  - classes annotated with @javax.websocket.server.ServerEndpoint

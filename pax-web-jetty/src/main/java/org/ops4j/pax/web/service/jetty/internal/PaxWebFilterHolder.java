@@ -28,8 +28,8 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.UnavailableException;
 
-import org.eclipse.jetty.servlet.BaseHolder;
-import org.eclipse.jetty.servlet.FilterHolder;
+import org.eclipse.jetty.ee8.servlet.BaseHolder;
+import org.eclipse.jetty.ee8.servlet.FilterHolder;
 import org.ops4j.pax.web.service.jetty.internal.web.PaxWebWebSocketUpgradeFilter;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;

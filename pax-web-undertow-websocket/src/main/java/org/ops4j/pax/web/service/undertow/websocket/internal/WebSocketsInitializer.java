@@ -55,7 +55,7 @@ public class WebSocketsInitializer implements ServletContainerInitializer {
         }
 
         // inspired by Tomcat's org.apache.tomcat.websocket.server.WsSci and
-        // Jetty's org.eclipse.jetty.websocket.javax.server.config.JavaxWebSocketServletContainerInitializer
+        // Jetty's org.eclipse.jetty.ee8.websocket.javax.server.config.JavaxWebSocketServletContainerInitializer
 
         Set<Class<?>> annotatedEndpointClasses = new HashSet<>();
         Set<Class<? extends Endpoint>> conigurableEndpoints = new HashSet<>();

@@ -38,14 +38,14 @@ import javax.websocket.server.ServerContainer;
 import javax.websocket.server.ServerEndpoint;
 import javax.websocket.server.ServerEndpointConfig;
 
+import org.eclipse.jetty.ee8.servlet.DefaultServlet;
+import org.eclipse.jetty.ee8.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee8.websocket.javax.server.config.JavaxWebSocketServletContainerInitializer;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
-import org.eclipse.jetty.servlet.DefaultServlet;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.websocket.javax.server.config.JavaxWebSocketServletContainerInitializer;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,7 +78,7 @@ public class EmbeddedJettyWebSocketsTest {
 		Set<Class<?>> classes = new HashSet<>();
 		classes.add(MyServerApplicationConfig.class);
 		classes.add(MyAnnotatedEndpoint.class);
-		// org.eclipse.jetty.websocket.javax.server.config.JavaxWebSocketServletContainerInitializer is from
+		// org.eclipse.jetty.ee8.websocket.javax.server.config.JavaxWebSocketServletContainerInitializer is from
 		// org.eclipse.jetty.websocket/websocket-javax-server
 		sch.addServletContainerInitializer(new JavaxWebSocketServletContainerInitializer(), classes.toArray(new Class[0]));
 
@@ -106,7 +106,7 @@ public class EmbeddedJettyWebSocketsTest {
 
 		// org.eclipse.jetty.websocket.javax.server.internal.JavaxWebSocketServerContainer
 		ServerContainer sc = (ServerContainer) sch.getServletContext().getAttribute(ServerContainer.class.getName());
-		assertThat(sc.getClass().getName(), equalTo("org.eclipse.jetty.websocket.javax.server.internal.JavaxWebSocketServerContainer"));
+		assertThat(sc.getClass().getName(), equalTo("org.eclipse.jetty.ee8.websocket.javax.server.JavaxWebSocketServerContainer"));
 		sc.addEndpoint(MyAnnotatedEndpoint.class);
 
 		container.connectToServer(new MyClientEndpoint("c2"), config,

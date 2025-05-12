@@ -26,6 +26,7 @@ import javax.servlet.Servlet;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.util.resource.PathResource;
+import org.eclipse.jetty.util.resource.ResourceFactory;
 import org.ops4j.pax.web.service.jetty.internal.web.JettyResourceServlet;
 import org.ops4j.pax.web.service.spi.ServerController;
 import org.ops4j.pax.web.service.spi.ServerState;
@@ -172,8 +173,8 @@ class JettyServerController implements ServerController {
 	public Servlet createResourceServlet(final URL urlBase, final String base) {
 		final PathResource baseUrlResource;
 		try {
-			baseUrlResource = urlBase == null ? null : new PathResource(urlBase);
-		} catch (IOException | URISyntaxException notPossbleButStill) {
+			baseUrlResource = urlBase == null ? null : (PathResource) ResourceFactory.root().newResource(urlBase);
+		} catch (Exception notPossbleButStill) {
 			throw new IllegalArgumentException(notPossbleButStill.getMessage(), notPossbleButStill);
 		}
 		String chroot = baseUrlResource == null ? base : null;

@@ -23,9 +23,8 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.UnavailableException;
 
-import org.eclipse.jetty.server.Request;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.eclipse.jetty.servlet.ServletMapping;
+import org.eclipse.jetty.ee8.servlet.ServletHolder;
+import org.eclipse.jetty.ee8.servlet.ServletMapping;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.jetty.internal.web.JettyResourceServlet;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
@@ -291,7 +290,7 @@ public class PaxWebServletHolder extends ServletHolder {
 	 * @throws UnavailableException
 	 */
 	@Override
-	public void prepare(Request baseRequest, ServletRequest request, ServletResponse response) throws ServletException, UnavailableException {
+	protected void prepare(org.eclipse.jetty.ee8.nested.Request baseRequest, ServletRequest request, ServletResponse response) throws ServletException, UnavailableException {
 		super.prepare(baseRequest, request, response);
 	}
 

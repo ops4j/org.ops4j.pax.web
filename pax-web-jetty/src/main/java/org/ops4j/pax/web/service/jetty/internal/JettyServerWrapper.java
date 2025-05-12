@@ -47,19 +47,29 @@ import javax.servlet.SessionCookieConfig;
 import javax.servlet.annotation.ServletSecurity;
 import javax.servlet.http.HttpSessionAttributeListener;
 
+import org.eclipse.jetty.ee8.nested.ServletConstraint;
+import org.eclipse.jetty.ee8.nested.SessionHandler;
+import org.eclipse.jetty.ee8.security.Authenticator;
+import org.eclipse.jetty.ee8.security.ConstraintAware;
+import org.eclipse.jetty.ee8.security.ConstraintMapping;
+import org.eclipse.jetty.ee8.security.ConstraintSecurityHandler;
+import org.eclipse.jetty.ee8.security.authentication.BasicAuthenticator;
+import org.eclipse.jetty.ee8.security.authentication.ConfigurableSpnegoAuthenticator;
+import org.eclipse.jetty.ee8.security.authentication.DigestAuthenticator;
+import org.eclipse.jetty.ee8.security.authentication.FormAuthenticator;
+import org.eclipse.jetty.ee8.security.authentication.SslClientCertAuthenticator;
+import org.eclipse.jetty.ee8.servlet.ErrorPageErrorHandler;
+import org.eclipse.jetty.ee8.servlet.FilterHolder;
+import org.eclipse.jetty.ee8.servlet.FilterMapping;
+import org.eclipse.jetty.ee8.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee8.servlet.ServletHandler;
+import org.eclipse.jetty.ee8.servlet.ServletHolder;
+import org.eclipse.jetty.ee8.servlet.ServletMapping;
 import org.eclipse.jetty.http.HttpCookie;
 import org.eclipse.jetty.http.MimeTypes;
 import org.eclipse.jetty.http.PreEncodedHttpField;
+import org.eclipse.jetty.http.pathmap.ServletPathSpec;
 import org.eclipse.jetty.jmx.MBeanContainer;
-import org.eclipse.jetty.security.Authenticator;
-import org.eclipse.jetty.security.ConstraintAware;
-import org.eclipse.jetty.security.ConstraintMapping;
-import org.eclipse.jetty.security.ConstraintSecurityHandler;
-import org.eclipse.jetty.security.authentication.BasicAuthenticator;
-import org.eclipse.jetty.security.authentication.ClientCertAuthenticator;
-import org.eclipse.jetty.security.authentication.ConfigurableSpnegoAuthenticator;
-import org.eclipse.jetty.security.authentication.DigestAuthenticator;
-import org.eclipse.jetty.security.authentication.FormAuthenticator;
 import org.eclipse.jetty.server.ConnectionFactory;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.CustomRequestLog;
@@ -69,27 +79,19 @@ import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.RequestLogWriter;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.server.SessionIdManager;
 import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.server.handler.ErrorHandler;
-import org.eclipse.jetty.server.session.DefaultSessionIdManager;
-import org.eclipse.jetty.server.session.FileSessionDataStoreFactory;
-import org.eclipse.jetty.server.session.SessionHandler;
-import org.eclipse.jetty.servlet.DefaultServlet;
-import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
-import org.eclipse.jetty.servlet.FilterHolder;
-import org.eclipse.jetty.servlet.FilterMapping;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.eclipse.jetty.servlet.ServletMapping;
+import org.eclipse.jetty.session.DefaultSessionIdManager;
+import org.eclipse.jetty.session.FileSessionDataStoreFactory;
+import org.eclipse.jetty.session.SessionIdManager;
 import org.eclipse.jetty.util.ArrayUtil;
 import org.eclipse.jetty.util.resource.Resource;
-import org.eclipse.jetty.util.security.Constraint;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.xml.XmlConfiguration;
 import org.ops4j.pax.web.service.AuthenticatorService;
+import org.ops4j.pax.web.service.jetty.internal.web.DefaultServlet;
 import org.ops4j.pax.web.service.jetty.internal.web.JettyResourceServlet;
 import org.ops4j.pax.web.service.spi.config.Configuration;
 import org.ops4j.pax.web.service.spi.config.LogConfiguration;
@@ -236,6 +238,7 @@ class JettyServerWrapper implements BatchVisitor {
 	private final Default404Servlet default404Servlet = new Default404Servlet();
 
 	private SessionCookieConfig defaultSessionCookieConfig;
+	private PaxWebSessionIdManager sessionIdManager;
 
 	/**
 	 * All {@link EventListenerModel} instances for {@link HttpSessionAttributeListener} listeners. They'll be
@@ -322,7 +325,7 @@ class JettyServerWrapper implements BatchVisitor {
 
 		// actual org.eclipse.jetty.server.Server
 		this.server = new Server(qtp);
-		this.server.setSessionIdManager(new PaxWebSessionIdManager(this.server));
+		this.sessionIdManager = new PaxWebSessionIdManager(this.server);
 	}
 
 	/**
@@ -370,7 +373,7 @@ class JettyServerWrapper implements BatchVisitor {
 			Thread.currentThread().setContextClassLoader(jettyXmlCl);
 			URL emptyConfig = getClass().getResource("/jetty-empty.xml");
 			if (emptyConfig != null) {
-				new XmlConfiguration(Resource.newResource(emptyConfig));
+				new XmlConfiguration(jettyFactory.newResource(emptyConfig));
 			}
 
 			// to load HttpFieldPreEncoder both for HTTP/1.1 and HTTP/2 we need to call static block
@@ -410,10 +413,10 @@ class JettyServerWrapper implements BatchVisitor {
 
 			List<XmlConfiguration> configs = new ArrayList<>();
 			for (File location : locations) {
-				configs.add(new XmlConfiguration(Resource.newResource(location)));
+				configs.add(new XmlConfiguration(jettyFactory.newResource(location)));
 			}
 			if (jettyResource != null) {
-				configs.add(new XmlConfiguration(Resource.newResource(jettyResource)));
+				configs.add(new XmlConfiguration(jettyFactory.newResource(jettyResource)));
 			}
 
 			for (XmlConfiguration cfg : configs) {
@@ -649,7 +652,7 @@ class JettyServerWrapper implements BatchVisitor {
 		LOG.info("Stopping Jetty thread pool {}", qtp);
 		qtp.stop();
 
-		Handler[] childHandlers = server.getChildHandlers();
+		List<Handler> childHandlers = server.getHandlers();
 		for (Handler handler : childHandlers) {
 			handler.stop();
 		}
@@ -660,9 +663,10 @@ class JettyServerWrapper implements BatchVisitor {
 		dynamicRegistrations.clear();
 		initializers.clear();
 		osgiContextModels.clear();
-		contextHandlers.forEach((path, sch) -> {
-			mainHandler.removeHandler(sch);
-		});
+//		contextHandlers.forEach((path, sch) -> mainHandler.removeHandler(sch));
+//		contextHandlers.forEach((path, sch) -> {
+//			mainHandler.removeHandler(sch);
+//		});
 		contextHandlers.clear();
 		mainHandler.mapContexts();
 
@@ -801,6 +805,7 @@ class JettyServerWrapper implements BatchVisitor {
 			// session configuration - based on defaultSessionConfiguration, but may be later overriden in OsgiContext
 			SessionHandler sessions = sch.getSessionHandler();
 			if (sessions != null) {
+				sessions.setSessionIdManager(this.sessionIdManager);
 				SessionConfiguration sc = configuration.session();
 				sessions.setMaxInactiveInterval(sc.getSessionTimeout() * 60);
 				sessions.setSessionCookie(defaultSessionCookieConfig.getName());
@@ -828,9 +833,8 @@ class JettyServerWrapper implements BatchVisitor {
 					sessions.setSessionIdPathParameterName(sc.getSessionUrlPathParameter());
 				}
 				if (sc.getSessionWorkerName() != null) {
-					SessionIdManager sidManager = server.getSessionIdManager();
-					if (sidManager instanceof DefaultSessionIdManager) {
-						((DefaultSessionIdManager) sidManager).setWorkerName(sc.getSessionWorkerName());
+					if (this.sessionIdManager != null) {
+						this.sessionIdManager.setWorkerName(sc.getSessionWorkerName());
 					}
 				}
 			}
@@ -874,7 +878,7 @@ class JettyServerWrapper implements BatchVisitor {
 						LOG.warn("Error stopping Jetty context \"{}\": {}", contextPath, e.getMessage(), e);
 					}
 				}
-				mainHandler.removeHandler(sch);
+//				mainHandler.removeHandler(sch);
 				mainHandler.mapContexts();
 			}
 		}
@@ -1096,8 +1100,8 @@ class JettyServerWrapper implements BatchVisitor {
 				LOG.info("Configuring MIME and Locale Encoding mapping of {}", ocm);
 
 				MimeTypes mimeTypes = new MimeTypes();
-				mimeTypes.setMimeMap(change.getMimeMapping());
-				sch.setMimeTypes(mimeTypes);
+//				mimeTypes.setMimeMap(change.getMimeMapping());
+//				sch.setMimeTypes(mimeTypes);
 
 				change.getLocaleEncodingMapping().forEach(sch::addLocaleEncoding);
 			}
@@ -1784,6 +1788,7 @@ class JettyServerWrapper implements BatchVisitor {
 				// reconfigure welcome files in resource servlets without reinitialization (Pax Web 8 change)
 				if (servletContextHandler != null && servletContextHandler.getServletHandler() != null
 						&& servletContextHandler.getServletHandler().getServlets() != null) {
+					servletContextHandler.setWelcomeFiles(newWelcomeFiles);
 					for (ServletHolder sh : servletContextHandler.getServletHandler().getServlets()) {
 						PaxWebServletHolder pwsh = (PaxWebServletHolder) sh;
 						// reconfigure the servlet ONLY if its holder uses given OsgiContextModel
@@ -2294,20 +2299,20 @@ class JettyServerWrapper implements BatchVisitor {
 				}
 
 				switch (loginConfig.getAuthMethod().toUpperCase()) {
-					case Constraint.__BASIC_AUTH:
+					case Authenticator.BASIC_AUTH:
 						securityHandler.setAuthenticator(new BasicAuthenticator());
 						break;
-					case Constraint.__DIGEST_AUTH:
+					case Authenticator.DIGEST_AUTH:
 						DigestAuthenticator digestAuthenticator = new DigestAuthenticator();
 						digestAuthenticator.setMaxNonceAge(configuration.security().getDigestAuthMaxNonceAge());
 						digestAuthenticator.setMaxNonceCount(configuration.security().getDigestAuthMaxNonceCount());
 						securityHandler.setAuthenticator(digestAuthenticator);
 						break;
-					case Constraint.__CERT_AUTH:
-					case Constraint.__CERT_AUTH2:
-						securityHandler.setAuthenticator(new ClientCertAuthenticator());
+					case Authenticator.CERT_AUTH:
+					case Authenticator.CERT_AUTH2:
+						securityHandler.setAuthenticator(new SslClientCertAuthenticator(new SslContextFactory.Server()));
 						break;
-					case Constraint.__FORM_AUTH:
+					case Authenticator.FORM_AUTH:
 						FormAuthenticator formAuthenticator = new FormAuthenticator(loginConfig.getFormLoginPage(),
 								loginConfig.getFormErrorPage(), !configuration.security().getFormAuthRedirect());
 						securityHandler.setInitParameter(FormAuthenticator.__FORM_LOGIN_PAGE, loginConfig.getFormLoginPage());
@@ -2315,7 +2320,7 @@ class JettyServerWrapper implements BatchVisitor {
 						securityHandler.setInitParameter(FormAuthenticator.__FORM_DISPATCH, Boolean.toString(!configuration.security().getFormAuthRedirect()));
 						securityHandler.setAuthenticator(formAuthenticator);
 						break;
-					case Constraint.__NEGOTIATE_AUTH:
+					case Authenticator.NEGOTIATE_AUTH:
 						// TODO: create configuration options
 						securityHandler.setAuthenticator(new ConfigurableSpnegoAuthenticator());
 						break;
@@ -2428,7 +2433,7 @@ class JettyServerWrapper implements BatchVisitor {
 					}
 				}
 				for (URL url : contextConfigs) {
-					XmlConfiguration cfg = new XmlConfiguration(Resource.newResource(url));
+					XmlConfiguration cfg = new XmlConfiguration(jettyFactory.newResource(url));
 					LOG.info("Processing context specific {} for {}", url, contextPath);
 
 					processConfiguration(cfg, previous, objects);
@@ -2468,7 +2473,7 @@ class JettyServerWrapper implements BatchVisitor {
 	private void ensureSecurityConstraintsConfigured(ConstraintSecurityHandler securityHandler, List<SecurityConstraintModel> models) {
 		// see org.eclipse.jetty.webapp.StandardDescriptorProcessor.visitSecurityConstraint()
 		for (SecurityConstraintModel constraint : models) {
-			Constraint base = new Constraint();
+			ServletConstraint base = new ServletConstraint();
 			if (constraint.isAuthRolesSet()) {
 				base.setAuthenticate(true);
 				base.setRoles(constraint.getAuthRoles().toArray(new String[0]));
@@ -2478,26 +2483,27 @@ class JettyServerWrapper implements BatchVisitor {
 				}
 			}
 			if (constraint.getTransportGuarantee() == ServletSecurity.TransportGuarantee.NONE) {
-				base.setDataConstraint(Constraint.DC_NONE);
+				base.setDataConstraint(ServletConstraint.DC_NONE);
 			} else {
 				// DC_CONFIDENTIAL and DC_INTEGRAL are handled equally and effectively mean "use TLS"
-				base.setDataConstraint(Constraint.DC_CONFIDENTIAL);
+				base.setDataConstraint(ServletConstraint.DC_CONFIDENTIAL);
 			}
 
 			for (SecurityConstraintModel.WebResourceCollection wrc : constraint.getWebResourceCollections()) {
-				Constraint sc = null;
+				ServletConstraint sc = null;
 				try {
-					sc = (Constraint) base.clone();
+					sc = (ServletConstraint) base.clone();
 					sc.setName(wrc.getName());
 				} catch (CloneNotSupportedException e) {
 					LOG.warn(e.getMessage(), e);
 				}
 
-				if (wrc.getMethods().size() > 0 && wrc.getOmittedMethods().size() > 0) {
+				if (!wrc.getMethods().isEmpty() && !wrc.getOmittedMethods().isEmpty()) {
 					LOG.warn("Both methods and method omissions specified in the descriptor. Using methods only");
 					wrc.getOmittedMethods().clear();
 				}
-				for (String url : wrc.getPatterns()) {
+				for (String u : wrc.getPatterns()) {
+					String url = ServletPathSpec.normalize(u);
 					boolean hit = false;
 					for (String method : wrc.getMethods()) {
 						ConstraintMapping mapping = new ConstraintMapping();

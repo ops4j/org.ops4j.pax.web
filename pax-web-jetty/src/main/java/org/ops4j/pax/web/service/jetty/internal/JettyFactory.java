@@ -16,13 +16,16 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
+import java.io.File;
 import java.lang.management.ManagementFactory;
+import java.net.URL;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLParameters;
 
 import org.eclipse.jetty.alpn.server.ALPNServerConnectionFactory;
+import org.eclipse.jetty.http.HttpCompliance;
 import org.eclipse.jetty.http.HttpScheme;
 import org.eclipse.jetty.http.HttpVersion;
 import org.eclipse.jetty.http2.HTTP2Cipher;
@@ -33,11 +36,13 @@ import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.ForwardedRequestCustomizer;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
-import org.eclipse.jetty.server.MultiPartFormDataCompliance;
 import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
+import org.eclipse.jetty.util.resource.PathResourceFactory;
+import org.eclipse.jetty.util.resource.Resource;
+import org.eclipse.jetty.util.resource.URLResourceFactory;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.ops4j.pax.web.service.spi.config.Configuration;
@@ -67,6 +72,9 @@ class JettyFactory {
 
 	private boolean alpnAvailable;
 	private boolean http2Available;
+
+	private final PathResourceFactory resourceFactory = new PathResourceFactory();
+	private final URLResourceFactory urlResourceFactory = new URLResourceFactory();
 
 	JettyFactory(Bundle paxWebJettyBundle, ClassLoader classLoader) {
 		this.paxWebJettyBundle = paxWebJettyBundle;
@@ -537,7 +545,7 @@ class JettyFactory {
 			// default from org.eclipse.jetty.server.HttpConfiguration._outputBufferSize
 			httpConfig.setOutputBufferSize(32768);
 		}
-		httpConfig.setMultiPartFormDataCompliance(MultiPartFormDataCompliance.RFC7578);
+		httpConfig.setHttpCompliance(HttpCompliance.RFC7230);
 
 		if (sc.checkForwardedHeaders() != null && sc.checkForwardedHeaders()) {
 			httpConfig.addCustomizer(new ForwardedRequestCustomizer());
@@ -576,6 +584,14 @@ class JettyFactory {
 			LOG.info("No JMX available. Skipping Jetty JMX configuration.");
 			return null;
 		}
+	}
+
+	public Resource newResource(URL path) {
+		return urlResourceFactory.newResource(path);
+	}
+
+	public Resource newResource(File file) {
+		return resourceFactory.newResource(file.toPath());
 	}
 
 }

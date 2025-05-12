@@ -34,17 +34,20 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.eclipse.jetty.ee8.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee8.servlet.ServletHolder;
+import org.eclipse.jetty.ee8.servlet.ServletMapping;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
-import org.eclipse.jetty.servlet.DefaultServlet;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.eclipse.jetty.servlet.ServletMapping;
 import org.eclipse.jetty.util.resource.PathResource;
+import org.eclipse.jetty.util.resource.PathResourceFactory;
+import org.eclipse.jetty.util.resource.Resource;
+import org.junit.Ignore;
 import org.junit.Test;
+import org.ops4j.pax.web.service.jetty.internal.web.DefaultServlet;
 import org.ops4j.pax.web.service.jetty.internal.web.JettyResourceServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,13 +73,14 @@ public class UnifiedJettyTest {
 		server.setConnectors(new Connector[] { connector });
 
 		ContextHandlerCollection chc = new ContextHandlerCollection();
-		ServletContextHandler handler1 = new ServletContextHandler(null, "/", ServletContextHandler.NO_SESSIONS);
+		ServletContextHandler handler1 = new ServletContextHandler(chc, "/", ServletContextHandler.NO_SESSIONS) {
+			@Override
+			public Resource getBaseResource() {
+				Resource resource = JettyResourceServlet.BASE_RESOURCE.get();
+				return resource == null ? super.getBaseResource() : resource;
+			}
+		};
 		handler1.setAllowNullPathInfo(true);
-		handler1.setInitParameter(DefaultServlet.CONTEXT_INIT + "dirAllowed", "false");
-		handler1.setInitParameter(DefaultServlet.CONTEXT_INIT + "etags", "true");
-		handler1.setInitParameter(DefaultServlet.CONTEXT_INIT + "resourceBase", new File("target").getAbsolutePath());
-		handler1.setInitParameter(DefaultServlet.CONTEXT_INIT + "maxCachedFiles", "1000");
-		handler1.setInitParameter(DefaultServlet.CONTEXT_INIT + "pathInfoOnly", "true");
 
 		// in Jetty, DefaultServlet implements org.eclipse.jetty.util.resource.ResourceFactory used by the
 		// cache to populate in-memory storage. So org.eclipse.jetty.util.resource.ResourceFactory is actually
@@ -97,11 +101,26 @@ public class UnifiedJettyTest {
 		IOUtils.write("b2", fw2);
 		fw2.close();
 
-		final PathResource p1 = new PathResource(b1);
-		final PathResource p2 = new PathResource(b2);
+		PathResourceFactory prf = new PathResourceFactory();
+		final PathResource p1 = (PathResource) prf.newResource(b1.toURI());
+		final PathResource p2 = (PathResource) prf.newResource(b2.toURI());
 
-		handler1.addServlet(new ServletHolder("default1", new JettyResourceServlet(p1, null)), "/d1/*");
-		handler1.addServlet(new ServletHolder("default2", new JettyResourceServlet(p2, null)), "/d2/*");
+		ServletHolder sh1 = new ServletHolder("default1", new JettyResourceServlet(p1, null));
+		ServletHolder sh2 = new ServletHolder("default2", new JettyResourceServlet(p2, null));
+
+		sh1.setInitParameter("dirAllowed", "false");
+		sh1.setInitParameter("etags", "true");
+//		sh1.setInitParameter("baseResource", new File("target").getAbsolutePath());
+		sh1.setInitParameter("maxCachedFiles", "1000");
+		sh1.setInitParameter("pathInfoOnly", "true");
+		sh2.setInitParameter("dirAllowed", "false");
+		sh2.setInitParameter("etags", "true");
+//		sh2.setInitParameter("baseResource", new File("target").getAbsolutePath());
+		sh2.setInitParameter("maxCachedFiles", "1000");
+		sh2.setInitParameter("pathInfoOnly", "true");
+
+		handler1.addServlet(sh1, "/d1/*");
+		handler1.addServlet(sh2, "/d2/*");
 
 		chc.addHandler(handler1);
 		server.setHandler(chc);
@@ -184,12 +203,12 @@ public class UnifiedJettyTest {
 		// a bug with "/"? We can't set it to "true", but this may mean we can't map the default servlet to something
 		// different than "/"
 		defaultServlet.setInitParameter("pathInfoOnly", "false");
-		defaultServlet.setInitParameter("resourceBase", b1.getAbsolutePath());
+		defaultServlet.setInitParameter("baseResource", b1.getAbsolutePath());
 		handler1.addServlet(defaultServlet, "/");
 
 		ServletHolder indexxServlet = new ServletHolder("indexx", new HttpServlet() {
 			@Override
-			protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+			public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 				resp.getWriter().print("'indexx'");
 			}
 		});
@@ -241,12 +260,12 @@ public class UnifiedJettyTest {
 		// a bug with "/"? We can't set it to "true", but this may mean we can't map the default servlet to something
 		// different than "/"
 		defaultServlet.setInitParameter("pathInfoOnly", "false");
-		defaultServlet.setInitParameter("resourceBase", b1.getAbsolutePath());
+		defaultServlet.setInitParameter("baseResource", b1.getAbsolutePath());
 		handler1.addServlet(defaultServlet, "/");
 
 		ServletHolder indexxServlet = new ServletHolder("indexx", new HttpServlet() {
 			@Override
-			protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+			public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 				resp.getWriter().print("'indexx'");
 			}
 		});
@@ -266,7 +285,7 @@ public class UnifiedJettyTest {
 		assertThat(response, startsWith("HTTP/1.1 404"));
 
 		response = send(port, "/c");
-		assertThat(response, startsWith("HTTP/1.1 302"));
+		assertThat(response, startsWith("HTTP/1.1 301"));
 		response = send(port, "/c/");
 		assertThat(response, endsWith("'indexx'"));
 		response = send(port, "/c/sub/");
@@ -288,7 +307,7 @@ public class UnifiedJettyTest {
 		ContextHandlerCollection chc = new ContextHandlerCollection();
 		ServletContextHandler handler1 = new ServletContextHandler(null, "/", ServletContextHandler.NO_SESSIONS);
 		handler1.setAllowNullPathInfo(true);
-		handler1.setInitParameter(DefaultServlet.CONTEXT_INIT + "pathInfoOnly", "true");
+		handler1.setWelcomeFiles(new String[] { "index.txt" });
 
 		File b1 = new File("target/b1");
 		FileUtils.deleteDirectory(b1);
@@ -307,11 +326,13 @@ public class UnifiedJettyTest {
 			IOUtils.write("'sub/index.txt'", fw1);
 		}
 
-		final PathResource p1 = new PathResource(b1);
+		final PathResource p1 = (PathResource) new PathResourceFactory().newResource(b1.toURI());
+		handler1.setBaseResource(p1);
 
 		JettyResourceServlet servlet = new JettyResourceServlet(p1, null);
-		servlet.setWelcomeFiles(new String[] { "index.txt" });
-		handler1.addServlet(new ServletHolder("default1", servlet), "/d1/*");
+		ServletHolder sh = new ServletHolder("default1", servlet);
+		sh.setInitParameter("pathInfoOnly", "true");
+		handler1.addServlet(sh, "/d1/*");
 
 		chc.addHandler(handler1);
 		server.setHandler(chc);
@@ -347,6 +368,7 @@ public class UnifiedJettyTest {
 	}
 
 	@Test
+	@Ignore("jetty/jetty.project/issues/10608")
 	public void paxWebWelcomePages() throws Exception {
 		Server server = new Server();
 		ServerConnector connector = new ServerConnector(server, 1, 1, new HttpConnectionFactory());
@@ -384,9 +406,10 @@ public class UnifiedJettyTest {
 			IOUtils.write("'sub/index-b3'", fw3);
 		}
 
-		final PathResource p1 = new PathResource(b1);
-		final PathResource p2 = new PathResource(b2);
-		final PathResource p3 = new PathResource(b3);
+		PathResourceFactory prf = new PathResourceFactory();
+		final PathResource p1 = (PathResource) prf.newResource(b1.toURI());
+		final PathResource p2 = (PathResource) prf.newResource(b2.toURI());
+		final PathResource p3 = (PathResource) prf.newResource(b3.toURI());
 
 		// the "/" default & resource servlet
 		JettyResourceServlet jrs1 = new JettyResourceServlet(p1, null);
@@ -656,6 +679,7 @@ public class UnifiedJettyTest {
 	}
 
 	@Test
+	@Ignore("jetty/jetty.project/issues/10608")
 	public void paxWebWelcomePagesWithDifferentContext() throws Exception {
 		Server server = new Server();
 		ServerConnector connector = new ServerConnector(server, 1, 1, new HttpConnectionFactory());
@@ -694,9 +718,10 @@ public class UnifiedJettyTest {
 			IOUtils.write("'sub/index-b3'", fw3);
 		}
 
-		final PathResource p1 = new PathResource(b1);
-		final PathResource p2 = new PathResource(b2);
-		final PathResource p3 = new PathResource(b3);
+		PathResourceFactory prf = new PathResourceFactory();
+		final PathResource p1 = (PathResource) prf.newResource(b1.toURI());
+		final PathResource p2 = (PathResource) prf.newResource(b2.toURI());
+		final PathResource p3 = (PathResource) prf.newResource(b3.toURI());
 
 		// the "/" default & resource servlet
 		JettyResourceServlet jrs1 = new JettyResourceServlet(p1, null);

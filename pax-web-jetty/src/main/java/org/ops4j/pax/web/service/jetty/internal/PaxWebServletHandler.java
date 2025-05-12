@@ -36,21 +36,18 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.eclipse.jetty.security.DefaultUserIdentity;
-import org.eclipse.jetty.security.UserAuthentication;
+import org.eclipse.jetty.ee8.nested.ServletRequestHttpWrapper;
+import org.eclipse.jetty.ee8.nested.ServletResponseHttpWrapper;
+import org.eclipse.jetty.ee8.security.UserAuthentication;
+import org.eclipse.jetty.ee8.servlet.FilterHolder;
+import org.eclipse.jetty.ee8.servlet.FilterMapping;
+import org.eclipse.jetty.ee8.servlet.ListenerHolder;
+import org.eclipse.jetty.ee8.servlet.ServletHandler;
+import org.eclipse.jetty.ee8.servlet.ServletHolder;
+import org.eclipse.jetty.ee8.servlet.ServletMapping;
+import org.eclipse.jetty.security.UserIdentity;
 import org.eclipse.jetty.security.UserPrincipal;
-import org.eclipse.jetty.server.Authentication;
-import org.eclipse.jetty.server.Request;
-import org.eclipse.jetty.server.ServletRequestHttpWrapper;
-import org.eclipse.jetty.server.ServletResponseHttpWrapper;
-import org.eclipse.jetty.servlet.FilterHolder;
-import org.eclipse.jetty.servlet.FilterMapping;
-import org.eclipse.jetty.servlet.ListenerHolder;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.eclipse.jetty.servlet.ServletMapping;
 import org.eclipse.jetty.util.ArrayUtil;
-import org.eclipse.jetty.util.MultiException;
 import org.ops4j.pax.web.service.WebContainerContext;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
@@ -65,12 +62,12 @@ import org.slf4j.LoggerFactory;
 
 /**
  * <p>Specialized {@link ServletHandler} to be used inside specialized
- * {@link org.eclipse.jetty.servlet.ServletContextHandler} for Pax Web specific invocation and management of
+ * {@link org.eclipse.jetty.ee8.servlet.ServletContextHandler} for Pax Web specific invocation and management of
  * servlets.</p>
  *
  * <p>Remember (a note to myself as well), {@link ServletHandler} in Jetty is not for handling single servlet, it's
  * for handling <strong>all</strong> the servlets within single
- * {@link org.eclipse.jetty.servlet.ServletContextHandler}.</p>
+ * {@link org.eclipse.jetty.ee8.servlet.ServletContextHandler}.</p>
  */
 public class PaxWebServletHandler extends ServletHandler {
 
@@ -101,7 +98,7 @@ public class PaxWebServletHandler extends ServletHandler {
 	private final ThreadLocal<PaxWebServletHolder> currentServletHolder = new ThreadLocal<>();
 
 	/**
-	 * Create new {@link ServletHandler} for given {@link org.eclipse.jetty.servlet.ServletContextHandler}
+	 * Create new {@link ServletHandler} for given {@link org.eclipse.jetty.ee8.servlet.ServletContextHandler}
 	 * @param default404Servlet this servlet will be used when there's no mapped servlet
 	 */
 	PaxWebServletHandler(Servlet default404Servlet, OsgiSessionAttributeListener osgiSessionsBridge) {
@@ -163,7 +160,7 @@ public class PaxWebServletHandler extends ServletHandler {
 
 		try {
 			super.initialize();
-		} catch (MultiException e) {
+		} catch (Exception e) {
 			// See https://github.com/ops4j/org.ops4j.pax.web/issues/1725
 			// we don't want entire context to become UNAVAILABLE just because some servlets/filters
 			// thrown javax.servlet.UnavailableException
@@ -246,8 +243,8 @@ public class PaxWebServletHandler extends ServletHandler {
 	}
 
 	/**
-	 * Override the method from {@link org.eclipse.jetty.servlet.ServletContextHandler} just because
-	 * {@code org.eclipse.jetty.websocket.javax.server.config.JavaxWebSocketServletContainerInitializer} adds
+	 * Override the method from {@link org.eclipse.jetty.ee8.servlet.ServletContextHandler} just because
+	 * {@code org.eclipse.jetty.ee8.websocket.javax.server.config.JavaxWebSocketServletContainerInitializer} adds
 	 * {@link FilterHolder} directly, while we use {@link PaxWebFilterHolder} array.
 	 * @param holder
 	 * @param pathSpec
@@ -313,7 +310,7 @@ public class PaxWebServletHandler extends ServletHandler {
 	}
 
 	/**
-	 * Jetty {@link ServletHandler#doHandle(String, Request, HttpServletRequest, HttpServletResponse)} is not just
+	 * Jetty {@link ServletHandler#doHandle(String, org.eclipse.jetty.ee8.nested.Request, HttpServletRequest, HttpServletResponse)} is not just
 	 * about calling a servlet. It's about preparation of entire chain of invocation and mapping of incoming request
 	 * into some target servlet + associated filters.
 	 *
@@ -325,9 +322,8 @@ public class PaxWebServletHandler extends ServletHandler {
 	 * @throws ServletException
 	 */
 	@Override
-	public void doHandle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
-			throws IOException, ServletException {
-
+	public void doHandle(String target, org.eclipse.jetty.ee8.nested.Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+//		super.doHandle(target, baseRequest, request, response);
 		if ("TRACE".equals(request.getMethod())) {
 			// PAXWEB-229 - prevent https://owasp.org/www-community/attacks/Cross_Site_Tracing
 			response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
@@ -371,7 +367,7 @@ public class PaxWebServletHandler extends ServletHandler {
 		}
 	}
 
-	protected FilterChain getOsgiFilterChain(final Request baseRequest, String pathInContext, ServletHolder servletHolder) {
+	protected FilterChain getOsgiFilterChain(final org.eclipse.jetty.ee8.nested.Request baseRequest, String pathInContext, ServletHolder servletHolder) {
 		PaxWebServletHolder holder = (PaxWebServletHolder) servletHolder;
 
 		// either super.getFilterChain() will return a chain that should be invoked once (which will provide
@@ -415,12 +411,12 @@ public class PaxWebServletHandler extends ServletHandler {
 
 			if (user != null || authType != null) {
 				// translate it into Jetty specific authentication
-				if (baseRequest.getAuthentication() == null || baseRequest.getAuthentication() == Authentication.UNAUTHENTICATED) {
+				if (baseRequest.getAuthentication() == null) {
 					String userName = user != null ? user.toString() : null;
 					String authMethod = authType != null ? authType.toString() : null;
 					Principal p = new UserPrincipal(userName, null);
 					Subject s = new Subject(true, Collections.singleton(p), Collections.emptySet(), Collections.emptySet());
-					baseRequest.setAuthentication(new UserAuthentication(authMethod, new DefaultUserIdentity(s, p, new String[0])));
+					baseRequest.setAuthentication(new UserAuthentication(authMethod, new DefaultUserIdentity(s, p)));
 				}
 			}
 		};
@@ -443,7 +439,7 @@ public class PaxWebServletHandler extends ServletHandler {
 	 * @return
 	 */
 	@Override
-	protected FilterChain getFilterChain(Request baseRequest, String pathInContext, ServletHolder servletHolder) {
+	protected FilterChain getFilterChain(org.eclipse.jetty.ee8.nested.Request baseRequest, String pathInContext, ServletHolder servletHolder) {
 		PaxWebServletHolder holder = (PaxWebServletHolder) servletHolder;
 
 		// calculate caching key for filter chain
@@ -510,6 +506,31 @@ public class PaxWebServletHandler extends ServletHandler {
 
 	public List<PreprocessorFilterConfig> getPreprocessors() {
 		return preprocessors;
+	}
+
+	private static class DefaultUserIdentity implements UserIdentity {
+		private final Subject subject;
+		private final Principal principal;
+
+		private DefaultUserIdentity(Subject subject, Principal principal) {
+			this.subject = subject;
+			this.principal = principal;
+		}
+
+		@Override
+		public Subject getSubject() {
+			return subject;
+		}
+
+		@Override
+		public Principal getUserPrincipal() {
+			return principal;
+		}
+
+		@Override
+		public boolean isUserInRole(String role) {
+			return false;
+		}
 	}
 
 }

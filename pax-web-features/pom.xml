@@ -89,7 +89,7 @@
 								<descriptor>mvn:org.ops4j.pax.web/pax-web-features</descriptor>
 							</blacklistedDescriptors>
 							<distribution>org.apache.karaf.features:framework</distribution>
-							<javase>11</javase>
+							<javase>17</javase>
 							<framework>
 								<feature>framework</feature>
 							</framework>

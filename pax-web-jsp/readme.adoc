@@ -388,7 +388,7 @@ Some well-known `javax.servlet.ServletContainerInitializer` services from `/META
 * `io.undertow.servlet.sse.ServerSentEventSCI`
 * `org.springframework.web.SpringServletContainerInitializer` (bridge to `org.springframework.web.WebApplicationInitializer` SPI)
 * `org.eclipse.jetty.websocket.server.NativeWebSocketServletContainerInitializer`
-* `org.eclipse.jetty.websocket.javax.server.config.JavaxWebSocketServletContainerInitializer`
+* `org.eclipse.jetty.ee8.websocket.javax.server.config.JavaxWebSocketServletContainerInitializer`
 * `com.sun.jersey.server.impl.container.servlet.JerseyServletContainerInitializer`
 
 What's most important for Jasper engine is that a JSP servlet requires one context attribute named `org.apache.tomcat.InstanceManager`. This implementation is used to create (and destroy) instances of classes - possibly with support for annotations like `@PostConstruct`. Such instance manager is set by `org.apache.jasper.servlet.JasperInitializer`. This initializer also sets `org.apache.jasper.compiler.TldCache` context attribute.

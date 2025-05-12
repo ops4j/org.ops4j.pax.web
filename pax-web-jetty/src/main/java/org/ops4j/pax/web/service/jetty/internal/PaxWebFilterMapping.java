@@ -22,7 +22,7 @@ import java.util.EnumSet;
 import java.util.List;
 import javax.servlet.DispatcherType;
 
-import org.eclipse.jetty.servlet.FilterMapping;
+import org.eclipse.jetty.ee8.servlet.FilterMapping;
 import org.ops4j.pax.web.service.spi.model.elements.FilterModel;
 
 /**

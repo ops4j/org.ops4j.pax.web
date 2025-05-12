@@ -15,8 +15,10 @@
  */
 package org.ops4j.pax.web.itest.jetty.config;
 
+import org.eclipse.jetty.http.HttpFields;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.HttpConfiguration;
+import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.junit.After;
@@ -31,6 +33,8 @@ import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceRegistration;
+
+import java.io.File;
 
 import static org.ops4j.pax.exam.OptionUtils.combine;
 
@@ -76,13 +80,21 @@ public class JettyHandlerServiceIntegrationTest extends AbstractContainerTestBas
 	public void testStaticContent() throws Exception {
 		ContextHandler ctxtHandler = new ContextHandler();
 		ctxtHandler.setContextPath("/static-content");
+		ctxtHandler.setBaseResourceAsString(new File("target").getCanonicalPath());
 		ResourceHandler resourceHandler = new ResourceHandler();
-		resourceHandler.setResourceBase("target");
-		resourceHandler.setDirectoriesListed(true);
+		resourceHandler.setBaseResourceAsString(new File("target").getCanonicalPath());
+		resourceHandler.setDirAllowed(true);
 		ctxtHandler.setHandler(resourceHandler);
 
-		HttpConfiguration.Customizer customizer = (connector1, channelConfig, request)
-				-> request.getResponse().addHeader("X-Y-Z", "x-y-z");
+		// if lambda, Pax Exam has problems scanning this class
+		@SuppressWarnings("Convert2Lambda")
+		HttpConfiguration.Customizer customizer = new HttpConfiguration.Customizer() {
+			@Override
+			public Request customize(Request request, HttpFields.Mutable responseHeaders) {
+				responseHeaders.add("X-Y-Z", "x-y-z");
+				return request;
+			}
+		};
 
 		@SuppressWarnings("unchecked")
 		final ServiceRegistration<Handler>[] registerHandlerService = new ServiceRegistration[1];

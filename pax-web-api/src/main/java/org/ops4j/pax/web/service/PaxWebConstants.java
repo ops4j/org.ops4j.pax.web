@@ -71,7 +71,7 @@ public interface PaxWebConstants {
 	 * The only supported {@link javax.servlet.ServletContainerInitializer} class that configures WebSocket
 	 * container for Jetty
 	 */
-	String DEFAULT_WEBSOCKET_JETTY_SCI_CLASS = "org.eclipse.jetty.websocket.javax.server.config.JavaxWebSocketServletContainerInitializer";
+	String DEFAULT_WEBSOCKET_JETTY_SCI_CLASS = "org.eclipse.jetty.ee8.websocket.javax.server.config.JavaxWebSocketServletContainerInitializer";
 	/**
 	 * The only supported {@link javax.servlet.ServletContainerInitializer} class that configures WebSocket
 	 * container for Tomcat
