@@ -26,6 +26,10 @@
 # but in pure OSGi it should not bother us too much.
 # Maybe one day I'll turn includeDependencyManagement off and list more specific bundles
 -runrequires: \
+	bnd.identity;id='jakarta.annotation-api',\
+	bnd.identity;id='org.ops4j.pax.web.pax-web-compatibility-annotation',\
+	bnd.identity;id='jakarta.servlet-api',\
+	bnd.identity;id='org.apache.felix.eventadmin',\
 	bnd.identity;id='org.osgi.test.cases.webcontainer',\
 	bnd.identity;id='org.ops4j.pax.web.pax-web-api', \
 	bnd.identity;id='org.ops4j.pax.web.pax-web-compatibility-el', \
@@ -79,16 +83,7 @@
 	jakarta.annotation-api;version='[3.0.0,3.0.1)',\
 	jakarta.el-api;version='[6.0.1,6.0.2)',\
 	jakarta.security.auth.message-api;version='[3.1.0,3.1.1)',\
-	junit-jupiter-api;version='[5.12.1,5.12.2)',\
-	junit-jupiter-engine;version='[5.12.1,5.12.2)',\
-	junit-jupiter-params;version='[5.12.1,5.12.2)',\
-	junit-platform-commons;version='[1.12.1,1.12.2)',\
-	junit-platform-engine;version='[1.12.1,1.12.2)',\
-	junit-platform-launcher;version='[1.12.1,1.12.2)',\
-	junit-vintage-engine;version='[5.12.1,5.12.2)',\
-	org.apache.tomcat-servlet-api;version='[11.0.5,11.0.6)',\
 	org.eclipse.jdt.core.compiler.batch;version='[3.40.0,3.40.1)',\
-	org.eclipse.jetty.servlet-api;version='[4.0.6,4.0.7)',\
 	org.opentest4j;version='[1.3.0,1.3.1)',\
 	org.ops4j.pax.logging.pax-logging-api;version='[2.3.0,2.3.1)',\
 	org.ops4j.pax.logging.pax-logging-log4j2;version='[2.3.0,2.3.1)',\
@@ -96,7 +91,6 @@
 	org.ops4j.pax.url.commons;version='[3.0.0,3.0.1)',\
 	org.ops4j.pax.url.war;version='[3.0.0,3.0.1)',\
 	org.ops4j.pax.web.pax-web-api;version='[11.0.0,11.0.1)',\
-	org.ops4j.pax.web.pax-web-compatibility-annotation;version='[11.0.0,11.0.1)',\
 	org.ops4j.pax.web.pax-web-compatibility-el;version='[11.0.0,11.0.1)',\
 	org.ops4j.pax.web.pax-web-extender-war;version='[11.0.0,11.0.1)',\
 	org.ops4j.pax.web.pax-web-jsp;version='[11.0.0,11.0.1)',\
@@ -104,4 +98,14 @@
 	org.ops4j.pax.web.pax-web-spi;version='[11.0.0,11.0.1)',\
 	org.ops4j.pax.web.pax-web-tomcat;version='[11.0.0,11.0.1)',\
 	org.ops4j.pax.web.pax-web-tomcat-common;version='[11.0.0,11.0.1)',\
-	org.osgi.service.event;version='[1.4.1,1.4.2)'
+	junit-jupiter-api;version='[5.12.2,5.12.3)',\
+	junit-jupiter-engine;version='[5.12.2,5.12.3)',\
+	junit-jupiter-params;version='[5.12.2,5.12.3)',\
+	junit-platform-commons;version='[1.12.2,1.12.3)',\
+	junit-platform-engine;version='[1.12.2,1.12.3)',\
+	junit-platform-launcher;version='[1.12.2,1.12.3)',\
+	junit-vintage-engine;version='[5.12.2,5.12.3)',\
+	org.apache.felix.eventadmin;version='[1.6.4,1.6.5)',\
+	jakarta.servlet-api;version='[6.1.0,6.1.1)',\
+	org.ops4j.pax.web.pax-web-compatibility-annotation;version='[11.0.0,11.0.1)',\
+	org.ops4j.pax.web.pax-web-compatibility-servlet;version='[11.0.0,11.0.1)'

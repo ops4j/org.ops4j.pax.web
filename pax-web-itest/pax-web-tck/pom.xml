@@ -115,7 +115,7 @@
 <!--									includes="TEST-*.xml"-->
 <!--									extension=".html" />-->
 <!--								<xslt basedir="${project.build.directory}/test-reports/tck-cmpn-128"-->
-<!--									destdir="${project.build.directory}"-->
+<!--									destdir="${project.build.directory}/test-reports/tck-cmpn-128"-->
 <!--									style="${project.build.directory}/unpack-bnd/aQute/bnd/main/testreport.xsl"-->
 <!--									includes="TEST-*.xml"-->
 <!--									extension=".html" />-->
