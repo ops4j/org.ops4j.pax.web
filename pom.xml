@@ -249,7 +249,7 @@
 		<!-- 3.41.0 doesn't work... -->
 		<dependency.org.eclipse.jdt.ecj>3.40.0</dependency.org.eclipse.jdt.ecj>
 
-        <dependency.org.eclipse.jetty>12.0.20</dependency.org.eclipse.jetty>
+		<dependency.org.eclipse.jetty>12.0.21</dependency.org.eclipse.jetty>
 
 		<dependency.org.eclipse.platform.osgi>3.23.0</dependency.org.eclipse.platform.osgi>
 
