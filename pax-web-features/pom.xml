@@ -104,16 +104,13 @@
 								<feature>pax-web-jetty-http2-extras</feature>
 								<feature>pax-web-jetty-http2-jdk9</feature>
 								<feature>pax-web-http-jetty</feature>
-<!--								<feature>pax-web-jetty-keycloak18</feature>-->
 								<feature>pax-web-jetty-keycloak</feature>
 								<feature>pax-web-tomcat</feature>
 								<feature>pax-web-tomcat-websockets</feature>
 								<feature>pax-web-http-tomcat</feature>
-<!--								<feature>pax-web-tomcat-keycloak18</feature>-->
 								<feature>pax-web-tomcat-keycloak</feature>
 								<feature>pax-web-undertow</feature>
 								<feature>pax-web-undertow-websockets</feature>
-<!--								<feature>pax-web-undertow-keycloak18</feature>-->
 								<feature>pax-web-undertow-keycloak</feature>
 								<feature>pax-web-http-undertow</feature>
 								<feature>pax-web-jsp</feature>
@@ -212,10 +209,6 @@
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-jetty-keycloak18</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-jetty-keycloak</artifactId>
 		</dependency>
 		<dependency>
@@ -241,10 +234,6 @@
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-tomcat-websocket</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-tomcat-keycloak18</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>

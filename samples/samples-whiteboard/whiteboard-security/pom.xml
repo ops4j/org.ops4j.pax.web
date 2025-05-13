@@ -59,12 +59,7 @@
 							org.ops4j.pax.web.extender.whiteboard.runtime,
 
 							<!-- from pax-logging-api -->
-							org.slf4j;version="[1.7,2)",
-
-							<!-- Needed to use org.keycloak.KeycloakPrincipal -->
-<!--							org.keycloak;version="[18,22)";resolution:=optional,-->
-							<!-- Needed to use org.keycloak.adapters.osgi.PathBasedKeycloakConfigResolver -->
-							org.keycloak.adapters.osgi;version="[18,22)";resolution:=optional
+							org.slf4j;version="[1.7,2)"
 						</Import-Package>
 						<Private-Package>org.ops4j.pax.web.samples.whiteboard.security</Private-Package>
 					</instructions>
@@ -72,16 +67,6 @@
 			</plugin>
 		</plugins>
 	</build>
-
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.keycloak</groupId>
-				<artifactId>keycloak-core</artifactId>
-				<version>${dependency.org.keycloak18}</version>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
 
 	<dependencies>
 

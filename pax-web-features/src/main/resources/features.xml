@@ -201,32 +201,14 @@ javax.servlet.context.tempdir = ${karaf.data}/pax-web/tmp
 		</configfile>
 	</feature>
 
-<!--	<feature name="pax-web-jetty-keycloak18" description="Keycloak 18.x Jetty bundles" version="${project.version}">-->
-<!--		&lt;!&ndash; This requires mvn:org.keycloak/keycloak-osgi-features/${dependency.org.keycloak18}/xml/features &ndash;&gt;-->
-<!--		<feature>keycloak-adapter-core</feature>-->
-<!--		<feature>pax-web-core</feature>-->
-<!--		<feature>pax-web-http-jetty</feature>-->
+	<feature name="pax-web-jetty-keycloak" description="Keycloak 20.x+ Jetty bundles" version="${project.version}">
+		<!-- This feature doesn't require any external feature repository -->
+		<feature>keycloak-adapter-core</feature>
+		<feature>pax-web-core</feature>
+		<feature>pax-web-http-jetty</feature>
 
-<!--		&lt;!&ndash; These bundles are not part of any enabled Keycloak feature &ndash;&gt;-->
-<!--		<bundle>mvn:org.keycloak/keycloak-osgi-adapter/${dependency.org.keycloak18}</bundle>-->
-<!--		&lt;!&ndash; These bundles are repackaged in pax-web-jetty-keycloak18, so they are easier to use (as with Tomcat) &ndash;&gt;-->
-<!--&lt;!&ndash;		<bundle>mvn:org.keycloak/keycloak-jetty-adapter-spi/${dependency.org.keycloak18}</bundle>&ndash;&gt;-->
-<!--&lt;!&ndash;		<bundle>mvn:org.keycloak/keycloak-jetty-core/${dependency.org.keycloak18}</bundle>&ndash;&gt;-->
-<!--&lt;!&ndash;		<bundle>mvn:org.keycloak/keycloak-jetty94-adapter/${dependency.org.keycloak18}</bundle>&ndash;&gt;-->
-<!--		&lt;!&ndash; Fragment for pax-web-jetty - should have lower start-level &ndash;&gt;-->
-<!--&lt;!&ndash;		<bundle start="false" start-level="25">mvn:org.keycloak/keycloak-pax-web-jetty94/${dependency.org.keycloak18}</bundle>&ndash;&gt;-->
-<!--		&lt;!&ndash; keycloak-pax-web-jetty94 misses important Import, so we use repackaged version &ndash;&gt;-->
-<!--		<bundle start="false" start-level="25">mvn:org.ops4j.pax.web/pax-web-jetty-keycloak18/${project.version}</bundle>-->
-<!--	</feature>-->
-
-<!--	<feature name="pax-web-jetty-keycloak" description="Keycloak 20.x+ Jetty bundles" version="${project.version}">-->
-<!--		&lt;!&ndash; This feature doesn't require any external feature repository &ndash;&gt;-->
-<!--		<feature>keycloak-adapter-core</feature>-->
-<!--		<feature>pax-web-core</feature>-->
-<!--		<feature>pax-web-http-jetty</feature>-->
-
-<!--		<bundle start="false" start-level="25">mvn:org.ops4j.pax.web/pax-web-jetty-keycloak/${project.version}</bundle>-->
-<!--	</feature>-->
+		<bundle start="false" start-level="25">mvn:org.ops4j.pax.web/pax-web-jetty-keycloak/${project.version}</bundle>
+	</feature>
 
 	<feature name="pax-web-tomcat" description="Tomcat 9 bundles" version="${dependency.org.apache.tomcat}">
 		<details>
@@ -301,25 +283,6 @@ javax.servlet.context.tempdir = ${karaf.data}/pax-web/tmp
 		<configfile finalname="${karaf.etc}/tomcat-context.xml">
 			mvn:org.ops4j.pax.web/pax-web-features/${project.version}/xml/context-tomcat
 		</configfile>
-	</feature>
-
-	<feature name="pax-web-tomcat-keycloak18" description="Keycloak 18.x Tomcat bundles" version="${project.version}">
-		<!-- This requires mvn:org.keycloak/keycloak-osgi-features/${dependency.org.keycloak18}/xml/features -->
-		<feature>keycloak-adapter-core</feature>
-		<feature>pax-web-core</feature>
-		<feature>pax-web-http-tomcat</feature>
-
-		<bundle>mvn:org.keycloak/keycloak-osgi-adapter/${dependency.org.keycloak18}</bundle>
-		<!-- These bundles are not part of any enabled Keycloak feature -->
-<!--		<bundle>mvn:org.keycloak/keycloak-tomcat-adapter-spi/${dependency.org.keycloak18}</bundle>-->
-<!--		<bundle>mvn:org.keycloak/keycloak-tomcat-core-adapter/${dependency.org.keycloak18}</bundle>-->
-<!--		<bundle>mvn:org.keycloak/keycloak-tomcat-adapter/${dependency.org.keycloak18}</bundle>-->
-		<!-- Fragment for pax-web-tomcat - should have lower start-level -->
-<!--		<bundle start="false" start-level="25">mvn:org.keycloak/keycloak-pax-web-tomcat8/${dependency.org.keycloak18}</bundle>-->
-		<!-- However we can't even install them as bundles, because they miss OSGi headers -->
-		<!-- See: https://github.com/keycloak/keycloak/pull/11704 -->
-		<!-- That's why Pax Web itself repackages the above bundles in one: -->
-		<bundle start="false" start-level="25">mvn:org.ops4j.pax.web/pax-web-tomcat-keycloak18/${project.version}</bundle>
 	</feature>
 
 	<feature name="pax-web-tomcat-keycloak" description="Keycloak 20.x+ Tomcat bundles" version="${project.version}">
@@ -404,22 +367,6 @@ javax.servlet.context.tempdir = ${karaf.data}/pax-web/tmp
 		<configfile finalname="${karaf.etc}/undertow.xml">
 			mvn:org.ops4j.pax.web/pax-web-features/${project.version}/xml/config-undertow
 		</configfile>
-	</feature>
-
-	<feature name="pax-web-undertow-keycloak18" description="Keycloak 18.x Undertow bundles" version="${project.version}">
-		<!-- This requires mvn:org.keycloak/keycloak-osgi-features/${dependency.org.keycloak18}/xml/features -->
-		<feature>keycloak-adapter-core</feature>
-		<feature>pax-web-core</feature>
-		<feature>pax-web-http-undertow</feature>
-
-		<bundle>mvn:org.keycloak/keycloak-osgi-adapter/${dependency.org.keycloak18}</bundle>
-		<!--
-			These bundles are part of "keycloak-pax-http-undertow" Keycloak feature, but this feature also includes
-			org.keycloak/keycloak-camel-undertow, so we're providing Pax Web variant of this feature
-		-->
-		<bundle>mvn:org.keycloak/keycloak-undertow-adapter-spi/${dependency.org.keycloak18}</bundle>
-		<bundle>mvn:org.keycloak/keycloak-undertow-adapter/${dependency.org.keycloak18}</bundle>
-		<bundle start="false">mvn:org.keycloak/keycloak-pax-web-undertow/${dependency.org.keycloak18}</bundle>
 	</feature>
 
 	<feature name="pax-web-undertow-keycloak" description="Keycloak 20.x+ Undertow bundles" version="${project.version}">
