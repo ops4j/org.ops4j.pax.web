@@ -50,8 +50,8 @@
 							jakarta.servlet.http;version="[6,7)",
 
 							<!-- for annotation scanning on listeners, servlets and filters -->
-							jakarta.annotation;version="[2.1,3)",
-							jakarta.annotation.security;version="[2.1,3)",
+							jakarta.annotation;version="[3.0,4.0)",
+							jakarta.annotation.security;version="[3.0,4.0)",
 
 							<!-- OSGi Core R8+ -->
 							org.osgi.framework;version="[1.10,2)",

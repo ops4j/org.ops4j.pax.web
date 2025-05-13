@@ -57,8 +57,8 @@
 							jakarta.websocket;version="[2.1,3)";resolution:=optional,
 							jakarta.websocket.server;version="[2.1,3)";resolution:=optional,
 
-							jakarta.annotation;version="[2.1,3)";resolution:=optional,
-							jakarta.annotation.security;version="[2.1,3)";resolution:=optional,
+							jakarta.annotation;version="[3.0,4.0)";resolution:=optional,
+							jakarta.annotation.security;version="[3.0,4.0)";resolution:=optional,
 
 							<!-- OSGi Core R8+ -->
 							org.osgi.framework;version="[1.10,2)",

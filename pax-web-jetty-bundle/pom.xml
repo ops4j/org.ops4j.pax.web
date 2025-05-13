@@ -102,8 +102,8 @@
 							<!-- other -->
 							org.objectweb.asm;version="[9.2,10)";resolution:=optional,
 
-							jakarta.annotation;version="[2.1,3)";resolution:=optional,
-							jakarta.annotation.security;version="[2.1,3)";resolution:=optional,
+							jakarta.annotation;version="[3.0,4.0)";resolution:=optional,
+							jakarta.annotation.security;version="[3.0,4.0)";resolution:=optional,
 
 							javax.imageio;resolution:=optional,
 							javax.mail;resolution:=optional,
