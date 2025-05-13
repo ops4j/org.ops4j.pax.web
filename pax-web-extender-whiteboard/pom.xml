@@ -145,11 +145,6 @@
 <!--			<artifactId>pax-swissbox-core</artifactId>-->
 <!--			<optional>true</optional>-->
 <!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.ops4j.pax.swissbox</groupId>-->
-<!--			<artifactId>pax-swissbox-optional-jcl</artifactId>-->
-<!--			<optional>true</optional>-->
-<!--		</dependency>-->
 
 		<!-- OSGi -->
 
@@ -190,7 +185,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-slf4j-impl</artifactId>
+			<artifactId>log4j-slf4j2-impl</artifactId>
 			<scope>test</scope>
 		</dependency>
 

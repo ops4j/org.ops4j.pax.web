@@ -12,7 +12,7 @@ When using PaxExam native conainer (not Karaf container), we have two JVM instan
 PaxExam itself (before even starting any implementation of `org.ops4j.pax.exam.TestContainer`) uses Slf4J API, so we definitiely want two Maven dependencies in `test` scope:
 
 * org.slf4j:slf4j-api
-* org.apache.logging.log4j:log4j-slf4j-impl
+* org.apache.logging.log4j:log4j-slf4j2-impl
 
 And configuration file like `src/test/resources/log4j2-test.properties`.
 
