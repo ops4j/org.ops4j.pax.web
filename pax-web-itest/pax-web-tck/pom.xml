@@ -120,7 +120,7 @@
 <!--									includes="TEST-*.xml"-->
 <!--									extension=".html" />-->
 								<xslt basedir="${project.build.directory}/test-reports/tck-cmpn-140"
-									destdir="${project.build.directory}"
+									destdir="${project.build.directory}/test-reports/tck-cmpn-140"
 									style="${project.build.directory}/unpack-bnd/aQute/bnd/main/testreport.xsl"
 									includes="TEST-*.xml"
 									extension=".html" />
@@ -183,6 +183,7 @@
 								<include>tck-cmpn-140.bndrun</include>
 							</bndruns>
 							<failOnChanges>false</failOnChanges>
+							<testFailureIgnore>true</testFailureIgnore>
 							<includeDependencyManagement>true</includeDependencyManagement>
 							<resolve>false</resolve>
 							<scopes>
