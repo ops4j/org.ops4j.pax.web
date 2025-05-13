@@ -274,7 +274,6 @@
 
 		<dependency.org.jline>3.21.0</dependency.org.jline>
 		<dependency.org.jsoup>1.20.1</dependency.org.jsoup>
-		<!-- Keycloak version newer than 18 - just the latest available upstream version -->
 		<dependency.org.keycloak>22.0.4</dependency.org.keycloak>
 		<dependency.org.mockito>5.17.0</dependency.org.mockito>
 		<dependency.org.mortbay.jasper.apache-jsp>10.1.31</dependency.org.mortbay.jasper.apache-jsp>
@@ -1420,11 +1419,6 @@
 <!--				<version>${project.version}</version>-->
 <!--			</dependency>-->
 
-			<dependency>
-				<groupId>org.ops4j.pax.web</groupId>
-				<artifactId>pax-web-jetty-keycloak</artifactId>
-				<version>${project.version}</version>
-			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.web</groupId>
 				<artifactId>pax-web-tomcat-keycloak</artifactId>

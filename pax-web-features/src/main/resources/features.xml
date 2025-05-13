@@ -201,14 +201,14 @@ javax.servlet.context.tempdir = ${karaf.data}/pax-web/tmp
 		</configfile>
 	</feature>
 
-	<feature name="pax-web-jetty-keycloak" description="Keycloak 20.x+ Jetty bundles" version="${project.version}">
-		<!-- This feature doesn't require any external feature repository -->
-		<feature>keycloak-adapter-core</feature>
-		<feature>pax-web-core</feature>
-		<feature>pax-web-http-jetty</feature>
+<!--	<feature name="pax-web-jetty-keycloak" description="Keycloak 20.x+ Jetty bundles" version="${project.version}">-->
+<!--		&lt;!&ndash; This feature doesn't require any external feature repository &ndash;&gt;-->
+<!--		<feature>keycloak-adapter-core</feature>-->
+<!--		<feature>pax-web-core</feature>-->
+<!--		<feature>pax-web-http-jetty</feature>-->
 
-		<bundle start="false" start-level="25">mvn:org.ops4j.pax.web/pax-web-jetty-keycloak/${project.version}</bundle>
-	</feature>
+<!--		<bundle start="false" start-level="25">mvn:org.ops4j.pax.web/pax-web-jetty-keycloak/${project.version}</bundle>-->
+<!--	</feature>-->
 
 	<feature name="pax-web-tomcat" description="Tomcat 9 bundles" version="${dependency.org.apache.tomcat}">
 		<details>

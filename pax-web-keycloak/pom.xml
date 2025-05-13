@@ -214,7 +214,7 @@
 	<modules>
 		<module>keycloak-common</module>
 		<module>keycloak-osgi-adapter</module>
-		<module>pax-web-jetty-keycloak</module>
+<!--		<module>pax-web-jetty-keycloak</module>-->
 		<module>pax-web-tomcat-keycloak</module>
 		<module>pax-web-undertow-keycloak</module>
 	</modules>
