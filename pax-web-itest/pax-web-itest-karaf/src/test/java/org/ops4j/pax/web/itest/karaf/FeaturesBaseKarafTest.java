@@ -15,8 +15,11 @@
  */
 package org.ops4j.pax.web.itest.karaf;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.rmi.NoSuchObjectException;
 import java.util.Hashtable;
+import java.util.Properties;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
@@ -40,7 +43,13 @@ public abstract class FeaturesBaseKarafTest extends AbstractKarafTestBase {
 	}
 
 	public JMXConnector getJMXConnector() throws Exception {
-		JMXServiceURL url = new JMXServiceURL("service:jmx:rmi://127.0.0.1:44444/jndi/rmi://127.0.0.1:1099/karaf-root");
+		File mgmtConfig = new File(System.getProperty("karaf.etc"), "org.apache.karaf.management.cfg");
+		Properties props = new Properties();
+		try (FileInputStream fis = new FileInputStream(mgmtConfig)) {
+			props.load(fis);
+		}
+		JMXServiceURL url = new JMXServiceURL(String.format("service:jmx:rmi://127.0.0.1:%s/jndi/rmi://127.0.0.1:%s/karaf-root",
+				props.getProperty("rmiServerPort"), props.getProperty("rmiRegistryPort")));
 		Hashtable<String, Object> env = new Hashtable<>();
 		String[] credentials = new String[] { "karaf", "karaf" };
 		env.put(JMXConnector.CREDENTIALS, credentials);
