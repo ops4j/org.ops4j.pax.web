@@ -129,12 +129,12 @@
 		<plugin.maven-clean-plugin>3.4.1</plugin.maven-clean-plugin>
 		<plugin.maven-compiler-plugin>3.14.0</plugin.maven-compiler-plugin>
 		<plugin.maven-dependency-plugin>3.8.1</plugin.maven-dependency-plugin>
-		<plugin.maven-deploy-plugin>3.1.3</plugin.maven-deploy-plugin>
+		<plugin.maven-deploy-plugin>3.1.4</plugin.maven-deploy-plugin>
 		<plugin.maven-enforcer-plugin>3.5.0</plugin.maven-enforcer-plugin>
 		<plugin.dependency.org.commonjava.maven.enforcer>1.3</plugin.dependency.org.commonjava.maven.enforcer>
-		<plugin.maven-failsafe-plugin>3.5.2</plugin.maven-failsafe-plugin>
+		<plugin.maven-failsafe-plugin>3.5.3</plugin.maven-failsafe-plugin>
 		<plugin.maven-gpg-plugin>3.2.7</plugin.maven-gpg-plugin>
-		<plugin.maven-install-plugin>3.1.3</plugin.maven-install-plugin>
+		<plugin.maven-install-plugin>3.1.4</plugin.maven-install-plugin>
 		<plugin.maven-jar-plugin>3.4.2</plugin.maven-jar-plugin>
 		<plugin.maven-javadoc-plugin>3.11.2</plugin.maven-javadoc-plugin>
 		<plugin.maven-release-plugin>3.1.1</plugin.maven-release-plugin>
@@ -143,7 +143,7 @@
 		<plugin.dependency.maven-filtering>3.4.0</plugin.dependency.maven-filtering>
 		<plugin.maven-site-plugin>3.21.0</plugin.maven-site-plugin>
 		<plugin.maven-source-plugin>3.3.1</plugin.maven-source-plugin>
-		<plugin.maven-surefire-plugin>3.5.2</plugin.maven-surefire-plugin>
+		<plugin.maven-surefire-plugin>3.5.3</plugin.maven-surefire-plugin>
 		<plugin.maven-war-plugin>3.4.0</plugin.maven-war-plugin>
 
 		<!-- Other Maven plugins (and their dependencies) -->
@@ -159,7 +159,7 @@
 		<plugin.mycila.license-maven-plugin>4.6</plugin.mycila.license-maven-plugin>
 		<plugin.servicemix.depends-maven-plugin>1.5.0</plugin.servicemix.depends-maven-plugin>
 		<plugin.sonatype.nexus-staging-maven-plugin>1.7.0</plugin.sonatype.nexus-staging-maven-plugin>
-		<plugin.bnd.bnd-maven-plugin>6.4.0</plugin.bnd.bnd-maven-plugin>
+		<plugin.bnd.bnd-maven-plugin>7.1.0</plugin.bnd.bnd-maven-plugin>
 
 		<!-- versions of Maven dependencies (sorted and groupped in arbitrary way)  -->
 
@@ -168,7 +168,7 @@
 		<dependency.commons-beanutils>1.10.1</dependency.commons-beanutils>
 		<dependency.commons-codec>1.18.0</dependency.commons-codec>
 		<dependency.commons-collections3>3.2.2</dependency.commons-collections3>
-		<dependency.commons-digester>1.8.1</dependency.commons-digester>
+		<dependency.commons-digester>2.1</dependency.commons-digester>
 		<dependency.commons-fileupload>1.5</dependency.commons-fileupload>
 		<dependency.commons-io>2.19.0</dependency.commons-io>
 		<dependency.com.fasterxml.classmate>1.7.0</dependency.com.fasterxml.classmate>
@@ -203,13 +203,15 @@
 
 		<dependency.junit>4.13.2</dependency.junit>
 
+		<dependency.net.bytebuddy>1.17.5</dependency.net.bytebuddy>
+
 		<dependency.org.apache.aries.cdi>1.1.5</dependency.org.apache.aries.cdi>
 		<dependency.org.apache.aries.component-dsl>1.2.2</dependency.org.apache.aries.component-dsl>
 		<dependency.org.apache.aries.jax.rs>2.0.2</dependency.org.apache.aries.jax.rs>
 		<dependency.org.apache.aries.spifly>1.3.7</dependency.org.apache.aries.spifly>
 		<dependency.org.apache.aries.util>1.1.3</dependency.org.apache.aries.util>
 
-		<dependency.org.apache.cxf>3.6.5</dependency.org.apache.cxf>
+		<dependency.org.apache.cxf>3.6.6</dependency.org.apache.cxf>
 
 		<dependency.org.apache.commons.collections4>4.5.0</dependency.org.apache.commons.collections4>
 		<dependency.org.apache.commons.compress>1.27.1</dependency.org.apache.commons.compress>
@@ -219,13 +221,10 @@
 		<dependency.org.apache.felix.converter>1.0.18</dependency.org.apache.felix.converter>
 		<dependency.org.apache.felix.eventadmin>1.6.4</dependency.org.apache.felix.eventadmin>
 		<dependency.org.apache.felix.fileinstall>3.7.4</dependency.org.apache.felix.fileinstall>
-		<dependency.org.apache.felix.framework5>5.6.12</dependency.org.apache.felix.framework5>
-		<dependency.org.apache.felix.framework6>6.0.5</dependency.org.apache.felix.framework6>
 		<dependency.org.apache.felix.framework7>7.0.5</dependency.org.apache.felix.framework7>
 		<dependency.org.apache.felix.inventory>1.1.0</dependency.org.apache.felix.inventory>
 		<dependency.org.apache.felix.metatype>1.2.4</dependency.org.apache.felix.metatype>
-		<!-- Version 2.2.x of felix.scr is for OSGi Core R10+ -->
-		<dependency.org.apache.felix.scr>2.1.30</dependency.org.apache.felix.scr>
+		<dependency.org.apache.felix.scr>2.2.12</dependency.org.apache.felix.scr>
 		<dependency.org.apache.felix.utils>1.11.8</dependency.org.apache.felix.utils>
 		<dependency.org.apache.felix.webconsole>4.9.10</dependency.org.apache.felix.webconsole>
 
@@ -234,7 +233,7 @@
 		<dependency.org.apache.httpcomponents.client4>4.5.14</dependency.org.apache.httpcomponents.client4>
 		<dependency.org.apache.httpcomponents.client5>5.4.4</dependency.org.apache.httpcomponents.client5>
 		<dependency.org.apache.httpcomponents.core4>4.4.16</dependency.org.apache.httpcomponents.core4>
-		<dependency.org.apache.httpcomponents.core5>5.2.5</dependency.org.apache.httpcomponents.core5>
+		<dependency.org.apache.httpcomponents.core5>5.3.4</dependency.org.apache.httpcomponents.core5>
 		<dependency.org.apache.karaf>4.4.7</dependency.org.apache.karaf>
 		<dependency.org.apache.logging.log4j>2.24.3</dependency.org.apache.logging.log4j>
 		<dependency.org.apache.myfaces>2.3.11</dependency.org.apache.myfaces>
@@ -248,16 +247,15 @@
 		<dependency.org.apache.ws.xmlschema>2.3.1</dependency.org.apache.ws.xmlschema>
 		<dependency.org.apache.xbean>4.27</dependency.org.apache.xbean>
 
+		<dependency.org.assertj>3.27.3</dependency.org.assertj>
 		<dependency.org.bouncycastle>1.80</dependency.org.bouncycastle>
-
 		<dependency.org.codehaus.woodstox.stax2-api>4.2.2</dependency.org.codehaus.woodstox.stax2-api>
-
-		<!-- 3.34.0 is JDK17+ -->
-		<dependency.org.eclipse.jdt.ecj>3.33.0</dependency.org.eclipse.jdt.ecj>
+		<!-- 3.41.0 doesn't work... -->
+		<dependency.org.eclipse.jdt.ecj>3.40.0</dependency.org.eclipse.jdt.ecj>
 
 		<dependency.org.eclipse.jetty>12.0.20</dependency.org.eclipse.jetty>
 
-		<dependency.org.eclipse.platform.osgi>3.22.0</dependency.org.eclipse.platform.osgi>
+		<dependency.org.eclipse.platform.osgi>3.23.0</dependency.org.eclipse.platform.osgi>
 
 		<dependency.org.glassfish.hk2>2.6.1</dependency.org.glassfish.hk2>
 		<dependency.org.glassfish.hk2.osgi-locator>1.0.3</dependency.org.glassfish.hk2.osgi-locator>
@@ -267,6 +265,7 @@
 		<dependency.org.jasypt>1.9.3</dependency.org.jasypt>
 		<dependency.org.jboss.classfilewriter>1.3.1.Final</dependency.org.jboss.classfilewriter>
 		<dependency.org.jboss.logging>3.6.1.Final</dependency.org.jboss.logging>
+		<!-- 3.7.0+ requires Smallrye libraries -->
 		<dependency.org.jboss.threads>3.6.1.Final</dependency.org.jboss.threads>
 		<!-- 3.1.7+ doesn't work with aries-cdi because of WELD-2581 -->
 		<dependency.org.jboss.weld>3.1.6.Final</dependency.org.jboss.weld>
@@ -274,28 +273,31 @@
 
 		<dependency.org.jline>3.21.0</dependency.org.jline>
 		<dependency.org.jsoup>1.20.1</dependency.org.jsoup>
-		<dependency.org.keycloak>22.0.4</dependency.org.keycloak>
+		<dependency.org.junit>5.12.2</dependency.org.junit>
+		<dependency.org.keycloak>25.0.3</dependency.org.keycloak>
 		<dependency.org.mockito>5.17.0</dependency.org.mockito>
-		<dependency.org.mortbay.jasper.apache-jsp>10.1.31</dependency.org.mortbay.jasper.apache-jsp>
+		<!-- Remember - we're still at Servlet/JSP from JakartaEE 8, so we need Tomcat/Jasper 9 -->
+		<dependency.org.mortbay.jasper.apache-jsp>9.0.96</dependency.org.mortbay.jasper.apache-jsp>
 		<dependency.org.mortbay.jetty.alpn>8.1.13.v20181017</dependency.org.mortbay.jetty.alpn>
+		<dependency.org.opentest4j>1.3.0</dependency.org.opentest4j>
 
 		<dependency.org.ops4j.base>1.5.1</dependency.org.ops4j.base>
-		<dependency.org.ops4j.pax.exam>4.13.5</dependency.org.ops4j.pax.exam>
-		<dependency.org.ops4j.pax.logging>2.2.8</dependency.org.ops4j.pax.logging>
-		<dependency.org.ops4j.pax.swissbox>1.8.5</dependency.org.ops4j.pax.swissbox>
+		<dependency.org.ops4j.pax.exam>4.14.0</dependency.org.ops4j.pax.exam>
+		<dependency.org.ops4j.pax.logging>2.3.0</dependency.org.ops4j.pax.logging>
+		<dependency.org.ops4j.pax.swissbox>1.9.0</dependency.org.ops4j.pax.swissbox>
 		<dependency.org.ops4j.pax.url>2.6.16</dependency.org.ops4j.pax.url>
 
-		<dependency.org.osgi.core>7.0.0</dependency.org.osgi.core>
-		<dependency.org.osgi.core8>8.0.0</dependency.org.osgi.core8>
+		<dependency.org.osgi.annotation>8.1.0</dependency.org.osgi.annotation>
+		<dependency.org.osgi.core>8.0.0</dependency.org.osgi.core>
 		<dependency.org.osgi.cmpn>7.0.0</dependency.org.osgi.cmpn>
 		<dependency.org.osgi.service.cdi>1.0.1</dependency.org.osgi.service.cdi>
 		<dependency.org.osgi.service.jaxrs>1.0.1</dependency.org.osgi.service.jaxrs>
 		<dependency.org.osgi.util.function>1.2.0</dependency.org.osgi.util.function>
 		<dependency.org.osgi.util.promise>1.3.0</dependency.org.osgi.util.promise>
 
-		<dependency.org.ow2.asm>9.7.1</dependency.org.ow2.asm>
+		<dependency.org.ow2.asm>9.8</dependency.org.ow2.asm>
 		<dependency.org.owasp.encoder>1.3.1</dependency.org.owasp.encoder>
-		<dependency.org.primefaces>14.0.11</dependency.org.primefaces>
+		<dependency.org.primefaces>14.0.12</dependency.org.primefaces>
 		<dependency.org.slf4j>2.0.17</dependency.org.slf4j>
 		<dependency.org.springframework>5.3.39</dependency.org.springframework>
 		<dependency.org.vaadin.artur>1.7.1</dependency.org.vaadin.artur>
@@ -303,7 +305,7 @@
 		<dependency.org.wildfly.client>1.0.1.Final</dependency.org.wildfly.client>
 		<dependency.org.wildfly.common>1.7.0.Final</dependency.org.wildfly.common>
 
-		<dependency.org.yaml.snakeyaml>1.33</dependency.org.yaml.snakeyaml>
+		<dependency.org.yaml.snakeyaml>2.4</dependency.org.yaml.snakeyaml>
 	</properties>
 
 	<build>
@@ -1377,47 +1379,27 @@
 				<version>${project.version}</version>
 			</dependency>
 
-<!--			<dependency>-->
-<!--				<groupId>org.ops4j.pax.web.samples</groupId>-->
-<!--				<artifactId>whiteboard-ds-jaxrs</artifactId>-->
-<!--				<version>${project.version}</version>-->
-<!--			</dependency>-->
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>whiteboard-ds-jaxrs</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 <!--			<dependency>-->
 <!--				<groupId>org.ops4j.pax.web.samples.web-fragment</groupId>-->
 <!--				<artifactId>fragment</artifactId>-->
 <!--				<version>${project.version}</version>-->
 <!--			</dependency>-->
-<!--			<dependency>-->
-<!--				<groupId>org.ops4j.pax.web.samples</groupId>-->
-<!--				<artifactId>jsf-resourcehandler-myfaces</artifactId>-->
-<!--				<version>${project.version}</version>-->
-<!--			</dependency>-->
-<!--			<dependency>-->
-<!--				<groupId>org.ops4j.pax.web.samples</groupId>-->
-<!--				<artifactId>jsf-resourcehandler-resourcebundle</artifactId>-->
-<!--				<version>${project.version}</version>-->
-<!--			</dependency>-->
-<!--			<dependency>-->
-<!--				<groupId>org.ops4j.pax.web.samples</groupId>-->
-<!--				<artifactId>jsf-resourcehandler-resourcebundle-override</artifactId>-->
-<!--				<version>${project.version}</version>-->
-<!--			</dependency>-->
-<!--			<dependency>-->
-<!--				<groupId>org.ops4j.pax.web.samples</groupId>-->
-<!--				<artifactId>war-jsf22-cdi</artifactId>-->
-<!--				<version>${project.version}</version>-->
-<!--				<type>war</type>-->
-<!--			</dependency>-->
-<!--			<dependency>-->
-<!--				<groupId>org.ops4j.pax.web.samples.web-fragment</groupId>-->
-<!--				<artifactId>war</artifactId>-->
-<!--				<version>${project.version}</version>-->
-<!--			</dependency>-->
-<!--			<dependency>-->
-<!--				<groupId>org.ops4j.pax.web.samples</groupId>-->
-<!--				<artifactId>whiteboard-blueprint</artifactId>-->
-<!--				<version>${project.version}</version>-->
-<!--			</dependency>-->
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples</groupId>
+				<artifactId>war-jsf22-cdi</artifactId>
+				<version>${project.version}</version>
+				<type>war</type>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.web.samples.web-fragment</groupId>
+				<artifactId>war</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 
 			<dependency>
 				<groupId>org.ops4j.pax.web</groupId>
@@ -1517,11 +1499,6 @@
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.swissbox</groupId>
-				<artifactId>pax-swissbox-optional-jcl</artifactId>
-				<version>${dependency.org.ops4j.pax.swissbox}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.ops4j.pax.swissbox</groupId>
 				<artifactId>pax-swissbox-property</artifactId>
 				<version>${dependency.org.ops4j.pax.swissbox}</version>
 			</dependency>
@@ -1614,6 +1591,11 @@
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.exam</groupId>
+				<artifactId>pax-exam-spi</artifactId>
+				<version>${dependency.org.ops4j.pax.exam}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.exam</groupId>
 				<artifactId>pax-exam-junit4</artifactId>
 				<version>${dependency.org.ops4j.pax.exam}</version>
 				<exclusions>
@@ -1664,7 +1646,7 @@
 			<dependency>
 				<groupId>org.osgi</groupId>
 				<artifactId>osgi.annotation</artifactId>
-				<version>${dependency.org.osgi.core}</version>
+				<version>${dependency.org.osgi.annotation}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.osgi</groupId>
@@ -1696,7 +1678,7 @@
 			<dependency>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>org.apache.felix.framework</artifactId>
-				<version>${dependency.org.apache.felix.framework6}</version>
+				<version>${dependency.org.apache.felix.framework7}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.felix</groupId>
@@ -1759,6 +1741,10 @@
 					<exclusion>
 						<groupId>org.osgi</groupId>
 						<artifactId>org.osgi.core</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.osgi</groupId>
+						<artifactId>org.osgi.framework</artifactId>
 					</exclusion>
 				</exclusions>
 			</dependency>
@@ -1823,6 +1809,10 @@
 					<exclusion>
 						<groupId>org.eclipse.platform</groupId>
 						<artifactId>org.eclipse.osgi</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.ops4j.pax.logging</groupId>
+						<artifactId>pax-logging-logback</artifactId>
 					</exclusion>
 				</exclusions>
 			</dependency>
@@ -1910,6 +1900,10 @@
 					<exclusion>
 						<groupId>org.eclipse.platform</groupId>
 						<artifactId>org.eclipse.osgi</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.ops4j.pax.logging</groupId>
+						<artifactId>pax-logging-logback</artifactId>
 					</exclusion>
 				</exclusions>
 			</dependency>
@@ -2260,11 +2254,6 @@
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-jdk14</artifactId>
-				<version>${dependency.org.slf4j}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.slf4j</groupId>
 				<artifactId>jcl-over-slf4j</artifactId>
 				<version>${dependency.org.slf4j}</version>
 			</dependency>
@@ -2291,7 +2280,7 @@
 			</dependency>
 			<dependency>
 				<groupId>org.apache.logging.log4j</groupId>
-				<artifactId>log4j-slf4j-impl</artifactId>
+				<artifactId>log4j-slf4j2-impl</artifactId>
 				<version>${dependency.org.apache.logging.log4j}</version>
 			</dependency>
 
@@ -3063,10 +3052,41 @@
 				<artifactId>junit</artifactId>
 				<version>${dependency.junit}</version>
 			</dependency>
+
+			<dependency>
+				<groupId>org.junit</groupId>
+				<artifactId>junit-bom</artifactId>
+				<version>${dependency.org.junit}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.assertj</groupId>
+				<artifactId>assertj-core</artifactId>
+				<version>${dependency.org.assertj}</version>
+			</dependency>
 			<dependency>
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-core</artifactId>
 				<version>${dependency.org.mockito}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.opentest4j</groupId>
+				<artifactId>opentest4j</artifactId>
+				<version>${dependency.org.opentest4j}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>net.bytebuddy</groupId>
+				<artifactId>byte-buddy</artifactId>
+				<version>${dependency.net.bytebuddy}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.bytebuddy</groupId>
+				<artifactId>byte-buddy-agent</artifactId>
+				<version>${dependency.net.bytebuddy}</version>
 			</dependency>
 
 <!--			<dependency>-->
@@ -3157,7 +3177,7 @@
 		<module>pax-web-karaf</module>
 		<module>pax-web-deployer</module>
 
-		<!-- Jetty 9 support -->
+		<!-- Jetty 12 support -->
 		<module>pax-web-jetty</module>
  		<module>pax-web-jetty-bundle</module>
 
@@ -3166,7 +3186,7 @@
 		<module>pax-web-tomcat-websocket</module>
 		<module>pax-web-tomcat-bundle</module>
 
-		<!-- Undertow 2 support -->
+		<!-- Undertow 2.2 support -->
 		<module>pax-web-undertow</module>
 		<module>pax-web-undertow-websocket</module>
 		<module>pax-web-undertow-bundle</module>
@@ -3192,22 +3212,6 @@
     </modules>
 
 	<profiles>
-
-		<profile>
-			<id>felix6</id>
-			<activation>
-				<activeByDefault>false</activeByDefault>
-			</activation>
-			<dependencyManagement>
-				<dependencies>
-					<dependency>
-						<groupId>org.apache.felix</groupId>
-						<artifactId>org.apache.felix.framework</artifactId>
-						<version>${dependency.org.apache.felix.framework6}</version>
-					</dependency>
-				</dependencies>
-			</dependencyManagement>
-		</profile>
 
 		<profile>
 			<id>felix7</id>

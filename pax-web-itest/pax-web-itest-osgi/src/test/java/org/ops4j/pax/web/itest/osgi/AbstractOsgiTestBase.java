@@ -25,7 +25,7 @@ import org.ops4j.pax.exam.CoreOptions;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.ProbeBuilder;
 import org.ops4j.pax.exam.TestProbeBuilder;
-import org.ops4j.pax.tinybundles.core.TinyBundles;
+import org.ops4j.pax.tinybundles.TinyBundles;
 import org.ops4j.pax.web.itest.AbstractControlledTestBase;
 import org.osgi.framework.Constants;
 
@@ -41,12 +41,12 @@ public abstract class AbstractOsgiTestBase extends AbstractControlledTestBase {
 		// pax-web-itest-container-common private packages org.ops4j.pax.web.itest package, but here
 		// there's no additional bundle, so we have to create it on-fly
 		InputStream helper = TinyBundles.bundle()
-				.set("Bundle-ManifestVersion", "2")
-				.set("Export-Package", "org.ops4j.pax.web.itest")
-				.set("DynamicImport-Package", "*")
-				.add(AbstractControlledTestBase.class)
-				.set("Bundle-SymbolicName", "infra")
-				.build();
+				.setHeader("Bundle-ManifestVersion", "2")
+				.setHeader("Export-Package", "org.ops4j.pax.web.itest")
+				.setHeader("DynamicImport-Package", "*")
+				.addClass(AbstractControlledTestBase.class)
+				.setHeader("Bundle-SymbolicName", "infra")
+				.build(TinyBundles.rawBuilder());
 		File dir = new File("target/bundles");
 		dir.mkdirs();
 		String bundleURL = null;
