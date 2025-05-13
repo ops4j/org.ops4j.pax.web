@@ -16,10 +16,10 @@
     limitations under the License.
 
 -->
-<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "http://www.eclipse.org/jetty/configure_9_3.dtd">
+<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "https://www.eclipse.org/jetty/configure_10_0.dtd">
 <Configure id="Context">
 	<!--
-		will call org.eclipse.jetty.server.handler.ContextHandler.setMaxFormContentSize()
+		will call org.eclipse.jetty.ee8.nested.ContextHandler#setMaxFormContentSize()
 		on org.ops4j.pax.web.service.jetty.internal.PaxWebServletContextHandler object
 	-->
 	<Set name="maxFormContentSize" type="int">42</Set>

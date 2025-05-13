@@ -16,15 +16,22 @@
     limitations under the License.
 
 -->
-<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "http://www.eclipse.org/jetty/configure_9_3.dtd">
+<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "https://www.eclipse.org/jetty/configure_10_0.dtd">
 <Configure id="Server" class="org.eclipse.jetty.server.Server">
+
+	<Call id="ResourceFactory" class="org.eclipse.jetty.util.resource.ResourceFactory" name="of">
+		<Arg><Ref refid="Server" /></Arg>
+		<Call id="config" name="newResource">
+			<Arg>target/test-classes/realm.properties</Arg>
+		</Call>
+	</Call>
 
 	<Call name="addBean">
 		<Arg>
 			<New class="org.eclipse.jetty.security.HashLoginService">
 				<Set name="name">Test Realm</Set>
 				<!-- File will be loaded relatively to pax-web-itest-jetty module -->
-				<Set name="config">target/test-classes/realm.properties</Set>
+				<Set name="config"><Ref refid="config" /></Set>
 			</New>
 		</Arg>
 	</Call>
@@ -34,7 +41,7 @@
 			<New class="org.eclipse.jetty.security.HashLoginService">
 				<Set name="name">default</Set>
 				<!-- File will be loaded relatively to pax-web-itest-jetty module -->
-				<Set name="config">target/test-classes/realm.properties</Set>
+				<Set name="config"><Ref refid="config" /></Set>
 			</New>
 		</Arg>
 	</Call>

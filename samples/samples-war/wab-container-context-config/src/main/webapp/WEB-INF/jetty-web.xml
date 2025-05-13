@@ -16,7 +16,7 @@
     limitations under the License.
 
 -->
-<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "http://www.eclipse.org/jetty/configure_9_3.dtd">
+<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "https://www.eclipse.org/jetty/configure_10_0.dtd">
 <!--
 	The only working way to configure a context in pax-web-jetty is to:
 	 - put WEB-INF/jetty-web.xml or WEB-INF/web-jetty.xml into the WAB/WAR, or
@@ -32,9 +32,18 @@
 		which is an extension of org.eclipse.jetty.servlet.ServletContextHandler
 		It's *not* and extension of org.eclipse.jetty.webapp.WebAppContext
 	-->
-	<Set name="handler">
-		<New class="org.eclipse.jetty.server.handler.ResourceHandler">
-			<Set name="resourceBase"><Property name="user.dir" />/target/test-classes</Set>
-		</New>
-	</Set>
+	<!--
+		Jetty 9 simply called super.setHandler() (but with warning)
+		Jetty 12 calls getServletHandler().setHandler()
+	-->
+	<New id="rh" class="org.eclipse.jetty.ee8.nested.ResourceHandler">
+		<Set name="baseResourceAsString"><Property name="user.dir" />/target/test-classes</Set>
+	</New>
+	<Call name="insertHandler">
+		<Arg>
+			<New class="org.eclipse.jetty.ee8.nested.HandlerWrapper">
+				<Set name="handler"><Ref refid="rh" /> </Set>
+			</New>
+		</Arg>
+	</Call>
 </Configure>
