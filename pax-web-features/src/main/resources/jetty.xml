@@ -16,7 +16,7 @@
     limitations under the License.
 
 -->
-<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "http://www.eclipse.org/jetty/configure_10_0.dtd">
+<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "https://www.eclipse.org/jetty/configure_10_0.dtd">
 
 <!-- Object named "Server" of org.eclipse.jetty.server.Server class is configured by pax-web-jetty -->
 <Configure id="Server" class="org.eclipse.jetty.server.Server">
