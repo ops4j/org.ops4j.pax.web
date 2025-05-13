@@ -104,7 +104,6 @@
 								<feature>pax-web-jetty-http2-extras</feature>
 								<feature>pax-web-jetty-http2-jdk9</feature>
 								<feature>pax-web-http-jetty</feature>
-								<feature>pax-web-jetty-keycloak</feature>
 								<feature>pax-web-tomcat</feature>
 								<feature>pax-web-tomcat-websockets</feature>
 								<feature>pax-web-http-tomcat</feature>
@@ -206,10 +205,6 @@
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
 			<artifactId>pax-web-jetty</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j.pax.web</groupId>
-			<artifactId>pax-web-jetty-keycloak</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.web</groupId>
