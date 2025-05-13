@@ -46,7 +46,7 @@ public abstract class AbstractOsgiTestBase extends AbstractControlledTestBase {
 				.setHeader("DynamicImport-Package", "*")
 				.addClass(AbstractControlledTestBase.class)
 				.setHeader("Bundle-SymbolicName", "infra")
-				.build();
+				.build(TinyBundles.rawBuilder());
 		File dir = new File("target/bundles");
 		dir.mkdirs();
 		String bundleURL = null;
