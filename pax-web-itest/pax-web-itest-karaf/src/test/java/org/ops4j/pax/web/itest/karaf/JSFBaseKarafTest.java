@@ -50,8 +50,8 @@ public abstract class JSFBaseKarafTest extends AbstractKarafTestBase {
 	@Test
 	public void testSlash() throws Exception {
 		createTestClientForKaraf()
-				.withResponseAssertion("Response must contain 'Hello from JSF 2.3 example running on Pax Web 9'",
-						resp -> resp.contains("Hello from JSF 2.3 example running on Pax Web 9"))
+				.withResponseAssertion("Response must contain 'Hello from JSF 2.3 example running on Pax Web 10'",
+						resp -> resp.contains("Hello from JSF 2.3 example running on Pax Web 10"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/war-jsf23-embedded/");
 	}
 
@@ -62,8 +62,8 @@ public abstract class JSFBaseKarafTest extends AbstractKarafTestBase {
 		LOG.debug("Testing JSF workflow!");
 		String response = HttpTestClientFactory.createDefaultTestClient()
 				.useCookieState(cookieState)
-				.withResponseAssertion("Response must contain 'Hello from JSF 2.3 example running on Pax Web 9'",
-						resp -> resp.contains("Hello from JSF 2.3 example running on Pax Web 9"))
+				.withResponseAssertion("Response must contain 'Hello from JSF 2.3 example running on Pax Web 10'",
+						resp -> resp.contains("Hello from JSF 2.3 example running on Pax Web 10"))
 				.withResponseAssertion("Response must contain JSF-ViewState-ID",
 						resp -> {
 							LOG.debug("Found JSF starting page: {}", resp);
