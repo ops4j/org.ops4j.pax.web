@@ -15,6 +15,7 @@
  */
 package org.ops4j.pax.web.itest.karaf;
 
+import java.util.Set;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
@@ -23,6 +24,7 @@ import org.junit.Test;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
 /**
@@ -39,7 +41,9 @@ public class FeaturesJettyKarafTest extends FeaturesBaseKarafTest {
 	public void testJmx() throws Exception {
 		try (JMXConnector connector = this.getJMXConnector()) {
 			MBeanServerConnection connection = connector.getMBeanServerConnection();
-			ObjectName name = new ObjectName("org.ops4j.pax.web.service.jetty.internal:context=ROOT,type=paxwebservletcontexthandler$1,id=0");
+			Set<ObjectName> names = connection.queryNames(new ObjectName("org.ops4j.pax.web.service.jetty.internal:type=prioritizedhandlercollection,*"), null);
+			assertFalse(names.isEmpty());
+			ObjectName name = names.iterator().next();
 			Object handlers = connection.getAttribute(name, "handlers");
 			assertNotNull(handlers);
 		}

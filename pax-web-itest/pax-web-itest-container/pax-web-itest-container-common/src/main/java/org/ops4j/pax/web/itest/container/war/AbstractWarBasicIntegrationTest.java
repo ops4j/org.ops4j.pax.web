@@ -83,11 +83,15 @@ public abstract class AbstractWarBasicIntegrationTest extends AbstractContainerT
 		}
 	}
 
+	protected int getRedirectHttpCode() {
+		return 302;
+	}
+
 	@Test
 	public void complexWab() throws Exception {
 		// there should be a /wab-complex context that's (by default) redirecting to /wab-complex/
 		HttpTestClientFactory.createDefaultTestClient(false)
-				.withReturnCode(302)
+				.withReturnCode(getRedirectHttpCode())
 				.doGETandExecuteTest("http://127.0.0.1:8181/wab-complex");
 
 		// servlet from web.xml

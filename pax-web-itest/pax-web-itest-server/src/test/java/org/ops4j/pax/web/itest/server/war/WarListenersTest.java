@@ -19,6 +19,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.ops4j.pax.web.itest.server.MultiContainerTestSupport;
+import org.ops4j.pax.web.itest.server.Runtime;
 import org.ops4j.pax.web.itest.server.support.war.StaticList;
 import org.osgi.framework.Bundle;
 
@@ -72,7 +73,11 @@ public class WarListenersTest extends MultiContainerTestSupport {
 		installWab(wab);
 
 		// there should be a /c context that's (by default) redirecting to /wab/
-		assertThat(httpGET(port, "/c"), startsWith("HTTP/1.1 302"));
+		if (runtime == Runtime.JETTY) {
+			assertThat(httpGET(port, "/c"), startsWith("HTTP/1.1 301"));
+		} else {
+			assertThat(httpGET(port, "/c"), startsWith("HTTP/1.1 302"));
+		}
 
 		assertThat(StaticList.EVENTS.size(), equalTo(3));
 		assertThat(StaticList.EVENTS.get(0), equalTo("Listener-from-web.xml initialized"));

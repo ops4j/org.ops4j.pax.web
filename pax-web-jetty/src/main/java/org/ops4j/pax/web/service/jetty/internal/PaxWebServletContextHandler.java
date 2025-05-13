@@ -15,6 +15,7 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -37,15 +38,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.eclipse.jetty.ee8.nested.Request;
 import org.eclipse.jetty.ee8.nested.SessionHandler;
 import org.eclipse.jetty.ee8.servlet.ServletContextHandler;
-import org.eclipse.jetty.http.HttpField;
-import org.eclipse.jetty.http.HttpHeader;
-import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.server.Handler;
-import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.server.handler.ContextHandler;
-import org.eclipse.jetty.server.handler.ContextRequest;
 import org.eclipse.jetty.session.ManagedSession;
-import org.eclipse.jetty.util.Callback;
 import org.eclipse.jetty.util.resource.PathResourceFactory;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.resource.URLResourceFactory;
@@ -126,47 +121,49 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 		setProtectedTargets(new String[] { "/WEB-INF", "/META-INF", "/OSGI-INF", "/OSGI-OPT" });
 	}
 
-	// TODO: remove
 	@Override
-	protected CoreContextHandler createCoreContextHandler() {
-		return new CoreContextHandler(this) {
-
-			@Override
-			protected boolean handleByContextHandler(String pathInContext, ContextRequest request, Response response, Callback callback) {
-				if ("TRACE".equals(request.getMethod())) {
-					// PAXWEB-229 - prevent https://owasp.org/www-community/attacks/Cross_Site_Tracing
-					Response.writeError(request, response, callback, HttpServletResponse.SC_METHOD_NOT_ALLOWED, null);
-					return true;
-				}
-
-				return super.handleByContextHandler(pathInContext, request, response, callback);
-			}
-
-			@Override
-			protected void handleMovedPermanently(org.eclipse.jetty.server.Request request, Response response, Callback callback) {
-				// Pax Web - copied original code, but switching 301 to 302 (just as for Tomcat and Undertow)
-				String location = getContextPath() + "/";
-				if (request.getHttpURI().getParam() != null) {
-					location += ";" + request.getHttpURI().getParam();
-				}
-				if (request.getHttpURI().getQuery() != null) {
-					location += ";" + request.getHttpURI().getQuery();
-				}
-
-				response.setStatus(HttpStatus.MOVED_TEMPORARILY_302);
-				response.getHeaders().add(new HttpField(HttpHeader.LOCATION, location));
-				callback.succeeded();
-			}
-
-			@Override
-			public Resource getBaseResource() {
-				// special case for JettyResourceServlet extending Jetty 12 ResourceServlet which, when initialized,
-				// needs servlet's specific base resource
-				Resource resource = JettyResourceServlet.BASE_RESOURCE.get();
-				return resource == null ? super.getBaseResource() : resource;
-			}
-		};
+	public void doHandle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+		super.doHandle(target, baseRequest, request, response);
 	}
+
+	@Override
+	public Resource getBaseResource() {
+		// special case for JettyResourceServlet extending Jetty 12 ResourceServlet which, when initialized,
+		// needs servlet's specific base resource
+		Resource resource = JettyResourceServlet.BASE_RESOURCE.get();
+		return resource == null ? super.getBaseResource() : resource;
+	}
+
+//	// TODO: remove
+//	@Override
+//	protected CoreContextHandler createCoreContextHandler() {
+//		return new CoreContextHandler(this) {
+//
+//			@Override
+//			protected void handleMovedPermanently(org.eclipse.jetty.server.Request request, Response response, Callback callback) {
+//				// Pax Web - copied original code, but switching 301 to 302 (just as for Tomcat and Undertow)
+//				String location = getContextPath() + "/";
+//				if (request.getHttpURI().getParam() != null) {
+//					location += ";" + request.getHttpURI().getParam();
+//				}
+//				if (request.getHttpURI().getQuery() != null) {
+//					location += ";" + request.getHttpURI().getQuery();
+//				}
+//
+//				response.setStatus(HttpStatus.MOVED_TEMPORARILY_302);
+//				response.getHeaders().add(new HttpField(HttpHeader.LOCATION, location));
+//				callback.succeeded();
+//			}
+//
+//			@Override
+//			public Resource getBaseResource() {
+//				// special case for JettyResourceServlet extending Jetty 12 ResourceServlet which, when initialized,
+//				// needs servlet's specific base resource
+//				Resource resource = JettyResourceServlet.BASE_RESOURCE.get();
+//				return resource == null ? super.getBaseResource() : resource;
+//			}
+//		};
+//	}
 
 	/**
 	 * Helper method to be used from {@link org.ops4j.pax.web.service.jetty.internal.web.JettyResourceServlet}

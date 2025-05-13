@@ -27,6 +27,7 @@ import org.junit.runners.Parameterized;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultResourceMapping;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultWelcomeFileMapping;
 import org.ops4j.pax.web.itest.server.MultiContainerTestSupport;
+import org.ops4j.pax.web.itest.server.Runtime;
 import org.ops4j.pax.web.service.spi.model.elements.ServletModel;
 import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.ops4j.pax.web.service.whiteboard.ResourceMapping;
@@ -263,7 +264,11 @@ public class WhiteboardWelcomeFilesTest extends MultiContainerTestSupport {
 				props, () -> rm);
 		ServletModel rmModel = getResourceMappingCustomizer().addingService(resourceMappingRef);
 		assertThat(httpGET(port, "/c/file.txt"), endsWith("hello1"));
-		assertThat(httpGET(port, "/c"), startsWith("HTTP/1.1 302"));
+		if (runtime == Runtime.JETTY) {
+			assertThat(httpGET(port, "/c"), startsWith("HTTP/1.1 301"));
+		} else {
+			assertThat(httpGET(port, "/c"), startsWith("HTTP/1.1 302"));
+		}
 		assertThat(httpGET(port, "/c/"), startsWith("HTTP/1.1 403"));
 
 		DefaultWelcomeFileMapping mapping = new DefaultWelcomeFileMapping();
@@ -274,11 +279,19 @@ public class WhiteboardWelcomeFilesTest extends MultiContainerTestSupport {
 				props, () -> mapping);
 		WelcomeFileModel wfmModel = getWelcomeFileMappingCustomizer().addingService(mappingRef);
 		// this is redirect NOT affected by DefaultWelcomeFileMapping.setRedirect()
-		assertThat(httpGET(port, "/c"), startsWith("HTTP/1.1 302"));
+		if (runtime == Runtime.JETTY) {
+			assertThat(httpGET(port, "/c"), startsWith("HTTP/1.1 301"));
+		} else {
+			assertThat(httpGET(port, "/c"), startsWith("HTTP/1.1 302"));
+		}
 		assertThat(httpGET(port, "/c/"), endsWith("hello1"));
 
 		getWelcomeFileMappingCustomizer().removedService(mappingRef, wfmModel);
-		assertThat(httpGET(port, "/c"), startsWith("HTTP/1.1 302"));
+		if (runtime == Runtime.JETTY) {
+			assertThat(httpGET(port, "/c"), startsWith("HTTP/1.1 301"));
+		} else {
+			assertThat(httpGET(port, "/c"), startsWith("HTTP/1.1 302"));
+		}
 		assertThat(httpGET(port, "/c/"), startsWith("HTTP/1.1 403"));
 
 		DefaultWelcomeFileMapping mapping2 = new DefaultWelcomeFileMapping();
@@ -289,18 +302,30 @@ public class WhiteboardWelcomeFilesTest extends MultiContainerTestSupport {
 				props, () -> mapping2);
 		WelcomeFileModel wfmModel2 = getWelcomeFileMappingCustomizer().addingService(mapping2Ref);
 		// this is redirect NOT affected by DefaultWelcomeFileMapping.setRedirect()
-		assertThat(httpGET(port, "/c"), startsWith("HTTP/1.1 302"));
+		if (runtime == Runtime.JETTY) {
+			assertThat(httpGET(port, "/c"), startsWith("HTTP/1.1 301"));
+		} else {
+			assertThat(httpGET(port, "/c"), startsWith("HTTP/1.1 302"));
+		}
 		String response = httpGET(port, "/c/");
 		assertThat(response, startsWith("HTTP/1.1 302"));
 		assertTrue(extractHeaders(response).get("Location").endsWith("/c/file.txt"));
 
 		getWelcomeFileMappingCustomizer().removedService(mapping2Ref, wfmModel2);
-		assertThat(httpGET(port, "/c"), startsWith("HTTP/1.1 302"));
+		if (runtime == Runtime.JETTY) {
+			assertThat(httpGET(port, "/c"), startsWith("HTTP/1.1 301"));
+		} else {
+			assertThat(httpGET(port, "/c"), startsWith("HTTP/1.1 302"));
+		}
 		assertThat(httpGET(port, "/c/"), startsWith("HTTP/1.1 403"));
 
 		getResourceMappingCustomizer().removedService(resourceMappingRef, rmModel);
 		assertThat(httpGET(port, "/c/file.txt"), startsWith("HTTP/1.1 404"));
-		assertThat(httpGET(port, "/c"), startsWith("HTTP/1.1 302"));
+		if (runtime == Runtime.JETTY) {
+			assertThat(httpGET(port, "/c"), startsWith("HTTP/1.1 301"));
+		} else {
+			assertThat(httpGET(port, "/c"), startsWith("HTTP/1.1 302"));
+		}
 		assertThat(httpGET(port, "/c/"), startsWith("HTTP/1.1 404"));
 
 		ServerModelInternals serverModelInternals = serverModelInternals(serverModel);

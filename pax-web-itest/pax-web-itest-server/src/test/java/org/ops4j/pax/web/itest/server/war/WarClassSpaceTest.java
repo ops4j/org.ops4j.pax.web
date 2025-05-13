@@ -25,6 +25,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.ops4j.pax.web.itest.server.MultiContainerTestSupport;
+import org.ops4j.pax.web.itest.server.Runtime;
 import org.ops4j.pax.web.itest.server.support.war.cb1.scis.SCIFromContainerBundle1;
 import org.ops4j.pax.web.itest.server.support.war.cb2.scis.SCIFromContainerBundle2;
 import org.ops4j.pax.web.itest.server.support.war.cb3.scis.SCIFromContainerBundle3;
@@ -283,7 +284,11 @@ public class WarClassSpaceTest extends MultiContainerTestSupport {
 		installWab(wab);
 
 		// there should be a /wab context that's (by default) redirecting to /wab/
-		assertThat(httpGET(port, "/wab"), startsWith("HTTP/1.1 302"));
+		if (runtime == Runtime.JETTY) {
+			assertThat(httpGET(port, "/wab"), startsWith("HTTP/1.1 301"));
+		} else {
+			assertThat(httpGET(port, "/wab"), startsWith("HTTP/1.1 302"));
+		}
 
 		// remember - if the JSP or default servlet tests fail, it means pax-web-spi doesn't have its
 		// pax-web-spi/target/classes/org/ops4j/pax/web/service/spi/model/default-web.xml unpacked

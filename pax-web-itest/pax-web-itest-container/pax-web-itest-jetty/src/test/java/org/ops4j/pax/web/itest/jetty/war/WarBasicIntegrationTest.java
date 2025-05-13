@@ -33,4 +33,8 @@ public class WarBasicIntegrationTest extends AbstractWarBasicIntegrationTest {
 		return combine(jspOptions, paxWebExtenderWar());
 	}
 
+	@Override
+	protected int getRedirectHttpCode() {
+		return 301;
+	}
 }
