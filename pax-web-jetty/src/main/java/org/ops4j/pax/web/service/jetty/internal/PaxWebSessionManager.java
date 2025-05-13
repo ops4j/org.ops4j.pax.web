@@ -16,7 +16,6 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
-import org.eclipse.jetty.http.HttpCookie;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.Session;

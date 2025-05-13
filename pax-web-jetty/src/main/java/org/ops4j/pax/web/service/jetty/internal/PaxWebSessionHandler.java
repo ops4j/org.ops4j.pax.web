@@ -21,7 +21,6 @@ import java.lang.reflect.Proxy;
 
 import org.eclipse.jetty.ee8.nested.SessionHandler;
 import org.eclipse.jetty.http.HttpCookie;
-import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.session.AbstractSessionManager;
 import org.eclipse.jetty.session.ManagedSession;
 import org.eclipse.jetty.session.SessionManager;
@@ -31,7 +30,7 @@ public class PaxWebSessionHandler extends SessionHandler implements InvocationHa
 	private final AbstractSessionManager original;
 	private final SessionManager wrapped;
 
-	public PaxWebSessionHandler(Server server) {
+	public PaxWebSessionHandler() {
 		this.original = (AbstractSessionManager) super.getSessionManager();
 		this.wrapped = (SessionManager) Proxy.newProxyInstance(getClass().getClassLoader(), new Class[] { SessionManager.class }, this);
 	}

@@ -126,6 +126,7 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 		setProtectedTargets(new String[] { "/WEB-INF", "/META-INF", "/OSGI-INF", "/OSGI-OPT" });
 	}
 
+	// TODO: remove
 	@Override
 	protected CoreContextHandler createCoreContextHandler() {
 		return new CoreContextHandler(this) {
@@ -435,7 +436,7 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 
 	@Override
 	protected SessionHandler newSessionHandler() {
-		return new PaxWebSessionHandler(getServer());
+		return new PaxWebSessionHandler();
 	}
 
 }

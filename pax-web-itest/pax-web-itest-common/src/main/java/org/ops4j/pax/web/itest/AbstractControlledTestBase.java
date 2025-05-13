@@ -312,12 +312,18 @@ public abstract class AbstractControlledTestBase {
 						.artifactId("jetty-server").versionAsInProject(),
 				mavenBundle().groupId("org.eclipse.jetty")
 						.artifactId("jetty-xml").versionAsInProject(),
+				mavenBundle().groupId("org.eclipse.jetty.ee8")
+						.artifactId("jetty-ee8-nested").versionAsInProject(),
+				mavenBundle().groupId("org.eclipse.jetty.ee8")
+						.artifactId("jetty-ee8-security").versionAsInProject(),
+				mavenBundle().groupId("org.eclipse.jetty.ee8")
+						.artifactId("jetty-ee8-servlet").versionAsInProject(),
 				mavenBundle().groupId("org.eclipse.jetty")
-						.artifactId("jetty-servlet").versionAsInProject(),
+						.artifactId("jetty-session").versionAsInProject(),
 				mavenBundle().groupId("org.eclipse.jetty")
 						.artifactId("jetty-security").versionAsInProject(),
-				mavenBundle().groupId("org.eclipse.jetty")
-						.artifactId("jetty-jaas").versionAsInProject()
+//				mavenBundle().groupId("org.eclipse.jetty")
+//						.artifactId("jetty-jaas").versionAsInProject()
 		};
 	}
 
@@ -328,20 +334,21 @@ public abstract class AbstractControlledTestBase {
 	protected Option[] paxWebJettyHttp2() {
 		Option[] common = combine(paxWebJetty(),
 				mavenBundle().groupId("org.eclipse.jetty.http2")
-						.artifactId("http2-hpack").versionAsInProject(),
+						.artifactId("jetty-http2-hpack").versionAsInProject(),
 				mavenBundle().groupId("org.eclipse.jetty.http2")
-						.artifactId("http2-common").versionAsInProject(),
+						.artifactId("jetty-http2-common").versionAsInProject(),
 				mavenBundle().groupId("org.eclipse.jetty.http2")
-						.artifactId("http2-server").versionAsInProject(),
+						.artifactId("jetty-http2-server").versionAsInProject(),
 				mavenBundle().groupId("org.eclipse.jetty")
 						.artifactId("jetty-alpn-server").versionAsInProject()
 		);
 		return combine(common,
-				mavenBundle().groupId("org.eclipse.jetty.alpn")
-						.artifactId("alpn-api").versionAsInProject(),
+//				mavenBundle().groupId("org.eclipse.jetty.alpn")
+//						.artifactId("alpn-api").versionAsInProject(),
 				mavenBundle().groupId("org.eclipse.jetty")
 						.artifactId("jetty-alpn-java-server").versionAsInProject()
 		);
+//		return common;
 	}
 
 	protected Option[] jettyWebSockets() {
@@ -352,22 +359,38 @@ public abstract class AbstractControlledTestBase {
 						.artifactId("jetty-client").versionAsInProject(),
 				mavenBundle().groupId("org.eclipse.jetty")
 						.artifactId("jetty-alpn-client").versionAsInProject(),
+				mavenBundle().groupId("org.eclipse.jetty.ee8.websocket")
+						.artifactId("jetty-ee8-websocket-javax-common").versionAsInProject(),
+				mavenBundle().groupId("org.eclipse.jetty.ee8.websocket")
+						.artifactId("jetty-ee8-websocket-javax-client").versionAsInProject(),
+				mavenBundle().groupId("org.eclipse.jetty")
+						.artifactId("jetty-ee").versionAsInProject(),
+				mavenBundle().groupId("org.eclipse.jetty.ee8")
+						.artifactId("jetty-ee8-webapp").versionAsInProject(),
+				mavenBundle().groupId("org.eclipse.jetty.ee8.websocket")
+						.artifactId("jetty-ee8-websocket-javax-server").versionAsInProject(),
+//				mavenBundle().groupId("org.eclipse.jetty.websocket")
+//						.artifactId("websocket-jetty-api").versionAsInProject(),
 				mavenBundle().groupId("org.eclipse.jetty.websocket")
-						.artifactId("websocket-javax-common").versionAsInProject(),
+						.artifactId("jetty-websocket-core-common").versionAsInProject(),
 				mavenBundle().groupId("org.eclipse.jetty.websocket")
-						.artifactId("websocket-javax-client").versionAsInProject(),
+						.artifactId("jetty-websocket-core-client").versionAsInProject(),
 				mavenBundle().groupId("org.eclipse.jetty.websocket")
-						.artifactId("websocket-javax-server").versionAsInProject(),
-				mavenBundle().groupId("org.eclipse.jetty.websocket")
-						.artifactId("websocket-jetty-api").versionAsInProject(),
-				mavenBundle().groupId("org.eclipse.jetty.websocket")
-						.artifactId("websocket-core-common").versionAsInProject(),
-				mavenBundle().groupId("org.eclipse.jetty.websocket")
-						.artifactId("websocket-core-client").versionAsInProject(),
-				mavenBundle().groupId("org.eclipse.jetty.websocket")
-						.artifactId("websocket-core-server").versionAsInProject(),
-				mavenBundle().groupId("org.eclipse.jetty.websocket")
-						.artifactId("websocket-servlet").versionAsInProject(),
+						.artifactId("jetty-websocket-core-server").versionAsInProject(),
+				mavenBundle().groupId("org.eclipse.jetty.ee8.websocket")
+						.artifactId("jetty-ee8-websocket-servlet").versionAsInProject(),
+				mavenBundle("org.apache.aries.spifly", "org.apache.aries.spifly.dynamic.bundle")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.ow2.asm", "asm")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.ow2.asm", "asm-commons")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.ow2.asm", "asm-util")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.ow2.asm", "asm-tree")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+				mavenBundle("org.ow2.asm", "asm-analysis")
+						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle("org.ops4j.pax.web", "pax-web-websocket")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1)
 		};

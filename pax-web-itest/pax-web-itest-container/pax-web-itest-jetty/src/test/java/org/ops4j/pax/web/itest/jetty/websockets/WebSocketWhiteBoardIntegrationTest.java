@@ -38,7 +38,7 @@ public class WebSocketWhiteBoardIntegrationTest extends AbstractWebSocketWhiteBo
 
 	@Override
 	protected String getContainerSpecificWebSocketsBundleSN() {
-		return "org.eclipse.jetty.websocket.javax.client";
+		return "org.eclipse.jetty.ee8.websocket.javax.client";
 	}
 
 }

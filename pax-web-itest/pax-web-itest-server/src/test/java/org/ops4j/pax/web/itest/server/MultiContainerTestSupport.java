@@ -337,7 +337,7 @@ public class MultiContainerTestSupport {
 
 		if (enableWebSockets()) {
 			wsGenericBundle = mockBundle("org.ops4j.pax.web.pax-web-websocket", null, false);
-			wsJettyBundle = mockBundle("org.eclipse.jetty.websocket.javax.server", null, false);
+			wsJettyBundle = mockBundle("org.eclipse.jetty.ee8.websocket.javax.server", null, false);
 			wsTomcatBundle = mockBundle("org.ops4j.pax.web.pax-web-tomcat-websocket", null, false);
 			wsUndertowBundle = mockBundle("org.ops4j.pax.web.pax-web-undertow-websocket", null, false);
 

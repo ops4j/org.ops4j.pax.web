@@ -161,7 +161,7 @@ public class PaxWebFilterHolder extends FilterHolder {
 		}
 
 		if (instance == null && getHeldClass() != null) {
-			// case of org.eclipse.jetty.websocket.server.WebSocketUpgradeFilter added by Jetty's SCI
+			// case of org.eclipse.jetty.ee8.websocket.servlet.WebSocketUpgradeFilter added by Jetty's SCI
 			Class<? extends Filter> heldClass = getHeldClass();
 			try {
 				Constructor<? extends Filter> ctr = heldClass.getConstructor();
@@ -175,7 +175,7 @@ public class PaxWebFilterHolder extends FilterHolder {
 			filterModel.setDtoFailureCode(DTOConstants.FAILURE_REASON_SERVICE_NOT_GETTABLE);
 		}
 
-		if (instance != null && "org.eclipse.jetty.websocket.servlet.WebSocketUpgradeFilter".equals(instance.getClass().getName())) {
+		if (instance != null && "org.eclipse.jetty.ee8.websocket.servlet.WebSocketUpgradeFilter".equals(instance.getClass().getName())) {
 			// very special handling - this filter (in org.eclipse.jetty.websocket.core.server.internal.CreatorNegotiator.negotiate())
 			// casts request's ServletContext to org.eclipse.jetty.server.handler.ContextHandler.Context
 			// it has changed when upgrading from Jetty 9 to Jetty 10

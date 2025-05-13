@@ -82,11 +82,8 @@ import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.server.handler.ErrorHandler;
-import org.eclipse.jetty.session.DefaultSessionIdManager;
 import org.eclipse.jetty.session.FileSessionDataStoreFactory;
-import org.eclipse.jetty.session.SessionIdManager;
 import org.eclipse.jetty.util.ArrayUtil;
-import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.xml.XmlConfiguration;
@@ -266,6 +263,32 @@ class JettyServerWrapper implements BatchVisitor {
 	 * One-time configuration of Jetty
 	 */
 	public void configure() throws Exception {
+		// In Jetty 9/10 for Pax Web 10 we could do this later, but now it's needed before creating a Server
+		// to load HttpFieldPreEncoder both for HTTP/1.1 and HTTP/2 we need to call static block
+		// of org.eclipse.jetty.http.PreEncodedHttpField class within proper ClassLoader
+		ClassLoader tccl = Thread.currentThread().getContextClassLoader();
+		try {
+			OsgiServletContextClassLoader cl = new OsgiServletContextClassLoader();
+			Bundle bundle = FrameworkUtil.getBundle(this.getClass());
+			if (bundle != null) {
+				// non unit-test
+				cl.addBundle(bundle);
+				for (Bundle b : bundle.getBundleContext().getBundles()) {
+					String sn = b.getSymbolicName();
+					if ("org.eclipse.jetty.http".equals(sn) || "org.eclipse.jetty.http2.hpack".equals(sn)) {
+						cl.addBundles(b);
+					}
+				}
+				Thread.currentThread().setContextClassLoader(cl);
+			}
+			// it's not enough to load a class to get static{} block called. PreEncodedHttpField
+			// itself can be loaded normally, but the static{} block uses
+			// ServiceLoader.load(HttpFieldPreEncoder.class) with TCCL
+			new PreEncodedHttpField("empty", "empty");
+		} finally {
+			Thread.currentThread().setContextClassLoader(tccl);
+		}
+
 		// for now, we have nothing. We can do many things using external jetty-*.xml files, but the creation
 		// of Server itself should be done manually here.
 		LOG.info("Creating Jetty server instance using configuration properties.");
@@ -374,31 +397,6 @@ class JettyServerWrapper implements BatchVisitor {
 			URL emptyConfig = getClass().getResource("/jetty-empty.xml");
 			if (emptyConfig != null) {
 				new XmlConfiguration(jettyFactory.newResource(emptyConfig));
-			}
-
-			// to load HttpFieldPreEncoder both for HTTP/1.1 and HTTP/2 we need to call static block
-			// of org.eclipse.jetty.http.PreEncodedHttpField class within proper ClassLoader
-			ClassLoader tccl = Thread.currentThread().getContextClassLoader();
-			try {
-				OsgiServletContextClassLoader cl = new OsgiServletContextClassLoader();
-				Bundle bundle = FrameworkUtil.getBundle(this.getClass());
-				if (bundle != null) {
-					// non unit-test
-					cl.addBundle(bundle);
-					for (Bundle b : bundle.getBundleContext().getBundles()) {
-						String sn = b.getSymbolicName();
-						if ("org.eclipse.jetty.http".equals(sn) || "org.eclipse.jetty.http2.hpack".equals(sn)) {
-							cl.addBundles(b);
-						}
-					}
-					Thread.currentThread().setContextClassLoader(cl);
-				}
-				// it's not enough to load a class to get static{} block called. PreEncodedHttpField
-				// itself can be loaded normally, but the static{} block uses
-				// ServiceLoader.load(HttpFieldPreEncoder.class) with TCCL
-				new PreEncodedHttpField("empty", "empty");
-			} finally {
-				Thread.currentThread().setContextClassLoader(tccl);
 			}
 
 			// When parsing, TCCL will be set to CL of pax-web-jetty bundle
@@ -1597,8 +1595,8 @@ class JettyServerWrapper implements BatchVisitor {
 				sch.getServletHandler().setFilterMappings(new FilterMapping[0]);
 
 				for (PaxWebFilterHolder fh : newFilterHolders) {
-					if ("org.eclipse.jetty.websocket.servlet.WebSocketUpgradeFilter".equals(fh.getName())) {
-						sch.getServletContext().removeAttribute("org.eclipse.jetty.websocket.server.WebSocketUpgradeFilter");
+					if ("org.eclipse.jetty.ee8.websocket.servlet.WebSocketUpgradeFilter".equals(fh.getName())) {
+						sch.getServletContext().removeAttribute("org.eclipse.jetty.ee8.websocket.servlet.WebSocketUpgradeFilter");
 					}
 					sch.getServletHandler().addFilter(fh);
 					if (fh.getMapping() != null) {
@@ -2023,7 +2021,7 @@ class JettyServerWrapper implements BatchVisitor {
 		for (FilterHolder fh : allFilters) {
 			if (fh instanceof PaxWebFilterHolder) {
 				FilterModel model = ((PaxWebFilterHolder) fh).getFilterModel();
-				// org.eclipse.jetty.websocket.server.WebSocketUpgradeFilter.configure() deals directly
+				// org.eclipse.jetty.ee8.websocket.servlet.WebSocketUpgradeFilter.configure() deals directly
 				// with Jetty context, so we can't intercept the registration and the model is null.
 				// we'll treat such registration as dynamic that has to be removed
 				if (model == null || model.isDynamic()) {
