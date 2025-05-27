@@ -305,7 +305,7 @@
 		<dependency.org.owasp.encoder>1.3.1</dependency.org.owasp.encoder>
 		<dependency.org.primefaces>14.0.11</dependency.org.primefaces>
 		<dependency.org.slf4j>1.7.36</dependency.org.slf4j>
-		<dependency.org.springframework>5.3.39</dependency.org.springframework>
+		<dependency.org.springframework>6.1.14</dependency.org.springframework>
 		<dependency.org.vaadin.artur>1.7.1</dependency.org.vaadin.artur>
 
 		<dependency.org.wildfly.client>1.0.1.Final</dependency.org.wildfly.client>
