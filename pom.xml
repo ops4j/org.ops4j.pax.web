@@ -165,7 +165,7 @@
 
 		<dependency.biz.aQute.bnd.bndlib>7.1.0</dependency.biz.aQute.bnd.bndlib>
 
-		<dependency.commons-beanutils>1.10.1</dependency.commons-beanutils>
+		<dependency.commons-beanutils>1.11.0</dependency.commons-beanutils>
 		<dependency.commons-codec>1.18.0</dependency.commons-codec>
 		<dependency.commons-collections3>3.2.2</dependency.commons-collections3>
 		<dependency.commons-digester>1.8.1</dependency.commons-digester>
