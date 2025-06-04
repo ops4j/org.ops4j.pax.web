@@ -48,7 +48,7 @@
 							org.keycloak.adapters;version="${dependency.org.keycloak}",
 							org.keycloak.adapters.spi;version="${dependency.org.keycloak}",
 							org.osgi.framework;version="[1.8,2)",
-							org.slf4j;version="[2.0,3)"
+							org.slf4j;version="[1.7,3)"
 						</Import-Package>
 					</instructions>
 				</configuration>
