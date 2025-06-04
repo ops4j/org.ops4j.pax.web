@@ -79,7 +79,7 @@
 							org.ops4j.pax.web.service.spi.util;version="${pax-web.osgi.version}",
 
 							<!-- from pax-logging-api -->
-							org.slf4j;version="[1.7,2)",
+							org.slf4j;version="[2.0,3)",
 
 							<!-- from pax-web-tomcat-common / tomcat-api -->
 							org.apache.tomcat;version="${dependency.org.apache.tomcat}",
