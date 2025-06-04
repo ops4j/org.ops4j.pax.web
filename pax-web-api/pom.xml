@@ -119,7 +119,7 @@
 							<!-- ranges indicate Servlet API 3.1+ (JavaEE 7+) -->
 							javax.servlet;version="[4.0,5)",
 							javax.servlet.annotation;version="[4.0,5)",
-							javax.servlet.descriptor;version="[4.0,5)"
+							javax.servlet.descriptor;version="[4.0,5)",
 							javax.servlet.http;version="[4.0,5)",
 
 							<!-- ranges indicate we can work with OSGi Core R6+ -->

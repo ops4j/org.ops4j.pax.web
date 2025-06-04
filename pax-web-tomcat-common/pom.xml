@@ -51,7 +51,7 @@
 							<!-- ranges indicate Servlet API 3.1+ (JavaEE 7+) -->
 							javax.servlet;version="[4.0,5)",
 							javax.servlet.annotation;version="[4.0,5)",
-							javax.servlet.descriptor;version="[4.0,5)"
+							javax.servlet.descriptor;version="[4.0,5)",
 
 							<!-- from pax-api -->
 							org.ops4j.pax.web.service;version="${pax-web.osgi.version}",
