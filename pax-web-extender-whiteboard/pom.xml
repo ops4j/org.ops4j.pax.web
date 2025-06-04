@@ -79,7 +79,7 @@
 							org.ops4j.pax.web.service.spi.whiteboard;version="${pax-web.osgi.version}",
 
 							<!-- from pax-logging-api -->
-							org.slf4j;version="[1.7,2)",
+							org.slf4j;version="[2.0,3)",
 
 							<!-- to check -->
 
