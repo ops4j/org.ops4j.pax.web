@@ -177,8 +177,8 @@ public class EmbeddedJettyHttps2Test {
 					// request with PUSH_PROMISE: https://httpwg.org/specs/rfc7540.html#PUSH_PROMISE
 					PushBuilder pushBuilder = req.newPushBuilder();
 					if (pushBuilder != null) {
-						pushBuilder.path("test/default.css").addHeader("X-Request-P1", req.getRequestURI()).push();
-						pushBuilder.path("test/app.js").removeHeader("X-Request-P1").addHeader("X-Request-P2", req.getRequestURI()).push();
+						pushBuilder.path("/test/default.css").addHeader("X-Request-P1", req.getRequestURI()).push();
+						pushBuilder.path("/test/app.js").removeHeader("X-Request-P1").addHeader("X-Request-P2", req.getRequestURI()).push();
 					}
 					resp.getWriter().close();
 				}
