@@ -122,12 +122,12 @@
 
 		<!-- Maven plugins from org.apache.maven.plugins (and their dependencies) -->
 		<plugin.maven-antrun-plugin>3.1.0</plugin.maven-antrun-plugin>
-		<plugin.maven-archetype-plugin>3.3.1</plugin.maven-archetype-plugin>
+		<plugin.maven-archetype-plugin>3.4.0</plugin.maven-archetype-plugin>
 		<plugin.maven-assembly-plugin>3.7.1</plugin.maven-assembly-plugin>
 		<plugin.maven-checkstyle-plugin>3.6.0</plugin.maven-checkstyle-plugin>
-		<plugin.dependency.com.puppycrawl.tools.checkstyle>10.21.2</plugin.dependency.com.puppycrawl.tools.checkstyle>
-		<plugin.maven-clean-plugin>3.4.0</plugin.maven-clean-plugin>
-		<plugin.maven-compiler-plugin>3.13.0</plugin.maven-compiler-plugin>
+		<plugin.dependency.com.puppycrawl.tools.checkstyle>10.25.0</plugin.dependency.com.puppycrawl.tools.checkstyle>
+		<plugin.maven-clean-plugin>3.5.0</plugin.maven-clean-plugin>
+		<plugin.maven-compiler-plugin>3.14.0</plugin.maven-compiler-plugin>
 		<plugin.maven-dependency-plugin>3.8.1</plugin.maven-dependency-plugin>
 		<plugin.maven-deploy-plugin>3.1.4</plugin.maven-deploy-plugin>
 		<plugin.maven-enforcer-plugin>3.5.0</plugin.maven-enforcer-plugin>
@@ -149,7 +149,7 @@
 		<!-- Other Maven plugins (and their dependencies) -->
 		<plugin.apache.apache-rat-plugin>0.16.1</plugin.apache.apache-rat-plugin>
 		<plugin.asciidoctor-maven-plugin>2.2.6</plugin.asciidoctor-maven-plugin>
-		<plugin.dependency.org.asciidoctor.diagram>2.3.1</plugin.dependency.org.asciidoctor.diagram>
+		<plugin.dependency.org.asciidoctor.diagram>2.3.2</plugin.dependency.org.asciidoctor.diagram>
 		<plugin.felix.maven-bundle-plugin>5.1.9</plugin.felix.maven-bundle-plugin>
 		<plugin.felix.maven-scr-plugin>1.26.4</plugin.felix.maven-scr-plugin>
 		<plugin.gatling.gatling-maven-plugin>3.1.2</plugin.gatling.gatling-maven-plugin>
