@@ -229,7 +229,8 @@
 		<dependency.org.apache.felix.framework7>7.0.5</dependency.org.apache.felix.framework7>
 		<dependency.org.apache.felix.inventory>1.1.0</dependency.org.apache.felix.inventory>
 		<dependency.org.apache.felix.metatype>1.2.4</dependency.org.apache.felix.metatype>
-		<dependency.org.apache.felix.scr>2.2.12</dependency.org.apache.felix.scr>
+		<!-- Version 2.2.x of felix.scr is for OSGi Core R10+ -->
+		<dependency.org.apache.felix.scr>2.1.30</dependency.org.apache.felix.scr>
 		<dependency.org.apache.felix.utils>1.11.8</dependency.org.apache.felix.utils>
 		<dependency.org.apache.felix.webconsole>4.9.10</dependency.org.apache.felix.webconsole>
 
