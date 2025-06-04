@@ -712,17 +712,21 @@
 
 			<!-- Other plugins -->
 
-<!--			<plugin>-->
-<!--				<groupId>org.sonatype.plugins</groupId>-->
-<!--				<artifactId>nexus-staging-maven-plugin</artifactId>-->
-<!--				<configuration>-->
-<!--					<autoReleaseAfterClose>false</autoReleaseAfterClose>-->
-<!--					<stagingProgressTimeoutMinutes>30</stagingProgressTimeoutMinutes>-->
-<!--				</configuration>-->
-<!--			</plugin>-->
+			<plugin>
+				<groupId>org.sonatype.plugins</groupId>
+				<artifactId>nexus-staging-maven-plugin</artifactId>
+				<configuration>
+					<!-- till we switch to new parent... -->
+					<skipStaging>true</skipStaging>
+					<skipLocalStaging>true</skipLocalStaging>
+					<skipRemoteStaging>true</skipRemoteStaging>
+					<skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.sonatype.central</groupId>
 				<artifactId>central-publishing-maven-plugin</artifactId>
+				<extensions>true</extensions>
 				<configuration>
 					<!-- you need <server> with such <id> in ~/.m2/repository -->
 					<publishingServerId>ossrh-central</publishingServerId>
