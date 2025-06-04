@@ -230,7 +230,7 @@
 		<dependency.org.apache.geronimo.bundles.commons-discovery>0.4_1</dependency.org.apache.geronimo.bundles.commons-discovery>
 
 		<dependency.org.apache.httpcomponents.client4>4.5.14</dependency.org.apache.httpcomponents.client4>
-		<dependency.org.apache.httpcomponents.client5>5.4.4</dependency.org.apache.httpcomponents.client5>
+		<dependency.org.apache.httpcomponents.client5>5.5</dependency.org.apache.httpcomponents.client5>
 		<dependency.org.apache.httpcomponents.core4>4.4.16</dependency.org.apache.httpcomponents.core4>
 		<dependency.org.apache.httpcomponents.core5>5.3.4</dependency.org.apache.httpcomponents.core5>
 		<dependency.org.apache.karaf>4.4.7</dependency.org.apache.karaf>
