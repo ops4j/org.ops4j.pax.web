@@ -217,6 +217,16 @@ class OsgiStandardRoot extends StandardRoot {
 				public void gc() {
 					// no op
 				}
+
+				@Override
+				public void setAllowLinking(boolean b) {
+					// no op
+				}
+
+				@Override
+				public boolean getAllowLinking() {
+					return false;
+				}
 			};
 		}
 	}
