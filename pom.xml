@@ -311,7 +311,7 @@
 		<dependency.org.ow2.asm>9.8</dependency.org.ow2.asm>
 		<dependency.org.owasp.encoder>1.3.1</dependency.org.owasp.encoder>
 		<dependency.org.primefaces>13.0.14-LTS</dependency.org.primefaces>
-		<dependency.org.slf4j>1.7.36</dependency.org.slf4j>
+		<dependency.org.slf4j>2.0.17</dependency.org.slf4j>
 		<dependency.org.springframework>5.3.39</dependency.org.springframework>
 		<dependency.org.vaadin.artur>1.7.1</dependency.org.vaadin.artur>
 
@@ -3334,14 +3334,6 @@
 			</dependency>
 
 			<dependency>
-				<groupId>org.junit</groupId>
-				<artifactId>junit-bom</artifactId>
-				<version>${dependency.org.junit}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-
-			<dependency>
 				<groupId>org.assertj</groupId>
 				<artifactId>assertj-core</artifactId>
 				<version>${dependency.org.assertj}</version>
@@ -3379,10 +3371,6 @@
 	</dependencyManagement>
 
 	<repositories>
-		<repository>
-			<id>staging-orgapachetomcat-1461</id>
-			<url>https://repository.apache.org/content/repositories/orgapachetomcat-1461</url>
-		</repository>
 		<repository>
 			<id>apache-snapshots</id>
 			<name>Apache Snapshots</name>
