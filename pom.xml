@@ -165,7 +165,7 @@
 
 		<dependency.biz.aQute.bnd.bndlib>7.1.0</dependency.biz.aQute.bnd.bndlib>
 
-		<dependency.commons-beanutils>1.10.1</dependency.commons-beanutils>
+		<dependency.commons-beanutils>1.11.0</dependency.commons-beanutils>
 		<dependency.commons-codec>1.18.0</dependency.commons-codec>
 		<dependency.commons-collections3>3.2.2</dependency.commons-collections3>
 		<dependency.commons-digester>2.1</dependency.commons-digester>
@@ -211,7 +211,7 @@
 		<dependency.org.apache.aries.spifly>1.3.7</dependency.org.apache.aries.spifly>
 		<dependency.org.apache.aries.util>1.1.3</dependency.org.apache.aries.util>
 
-		<dependency.org.apache.cxf>3.6.6</dependency.org.apache.cxf>
+		<dependency.org.apache.cxf>3.6.7</dependency.org.apache.cxf>
 
 		<dependency.org.apache.commons.collections4>4.5.0</dependency.org.apache.commons.collections4>
 		<dependency.org.apache.commons.compress>1.27.1</dependency.org.apache.commons.compress>
@@ -273,9 +273,9 @@
 
 		<dependency.org.jline>3.21.0</dependency.org.jline>
 		<dependency.org.jsoup>1.20.1</dependency.org.jsoup>
-		<dependency.org.junit>5.12.2</dependency.org.junit>
+		<dependency.org.junit>5.13.0</dependency.org.junit>
 		<dependency.org.keycloak>25.0.3</dependency.org.keycloak>
-		<dependency.org.mockito>5.17.0</dependency.org.mockito>
+		<dependency.org.mockito>5.18.0</dependency.org.mockito>
 		<!-- Remember - we're still at Servlet/JSP from JakartaEE 8, so we need Tomcat/Jasper 9 -->
 		<dependency.org.mortbay.jasper.apache-jsp>9.0.96</dependency.org.mortbay.jasper.apache-jsp>
 		<dependency.org.mortbay.jetty.alpn>8.1.13.v20181017</dependency.org.mortbay.jetty.alpn>
