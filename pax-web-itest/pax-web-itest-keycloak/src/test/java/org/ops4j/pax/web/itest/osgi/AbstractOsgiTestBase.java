@@ -25,7 +25,7 @@ import org.ops4j.pax.exam.CoreOptions;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.ProbeBuilder;
 import org.ops4j.pax.exam.TestProbeBuilder;
-import org.ops4j.pax.tinybundles.TinyBundles;
+import org.ops4j.pax.tinybundles.core.TinyBundles;
 import org.ops4j.pax.web.itest.AbstractControlledTestBase;
 import org.osgi.framework.Constants;
 

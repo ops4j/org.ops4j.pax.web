@@ -22,7 +22,7 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.ops4j.pax.exam.options.UrlProvisionOption;
-import org.ops4j.pax.tinybundles.TinyBundles;
+import org.ops4j.pax.tinybundles.core.TinyBundles;
 import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
 import org.ops4j.pax.web.itest.utils.web.AnnotatedMultipartTestServlet;
@@ -40,13 +40,13 @@ public abstract class AbstractServletAnnotatedIntegrationTest extends AbstractCo
 
 	protected UrlProvisionOption theWab() {
 		return streamBundle(TinyBundles.bundle()
-				.addClass(AnnotatedTestServlet.class)
-				.addClass(AnnotatedMultipartTestServlet.class)
-				.setHeader(Constants.BUNDLE_SYMBOLICNAME, "AnnotatedServletTest")
-				.setHeader(PaxWebConstants.HEADER_CONTEXT_PATH, "/annotatedTest")
-				.setHeader(Constants.IMPORT_PACKAGE, "javax.servlet")
-				.setHeader(Constants.DYNAMICIMPORT_PACKAGE, "*")
-				.build(TinyBundles.rawBuilder())).noStart();
+				.add(AnnotatedTestServlet.class)
+				.add(AnnotatedMultipartTestServlet.class)
+				.set(Constants.BUNDLE_SYMBOLICNAME, "AnnotatedServletTest")
+				.set(PaxWebConstants.HEADER_CONTEXT_PATH, "/annotatedTest")
+				.set(Constants.IMPORT_PACKAGE, "javax.servlet")
+				.set(Constants.DYNAMICIMPORT_PACKAGE, "*")
+				.build()).noStart();
 	}
 
 	@Before

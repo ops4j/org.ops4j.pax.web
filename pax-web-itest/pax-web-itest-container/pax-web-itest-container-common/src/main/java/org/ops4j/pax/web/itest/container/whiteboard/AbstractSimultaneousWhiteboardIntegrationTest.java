@@ -25,7 +25,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.tinybundles.TinyBundles;
+import org.ops4j.pax.tinybundles.core.TinyBundles;
 import org.ops4j.pax.web.extender.samples.whiteboard.internal.WhiteboardFilter;
 import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
@@ -49,12 +49,12 @@ public abstract class AbstractSimultaneousWhiteboardIntegrationTest extends Abst
 				FileUtils.cleanDirectory(dir);
 			}
 			dir.mkdirs();
-			InputStream b1 = TinyBundles.bundle().addClass(TestActivator.class)
-					.addClass(WhiteboardFilter.class)
-					.setHeader(Constants.BUNDLE_ACTIVATOR, TestActivator.class.getName())
-					.setHeader(Constants.BUNDLE_SYMBOLICNAME, "org.ops4j.pax.web.itest.SimultaneousTest")
-					.setHeader(Constants.DYNAMICIMPORT_PACKAGE, "*")
-					.build(TinyBundles.rawBuilder());
+			InputStream b1 = TinyBundles.bundle().add(TestActivator.class)
+					.add(WhiteboardFilter.class)
+					.set(Constants.BUNDLE_ACTIVATOR, TestActivator.class.getName())
+					.set(Constants.BUNDLE_SYMBOLICNAME, "org.ops4j.pax.web.itest.SimultaneousTest")
+					.set(Constants.DYNAMICIMPORT_PACKAGE, "*")
+					.build();
 			Store<InputStream> store = StoreFactory.anonymousStore();
 			File bundle1 = new File(dir, "b1.jar");
 			Files.copy(b1, bundle1.toPath());

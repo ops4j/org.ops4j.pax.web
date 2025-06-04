@@ -33,7 +33,7 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.tinybundles.TinyBundles;
+import org.ops4j.pax.tinybundles.core.TinyBundles;
 import org.ops4j.pax.web.itest.osgi.support.MockServerController;
 import org.ops4j.pax.web.service.PaxWebConfig;
 import org.ops4j.pax.web.service.PaxWebConstants;
@@ -274,9 +274,9 @@ public class PaxWebRuntimeIntegrationTest extends AbstractOsgiTestBase {
 		dir.mkdirs();
 		FileUtils.cleanDirectory(dir);
 		InputStream bundle1 = TinyBundles.bundle()
-				.setHeader("Bundle-ManifestVersion", "2")
-				.setHeader("Bundle-SymbolicName", "b1")
-				.build(TinyBundles.rawBuilder());
+				.set("Bundle-ManifestVersion", "2")
+				.set("Bundle-SymbolicName", "b1")
+				.build();
 		File f1 = new File(dir, "empty-bundle1.jar");
 		f1.delete();
 		try (FileOutputStream fos = new FileOutputStream(f1)) {
@@ -284,9 +284,9 @@ public class PaxWebRuntimeIntegrationTest extends AbstractOsgiTestBase {
 		}
 
 		InputStream bundle2 = TinyBundles.bundle()
-				.setHeader("Bundle-ManifestVersion", "2")
-				.setHeader("Bundle-SymbolicName", "b2")
-				.build(TinyBundles.rawBuilder());
+				.set("Bundle-ManifestVersion", "2")
+				.set("Bundle-SymbolicName", "b2")
+				.build();
 		File f2 = new File(dir, "empty-bundle2.jar");
 		f2.delete();
 		try (FileOutputStream fos = new FileOutputStream(f2)) {
