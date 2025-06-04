@@ -44,10 +44,10 @@
 						<Bundle-Activator>org.ops4j.pax.web.extender.war.internal.Activator</Bundle-Activator>
 						<Import-Package>
 							<!-- ranges indicate Servlet API 3.1+ (JavaEE 7+) -->
-							javax.servlet;version="[3.1,5)",
-							javax.servlet.descriptor;version="[3.1,5)",
-							javax.servlet.annotation;version="[3.1,5)",
-							javax.servlet.http;version="[3.1,5)",
+							javax.servlet;version="[4.0,5)",
+							javax.servlet.descriptor;version="[4.0,5)"
+							javax.servlet.annotation;version="[4.0,5)",
+							javax.servlet.http;version="[4.0,5)",
 
 							<!-- for annotation scanning on listeners, servlets and filters -->
 							javax.annotation;version="[1.3,2)",

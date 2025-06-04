@@ -43,7 +43,7 @@
 					<instructions>
 						<Import-Package>
 							org.osgi.framework;version="[1.8,2)",
-							javax.servlet.*;version="[3.1,5)",
+							javax.servlet.*;version="[4.0,5)",
 							org.ops4j.pax.web.samples.war.cb1.utils
 						</Import-Package>
 						<!--

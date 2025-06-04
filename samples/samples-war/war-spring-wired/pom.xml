@@ -47,7 +47,7 @@
 					</supportedProjectTypes>
 					<instructions>
 						<Import-Package>
-							javax.servlet.*;version="[3.1,5)",
+							javax.servlet.*;version="[4.0,5)",
 
 							javax.naming,
 							javax.xml.parsers,

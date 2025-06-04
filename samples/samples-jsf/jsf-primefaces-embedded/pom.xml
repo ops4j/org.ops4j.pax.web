@@ -71,8 +71,8 @@
 						<Require-Bundle>org.ops4j.pax.web.samples.jsf-primefaces-commons1</Require-Bundle>
 						<Import-Package>
 							org.osgi.framework;version="[1.8,2)",
-							javax.servlet;version="[3.1,5)"
-							javax.servlet.http;version="[3.1,5)",
+							javax.servlet;version="[4.0,5)"
+							javax.servlet.http;version="[4.0,5)",
 							org.ops4j.pax.web.samples.jsf3
 						</Import-Package>
 						<DynamicImport-Package>*</DynamicImport-Package>

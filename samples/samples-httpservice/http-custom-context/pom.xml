@@ -46,8 +46,8 @@
 <!--						<Embed-Transitive>true</Embed-Transitive>-->
 						<Import-Package>
 							<!-- ranges indicate Servlet API 3.1+ (JavaEE 7+) -->
-							javax.servlet;version="[3.1,5)",
-							javax.servlet.http;version="[3.1,5)",
+							javax.servlet;version="[4.0,5)",
+							javax.servlet.http;version="[4.0,5)",
 
 							<!-- ranges indicate we can work with OSGi Core R6+ -->
 							org.osgi.framework;version="[1.8,2)",

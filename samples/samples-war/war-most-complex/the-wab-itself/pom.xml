@@ -48,7 +48,7 @@
 					<instructions>
 						<Import-Package>
 							org.osgi.framework;version="[1.8,2)",
-							javax.servlet.*;version="[3.1,5)",
+							javax.servlet.*;version="[4.0,5)",
 							<!--
 								wiring to container-bundle-1, which is wired to container-bundle-3, which itself
 								won't be wired directly to the-wab-itself
