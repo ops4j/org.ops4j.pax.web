@@ -160,6 +160,7 @@
 		<plugin.sonarsource.sonar-maven-plugin>3.9.0.2155</plugin.sonarsource.sonar-maven-plugin>
 		<plugin.mycila.license-maven-plugin>4.6</plugin.mycila.license-maven-plugin>
 		<plugin.servicemix.depends-maven-plugin>1.5.0</plugin.servicemix.depends-maven-plugin>
+		<plugin.sonatype.central-publishing-maven-plugin>0.7.0</plugin.sonatype.central-publishing-maven-plugin>
 		<plugin.sonatype.nexus-staging-maven-plugin>1.7.0</plugin.sonatype.nexus-staging-maven-plugin>
 		<plugin.bnd.bnd-maven-plugin>7.1.0</plugin.bnd.bnd-maven-plugin>
 
@@ -555,6 +556,11 @@
 					<artifactId>nexus-staging-maven-plugin</artifactId>
 					<version>${plugin.sonatype.nexus-staging-maven-plugin}</version>
 				</plugin>
+				<plugin>
+					<groupId>org.sonatype.central</groupId>
+					<artifactId>central-publishing-maven-plugin</artifactId>
+					<version>${plugin.sonatype.central-publishing-maven-plugin}</version>
+				</plugin>
 <!--				<plugin>-->
 <!--					<groupId>io.gatling</groupId>-->
 <!--					<artifactId>gatling-maven-plugin</artifactId>-->
@@ -706,12 +712,20 @@
 
 			<!-- Other plugins -->
 
+<!--			<plugin>-->
+<!--				<groupId>org.sonatype.plugins</groupId>-->
+<!--				<artifactId>nexus-staging-maven-plugin</artifactId>-->
+<!--				<configuration>-->
+<!--					<autoReleaseAfterClose>false</autoReleaseAfterClose>-->
+<!--					<stagingProgressTimeoutMinutes>30</stagingProgressTimeoutMinutes>-->
+<!--				</configuration>-->
+<!--			</plugin>-->
 			<plugin>
-				<groupId>org.sonatype.plugins</groupId>
-				<artifactId>nexus-staging-maven-plugin</artifactId>
+				<groupId>org.sonatype.central</groupId>
+				<artifactId>central-publishing-maven-plugin</artifactId>
 				<configuration>
-					<autoReleaseAfterClose>false</autoReleaseAfterClose>
-					<stagingProgressTimeoutMinutes>30</stagingProgressTimeoutMinutes>
+					<!-- you need <server> with such <id> in ~/.m2/repository -->
+					<publishingServerId>ossrh-central</publishingServerId>
 				</configuration>
 			</plugin>
 
