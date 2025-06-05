@@ -154,7 +154,7 @@
 		<plugin.felix.maven-scr-plugin>1.26.4</plugin.felix.maven-scr-plugin>
 		<plugin.gatling.gatling-maven-plugin>3.1.2</plugin.gatling.gatling-maven-plugin>
 		<plugin.jacoco.jacoco-maven-plugin>0.8.7</plugin.jacoco.jacoco-maven-plugin>
-		<plugin.mojo.build-helper-maven-plugin>3.6.0</plugin.mojo.build-helper-maven-plugin>
+		<plugin.mojo.build-helper-maven-plugin>3.6.1</plugin.mojo.build-helper-maven-plugin>
 		<plugin.sonarsource.sonar-maven-plugin>3.9.0.2155</plugin.sonarsource.sonar-maven-plugin>
 		<plugin.mycila.license-maven-plugin>4.6</plugin.mycila.license-maven-plugin>
 		<plugin.servicemix.depends-maven-plugin>1.5.0</plugin.servicemix.depends-maven-plugin>
