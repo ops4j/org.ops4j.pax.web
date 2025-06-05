@@ -258,8 +258,8 @@
 		<dependency.org.eclipse.platform.osgi>3.23.0</dependency.org.eclipse.platform.osgi>
 
 		<dependency.org.glassfish.hk2>2.6.1</dependency.org.glassfish.hk2>
-		<dependency.org.glassfish.hk2.osgi-locator>1.0.3</dependency.org.glassfish.hk2.osgi-locator>
-		<dependency.org.glassfish.jersey>2.46</dependency.org.glassfish.jersey>
+		<dependency.org.glassfish.hk2.osgi-locator>1.0.4</dependency.org.glassfish.hk2.osgi-locator>
+		<dependency.org.glassfish.jersey>2.47</dependency.org.glassfish.jersey>
 
 		<dependency.org.javassist>3.30.2-GA</dependency.org.javassist>
 		<dependency.org.jasypt>1.9.3</dependency.org.jasypt>
