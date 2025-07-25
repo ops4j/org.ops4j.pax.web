@@ -158,7 +158,7 @@
 		<plugin.sonarsource.sonar-maven-plugin>3.9.0.2155</plugin.sonarsource.sonar-maven-plugin>
 		<plugin.mycila.license-maven-plugin>4.6</plugin.mycila.license-maven-plugin>
 		<plugin.servicemix.depends-maven-plugin>1.5.0</plugin.servicemix.depends-maven-plugin>
-		<plugin.sonatype.central-publishing-maven-plugin>0.7.0</plugin.sonatype.central-publishing-maven-plugin>
+		<plugin.sonatype.central-publishing-maven-plugin>0.8.0</plugin.sonatype.central-publishing-maven-plugin>
 		<plugin.sonatype.nexus-staging-maven-plugin>1.7.0</plugin.sonatype.nexus-staging-maven-plugin>
 		<plugin.bnd.bnd-maven-plugin>7.1.0</plugin.bnd.bnd-maven-plugin>
 
@@ -167,14 +167,14 @@
 		<dependency.biz.aQute.bnd.bndlib>7.1.0</dependency.biz.aQute.bnd.bndlib>
 
 		<dependency.commons-beanutils>1.11.0</dependency.commons-beanutils>
-		<dependency.commons-codec>1.18.0</dependency.commons-codec>
+		<dependency.commons-codec>1.19.0</dependency.commons-codec>
 		<dependency.commons-collections3>3.2.2</dependency.commons-collections3>
 		<dependency.commons-digester>2.1</dependency.commons-digester>
 		<dependency.commons-fileupload>1.5</dependency.commons-fileupload>
-		<dependency.commons-io>2.19.0</dependency.commons-io>
+		<dependency.commons-io>2.20.0</dependency.commons-io>
 		<dependency.com.fasterxml.classmate>1.7.0</dependency.com.fasterxml.classmate>
-		<dependency.com.fasterxml.jackson.core>2.19.0</dependency.com.fasterxml.jackson.core>
-		<dependency.com.fasterxml.jackson.core.databind>2.19.0</dependency.com.fasterxml.jackson.core.databind>
+		<dependency.com.fasterxml.jackson.core>2.19.2</dependency.com.fasterxml.jackson.core>
+		<dependency.com.fasterxml.jackson.core.databind>2.19.2</dependency.com.fasterxml.jackson.core.databind>
 		<dependency.com.fasterxml.woodstox>6.7.0</dependency.com.fasterxml.woodstox>
 		<dependency.com.sun.activation>2.0.1</dependency.com.sun.activation>
 		<dependency.com.sun.istack>4.2.0</dependency.com.sun.istack>
@@ -204,7 +204,7 @@
 
 		<dependency.junit>4.13.2</dependency.junit>
 
-		<dependency.net.bytebuddy>1.17.5</dependency.net.bytebuddy>
+		<dependency.net.bytebuddy>1.17.6</dependency.net.bytebuddy>
 
 		<dependency.org.apache.aries.component-dsl>1.2.2</dependency.org.apache.aries.component-dsl>
 		<dependency.org.apache.aries.jax.rs>2.0.2</dependency.org.apache.aries.jax.rs>
@@ -215,7 +215,7 @@
 
 		<dependency.org.apache.commons.collections4>4.5.0</dependency.org.apache.commons.collections4>
 		<dependency.org.apache.commons.compress>1.27.1</dependency.org.apache.commons.compress>
-		<dependency.org.apache.commons.lang3>3.17.0</dependency.org.apache.commons.lang3>
+		<dependency.org.apache.commons.lang3>3.18.0</dependency.org.apache.commons.lang3>
 
 		<dependency.org.apache.felix.configadmin>1.9.26</dependency.org.apache.felix.configadmin>
 		<dependency.org.apache.felix.converter>1.0.18</dependency.org.apache.felix.converter>
@@ -235,7 +235,7 @@
 		<dependency.org.apache.httpcomponents.core4>4.4.16</dependency.org.apache.httpcomponents.core4>
 		<dependency.org.apache.httpcomponents.core5>5.3.4</dependency.org.apache.httpcomponents.core5>
 		<dependency.org.apache.karaf>4.4.7</dependency.org.apache.karaf>
-		<dependency.org.apache.logging.log4j>2.24.3</dependency.org.apache.logging.log4j>
+		<dependency.org.apache.logging.log4j>2.25.1</dependency.org.apache.logging.log4j>
 		<dependency.org.apache.servicemix.bundles.aopalliance>1.0_6</dependency.org.apache.servicemix.bundles.aopalliance>
 		<dependency.org.apache.servicemix.bundles.jasypt>1.9.3_1</dependency.org.apache.servicemix.bundles.jasypt>
 		<dependency.org.apache.servicemix.bundles.javax-inject>1_3</dependency.org.apache.servicemix.bundles.javax-inject>
@@ -252,7 +252,7 @@
 
 		<dependency.org.eclipse.jetty>12.0.22</dependency.org.eclipse.jetty>
 
-		<dependency.org.eclipse.platform.osgi>3.23.0</dependency.org.eclipse.platform.osgi>
+		<dependency.org.eclipse.platform.osgi>3.23.100</dependency.org.eclipse.platform.osgi>
 
 		<dependency.org.glassfish.hk2>3.1.1</dependency.org.glassfish.hk2>
 		<!-- yes - it's 1.0.3 required by Jersey 3.1.x -->
@@ -267,9 +267,9 @@
 		<dependency.org.jboss.threads>3.6.1.Final</dependency.org.jboss.threads>
 		<dependency.org.jboss.xnio>3.8.16.Final</dependency.org.jboss.xnio>
 
-		<dependency.org.jline>3.21.0</dependency.org.jline>
-		<dependency.org.jsoup>1.20.1</dependency.org.jsoup>
-		<dependency.org.junit>5.13.0</dependency.org.junit>
+		<dependency.org.jline>3.21.1</dependency.org.jline>
+		<dependency.org.jsoup>1.21.1</dependency.org.jsoup>
+		<dependency.org.junit>5.13.4</dependency.org.junit>
 		<dependency.org.mockito>5.18.0</dependency.org.mockito>
 		<dependency.org.mortbay.jasper.apache-jsp>10.1.31</dependency.org.mortbay.jasper.apache-jsp>
 		<dependency.org.mortbay.jetty.alpn>8.1.13.v20181017</dependency.org.mortbay.jetty.alpn>
@@ -279,7 +279,7 @@
 		<dependency.org.ops4j.pax.exam>4.14.0</dependency.org.ops4j.pax.exam>
 		<dependency.org.ops4j.pax.logging>2.3.0</dependency.org.ops4j.pax.logging>
 		<dependency.org.ops4j.pax.swissbox>1.9.0</dependency.org.ops4j.pax.swissbox>
-		<dependency.org.ops4j.pax.url>3.0.0</dependency.org.ops4j.pax.url>
+		<dependency.org.ops4j.pax.url>3.0.1</dependency.org.ops4j.pax.url>
 
 		<dependency.org.osgi.annotation>8.1.0</dependency.org.osgi.annotation>
 		<dependency.org.osgi.core>8.0.0</dependency.org.osgi.core>
@@ -300,7 +300,7 @@
 		<dependency.org.owasp.encoder>1.3.1</dependency.org.owasp.encoder>
 		<dependency.org.primefaces>15.0.1</dependency.org.primefaces>
 		<dependency.org.slf4j>2.0.17</dependency.org.slf4j>
-		<dependency.org.springframework>6.2.7</dependency.org.springframework>
+		<dependency.org.springframework>6.2.9</dependency.org.springframework>
 		<dependency.org.vaadin.artur>1.7.1</dependency.org.vaadin.artur>
 
 		<dependency.org.wildfly.client>1.0.1.Final</dependency.org.wildfly.client>
