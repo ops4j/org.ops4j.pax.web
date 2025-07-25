@@ -248,7 +248,7 @@
 		<dependency.org.bouncycastle>1.81</dependency.org.bouncycastle>
 		<dependency.org.codehaus.woodstox.stax2-api>4.2.2</dependency.org.codehaus.woodstox.stax2-api>
 		<!-- 3.41.0 doesn't work... -->
-		<dependency.org.eclipse.jdt.ecj>3.40.0</dependency.org.eclipse.jdt.ecj>
+		<dependency.org.eclipse.jdt.ecj>3.42.0</dependency.org.eclipse.jdt.ecj>
 
 		<dependency.org.eclipse.jetty>12.0.23</dependency.org.eclipse.jetty>
 
