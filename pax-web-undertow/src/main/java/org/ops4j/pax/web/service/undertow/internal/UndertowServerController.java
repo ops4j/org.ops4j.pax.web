@@ -135,12 +135,13 @@ public class UndertowServerController implements ServerController/*, IdentityMan
 		if (listener == null) {
 			throw new IllegalArgumentException("ServerListener is null");
 		}
-		if (state == ServerState.STOPPED) {
-			listener.stateChanged(new ServerEvent(ServerEvent.State.CONFIGURED, undertowServerWrapper.getAddresses(false)));
-		} else if (state == ServerState.STARTED) {
-			listener.stateChanged(new ServerEvent(ServerEvent.State.STARTED, undertowServerWrapper.getAddresses(true)));
+		if (listeners.add(listener)) {
+			if (state == ServerState.STOPPED) {
+				listener.stateChanged(new ServerEvent(ServerEvent.State.CONFIGURED, undertowServerWrapper.getAddresses(false)));
+			} else if (state == ServerState.STARTED) {
+				listener.stateChanged(new ServerEvent(ServerEvent.State.STARTED, undertowServerWrapper.getAddresses(true)));
+			}
 		}
-		listeners.add(listener);
 	}
 
 	@Override
