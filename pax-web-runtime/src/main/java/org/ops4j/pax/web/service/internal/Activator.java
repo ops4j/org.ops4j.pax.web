@@ -562,7 +562,9 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 
 			// create a controller object to operate on any supported web server
 			serverController = serverControllerFactory.createServerController(configuration);
-			// immediately add current ServerListeners.
+			// immediately add current ServerListeners - these may have been added in
+			// org.ops4j.pax.web.service.internal.Activator.ServerListenerCustomizer.addingService(), but
+			// the controller will prevent duplicate event notification
 			serverListeners.forEach(listener -> serverController.addListener(listener));
 
 			// first step is to configure the server without actually starting it
