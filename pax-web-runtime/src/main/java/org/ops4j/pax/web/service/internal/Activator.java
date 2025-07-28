@@ -843,9 +843,10 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 		@Override
 		public ServerListener addingService(ServiceReference<ServerListener> reference) {
 			ServerListener service = bundleContext.getService(reference);
+			serverListeners.add(service);
+
 			ServerController sc = serverController;
 			if (sc != null) {
-				serverListeners.add(service);
 				sc.addListener(service);
 			}
 			return service;
@@ -858,9 +859,10 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 		@Override
 		public void removedService(ServiceReference<ServerListener> reference, ServerListener service) {
 			ServerController sc = serverController;
+			serverListeners.remove(service);
+
 			if (sc != null) {
 				sc.removeListener(service);
-				serverListeners.remove(service);
 			}
 			if (bundleContext != null) {
 				bundleContext.ungetService(reference);

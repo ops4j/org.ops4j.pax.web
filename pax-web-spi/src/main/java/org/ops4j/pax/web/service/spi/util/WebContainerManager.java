@@ -109,14 +109,15 @@ public class WebContainerManager implements BundleListener, ServiceTrackerCustom
 		this.context = context;
 		this.listener = listener;
 
-		final ThreadFactory tf = Executors.defaultThreadFactory();
 		if (threadName != null) {
+			final ThreadFactory tf = Executors.defaultThreadFactory();
 			pool = Executors.newSingleThreadExecutor(r -> {
 				Thread thread = tf.newThread(r);
 				thread.setName(threadName);
 				return thread;
 			});
 		} else {
+			// run in the same thread
 			pool = Runnable::run;
 		}
 
