@@ -529,7 +529,7 @@ class Hc5TestClient implements HttpTestClient {
 		for (AssertionDefinition<String> wrapper : responseContentAssertion) {
 			final boolean assertionResult = assertTrue(result.content != null ? result.content : "", wrapper.predicate);
 			if (!assertionResult) {
-				assertionErrors.add("Response-Content mismatch: " + wrapper.message);
+				assertionErrors.add("Response-Content mismatch: " + wrapper.message + ", but is " +  result.content);
 			}
 		}
 

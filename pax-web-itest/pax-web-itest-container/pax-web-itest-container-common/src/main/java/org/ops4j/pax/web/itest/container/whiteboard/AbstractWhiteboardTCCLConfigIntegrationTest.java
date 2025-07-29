@@ -48,30 +48,31 @@ public abstract class AbstractWhiteboardTCCLConfigIntegrationTest extends Abstra
 	public void setUp() throws Exception {
 		org.osgi.service.cm.Configuration config = caService.getConfiguration(PaxWebConstants.PID, null);
 
-		configureAndWaitForNamedServlet("tccl-servlet", () -> {
+		Dictionary<String, Object> current = config.getProperties();
+		if (current == null || !"8182".equals(current.get(PaxWebConfig.PID_CFG_HTTP_PORT))) {
 			Dictionary<String, Object> props = new Hashtable<>();
 			props.put(PaxWebConfig.PID_CFG_LISTENING_ADDRESSES, "127.0.0.1");
 			props.put(PaxWebConfig.PID_CFG_HTTP_PORT, "8182");
 			props.put(PaxWebConfig.PID_CFG_TCCL_TYPE, getTCCLType());
 
-			Dictionary<String, Object> current = config.getProperties();
-			if (current == null || !"8182".equals(current.get(PaxWebConfig.PID_CFG_HTTP_PORT))) {
-				configureAndWaitForListener(8182, () -> {
-					config.update(props);
-				});
-			}
+			configureAndWaitForListener(8182, () -> {
+				config.update(props);
+			});
+		}
 
+		configureAndWaitForNamedServlet("tccl-servlet", () -> {
+			Dictionary<String, String> properties = new Hashtable<>();
+			properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "tccl-servlet");
+			properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/tccl");
+			ServiceRegistration<Servlet> registerService = context
+					.registerService(Servlet.class, new TCCLServlet(), properties);
+		});
+		configureAndWaitForFilterWithMapping("/*", () -> {
 			Dictionary<String, String> properties = new Hashtable<>();
 			properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "tccl-filter");
 			properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/*");
 			ServiceRegistration<Filter> registerFilter = context
 					.registerService(Filter.class, new TCCLFilter(), properties);
-
-			properties = new Hashtable<>();
-			properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "tccl-servlet");
-			properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/tccl");
-			ServiceRegistration<Servlet> registerService = context
-					.registerService(Servlet.class, new TCCLServlet(), properties);
 		});
 	}
 
