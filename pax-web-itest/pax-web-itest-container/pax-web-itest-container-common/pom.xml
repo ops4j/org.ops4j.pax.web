@@ -91,7 +91,7 @@
 							org.ops4j.pax.web.itest.utils.web,
 
 							<!-- from pax-logging-api -->
-							org.slf4j;version="[2,3)",
+							org.slf4j;version="[1.7,3)",
 
 							<!-- test dependencies -->
 							javax.inject,

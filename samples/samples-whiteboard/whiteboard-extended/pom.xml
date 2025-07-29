@@ -57,7 +57,7 @@
 							org.osgi.service.servlet.whiteboard;version="[2,3)",
 
 							<!-- from pax-logging-api -->
-							org.slf4j;version="[2,3)",
+							org.slf4j;version="[1.7,3)",
 
 							<!-- from pax-web -->
 							org.ops4j.pax.web.service.whiteboard

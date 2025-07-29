@@ -59,7 +59,7 @@
 							org.ops4j.pax.web.extender.whiteboard.runtime,
 
 							<!-- from pax-logging-api -->
-							org.slf4j;version="[2,3)"
+							org.slf4j;version="[1.7,3)"
 						</Import-Package>
 						<Private-Package>org.ops4j.pax.web.samples.whiteboard.security</Private-Package>
 					</instructions>

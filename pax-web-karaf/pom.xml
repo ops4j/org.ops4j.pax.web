@@ -81,7 +81,7 @@
 							org.ops4j.pax.web.jsp;version="${pax-web.osgi.version}";resolution:=optional,
 
 							<!-- from pax-logging-api -->
-							org.slf4j;version="[2,3)",
+							org.slf4j;version="[1.7,3)",
 							org.apache.juli.logging,
 
 							<!-- Karaf -->

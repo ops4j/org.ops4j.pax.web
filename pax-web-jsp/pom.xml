@@ -78,7 +78,7 @@
 							org.ops4j.pax.web.service.spi.util;version="${pax-web.osgi.version}",
 
 							<!-- from pax-logging-api -->
-							org.slf4j;version="[2,3)",
+							org.slf4j;version="[1.7,3)",
 							org.apache.juli.logging;version="[9,11)",
 
 							<!-- packages required by Jasper/EL implementation and exported from pax-web-tomcat-common -->

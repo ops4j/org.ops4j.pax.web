@@ -96,9 +96,9 @@
 							org.ops4j.pax.web.service.spi.whiteboard;version="${pax-web.osgi.version}",
 
 							<!-- from pax-logging-api -->
-							org.slf4j;version="[2,3)",
-							org.slf4j.helpers;version="[2,3)";resolution:=optional,
-							org.slf4j.spi;version="[2,3)";resolution:=optional,
+							org.slf4j;version="[1.7,3)",
+							org.slf4j.helpers;version="[1.7,3)";resolution:=optional,
+							org.slf4j.spi;version="[1.7,3)";resolution:=optional,
 							org.osgi.service.log;version="[1.5,2)";resolution:=optional,
 							org.jboss.logging;version="[3.5,4)",
 

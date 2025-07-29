@@ -55,7 +55,7 @@
 							org.osgi.framework;version="[1.10,2)",
 
 							<!-- from pax-logging-api -->
-							org.slf4j;version="[2,3)"
+							org.slf4j;version="[1.7,3)"
 						</Import-Package>
 						<Export-Package>org.ops4j.pax.web.extender.samples.whiteboard.internal</Export-Package>
 					</instructions>
