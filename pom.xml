@@ -125,7 +125,7 @@
 		<plugin.maven-archetype-plugin>3.4.0</plugin.maven-archetype-plugin>
 		<plugin.maven-assembly-plugin>3.7.1</plugin.maven-assembly-plugin>
 		<plugin.maven-checkstyle-plugin>3.6.0</plugin.maven-checkstyle-plugin>
-		<plugin.dependency.com.puppycrawl.tools.checkstyle>10.25.0</plugin.dependency.com.puppycrawl.tools.checkstyle>
+		<plugin.dependency.com.puppycrawl.tools.checkstyle>10.26.1</plugin.dependency.com.puppycrawl.tools.checkstyle>
 		<plugin.maven-clean-plugin>3.5.0</plugin.maven-clean-plugin>
 		<plugin.maven-compiler-plugin>3.14.0</plugin.maven-compiler-plugin>
 		<plugin.maven-dependency-plugin>3.8.1</plugin.maven-dependency-plugin>
@@ -171,8 +171,7 @@
 		<dependency.commons-collections3>3.2.2</dependency.commons-collections3>
 		<dependency.commons-digester>2.1</dependency.commons-digester>
 		<dependency.commons-fileupload>1.5</dependency.commons-fileupload>
-		<!-- 2.20.0 requires java.nio.file.spi not exported by Karaf 4.3 -->
-		<dependency.commons-io>2.19.0</dependency.commons-io>
+		<dependency.commons-io>2.20.0</dependency.commons-io>
 		<dependency.com.fasterxml.classmate>1.7.0</dependency.com.fasterxml.classmate>
 		<dependency.com.fasterxml.jackson.core>2.19.2</dependency.com.fasterxml.jackson.core>
 		<dependency.com.fasterxml.jackson.core.databind>2.19.2</dependency.com.fasterxml.jackson.core.databind>
@@ -252,7 +251,7 @@
 		<dependency.org.assertj>3.27.3</dependency.org.assertj>
 		<dependency.org.bouncycastle>1.81</dependency.org.bouncycastle>
 		<dependency.org.codehaus.woodstox.stax2-api>4.2.2</dependency.org.codehaus.woodstox.stax2-api>
-		<!-- 3.41.0 doesn't work... -->
+		<!-- Keep this JDK 11 compatible version -->
 		<dependency.org.eclipse.jdt.ecj>3.33.0</dependency.org.eclipse.jdt.ecj>
 
 		<!-- Please keep Maven and OSGi version in sync -->
@@ -261,7 +260,7 @@
 		<dependency.org.eclipse.jetty.alpn>1.1.3.v20160715</dependency.org.eclipse.jetty.alpn>
 		<dependency.org.eclipse.jetty.alpn.osgi>1.1.3</dependency.org.eclipse.jetty.alpn.osgi>
 
-		<dependency.org.eclipse.platform.osgi>3.23.0</dependency.org.eclipse.platform.osgi>
+		<dependency.org.eclipse.platform.osgi>3.23.100</dependency.org.eclipse.platform.osgi>
 
 		<dependency.org.glassfish.hk2>2.6.1</dependency.org.glassfish.hk2>
 		<dependency.org.glassfish.hk2.osgi-locator>1.0.3</dependency.org.glassfish.hk2.osgi-locator>
@@ -308,7 +307,7 @@
 
 		<dependency.org.ow2.asm>9.8</dependency.org.ow2.asm>
 		<dependency.org.owasp.encoder>1.3.1</dependency.org.owasp.encoder>
-		<dependency.org.primefaces>14.0.12</dependency.org.primefaces>
+		<dependency.org.primefaces>14.0.13-LTS</dependency.org.primefaces>
 		<dependency.org.slf4j>2.0.17</dependency.org.slf4j>
 		<dependency.org.springframework>5.3.39</dependency.org.springframework>
 		<dependency.org.vaadin.artur>1.7.1</dependency.org.vaadin.artur>
