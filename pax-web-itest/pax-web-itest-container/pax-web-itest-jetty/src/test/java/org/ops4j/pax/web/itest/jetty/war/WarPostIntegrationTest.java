@@ -17,7 +17,6 @@ package org.ops4j.pax.web.itest.jetty.war;
 
 import jakarta.servlet.http.HttpServletResponse;
 
-import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
@@ -27,7 +26,6 @@ import org.ops4j.pax.web.itest.container.war.AbstractWarPostIntegrationTest;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 
 @RunWith(PaxExam.class)
-@Ignore("https://github.com/jetty/jetty.project/issues/12926")
 public class WarPostIntegrationTest extends AbstractWarPostIntegrationTest {
 
 	@Configuration
