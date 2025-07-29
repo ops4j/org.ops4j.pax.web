@@ -45,7 +45,7 @@ public class WebContainerErrorPagesTest extends MultiContainerTestSupport {
 		Bundle sample1 = mockBundle("sample1");
 		WebContainer wc = container(sample1);
 
-		wc.registerServlet("/yikes", new ProblemServlet(), null, null);
+		wc.registerServlet(new ProblemServlet(), ProblemServlet.class.getName(), new String[] { "/yikes" }, null, null);
 		wc.registerServlet("/error", new ErrorServlet(), null, null);
 		wc.registerErrorPage("461", "/error", null);
 
@@ -67,7 +67,7 @@ public class WebContainerErrorPagesTest extends MultiContainerTestSupport {
 		assertThat(httpGET(port, "/c/yikes?result=461&msg=x461"), startsWith("HTTP/1.1 404"));
 		assertThat(httpGET(port, "/yikes?result=461&msg=x461"), endsWith("null: [org.ops4j.pax.web.itest.server.support.ProblemServlet][null][null][x461][/yikes][461]"));
 
-		wc.unregister("/yikes");
+		wc.unregisterServlet(ProblemServlet.class.getName());
 		stopContainer(sample1);
 
 		ServerModelInternals serverModelInternals = serverModelInternals(serverModel);

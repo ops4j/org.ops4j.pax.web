@@ -222,6 +222,8 @@
 		<dependency.org.apache.felix.eventadmin>1.6.4</dependency.org.apache.felix.eventadmin>
 		<dependency.org.apache.felix.fileinstall>3.7.4</dependency.org.apache.felix.fileinstall>
 		<dependency.org.apache.felix.framework7>7.0.5</dependency.org.apache.felix.framework7>
+		<dependency.org.apache.felix.healthcheck.api>2.0.4</dependency.org.apache.felix.healthcheck.api>
+		<dependency.org.apache.felix.healthcheck.core>2.3.0</dependency.org.apache.felix.healthcheck.core>
 		<dependency.org.apache.felix.inventory>1.1.0</dependency.org.apache.felix.inventory>
 		<dependency.org.apache.felix.metatype>1.2.4</dependency.org.apache.felix.metatype>
 		<dependency.org.apache.felix.scr>2.2.12</dependency.org.apache.felix.scr>
@@ -287,6 +289,7 @@
 		<dependency.org.osgi.service.cm>1.6.1</dependency.org.osgi.service.cm>
 		<dependency.org.osgi.service.component>1.5.1</dependency.org.osgi.service.component>
 		<dependency.org.osgi.service.component.annotations>1.5.1</dependency.org.osgi.service.component.annotations>
+		<dependency.org.osgi.service.condition>1.0.0</dependency.org.osgi.service.condition>
 		<dependency.org.osgi.service.event>1.4.1</dependency.org.osgi.service.event>
 		<dependency.org.osgi.service.jakartars>2.0.0</dependency.org.osgi.service.jakartars>
 		<dependency.org.osgi.service.log>1.5.0</dependency.org.osgi.service.log>
@@ -1583,6 +1586,12 @@
 			</dependency>
 			<dependency>
 				<groupId>org.osgi</groupId>
+				<artifactId>org.osgi.service.condition</artifactId>
+				<version>${dependency.org.osgi.service.condition}</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.osgi</groupId>
 				<artifactId>org.osgi.service.event</artifactId>
 				<version>${dependency.org.osgi.service.event}</version>
 				<scope>provided</scope>
@@ -1650,6 +1659,18 @@
 				<version>${dependency.org.apache.felix.metatype}</version>
 			</dependency>
 
+			<dependency>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>org.apache.felix.healthcheck.api</artifactId>
+				<version>${dependency.org.apache.felix.healthcheck.api}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>org.apache.felix.healthcheck.core</artifactId>
+				<version>${dependency.org.apache.felix.healthcheck.core}</version>
+				<scope>test</scope>
+			</dependency>
 			<dependency>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>org.apache.felix.webconsole</artifactId>

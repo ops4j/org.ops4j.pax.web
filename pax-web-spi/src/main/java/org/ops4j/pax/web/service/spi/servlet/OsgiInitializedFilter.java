@@ -115,7 +115,8 @@ public class OsgiInitializedFilter implements Filter {
 			filter.init(new FilterConfig() {
 				@Override
 				public String getFilterName() {
-					return config.getFilterName();
+					return OsgiInitializedFilter.this.filterModel == null ? config.getFilterName()
+							: OsgiInitializedFilter.this.filterModel.getNameForDTO();
 				}
 
 				@Override

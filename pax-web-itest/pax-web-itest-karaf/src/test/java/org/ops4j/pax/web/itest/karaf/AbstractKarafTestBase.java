@@ -27,7 +27,6 @@ import org.ops4j.pax.exam.karaf.options.DoNotModifyLogOption;
 import org.ops4j.pax.exam.karaf.options.LogLevelOption.LogLevel;
 import org.ops4j.pax.exam.karaf.options.configs.CustomProperties;
 import org.ops4j.pax.exam.options.MavenArtifactUrlReference;
-import org.ops4j.pax.exam.options.MavenUrlReference;
 import org.ops4j.pax.exam.options.extra.VMOption;
 import org.ops4j.pax.web.itest.AbstractControlledTestBase;
 import org.ops4j.pax.web.itest.utils.client.HttpTestClient;
@@ -53,6 +52,7 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.replaceCo
 public class AbstractKarafTestBase extends AbstractControlledTestBase {
 
 	protected MavenArtifactUrlReference paxWebFeatures;
+	protected MavenArtifactUrlReference karafStandardFeatures;
 
 	@Inject
 	protected FeaturesService featuresService;
@@ -83,7 +83,7 @@ public class AbstractKarafTestBase extends AbstractControlledTestBase {
 				.groupId("org.ops4j.pax.web").artifactId("pax-web-features")
 				.type("xml").classifier("features").versionAsInProject();
 
-		MavenUrlReference karafStandardFeatures = maven()
+		this.karafStandardFeatures = maven()
 				.groupId("org.apache.karaf.features").artifactId("standard")
 				.type("xml").classifier("features").version(getKarafVersion());
 
@@ -219,6 +219,10 @@ public class AbstractKarafTestBase extends AbstractControlledTestBase {
 	public Option[] undertowConfig() {
 		return combine(baseConfigure(),
 				features(paxWebFeatures, "pax-web-http-undertow", "pax-web-war", "pax-web-whiteboard"));
+	}
+
+	public Option scrConfig() {
+		return features(karafStandardFeatures, "scr");
 	}
 
 	protected static String getProjectVersion() {

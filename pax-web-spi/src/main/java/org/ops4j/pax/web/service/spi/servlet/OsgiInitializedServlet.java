@@ -78,7 +78,8 @@ public class OsgiInitializedServlet implements Servlet {
 				servlet.init(new ServletConfig() {
 					@Override
 					public String getServletName() {
-						return config.getServletName();
+						return OsgiInitializedServlet.this.model == null ? config.getServletName()
+								: OsgiInitializedServlet.this.model.getNameForDTO();
 					}
 
 					@Override

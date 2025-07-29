@@ -85,8 +85,13 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 
 	private final List<DynamicMapping> dynamicServletNames = new LinkedList<>();
 
-	/** Filter name that defaults to FQCN of the {@link Filter}. {@code <filter>/<filter-name>} */
+	/**
+	 * Filter name that defaults to FQCN of the {@link Filter}. {@code <filter>/<filter-name>}, but according
+	 * to Whiteboard TCK doesn't have to be unique... That's why some tricks are involved to ensure that
+	 * more filters that don't have name specified may be registered.
+	 */
 	private String name;
+	private String nameForDTO;
 
 	/**
 	 * Init parameters of the filter as specified by {@link FilterConfig#getInitParameterNames()} and
@@ -204,15 +209,17 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 			// Whiteboard Specification 140.5 Registering Servlet Filters
 			Class<? extends Filter> c = getActualClass();
 			if (c != null) {
-				name = c.getName();
+				this.nameForDTO = c.getName();
 			}
 		}
 		if (name == null) {
 			// no idea how to obtain the class, but this should not happen
-			name = UUID.randomUUID().toString();
+			name = "filter-" + UUID.randomUUID().toString();
 		}
 		this.name = name;
-
+		if (this.nameForDTO == null) {
+			this.nameForDTO = name;
+		}
 
 		if (this.asyncSupported == null) {
 			this.asyncSupported = "true".equalsIgnoreCase(this.initParams.remove(PaxWebConstants.SERVICE_PROPERTY_ASYNC_SUPPORTED));
@@ -223,6 +230,7 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 	public void alterWithNewModel(ElementModel<Filter, FilterEventData> webElement) {
 		FilterModel fm = (FilterModel) webElement;
 		this.name = fm.getName();
+		this.nameForDTO = fm.getNameForDTO();
 		this.initParams.clear();
 		this.initParams.putAll(fm.initParams);
 		this.asyncSupported = fm.asyncSupported;
@@ -412,7 +420,7 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 
 	public FilterDTO toFilterDTO() {
 		FilterDTO dto = new FilterDTO();
-		dto.name = name;
+		dto.name = nameForDTO;
 		dto.asyncSupported = asyncSupported != null && asyncSupported;
 		dto.initParams = new HashMap<>(initParams);
 		// will be set later
@@ -439,7 +447,7 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 
 	public FailedFilterDTO toFailedFilterDTO(int dtoFailureCode) {
 		FailedFilterDTO dto = new FailedFilterDTO();
-		dto.name = name;
+		dto.name = nameForDTO;
 		dto.asyncSupported = asyncSupported != null && asyncSupported;
 		dto.initParams = new HashMap<>(initParams);
 		dto.servletContextId = 0L;
@@ -495,6 +503,10 @@ public class FilterModel extends ElementModel<Filter, FilterEventData> {
 
 	public String getName() {
 		return name;
+	}
+
+	public String getNameForDTO() {
+		return nameForDTO;
 	}
 
 	public Map<String, String> getInitParams() {

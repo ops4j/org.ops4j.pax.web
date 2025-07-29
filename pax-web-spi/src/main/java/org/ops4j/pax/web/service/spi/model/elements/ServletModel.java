@@ -73,8 +73,13 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 	 */
 	private String[] urlPatterns;
 
-	/** Servlet name that defaults to FQCN of the {@link Servlet}. {@code <servlet>/<servlet-name>} */
+	/**
+	 *  Servlet name that defaults to FQCN of the {@link Servlet}. {@code <servlet>/<servlet-name>}, but according
+	 * to Whiteboard TCK doesn't have to be unique... That's why some tricks are involved to ensure that
+	 * more servlets that don't have name specified may be registered.
+	 */
 	private String name;
+	private String nameForDTO;
 
 	/**
 	 * Init parameters of the servlet as specified by {@link ServletConfig#getInitParameterNames()} and
@@ -248,14 +253,17 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 			// Whiteboard Specification 140.4 Registering Servlets
 			Class<? extends Servlet> c = getActualClass();
 			if (c != null) {
-				name = c.getName();
+				this.nameForDTO = c.getName();
 			}
 		}
 		if (name == null && !resourceServlet) {
 			// no idea how to obtain the class, but this should not happen
-			name = UUID.randomUUID().toString();
+			name = "servlet-" + UUID.randomUUID().toString();
 		}
 		this.name = name;
+		if (this.nameForDTO == null) {
+			this.nameForDTO = name;
+		}
 
 		if (this.asyncSupported == null) {
 			// for CXF servlet: https://github.com/apache/cxf/blame/cxf-3.5.3/rt/transports/http/src/main/java/org/apache/cxf/transport/http/osgi/ServletExporter.java#L104-L105
@@ -286,6 +294,7 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 	public void alterWithNewModel(ElementModel<Servlet, ServletEventData> webElement) {
 		ServletModel sm = (ServletModel) webElement;
 		this.name = sm.getName();
+		this.nameForDTO = sm.getNameForDTO();
 		this.initParams.clear();
 		this.initParams.putAll(sm.initParams);
 		this.asyncSupported = sm.asyncSupported;
@@ -562,6 +571,10 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getNameForDTO() {
+		return nameForDTO;
 	}
 
 	public Map<String, String> getInitParams() {
@@ -850,7 +863,7 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 
 	public ServletDTO toServletDTO() {
 		ServletDTO dto = new ServletDTO();
-		dto.name = name;
+		dto.name = nameForDTO;
 		dto.asyncSupported = asyncSupported != null && asyncSupported;
 		dto.initParams = new HashMap<>(initParams);
 		// will be set later
@@ -873,7 +886,7 @@ public class ServletModel extends ElementModel<Servlet, ServletEventData> {
 
 	public FailedServletDTO toFailedServletDTO(int dtoFailureCode) {
 		FailedServletDTO dto = new FailedServletDTO();
-		dto.name = name;
+		dto.name = nameForDTO;
 		dto.asyncSupported = asyncSupported != null && asyncSupported;
 		dto.initParams = new HashMap<>(initParams);
 		dto.servletContextId = 0L;

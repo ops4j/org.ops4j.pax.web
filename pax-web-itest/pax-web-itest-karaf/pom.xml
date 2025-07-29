@@ -254,12 +254,26 @@
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.util.promise</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.service.condition</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>org.apache.aries.spifly</groupId>
 			<artifactId>org.apache.aries.spifly.dynamic.bundle</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.healthcheck.api</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.healthcheck.core</artifactId>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.webconsole</artifactId>
