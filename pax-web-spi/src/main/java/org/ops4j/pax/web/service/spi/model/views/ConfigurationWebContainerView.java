@@ -31,4 +31,10 @@ public interface ConfigurationWebContainerView extends PaxWebContainerView {
      */
     Executor configurationExecutor();
 
+    /**
+     * Is the underlying service (still) valid?
+     * @return
+     */
+    boolean isValid();
+
 }

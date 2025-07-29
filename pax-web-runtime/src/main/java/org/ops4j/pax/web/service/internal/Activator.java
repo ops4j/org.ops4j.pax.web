@@ -108,8 +108,8 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 	private ServerController serverController;
 
 	/**
-	 * {@link WebElementEventDispatcher} bound to lifecycle of this pax-web-runtime bundle, not to configuration
-	 * or {@link ServerControllerFactory}.
+	 * {@link WebElementEventDispatcher} bound to lifecycle of combined configuration
+	 * and {@link ServerControllerFactory}.
 	 */
 	private WebElementEventDispatcher webElementEventDispatcher;
 
@@ -404,6 +404,11 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 		if (Utils.same(dictionary, this.configuration) && Utils.same(controllerFactory, this.serverControllerFactory)) {
 			LOG.debug("No change in configuration of Pax Web Runtime.");
 			return;
+		}
+
+		if (webElementEventDispatcher != null) {
+			webElementEventDispatcher.destroy();
+			webElementEventDispatcher = null;
 		}
 
 		if (serverModel != null) {
