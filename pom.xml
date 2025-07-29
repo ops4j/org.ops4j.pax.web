@@ -732,6 +732,8 @@
 				<configuration>
 					<!-- you need <server> with such <id> in ~/.m2/repository -->
 					<publishingServerId>ossrh-central</publishingServerId>
+					<deploymentName>pax-web-${project.version}</deploymentName>
+					<waitUntil>uploaded</waitUntil>
 				</configuration>
 			</plugin>
 
