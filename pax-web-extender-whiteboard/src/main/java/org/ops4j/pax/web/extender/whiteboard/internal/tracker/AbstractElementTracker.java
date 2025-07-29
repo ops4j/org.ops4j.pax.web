@@ -289,7 +289,7 @@ public abstract class AbstractElementTracker<S, R, D extends WebElementEventData
 		// org.ops4j.pax.web.service.spi.model.elements.ElementModel.performValidation() sets proper "last failure",
 		// which may then be set to different value (for example when dereferencing ServiceReference)
 		if (webElement.isValid()) {
-			// the succesful DTO information will be propagated to HttpServiceRuntime (which is the ServerModel)
+			// the successful DTO information will be propagated to HttpServiceRuntime (which is the ServerModel)
 			// during registration of the web element
 			whiteboardExtenderContext.addWebElement(serviceReference.getBundle(), webElement);
 			return webElement;

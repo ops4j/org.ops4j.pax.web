@@ -193,7 +193,7 @@ public class BundleWhiteboardApplication {
 	}
 
 	/**
-	 * Deassociates given customized <em>context</em> from current <em>bundle web application</em> and unregisters
+	 * Dissociates given customized <em>context</em> from current <em>bundle web application</em> and unregisters
 	 * it from {@link WebContainer}.
 	 * @param webContext
 	 */

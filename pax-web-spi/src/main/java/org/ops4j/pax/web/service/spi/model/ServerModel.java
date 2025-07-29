@@ -625,6 +625,10 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 		this.stopping.set(true);
 	}
 
+	public boolean isStopping() {
+		return stopping.get();
+	}
+
 	/**
 	 * Increment internal change counter and propagate this information to {@link ServiceRegistration} for
 	 * {@link HttpServiceRuntime} and {@link ServiceReferenceDTO}

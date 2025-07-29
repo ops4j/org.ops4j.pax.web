@@ -2820,6 +2820,11 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		public Executor configurationExecutor() {
 			return HttpServiceEnabled.this.serverModel.getExecutor();
 		}
+
+		@Override
+		public boolean isValid() {
+			return !HttpServiceEnabled.this.serverModel.isStopping();
+		}
 	}
 
 	/**
