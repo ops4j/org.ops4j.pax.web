@@ -152,7 +152,7 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 
 	private final Executor executor;
 
-	/** Unique identified of the Thread from (assumed) single thread pool executor. */
+	/** Unique identifier of the Thread from (assumed) single thread pool executor. */
 	private final long registrationThreadId;
 
 	// --- Global context information - not related to any particular bundle
