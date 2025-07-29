@@ -366,21 +366,21 @@ public class WebContainerManager implements BundleListener, ServiceTrackerCustom
 		ServiceReference<WebContainer> currentReference = currentWebContainerRef.get();
 		// but potentially the new reference is better
 
-		if (currentReference == null) {
-			// we can get a better pool - from global pax-web-runtime - it's the same for all incarnations
-			// of HttpService (factory)
-			if (reference != null && !synchronous) {
-				ConfigurationWebContainerView view = containerView(this.context.getBundle(), reference, ConfigurationWebContainerView.class);
-				if (view != null) {
-					Executor global = view.configurationExecutor();
-					if (global != null) {
-						LOG.debug("Synchronized WebContainerManager with {}", view);
-						this.pool = global;
-						listener.setExecutor(pool);
-					}
-				}
-			}
-		}
+//		if (currentReference == null) {
+//			// we can get a better pool - from global pax-web-runtime - it's the same for all incarnations
+//			// of HttpService (factory)
+//			if (reference != null && !synchronous) {
+//				ConfigurationWebContainerView view = containerView(this.context.getBundle(), reference, ConfigurationWebContainerView.class);
+//				if (view != null) {
+//					Executor global = view.configurationExecutor();
+//					if (global != null) {
+//						LOG.debug("Synchronized WebContainerManager with {}", view);
+//						this.pool = global;
+//						listener.setExecutor(pool);
+//					}
+//				}
+//			}
+//		}
 
 		if (currentReference == null || currentReference.compareTo(reference) < 0) {
 			// call if we didn't have any reference or the new one has higher ranking - only in this method
