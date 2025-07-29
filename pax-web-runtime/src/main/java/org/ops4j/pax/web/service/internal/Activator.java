@@ -27,9 +27,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -180,7 +182,7 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 	public void start(final BundleContext context) throws Exception {
 		LOG.debug("Starting Pax Web Runtime");
 
-		runtimeExecutor = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("paxweb-config"));
+		runtimeExecutor = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("paxweb-config"), new ThreadPoolExecutor.AbortPolicy());
 		registrationThreadId = ServerModel.getThreadIdFromSingleThreadPool(runtimeExecutor);
 
 		bundleContext = context;
@@ -369,11 +371,11 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 		});
 
 		// Make sure that when destroying the configuration (factory == null), we do things synchronously
-		if (controllerFactory == null || !deferredConfiguration) {
+		if ((controllerFactory == null || !deferredConfiguration) && !runtimeExecutor.isShutdown()) {
 			try {
 				future.get(20, TimeUnit.SECONDS);
 			} catch (Exception e) {
-				LOG.info("Error when updating factory: " + e.getMessage(), e);
+				LOG.info("Error when updating factory: {}", e.getMessage(), e);
 			}
 		}
 	}
@@ -404,7 +406,7 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 		if (!initialConfigSet.get()) {
 			LOG.debug("Initial configuration of pax-web-runtime, registration of ServerControllerFactory tracker");
 			initialConfigSet.compareAndSet(false, true);
-			this.configuration = dictionary;
+			this.configuration = Utils.toHashtable(dictionary);
 			this.serverControllerFactory = controllerFactory; // should always be null here
 
 			// the only place where tracker of ServerControllerFactory services is created and opened
@@ -428,7 +430,7 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 			serverModel = null;
 		}
 
-		this.configuration = dictionary;
+		this.configuration = Utils.toHashtable(dictionary);
 		boolean hadSCF = this.serverControllerFactory != null;
 		ServerControllerFactory previousServerControllerFactory = this.serverControllerFactory;
 		this.serverControllerFactory = controllerFactory;
@@ -601,7 +603,7 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 			LOG.info("Registering HttpServiceRuntime");
 			// see Table 140.9 Service properties for the HttpServiceRuntime service
 			props = new Hashtable<>();
-			// we'll set this propery later through ServerListener
+			// we'll set this property later through ServerListener
 			props.put(HttpServiceRuntimeConstants.HTTP_SERVICE_ENDPOINT, "/");
 			Long httpServiceId = (Long) httpServiceFactoryReg.getReference().getProperty(Constants.SERVICE_ID);
 			props.put(PaxWebConstants.HTTP_SERVICE_ID, Collections.singletonList(httpServiceId));

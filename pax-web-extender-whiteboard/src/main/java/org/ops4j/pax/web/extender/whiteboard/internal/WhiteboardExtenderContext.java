@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -130,6 +131,8 @@ public class WhiteboardExtenderContext implements WebContainerListener, WebConte
 	/** Flag marking actual registration of {@link OsgiContextModel#DEFAULT_CONTEXT_MODEL}. */
 	private AtomicBoolean defaultContextRegistered = new AtomicBoolean(false);
 
+	private Executor executor;
+
 	public WhiteboardExtenderContext(BundleContext bundleContext) {
 		this(bundleContext, false);
 	}
@@ -208,6 +211,11 @@ public class WhiteboardExtenderContext implements WebContainerListener, WebConte
 		} finally {
 			lock.unlock();
 		}
+	}
+
+	@Override
+	public void setExecutor(Executor executor) {
+		this.executor = executor;
 	}
 
 	/**

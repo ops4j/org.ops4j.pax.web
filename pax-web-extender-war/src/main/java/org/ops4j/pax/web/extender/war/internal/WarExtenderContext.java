@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
@@ -446,6 +447,10 @@ public class WarExtenderContext implements WebContainerListener, ReportViewPlugi
 			}
 		}
 		return null;
+	}
+
+	@Override
+	public void setExecutor(Executor executor) {
 	}
 
 	private WebApplicationInfo getWebApplication(Bundle bundle) {
