@@ -23,6 +23,9 @@ import java.util.Map;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -131,7 +134,11 @@ public class WhiteboardExtenderContext implements WebContainerListener, WebConte
 	/** Flag marking actual registration of {@link OsgiContextModel#DEFAULT_CONTEXT_MODEL}. */
 	private AtomicBoolean defaultContextRegistered = new AtomicBoolean(false);
 
-	private Executor executor;
+	/**
+	 * Local executor used only to handle events from ServerModel to free its own global executor.
+	 * See <a href="https://github.com/ops4j/org.ops4j.pax.web/issues/2057">pax.web#2057</a>
+	 */
+	private final ExecutorService executor;
 
 	public WhiteboardExtenderContext(BundleContext bundleContext) {
 		this(bundleContext, false);
@@ -153,6 +160,17 @@ public class WhiteboardExtenderContext implements WebContainerListener, WebConte
 				? new WebContainerManager(bundleContext, this)
 				: new WebContainerManager(bundleContext, this, "HttpService->Whiteboard");
 		webContainerManager.initialize();
+
+		this.executor = localThreadExecutor();
+	}
+
+	private ExecutorService localThreadExecutor() {
+		return Executors.newSingleThreadExecutor(r -> {
+			final ThreadFactory tf = Executors.defaultThreadFactory();
+			Thread thread = tf.newThread(r);
+			thread.setName("Whiteboard Configuration Task");
+			return thread;
+		});
 	}
 
 	@Override
@@ -192,12 +210,14 @@ public class WhiteboardExtenderContext implements WebContainerListener, WebConte
 		if (!acceptWabContexts.get()) {
 			return;
 		}
-		lock.lock();
-		try {
-			reRegisterWebElements();
-		} finally {
-			lock.unlock();
-		}
+		this.executor.execute(() -> {
+			lock.lock();
+			try {
+				reRegisterWebElements();
+			} finally {
+				lock.unlock();
+			}
+		});
 	}
 
 	@Override
@@ -205,23 +225,26 @@ public class WhiteboardExtenderContext implements WebContainerListener, WebConte
 		if (!acceptWabContexts.get()) {
 			return;
 		}
-		lock.lock();
-		try {
-			reRegisterWebElements();
-		} finally {
-			lock.unlock();
-		}
+		this.executor.execute(() -> {
+			lock.lock();
+			try {
+				reRegisterWebElements();
+			} finally {
+				lock.unlock();
+			}
+		});
 	}
 
 	@Override
 	public void setExecutor(Executor executor) {
-		this.executor = executor;
+		// keep it like this. it was (is?) an experiment to fix https://github.com/ops4j/org.ops4j.pax.web/issues/2057
 	}
 
 	/**
 	 * Cleans up everything related to pax-web-extender-whiteboard
 	 */
 	public void shutdown() {
+		executor.shutdown();
 		webContainerManager.shutdown();
 		currentWebContainerReference = null;
 	}
