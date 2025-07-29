@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
+import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import javax.servlet.Filter;
@@ -80,6 +81,7 @@ import org.ops4j.pax.web.service.spi.model.elements.WelcomeFileModel;
 import org.ops4j.pax.web.service.spi.model.events.WebContextEventListener;
 import org.ops4j.pax.web.service.spi.model.events.WebElementEvent;
 import org.ops4j.pax.web.service.spi.model.events.WebElementEventListener;
+import org.ops4j.pax.web.service.spi.model.views.ConfigurationWebContainerView;
 import org.ops4j.pax.web.service.spi.model.views.ReportViewPlugin;
 import org.ops4j.pax.web.service.spi.model.views.ReportWebContainerView;
 import org.ops4j.pax.web.service.spi.model.views.WebAppWebContainerView;
@@ -140,6 +142,7 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 	private final WhiteboardWebContainerView whiteboardWebContainer = new WhiteboardWebContainer();
 	private final DirectWebContainerView directWebContainer = new DirectWebContainer();
 	private final ProcessingWebContainerView processingWebContainer = new ProcessingWebContainer();
+	private final ConfigurationWebContainerView configurationWebContainer = new ConfigurationWebContainer();
 	private final WebAppWebContainerView webAppWebContainer = new WebAppWebContainer();
 	private final ReportWebContainer reportWebContainer = new ReportWebContainer();
 
@@ -310,6 +313,10 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 		if (type == ProcessingWebContainerView.class) {
 			// view used to alter existing contexts using "HTTP Context Processing"
 			return type.cast(processingWebContainer);
+		}
+		if (type == ConfigurationWebContainerView.class) {
+			// view used to perform tasks synchronized with global executor
+			return type.cast(configurationWebContainer);
 		}
 		return null;
 	}
@@ -2692,6 +2699,17 @@ public class HttpServiceEnabled implements WebContainer, StoppableHttpService {
 //				batch.accept(serviceModel);
 				return null;
 			}, true);
+		}
+	}
+
+	/**
+	 * Private view needed to fix some real timing issues between Whiteboard, WAR and configuration changes.
+	 */
+	private class ConfigurationWebContainer implements ConfigurationWebContainerView {
+
+		@Override
+		public Executor configurationExecutor() {
+			return HttpServiceEnabled.this.serverModel.getExecutor();
 		}
 	}
 

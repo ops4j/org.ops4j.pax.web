@@ -37,7 +37,7 @@ public class WhiteboardTCCLWhiteboardConfigIntegrationTest extends AbstractWhite
 		// 31 -> {org.apache.felix.framework.BundleImpl@4591} "org.ops4j.pax.web.pax-web-extender-whiteboard [31]"
 		// 32 -> {org.apache.felix.framework.BundleImpl@4593} "PAXEXAM-PROBE-f5422f17-b2cb-4399-8760-42eff0784bf3 [32]"
 		//
- 		// org.ops4j.pax.web.service.internal.PaxWebManagedService will be registered before configadmin
+		// org.ops4j.pax.web.service.internal.PaxWebManagedService will be registered before configadmin
 		// starts and thanks to trackInitial, this managed service will receive initial (null) configuration
 		// before a configuration updated by AbstractWhiteboardTCCLConfigIntegrationTest.setUp()
 		// but even if that's the case, we should not rely on this

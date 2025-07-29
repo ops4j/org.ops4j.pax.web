@@ -15,6 +15,8 @@
  */
 package org.ops4j.pax.web.service.spi.util;
 
+import java.util.concurrent.Executor;
+
 import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
@@ -57,4 +59,10 @@ public interface WebContainerListener {
 	 */
 	void bundleStopped(Bundle bundle);
 
+	/**
+	 * Pass executor to the listener, which it may use for handling events. This is an attempt to really use
+	 * single executor for critical Pax Web tasks (and coordination between WAR and Whiteboard extenders)
+	 * @param executor
+	 */
+	void setExecutor(Executor executor);
 }

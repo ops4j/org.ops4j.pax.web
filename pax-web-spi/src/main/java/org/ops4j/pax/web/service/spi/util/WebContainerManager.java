@@ -24,6 +24,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.ops4j.pax.web.service.WebContainer;
+import org.ops4j.pax.web.service.spi.model.views.ConfigurationWebContainerView;
 import org.ops4j.pax.web.service.spi.whiteboard.WhiteboardWebContainerView;
 import org.ops4j.pax.web.service.views.PaxWebContainerView;
 import org.osgi.framework.Bundle;
@@ -79,7 +80,9 @@ public class WebContainerManager implements BundleListener, ServiceTrackerCustom
 	 */
 	private final WebContainerListener listener;
 
-	private final Executor pool;
+	private Executor pool;
+	private final boolean synchronous;
+	private final String threadName;
 
 	private final Map<ServiceReference<WebContainer>, Map<Bundle, WebContainer>> containers = new HashMap<>();
 
@@ -108,20 +111,28 @@ public class WebContainerManager implements BundleListener, ServiceTrackerCustom
 	public WebContainerManager(BundleContext context, WebContainerListener listener, final String threadName) {
 		this.context = context;
 		this.listener = listener;
+		this.threadName = threadName;
+		this.synchronous = threadName == null;
 
 		if (threadName != null) {
-			final ThreadFactory tf = Executors.defaultThreadFactory();
-			pool = Executors.newSingleThreadExecutor(r -> {
-				Thread thread = tf.newThread(r);
-				thread.setName(threadName);
-				return thread;
-			});
+			// we'll get a better one when WebContainer becomes available
+			pool = localThreadExecutor();
 		} else {
 			// run in the same thread
 			pool = Runnable::run;
 		}
+		listener.setExecutor(pool);
 
 		webContainerTracker = new ServiceTracker<>(context, WebContainer.class, this);
+	}
+
+	private Executor localThreadExecutor() {
+		return Executors.newSingleThreadExecutor(r -> {
+			final ThreadFactory tf = Executors.defaultThreadFactory();
+			Thread thread = tf.newThread(r);
+			thread.setName(threadName);
+			return thread;
+		});
 	}
 
 	/**
@@ -136,7 +147,7 @@ public class WebContainerManager implements BundleListener, ServiceTrackerCustom
 
 		// opening a tracker registers a listener for given filter and calls getServiceReferences(). The
 		// initial array of refs is passed to a Tracked() object, then AbstractTracked.trackInitial() is called
-		// Tracked object keeps a mapping betwen ServiceReference<> of incoming object and actual customized object
+		// Tracked object keeps a mapping between ServiceReference<> of incoming object and actual customized object
 		// AbstractTracked.trackAdding() is called only for those refs without a mapping
 		webContainerTracker.open(false);
 	}
@@ -151,15 +162,17 @@ public class WebContainerManager implements BundleListener, ServiceTrackerCustom
 		if (pool instanceof ExecutorService) {
 			((ExecutorService) pool).shutdown();
 		}
+		pool = null;
 	}
 
 	/**
 	 * Adapter method that's invoked from {@link ServiceTrackerCustomizer} and calls the listeners in a new thread.
-	 * @param oldReference
+	 * This is the only place where {@link #currentWebContainerRef} is changed - even if it's an atomic reference.
 	 * @param newReference
 	 */
-	private void webContainerChanged(ServiceReference<WebContainer> oldReference, ServiceReference<WebContainer> newReference) {
-		currentWebContainerRef.set(newReference);
+	private void webContainerChanged(ServiceReference<WebContainer> newReference) {
+		ServiceReference<WebContainer> previous = currentWebContainerRef.getAndSet(newReference);
+		LOG.debug("WebContainer changed from {} to {}", previous, newReference);
 
 		// we should inform about new reference to WebContainer OSGi service in a separate thread, because this event
 		// is delivered in single pax-web configuration thread (from pax-web-runtime) when WebContainer service
@@ -168,16 +181,20 @@ public class WebContainerManager implements BundleListener, ServiceTrackerCustom
 		// threads obtain the Whiteboard lock and try to access pax-web configuration thread and we may end up with
 		// a thread deadlock
 		pool.execute(() -> {
+			if (previous == newReference) {
+				// no need to do anything - a check just in case
+				return;
+			}
 			String name = Thread.currentThread().getName();
 			try {
-				if (oldReference == null) {
-					Thread.currentThread().setName(name + " (add HttpService)");
+				if (previous == null) {
+					Thread.currentThread().setName(name + " / " + this.threadName + " (add HttpService)");
 				} else if (newReference == null) {
-					Thread.currentThread().setName(name + " (remove HttpService)");
+					Thread.currentThread().setName(name + " / " + this.threadName + " (remove HttpService)");
 				} else {
-					Thread.currentThread().setName(name + " (change HttpService)");
+					Thread.currentThread().setName(name + " / " + this.threadName + " (change HttpService)");
 				}
-				listener.webContainerChanged(oldReference, newReference);
+				listener.webContainerChanged(previous, newReference);
 			} finally {
 				Thread.currentThread().setName(name);
 			}
@@ -231,7 +248,7 @@ public class WebContainerManager implements BundleListener, ServiceTrackerCustom
 				return null;
 			}
 			if (webContainer == null) {
-				LOG.warn("Can't get a WebContainer service from {}", ref);
+				// we're simply operating on no longer valid ServiceReference
 				return null;
 			} else {
 				containers.computeIfAbsent(ref, r -> new HashMap<>()).put(bundle, webContainer);
@@ -340,10 +357,25 @@ public class WebContainerManager implements BundleListener, ServiceTrackerCustom
 		// but potentially the new reference is better
 
 		if (currentReference == null) {
-			this.webContainerChanged(null, reference);
-		} else if (currentReference.compareTo(reference) < 0) {
-			// better reference replaces the current one
-			this.webContainerChanged(currentReference, reference);
+			// we can get a better pool - from global pax-web-runtime - it's the same for all incarnations
+			// of HttpService (factory)
+			if (reference != null && !synchronous) {
+				ConfigurationWebContainerView view = containerView(this.context.getBundle(), reference, ConfigurationWebContainerView.class);
+				if (view != null) {
+					Executor global = view.configurationExecutor();
+					if (global != null) {
+						LOG.debug("Synchronized WebContainerManager with {}", view);
+						this.pool = global;
+						listener.setExecutor(pool);
+					}
+				}
+			}
+		}
+
+		if (currentReference == null || currentReference.compareTo(reference) < 0) {
+			// call if we didn't have any reference or the new one has higher ranking - only in this method
+			// we'll update currentWebContainerRef atomic reference
+			this.webContainerChanged(reference);
 		}
 
 		return reference;
@@ -362,17 +394,11 @@ public class WebContainerManager implements BundleListener, ServiceTrackerCustom
 
 		// we don't actually care about the passed reference, because we want the best one and compare it with
 		// current one
-		if (bestReference != null) {
-			if (currentReference == null) {
-				// new reference
-				this.webContainerChanged(null, bestReference);
-			} else if (bestReference.compareTo(currentReference) > 0) {
-				// better reference replaces the current one
-				this.webContainerChanged(currentReference, bestReference);
-			}
+		if (bestReference != null && (currentReference == null || currentReference.compareTo(bestReference) < 0)) {
+			this.webContainerChanged(bestReference);
 		} else if (currentReference != null) {
 			// we have currentReference, but there's no best one...
-			this.webContainerChanged(currentReference, null);
+			this.webContainerChanged(null);
 		}
 	}
 
@@ -393,7 +419,7 @@ public class WebContainerManager implements BundleListener, ServiceTrackerCustom
 
 		// just pick up next best (or null) reference from the available ones
 		ServiceReference<WebContainer> bestReference = webContainerTracker.getServiceReference();
-		this.webContainerChanged(currentReference, bestReference);
+		this.webContainerChanged(bestReference);
 	}
 
 }
