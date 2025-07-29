@@ -188,11 +188,11 @@ public class WebContainerManager implements BundleListener, ServiceTrackerCustom
 			String name = Thread.currentThread().getName();
 			try {
 				if (previous == null) {
-					Thread.currentThread().setName(name + " / " + this.threadName + " (add HttpService)");
+					Thread.currentThread().setName(this.threadName + " (add HttpService)");
 				} else if (newReference == null) {
-					Thread.currentThread().setName(name + " / " + this.threadName + " (remove HttpService)");
+					Thread.currentThread().setName(this.threadName + " (remove HttpService)");
 				} else {
-					Thread.currentThread().setName(name + " / " + this.threadName + " (change HttpService)");
+					Thread.currentThread().setName(this.threadName + " (change HttpService)");
 				}
 				listener.webContainerChanged(previous, newReference);
 			} finally {
@@ -234,7 +234,13 @@ public class WebContainerManager implements BundleListener, ServiceTrackerCustom
 			if (bundleContainers != null) {
 				WebContainer container = bundleContainers.get(bundle);
 				if (container != null) {
-					return container;
+					// check on borrow
+					ConfigurationWebContainerView configView = container.adapt(ConfigurationWebContainerView.class);
+					if (configView != null && configView.isValid()) {
+						return container;
+					} else {
+						bundleContainers.remove(bundle);
+					}
 				}
 			}
 			if (bundleContext == null) {
@@ -251,8 +257,12 @@ public class WebContainerManager implements BundleListener, ServiceTrackerCustom
 				// we're simply operating on no longer valid ServiceReference
 				return null;
 			} else {
-				containers.computeIfAbsent(ref, r -> new HashMap<>()).put(bundle, webContainer);
-				return webContainer;
+				ConfigurationWebContainerView configView = webContainer.adapt(ConfigurationWebContainerView.class);
+				if (configView != null && configView.isValid()) {
+					containers.computeIfAbsent(ref, r -> new HashMap<>()).put(bundle, webContainer);
+					return webContainer;
+				}
+				return null;
 			}
 		}
 	}

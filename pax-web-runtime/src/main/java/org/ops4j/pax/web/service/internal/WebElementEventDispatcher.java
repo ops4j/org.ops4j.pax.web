@@ -82,7 +82,7 @@ public class WebElementEventDispatcher implements WebElementEventListener,
 	public WebElementEventListener addingService(ServiceReference<WebElementEventListener> reference) {
 		WebElementEventListener listener = bundleContext.getService(reference);
 		if (listener != null) {
-			LOG.debug("New WebElementEventListener added: {}", listener.getClass().getName());
+			LOG.debug("New WebElementEventListener added: {} to {}@{}", listener.getClass().getName(), this.getClass().getSimpleName(), System.identityHashCode(this));
 			synchronized (listeners) {
 				listeners.add(listener);
 			}
