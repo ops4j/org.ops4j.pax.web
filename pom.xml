@@ -167,14 +167,15 @@
 		<dependency.biz.aQute.bnd.bndlib>7.1.0</dependency.biz.aQute.bnd.bndlib>
 
 		<dependency.commons-beanutils>1.11.0</dependency.commons-beanutils>
-		<dependency.commons-codec>1.18.0</dependency.commons-codec>
+		<dependency.commons-codec>1.19.0</dependency.commons-codec>
 		<dependency.commons-collections3>3.2.2</dependency.commons-collections3>
 		<dependency.commons-digester>2.1</dependency.commons-digester>
 		<dependency.commons-fileupload>1.5</dependency.commons-fileupload>
+		<!-- 2.20.0 requires java.nio.file.spi not exported by Karaf 4.3 -->
 		<dependency.commons-io>2.19.0</dependency.commons-io>
 		<dependency.com.fasterxml.classmate>1.7.0</dependency.com.fasterxml.classmate>
-		<dependency.com.fasterxml.jackson.core>2.19.0</dependency.com.fasterxml.jackson.core>
-		<dependency.com.fasterxml.jackson.core.databind>2.19.0</dependency.com.fasterxml.jackson.core.databind>
+		<dependency.com.fasterxml.jackson.core>2.19.2</dependency.com.fasterxml.jackson.core>
+		<dependency.com.fasterxml.jackson.core.databind>2.19.2</dependency.com.fasterxml.jackson.core.databind>
 		<dependency.com.fasterxml.woodstox>6.7.0</dependency.com.fasterxml.woodstox>
 		<dependency.com.sun.activation>1.2.0</dependency.com.sun.activation>
 		<dependency.com.sun.istack>3.0.12</dependency.com.sun.istack>
@@ -204,7 +205,7 @@
 
 		<dependency.junit>4.13.2</dependency.junit>
 
-		<dependency.net.bytebuddy>1.17.5</dependency.net.bytebuddy>
+		<dependency.net.bytebuddy>1.17.6</dependency.net.bytebuddy>
 
 		<dependency.org.apache.aries.cdi>1.1.5</dependency.org.apache.aries.cdi>
 		<dependency.org.apache.aries.component-dsl>1.2.2</dependency.org.apache.aries.component-dsl>
@@ -216,7 +217,7 @@
 
 		<dependency.org.apache.commons.collections4>4.5.0</dependency.org.apache.commons.collections4>
 		<dependency.org.apache.commons.compress>1.27.1</dependency.org.apache.commons.compress>
-		<dependency.org.apache.commons.lang3>3.17.0</dependency.org.apache.commons.lang3>
+		<dependency.org.apache.commons.lang3>3.18.0</dependency.org.apache.commons.lang3>
 
 		<dependency.org.apache.felix.configadmin>1.9.26</dependency.org.apache.felix.configadmin>
 		<dependency.org.apache.felix.converter>1.0.18</dependency.org.apache.felix.converter>
@@ -236,7 +237,7 @@
 		<dependency.org.apache.httpcomponents.core4>4.4.16</dependency.org.apache.httpcomponents.core4>
 		<dependency.org.apache.httpcomponents.core5>5.3.4</dependency.org.apache.httpcomponents.core5>
 		<dependency.org.apache.karaf>4.4.7</dependency.org.apache.karaf>
-		<dependency.org.apache.logging.log4j>2.24.3</dependency.org.apache.logging.log4j>
+		<dependency.org.apache.logging.log4j>2.25.1</dependency.org.apache.logging.log4j>
 		<dependency.org.apache.myfaces>2.3.11</dependency.org.apache.myfaces>
 		<dependency.org.apache.myfaces.commons.facelets-examples20>1.0.2.1</dependency.org.apache.myfaces.commons.facelets-examples20>
 		<dependency.org.apache.myfaces.trinidad>2.2.1</dependency.org.apache.myfaces.trinidad>
@@ -249,7 +250,7 @@
 		<dependency.org.apache.xbean>4.27</dependency.org.apache.xbean>
 
 		<dependency.org.assertj>3.27.3</dependency.org.assertj>
-		<dependency.org.bouncycastle>1.80</dependency.org.bouncycastle>
+		<dependency.org.bouncycastle>1.81</dependency.org.bouncycastle>
 		<dependency.org.codehaus.woodstox.stax2-api>4.2.2</dependency.org.codehaus.woodstox.stax2-api>
 		<!-- 3.41.0 doesn't work... -->
 		<dependency.org.eclipse.jdt.ecj>3.33.0</dependency.org.eclipse.jdt.ecj>
@@ -263,8 +264,8 @@
 		<dependency.org.eclipse.platform.osgi>3.23.0</dependency.org.eclipse.platform.osgi>
 
 		<dependency.org.glassfish.hk2>2.6.1</dependency.org.glassfish.hk2>
-		<dependency.org.glassfish.hk2.osgi-locator>1.0.3</dependency.org.glassfish.hk2.osgi-locator>
-		<dependency.org.glassfish.jersey>2.46</dependency.org.glassfish.jersey>
+		<dependency.org.glassfish.hk2.osgi-locator>1.0.4</dependency.org.glassfish.hk2.osgi-locator>
+		<dependency.org.glassfish.jersey>2.47</dependency.org.glassfish.jersey>
 
 		<dependency.org.javassist>3.30.2-GA</dependency.org.javassist>
 		<dependency.org.jasypt>1.9.3</dependency.org.jasypt>
@@ -277,7 +278,7 @@
 		<dependency.org.jboss.xnio>3.8.16.Final</dependency.org.jboss.xnio>
 
 		<dependency.org.jline>3.21.0</dependency.org.jline>
-		<dependency.org.jsoup>1.20.1</dependency.org.jsoup>
+		<dependency.org.jsoup>1.21.1</dependency.org.jsoup>
 		<!-- Special version of Keycloak that will never exceed 18.0.x - the last version with OSGi/Karaf/PaxWeb support -->
 		<dependency.org.keycloak18>18.0.2</dependency.org.keycloak18>
 		<!-- Keycloak version newer than 18 - just the latest available upstream version -->
@@ -292,7 +293,7 @@
 		<dependency.org.ops4j.pax.exam>4.14.0</dependency.org.ops4j.pax.exam>
 		<dependency.org.ops4j.pax.logging>2.3.0</dependency.org.ops4j.pax.logging>
 		<dependency.org.ops4j.pax.swissbox>1.9.0</dependency.org.ops4j.pax.swissbox>
-		<dependency.org.ops4j.pax.url>2.6.16</dependency.org.ops4j.pax.url>
+		<dependency.org.ops4j.pax.url>2.6.17</dependency.org.ops4j.pax.url>
 
 		<dependency.org.osgi.annotation>8.1.0</dependency.org.osgi.annotation>
 		<dependency.org.osgi.core>8.0.0</dependency.org.osgi.core>
