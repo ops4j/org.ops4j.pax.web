@@ -420,7 +420,7 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 
 	/**
 	 * {@link ServiceReferenceDTO} for the associated {@link HttpServiceRuntime}. It's properties will be changed
-	 * on different occassions.
+	 * on different occasions.
 	 */
 	private ServiceReferenceDTO httpServiceRuntimeDTO;
 
@@ -1075,9 +1075,8 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 				if (wabOsgiContextListener != null && osgiContextModel.isWab()) {
 					// let pax-web-extender-whiteboard know about new WAB OsgiContextModel - but let's release
 					// current thread (see https://github.com/ops4j/org.ops4j.pax.web/issues/1648)
-					executor.execute(() -> {
-						wabOsgiContextListener.wabContextRegistered(osgiContextModel);
-					});
+					// This listener will use own executor
+					wabOsgiContextListener.wabContextRegistered(osgiContextModel);
 				}
 			}
 		}
@@ -1097,7 +1096,7 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 				// was there some stored shared model, overriden by Whiteboard shared context?
 				OsgiContextModel defaultSharedOsgiContextModel = sharedDefaultContexts.remove(key);
 				if (defaultSharedOsgiContextModel != null) {
-					// restore previously overriden shared model
+					// restore previously overridden shared model
 					models.add(defaultSharedOsgiContextModel);
 				} else {
 					sharedContexts.remove(key);
@@ -1110,10 +1109,10 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 			models.remove(osgiContextModel);
 			if (models.isEmpty()) {
 				// no more bundle models available
-				// was there some stored bundle model, overriden by Whiteboard context?
+				// was there some stored bundle model, overridden by Whiteboard context?
 				OsgiContextModel defaultBundleOsgiContextModel = bundleDefaultContexts.remove(key);
 				if (defaultBundleOsgiContextModel != null) {
-					// restore previously overriden bundle model
+					// restore previously overridden bundle model
 					models.add(defaultBundleOsgiContextModel);
 				} else {
 					bundleContexts.remove(key);
