@@ -357,9 +357,14 @@ public class WhiteboardExtenderContext implements WebContainerListener, WebConte
 		// install using new reference which will be dereferenced using a bundle for particular application
 		installWhiteboardApplications(ref);
 
-		// in case some servlets were registered above which should switch to contexts from other whiteboard
-		// applications registered later (https://github.com/ops4j/org.ops4j.pax.web/issues/1769)
-		reRegisterWebElements();
+		lock.lock();
+		try {
+			// in case some servlets were registered above which should switch to contexts from other whiteboard
+			// applications registered later (https://github.com/ops4j/org.ops4j.pax.web/issues/1769)
+			reRegisterWebElements();
+		} finally {
+			lock.unlock();
+		}
 
 		acceptWabContexts.set(true);
 	}
