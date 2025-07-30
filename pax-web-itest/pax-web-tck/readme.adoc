@@ -126,17 +126,17 @@ index 5e2eb83bf3..7d3fa5f785 100644
 +org.ops4j.pax.web:pax-web-compatibility-el2:8.0.18
 +org.ops4j.pax.web:pax-web-jsp:8.0.18
 +org.ops4j.pax.web:pax-web-extender-war:8.0.18
-+org.ops4j.pax.web:pax-web-api:11.0.1-SNAPSHOT
-+org.ops4j.pax.web:pax-web-spi:11.0.1-SNAPSHOT
-+org.ops4j.pax.web:pax-web-compatibility-annotation:11.0.1-SNAPSHOT
-+org.ops4j.pax.web:pax-web-compatibility-el:11.0.1-SNAPSHOT
-+org.ops4j.pax.web:pax-web-compatibility-servlet:11.0.1-SNAPSHOT
-+org.ops4j.pax.web:pax-web-runtime:11.0.1-SNAPSHOT
-+org.ops4j.pax.web:pax-web-tomcat-common:11.0.1-SNAPSHOT
-+org.ops4j.pax.web:pax-web-tomcat:11.0.1-SNAPSHOT
-+org.ops4j.pax.web:pax-web-jsp:11.0.1-SNAPSHOT
-+org.ops4j.pax.web:pax-web-extender-war:11.0.1-SNAPSHOT
-+org.ops4j.pax.web:pax-web-extender-whiteboard:11.0.1-SNAPSHOT
++org.ops4j.pax.web:pax-web-api:11.0.2-SNAPSHOT
++org.ops4j.pax.web:pax-web-spi:11.0.2-SNAPSHOT
++org.ops4j.pax.web:pax-web-compatibility-annotation:11.0.2-SNAPSHOT
++org.ops4j.pax.web:pax-web-compatibility-el:11.0.2-SNAPSHOT
++org.ops4j.pax.web:pax-web-compatibility-servlet:11.0.2-SNAPSHOT
++org.ops4j.pax.web:pax-web-runtime:11.0.2-SNAPSHOT
++org.ops4j.pax.web:pax-web-tomcat-common:11.0.2-SNAPSHOT
++org.ops4j.pax.web:pax-web-tomcat:11.0.2-SNAPSHOT
++org.ops4j.pax.web:pax-web-jsp:11.0.2-SNAPSHOT
++org.ops4j.pax.web:pax-web-extender-war:11.0.2-SNAPSHOT
++org.ops4j.pax.web:pax-web-extender-whiteboard:11.0.2-SNAPSHOT
 +
  # Jakarta EE API
  jakarta.ws.rs:jakarta.ws.rs-api:3.0.0
@@ -265,12 +265,12 @@ $ pwd
 /home/ggrzybek/sources/github.com/osgi/osgi/osgi.tck/generated/osgi.tck.cmpn/jar
 
 $ find -type l | xargs file
-./org.ops4j.pax.web.pax-web-api-11.0.0.jar:                   symbolic link to /data/sources/github.com/ops4j/org.ops4j.pax.web-jakarta-new/pax-web-api/target/pax-web-api-11.0.1-SNAPSHOT.jar
-./org.ops4j.pax.web.pax-web-spi-11.0.0.jar:                   symbolic link to /data/sources/github.com/ops4j/org.ops4j.pax.web-jakarta-new/pax-web-spi/target/pax-web-spi-11.0.1-SNAPSHOT.jar
-./org.ops4j.pax.web.pax-web-runtime-11.0.0.jar:               symbolic link to /data/sources/github.com/ops4j/org.ops4j.pax.web-jakarta-new/pax-web-runtime/target/pax-web-runtime-11.0.1-SNAPSHOT.jar
-./org.ops4j.pax.web.pax-web-extender-whiteboard-11.0.0.jar:   symbolic link to /data/sources/github.com/ops4j/org.ops4j.pax.web-jakarta-new/pax-web-extender-whiteboard/target/pax-web-extender-whiteboard-11.0.1-SNAPSHOT.jar
-./org.ops4j.pax.web.pax-web-compatibility-servlet-11.0.0.jar: symbolic link to /data/sources/github.com/ops4j/org.ops4j.pax.web-jakarta-new/pax-web-fragments/pax-web-compatibility-servlet/target/pax-web-compatibility-servlet-11.0.1-SNAPSHOT.jar
-./org.ops4j.pax.web.pax-web-tomcat-11.0.0.jar:                symbolic link to /data/sources/github.com/ops4j/org.ops4j.pax.web-jakarta-new/pax-web-tomcat/target/pax-web-tomcat-11.0.1-SNAPSHOT.jar
+./org.ops4j.pax.web.pax-web-api-11.0.0.jar:                   symbolic link to /data/sources/github.com/ops4j/org.ops4j.pax.web-jakarta-new/pax-web-api/target/pax-web-api-11.0.2-SNAPSHOT.jar
+./org.ops4j.pax.web.pax-web-spi-11.0.0.jar:                   symbolic link to /data/sources/github.com/ops4j/org.ops4j.pax.web-jakarta-new/pax-web-spi/target/pax-web-spi-11.0.2-SNAPSHOT.jar
+./org.ops4j.pax.web.pax-web-runtime-11.0.0.jar:               symbolic link to /data/sources/github.com/ops4j/org.ops4j.pax.web-jakarta-new/pax-web-runtime/target/pax-web-runtime-11.0.2-SNAPSHOT.jar
+./org.ops4j.pax.web.pax-web-extender-whiteboard-11.0.0.jar:   symbolic link to /data/sources/github.com/ops4j/org.ops4j.pax.web-jakarta-new/pax-web-extender-whiteboard/target/pax-web-extender-whiteboard-11.0.2-SNAPSHOT.jar
+./org.ops4j.pax.web.pax-web-compatibility-servlet-11.0.0.jar: symbolic link to /data/sources/github.com/ops4j/org.ops4j.pax.web-jakarta-new/pax-web-fragments/pax-web-compatibility-servlet/target/pax-web-compatibility-servlet-11.0.2-SNAPSHOT.jar
+./org.ops4j.pax.web.pax-web-tomcat-11.0.0.jar:                symbolic link to /data/sources/github.com/ops4j/org.ops4j.pax.web-jakarta-new/pax-web-tomcat/target/pax-web-tomcat-11.0.2-SNAPSHOT.jar
 ----
 
 So I can simply rebuild Pax Web and run `bnd` test immediately.
