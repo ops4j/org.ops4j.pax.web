@@ -516,7 +516,7 @@ javax.servlet.context.tempdir = ${karaf.data}/pax-web/tmp
 		<bundle dependency="true">mvn:org.apache.httpcomponents/httpcore-osgi/${dependency.org.apache.httpcomponents.core4}</bundle>
 		<bundle dependency="true">mvn:org.apache.httpcomponents/httpclient-osgi/${dependency.org.apache.httpcomponents.client4}</bundle>
 
-		<bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/${dependency.com.fasterxml.jackson.core}</bundle>
+		<bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/${dependency.com.fasterxml.jackson.core.annotations}</bundle>
 		<bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/${dependency.com.fasterxml.jackson.core}</bundle>
 		<bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/${dependency.com.fasterxml.jackson.core.databind}</bundle>
 
