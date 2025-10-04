@@ -162,7 +162,12 @@ public class ClassPathUtil {
 		} else {
 			String[] segments = bundleClasspath.split("\\s*,\\s*");
 			for (String segment : segments) {
-				final URL url = bundle.getEntry(segment);
+				final URL url;
+				if (".".equals(segment)) {
+					url = bundle.getEntry("/");
+				} else {
+					url = bundle.getEntry(segment);
+				}
 				if (url == null) {
 					continue;
 				}
