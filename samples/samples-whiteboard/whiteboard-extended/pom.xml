@@ -53,7 +53,6 @@
 
 							<!-- OSGi cmpn -->
 							org.osgi.service.http;version="[1.2,2)",
-							org.osgi.service.http.context;version="[1.1,2)",
 							org.osgi.service.http.whiteboard;version="[1.1,2)",
 
 							<!-- from pax-logging-api -->
