@@ -51,9 +51,7 @@ public class PostLimitUndertowKarafTest extends PostLimitBaseKarafTest {
 
 	@Override
 	protected int getPostSizeExceededHttpResponseCode() {
-		// TODO: create an UNDERTOW jira issue. io.undertow.server.RequestTooBigException should be checked
-		//       as the cause of IllegalStateException and better error code should be used (413)
-		return HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+		return HttpServletResponse.SC_BAD_REQUEST;
 	}
 
 }
