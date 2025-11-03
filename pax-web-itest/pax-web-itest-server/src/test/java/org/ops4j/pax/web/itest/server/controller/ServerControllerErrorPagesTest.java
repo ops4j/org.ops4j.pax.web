@@ -147,8 +147,8 @@ public class ServerControllerErrorPagesTest extends MultiContainerTestSupport {
 		assertThat(httpGET(port, "/c1/yikes?result=461&msg=x461"), endsWith("/ep1: [badServlet][null][null][x461][/c1/yikes][461]"));
 		assertThat(httpGET(port, "/c2/yikes?ex=" + th + "&msg=x"), endsWith("/ep1: [badServlet][" + th + "][" + th + "][" + emsg + "][/c2/yikes][500]"));
 		if (runtime == Runtime.JETTY) {
-			assertThat(httpGET(port, "/c1/yikes?result=462&msg=x462"), containsString("<th>URI:</th><td>/c1/yikes</td>"));
-			assertThat(httpGET(port, "/c3/yikes?result=461&msg=x461"), containsString("<th>URI:</th><td>/c3/yikes</td>"));
+			assertThat(httpGET(port, "/c1/yikes?result=462&msg=x462"), containsString("<tr><th>MESSAGE:</th><td>x462</td></tr>"));
+			assertThat(httpGET(port, "/c3/yikes?result=461&msg=x461"), containsString("<tr><th>MESSAGE:</th><td>x461</td></tr>"));
 		} else if (runtime == Runtime.TOMCAT) {
 			assertThat(httpGET(port, "/c1/yikes?result=462&msg=x462"), containsString("<p><b>Message</b> x462</p><p>"));
 			assertThat(httpGET(port, "/c3/yikes?result=461&msg=x461"), containsString("<p><b>Message</b> x461</p><p>"));

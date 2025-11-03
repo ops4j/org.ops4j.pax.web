@@ -76,8 +76,8 @@ public class WhiteboardErrorPagesTest extends MultiContainerTestSupport {
 		assertThat(httpGET(port, "/yikes?result=461&msg=x461"), endsWith("null: [badServlet][null][null][x461][/yikes][461]"));
 		assertThat(httpGET(port, "/yikes?ex=" + th + "&msg=x"), endsWith("null: [badServlet][" + th + "][" + th + "][" + emsg + "][/yikes][500]"));
 		if (runtime == Runtime.JETTY) {
-			assertThat(httpGET(port, "/yikes?result=462&msg=x462"), containsString("<th>URI:</th><td>/yikes</td>"));
-			assertThat(httpGET(port, "/xikes?result=461&msg=x461"), containsString("<th>URI:</th><td>/xikes</td>"));
+			assertThat(httpGET(port, "/yikes?result=462&msg=x462"), containsString("<tr><th>MESSAGE:</th><td>x462</td></tr>"));
+			assertThat(httpGET(port, "/xikes?result=461&msg=x461"), containsString("<tr><th>MESSAGE:</th><td>Not Found</td></tr>"));
 		} else if (runtime == Runtime.TOMCAT) {
 			assertThat(httpGET(port, "/yikes?result=462&msg=x462"), containsString("<p><b>Message</b> x462</p><p>"));
 			assertThat(httpGET(port, "/xikes?result=461&msg=x461"), containsString("<h1>HTTP Status 404"));
@@ -89,10 +89,10 @@ public class WhiteboardErrorPagesTest extends MultiContainerTestSupport {
 		getServletCustomizer().removedService(servletRef, model);
 
 		if (runtime == Runtime.JETTY) {
-			assertThat(httpGET(port, "/yikes?result=461&msg=x461"), containsString("<th>URI:</th><td>/yikes</td>"));
-			assertThat(httpGET(port, "/yikes?ex=" + th + "&msg=x"), containsString("<th>URI:</th><td>/yikes</td>"));
-			assertThat(httpGET(port, "/yikes?result=462&msg=x462"), containsString("<th>URI:</th><td>/yikes</td>"));
-			assertThat(httpGET(port, "/xikes?result=461&msg=x461"), containsString("<th>URI:</th><td>/xikes</td>"));
+			assertThat(httpGET(port, "/yikes?result=461&msg=x461"), containsString("<tr><th>MESSAGE:</th><td>x461</td></tr>"));
+			assertThat(httpGET(port, "/yikes?ex=" + th + "&msg=x"), containsString("<tr><th>MESSAGE:</th><td>java.io.FileNotFoundException: x</td></tr>"));
+			assertThat(httpGET(port, "/yikes?result=462&msg=x462"), containsString("<tr><th>MESSAGE:</th><td>x462</td></tr>"));
+			assertThat(httpGET(port, "/xikes?result=461&msg=x461"), containsString("<tr><th>MESSAGE:</th><td>Not Found</td></tr>"));
 		} else if (runtime == Runtime.TOMCAT) {
 			assertThat(httpGET(port, "/yikes?result=461&msg=x461"), containsString("<p><b>Message</b> x461</p><p>"));
 			assertThat(httpGET(port, "/yikes?ex=" + th + "&msg=x"), containsString("<p><b>Message</b> x</p><p>"));
@@ -118,8 +118,8 @@ public class WhiteboardErrorPagesTest extends MultiContainerTestSupport {
 		assertThat(httpGET(port, "/yikes?result=461&msg=x461"), endsWith("[badServlet][null][null][x461][/yikes][461]"));
 		assertThat(httpGET(port, "/yikes?ex=" + th + "&msg=x"), endsWith("[badServlet][" + th + "][" + th + "][" + emsg + "][/yikes][500]"));
 		if (runtime == Runtime.JETTY) {
-			assertThat(httpGET(port, "/yikes?result=462&msg=x462"), containsString("<th>URI:</th><td>/yikes</td>"));
-			assertThat(httpGET(port, "/xikes?result=461&msg=x461"), containsString("<th>URI:</th><td>/xikes</td>"));
+			assertThat(httpGET(port, "/yikes?result=462&msg=x462"), containsString("<tr><th>MESSAGE:</th><td>x462</td></tr>"));
+			assertThat(httpGET(port, "/xikes?result=461&msg=x461"), containsString("<tr><th>MESSAGE:</th><td>Not Found</td></tr>"));
 		} else if (runtime == Runtime.TOMCAT) {
 			assertThat(httpGET(port, "/yikes?result=462&msg=x462"), containsString("<p><b>Message</b> x462</p><p>"));
 			assertThat(httpGET(port, "/xikes?result=461&msg=x461"), containsString("<h1>HTTP Status 404"));
@@ -131,10 +131,10 @@ public class WhiteboardErrorPagesTest extends MultiContainerTestSupport {
 		getServletCustomizer().removedService(servletRef, model);
 
 		if (runtime == Runtime.JETTY) {
-			assertThat(httpGET(port, "/yikes?result=461&msg=x461"), containsString("<th>URI:</th><td>/yikes</td>"));
-			assertThat(httpGET(port, "/yikes?ex=" + th + "&msg=x"), containsString("<th>URI:</th><td>/yikes</td>"));
-			assertThat(httpGET(port, "/yikes?result=462&msg=x462"), containsString("<th>URI:</th><td>/yikes</td>"));
-			assertThat(httpGET(port, "/xikes?result=461&msg=x461"), containsString("<th>URI:</th><td>/xikes</td>"));
+			assertThat(httpGET(port, "/yikes?result=461&msg=x461"), containsString("<tr><th>MESSAGE:</th><td>x461</td></tr>"));
+			assertThat(httpGET(port, "/yikes?ex=" + th + "&msg=x"), containsString("<tr><th>MESSAGE:</th><td>java.io.FileNotFoundException: x</td></tr>"));
+			assertThat(httpGET(port, "/yikes?result=462&msg=x462"), containsString("<tr><th>MESSAGE:</th><td>x462</td></tr>"));
+			assertThat(httpGET(port, "/xikes?result=461&msg=x461"), containsString("<tr><th>MESSAGE:</th><td>Not Found</td></tr>"));
 		} else if (runtime == Runtime.TOMCAT) {
 			assertThat(httpGET(port, "/yikes?result=461&msg=x461"), containsString("<p><b>Message</b> x461</p><p>"));
 			assertThat(httpGET(port, "/yikes?ex=" + th + "&msg=x"), containsString("<p><b>Message</b> x</p><p>"));
@@ -166,8 +166,8 @@ public class WhiteboardErrorPagesTest extends MultiContainerTestSupport {
 		assertThat(httpGET(port, "/yikes?result=461&msg=x461"), endsWith("[badServlet][null][null][x461][/yikes][461]"));
 		assertThat(httpGET(port, "/yikes?ex=" + th + "&msg=x"), endsWith("[badServlet][" + th + "][" + th + "][" + emsg + "][/yikes][500]"));
 		if (runtime == Runtime.JETTY) {
-			assertThat(httpGET(port, "/yikes?result=462&msg=x462"), containsString("<th>URI:</th><td>/yikes</td>"));
-			assertThat(httpGET(port, "/xikes?result=461&msg=x461"), containsString("<th>URI:</th><td>/xikes</td>"));
+			assertThat(httpGET(port, "/yikes?result=462&msg=x462"), containsString("<tr><th>MESSAGE:</th><td>x462</td></tr>"));
+			assertThat(httpGET(port, "/xikes?result=461&msg=x461"), containsString("<tr><th>MESSAGE:</th><td>Not Found</td></tr>"));
 		} else if (runtime == Runtime.TOMCAT) {
 			assertThat(httpGET(port, "/yikes?result=462&msg=x462"), containsString("<p><b>Message</b> x462</p><p>"));
 			assertThat(httpGET(port, "/xikes?result=461&msg=x461"), containsString("<h1>HTTP Status 404"));
@@ -180,10 +180,10 @@ public class WhiteboardErrorPagesTest extends MultiContainerTestSupport {
 		getErrorPageMappingCustomizer().removedService(epMappingRef, epmModel);
 
 		if (runtime == Runtime.JETTY) {
-			assertThat(httpGET(port, "/yikes?result=461&msg=x461"), containsString("<th>URI:</th><td>/yikes</td>"));
-			assertThat(httpGET(port, "/yikes?ex=" + th + "&msg=x"), containsString("<th>URI:</th><td>/yikes</td>"));
-			assertThat(httpGET(port, "/yikes?result=462&msg=x462"), containsString("<th>URI:</th><td>/yikes</td>"));
-			assertThat(httpGET(port, "/xikes?result=461&msg=x461"), containsString("<th>URI:</th><td>/xikes</td>"));
+			assertThat(httpGET(port, "/yikes?result=461&msg=x461"), containsString("<tr><th>MESSAGE:</th><td>x461</td></tr>"));
+			assertThat(httpGET(port, "/yikes?ex=" + th + "&msg=x"), containsString("<tr><th>MESSAGE:</th><td>java.io.FileNotFoundException: x</td></tr>"));
+			assertThat(httpGET(port, "/yikes?result=462&msg=x462"), containsString("<tr><th>MESSAGE:</th><td>x462</td></tr>"));
+			assertThat(httpGET(port, "/xikes?result=461&msg=x461"), containsString("<tr><th>MESSAGE:</th><td>Not Found</td></tr>"));
 		} else if (runtime == Runtime.TOMCAT) {
 			assertThat(httpGET(port, "/yikes?result=461&msg=x461"), containsString("<p><b>Message</b> x461</p><p>"));
 			assertThat(httpGET(port, "/yikes?ex=" + th + "&msg=x"), containsString("<p><b>Message</b> x</p><p>"));
@@ -209,8 +209,8 @@ public class WhiteboardErrorPagesTest extends MultiContainerTestSupport {
 		assertThat(httpGET(port, "/yikes?result=461&msg=x461"), endsWith("[badServlet][null][null][x461][/yikes][461]"));
 		assertThat(httpGET(port, "/yikes?ex=" + th + "&msg=x"), endsWith("[badServlet][" + th + "][" + th + "][" + emsg + "][/yikes][500]"));
 		if (runtime == Runtime.JETTY) {
-			assertThat(httpGET(port, "/yikes?result=462&msg=x462"), containsString("<th>URI:</th><td>/yikes</td>"));
-			assertThat(httpGET(port, "/xikes?result=461&msg=x461"), containsString("<th>URI:</th><td>/xikes</td>"));
+			assertThat(httpGET(port, "/yikes?result=462&msg=x462"), containsString("<tr><th>MESSAGE:</th><td>x462</td></tr>"));
+			assertThat(httpGET(port, "/xikes?result=461&msg=x461"), containsString("<tr><th>MESSAGE:</th><td>Not Found</td></tr>"));
 		} else if (runtime == Runtime.TOMCAT) {
 			assertThat(httpGET(port, "/yikes?result=462&msg=x462"), containsString("<p><b>Message</b> x462</p><p>"));
 			assertThat(httpGET(port, "/xikes?result=461&msg=x461"), containsString("<h1>HTTP Status 404"));
@@ -222,10 +222,10 @@ public class WhiteboardErrorPagesTest extends MultiContainerTestSupport {
 		getServletMappingCustomizer().removedService(eservletMappingRef, emodel);
 
 		if (runtime == Runtime.JETTY) {
-			assertThat(httpGET(port, "/yikes?result=461&msg=x461"), containsString("<th>URI:</th><td>/yikes</td>"));
-			assertThat(httpGET(port, "/yikes?ex=" + th + "&msg=x"), containsString("<th>URI:</th><td>/yikes</td>"));
-			assertThat(httpGET(port, "/yikes?result=462&msg=x462"), containsString("<th>URI:</th><td>/yikes</td>"));
-			assertThat(httpGET(port, "/xikes?result=461&msg=x461"), containsString("<th>URI:</th><td>/xikes</td>"));
+			assertThat(httpGET(port, "/yikes?result=461&msg=x461"), containsString("<tr><th>MESSAGE:</th><td>x461</td></tr>"));
+			assertThat(httpGET(port, "/yikes?ex=" + th + "&msg=x"), containsString("<tr><th>MESSAGE:</th><td>java.io.FileNotFoundException: x</td></tr>"));
+			assertThat(httpGET(port, "/yikes?result=462&msg=x462"), containsString("<tr><th>MESSAGE:</th><td>x462</td></tr>"));
+			assertThat(httpGET(port, "/xikes?result=461&msg=x461"), containsString("<tr><th>MESSAGE:</th><td>Not Found</td></tr>"));
 		} else if (runtime == Runtime.TOMCAT) {
 			assertThat(httpGET(port, "/yikes?result=461&msg=x461"), containsString("<p><b>Message</b> x461</p><p>"));
 			assertThat(httpGET(port, "/yikes?ex=" + th + "&msg=x"), containsString("<p><b>Message</b> x</p><p>"));
