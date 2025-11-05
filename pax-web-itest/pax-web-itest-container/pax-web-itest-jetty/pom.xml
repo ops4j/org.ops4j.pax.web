@@ -196,18 +196,13 @@
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.eclipse.jetty.ee</groupId>
-			<artifactId>jetty-ee-webapp</artifactId>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-ee</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty.ee8</groupId>
 			<artifactId>jetty-ee8-webapp</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty.compression</groupId>
-			<artifactId>jetty-compression-common</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
@@ -223,11 +218,6 @@
 		<dependency>
 			<groupId>org.eclipse.jetty.websocket</groupId>
 			<artifactId>jetty-websocket-core-server</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty.websocket</groupId>
-			<artifactId>jetty-websocket-jetty-server</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>

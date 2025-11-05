@@ -535,7 +535,7 @@ class JettyFactory {
 			httpConfig = new HttpConfiguration();
 			httpConfig.setSendXPoweredBy(false);
 			httpConfig.setSendServerVersion(false);
-			httpConfig.setHttpCompliance(HttpCompliance.STRICT);
+			httpConfig.setHttpCompliance(HttpCompliance.RFC7230);
 			httpConfig.setUriCompliance(UriCompliance.DEFAULT);
 		}
 

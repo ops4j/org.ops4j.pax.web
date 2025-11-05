@@ -19,6 +19,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
+import org.eclipse.jetty.ee8.nested.Request;
 import org.eclipse.jetty.ee8.nested.SessionHandler;
 import org.eclipse.jetty.http.HttpCookie;
 import org.eclipse.jetty.session.AbstractSessionManager;
@@ -26,6 +27,8 @@ import org.eclipse.jetty.session.ManagedSession;
 import org.eclipse.jetty.session.SessionManager;
 
 public class PaxWebSessionHandler extends SessionHandler implements InvocationHandler {
+
+	public static final ThreadLocal<Request> CURRENT_REQUEST = new ThreadLocal<>();
 
 	private final AbstractSessionManager original;
 	private final SessionManager wrapped;
