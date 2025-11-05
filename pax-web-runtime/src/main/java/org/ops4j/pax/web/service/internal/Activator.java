@@ -686,6 +686,7 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 		setProperty(properties, PaxWebConfig.PID_CFG_SERVER_THREAD_NAME_PREFIX, sc.getServerThreadNamePrefix());
 		setProperty(properties, PaxWebConfig.PID_CFG_SHOW_STACKS, sc.isShowStacks());
 		setProperty(properties, PaxWebConfig.PID_CFG_EVENT_DISPATCHER_THREAD_COUNT, sc.getEventDispatcherThreadCount());
+		setProperty(properties, PaxWebConfig.PID_CFG_DECODE_AMBIGUOUS_URIS, sc.isDecodeAmbiguousURIs());
 		setProperty(properties, PaxWebConfig.PID_CFG_HTTP_CHECK_FORWARDED_HEADERS, sc.checkForwardedHeaders());
 		setProperty(properties, PaxWebConfig.PID_CFG_TEMP_DIR, sc.getTemporaryDirectory());
 		setProperty(properties, PaxWebConfig.PID_CFG_HTTP_CHECK_FORWARDED_HEADERS, sc.checkForwardedHeaders());

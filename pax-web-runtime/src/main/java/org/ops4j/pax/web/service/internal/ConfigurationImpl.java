@@ -249,6 +249,8 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 
 		private final String tcclType;
 
+		private final boolean decodeAmbiguousURIs;
+
 		private ServerConfigurationImpl() {
 			// eager resolution of some important properties
 			resolveIntegerProperty(PaxWebConfig.PID_CFG_HTTP_PORT);
@@ -343,6 +345,9 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 				LOG.warn("Unknown value of {} property. Falling back to \"servlet\".", PaxWebConfig.PID_CFG_TCCL_TYPE);
 			}
 			tcclType = tcclTypeValue;
+
+			Boolean decode = resolveBooleanProperty(PaxWebConfig.PID_CFG_DECODE_AMBIGUOUS_URIS);
+			decodeAmbiguousURIs = decode != null && decode;
 		}
 
 		@Override
@@ -448,6 +453,11 @@ public class ConfigurationImpl extends PropertyStore implements Configuration {
 		@Override
 		public String getTCCLType() {
 			return tcclType;
+		}
+
+		@Override
+		public boolean isDecodeAmbiguousURIs() {
+			return decodeAmbiguousURIs;
 		}
 	}
 

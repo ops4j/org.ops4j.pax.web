@@ -78,6 +78,9 @@
 		<AD id="org.ops4j.pax.web.tccl.type" required="false" type="String" default="servlet"
 				name="TCCL type to set in servlet/filter service methods" />
 
+		<AD id="org.ops4j.pax.web.server.decodeAmbiguousURIs" required="false" type="Boolean" default="false"
+				name="Jetty ServletHandler flag for decoding ambiguous URIs" />
+
 		<!-- Properties related to Security/SSL/TLS -->
 
 		<AD id="org.ops4j.pax.web.ssl.keystore" type="String" default=""

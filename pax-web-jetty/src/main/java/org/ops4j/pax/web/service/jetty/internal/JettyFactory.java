@@ -28,6 +28,7 @@ import org.eclipse.jetty.alpn.server.ALPNServerConnectionFactory;
 import org.eclipse.jetty.http.HttpCompliance;
 import org.eclipse.jetty.http.HttpScheme;
 import org.eclipse.jetty.http.HttpVersion;
+import org.eclipse.jetty.http.UriCompliance;
 import org.eclipse.jetty.http2.HTTP2Cipher;
 import org.eclipse.jetty.http2.server.HTTP2CServerConnectionFactory;
 import org.eclipse.jetty.http2.server.HTTP2ServerConnectionFactory;
@@ -529,10 +530,13 @@ class JettyFactory {
 				LOG.warn("More than one HttpConfiguration found in external Jetty configuration. Using {}.",
 						httpConfig);
 			}
+			// assume HttpCompliance and UriCompliance is set
 		} else {
 			httpConfig = new HttpConfiguration();
 			httpConfig.setSendXPoweredBy(false);
 			httpConfig.setSendServerVersion(false);
+			httpConfig.setHttpCompliance(HttpCompliance.STRICT);
+			httpConfig.setUriCompliance(UriCompliance.DEFAULT);
 		}
 
 		if (httpConfig.getSecureScheme() == null) {
@@ -545,7 +549,6 @@ class JettyFactory {
 			// default from org.eclipse.jetty.server.HttpConfiguration._outputBufferSize
 			httpConfig.setOutputBufferSize(32768);
 		}
-		httpConfig.setHttpCompliance(HttpCompliance.RFC7230);
 
 		if (sc.checkForwardedHeaders() != null && sc.checkForwardedHeaders()) {
 			httpConfig.addCustomizer(new ForwardedRequestCustomizer());

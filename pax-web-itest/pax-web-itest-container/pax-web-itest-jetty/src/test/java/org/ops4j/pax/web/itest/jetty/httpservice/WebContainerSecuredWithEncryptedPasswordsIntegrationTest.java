@@ -36,6 +36,8 @@ public class WebContainerSecuredWithEncryptedPasswordsIntegrationTest extends Ab
 
 	@Override
 	protected void additionalConfiguration(Dictionary<String, Object> properties) {
+		properties.put(PaxWebConfig.PID_CFG_DECODE_AMBIGUOUS_URIS, "true");
+
 		properties.put(PaxWebConfig.PID_CFG_ENC_ENABLED, "true");
 		properties.put(PaxWebConfig.PID_CFG_ENC_MASTERPASSWORD, "masterpasswordfortest");
 		properties.put(PaxWebConfig.PID_CFG_ENC_ITERATION_COUNT, "1042");

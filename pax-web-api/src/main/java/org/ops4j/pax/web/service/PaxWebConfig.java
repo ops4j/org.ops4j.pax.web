@@ -181,6 +181,12 @@ public interface PaxWebConfig {
 	 */
 	String PID_CFG_TCCL_TYPE = "org.ops4j.pax.web.tccl.type";
 
+	/**
+	 * Jetty specific option to call {@code org.eclipse.jetty.ee10.servlet.ServletHandler#setDecodeAmbiguousURIs()}.
+	 * Defaults to {@code false}.
+	 */
+	String PID_CFG_DECODE_AMBIGUOUS_URIS = "org.ops4j.pax.web.server.decodeAmbiguousURIs";
+
 	// --- security configuration properties
 
 	/**
