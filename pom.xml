@@ -238,7 +238,7 @@
 		<dependency.org.apache.httpcomponents.core4>4.4.16</dependency.org.apache.httpcomponents.core4>
 		<dependency.org.apache.httpcomponents.core5>5.3.6</dependency.org.apache.httpcomponents.core5>
 		<dependency.org.apache.karaf>4.4.8</dependency.org.apache.karaf>
-		<dependency.org.apache.logging.log4j>2.25.2</dependency.org.apache.logging.log4j>
+		<dependency.org.apache.logging.log4j>2.25.3</dependency.org.apache.logging.log4j>
 		<dependency.org.apache.servicemix.bundles.aopalliance>1.0_6</dependency.org.apache.servicemix.bundles.aopalliance>
 		<dependency.org.apache.servicemix.bundles.jasypt>1.9.3_1</dependency.org.apache.servicemix.bundles.jasypt>
 		<dependency.org.apache.servicemix.bundles.javax-inject>1_3</dependency.org.apache.servicemix.bundles.javax-inject>
