@@ -147,7 +147,7 @@ public class WebSocketModel extends ElementModel<Object, WebSocketEventData> {
             }
         }
 
-        if (c.isAnnotationPresent(ServerEndpoint.class)) {
+        if (c != null && c.isAnnotationPresent(ServerEndpoint.class)) {
             ServerEndpoint endpoint = c.getAnnotation(ServerEndpoint.class);
             decoderClasses = endpoint.decoders();
             encoderClasses = endpoint.encoders();
