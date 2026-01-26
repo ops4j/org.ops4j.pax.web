@@ -114,7 +114,7 @@ public class WebSocketModel extends ElementModel<Object, WebSocketEventData> {
                     + " or service reference");
         }
         if (sources != 1) {
-            throw new IllegalArgumentException("WebSocket Model should specify a web socket uniquely as instance, class"
+            LOG.warn("WebSocket Model should specify a web socket uniquely as instance, class"
                     + " or service reference");
         }
 
@@ -147,10 +147,6 @@ public class WebSocketModel extends ElementModel<Object, WebSocketEventData> {
             }
         }
 
-        if (c == null) {
-            throw new IllegalArgumentException("Can't determine the Web Socket endpoint path.");
-        }
-
         if (c.isAnnotationPresent(ServerEndpoint.class)) {
             ServerEndpoint endpoint = c.getAnnotation(ServerEndpoint.class);
             decoderClasses = endpoint.decoders();
@@ -164,10 +160,13 @@ public class WebSocketModel extends ElementModel<Object, WebSocketEventData> {
                 return Boolean.TRUE;
             }
         }
-
         LOG.warn("Can't determine the Web Socket endpoint path - is @ServerEndpoint annotation present?");
 
-        return Boolean.FALSE;
+        return Boolean.TRUE;
+    }
+
+    public boolean hasEndpoint() {
+        return webSocketEndpointClassResolved != null && webSocketEndpointClassResolved.isAnnotationPresent(ServerEndpoint.class);
     }
 
     @Override

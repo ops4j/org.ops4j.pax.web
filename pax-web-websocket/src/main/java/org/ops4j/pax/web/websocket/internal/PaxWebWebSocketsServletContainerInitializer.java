@@ -23,6 +23,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -53,7 +54,7 @@ public class PaxWebWebSocketsServletContainerInitializer implements ServletConta
 	private ContainerInitializerModel model;
 
 	@Override
-	public void onStartup(Set<Class<?>> c, ServletContext ctx) throws ServletException {
+	public void onStartup(final Set<Class<?>> c, final ServletContext ctx) throws ServletException {
 		ServerContainer wsContainer = (ServerContainer) ctx.getAttribute(ServerContainer.class.getName());
 
 		if (wsContainer == null) {
@@ -113,17 +114,21 @@ public class PaxWebWebSocketsServletContainerInitializer implements ServletConta
 
 				ServerEndpointConfig config = new DynamicEndpointConfig(wsm, instance);
 
-				try {
-					wsContainer.addEndpoint(config);
-				} catch (DeploymentException ex) {
-					LOG.error("Problem deploying Web Socket endpoint {}: {}", model, ex.getMessage(), ex);
+				if (wsm.hasEndpoint()) {
+					try {
+						wsContainer.addEndpoint(config);
+					} catch (DeploymentException ex) {
+						LOG.error("Problem deploying Web Socket endpoint {}: {}", model, ex.getMessage(), ex);
+					}
+				} else {
+					LOG.warn("WebSocket endpoint {} has no @ServerEndpoint annotation. It won't be registered.", model);
 				}
 			}
 		}
 	}
 
 	@Override
-	public void setContainerInitializerModel(ContainerInitializerModel model) {
+	public void setContainerInitializerModel(final ContainerInitializerModel model) {
 		this.model = model;
 	}
 
@@ -140,7 +145,7 @@ public class PaxWebWebSocketsServletContainerInitializer implements ServletConta
 		// org.apache.tomcat.websocket.pojo.Constants.POJO_METHOD_MAPPING_KEY mapping
 		private final Map<String, Object> userProperties = new HashMap<>();
 
-		DynamicEndpointConfig(WebSocketModel wsm, Object instance) {
+		DynamicEndpointConfig(final WebSocketModel wsm, final Object instance) {
 			this.wsm = wsm;
 			this.instance = instance;
 		}
@@ -171,7 +176,7 @@ public class PaxWebWebSocketsServletContainerInitializer implements ServletConta
 			// so we actually return proper instance
 			return new Configurator() {
 				@Override
-				public <T> T getEndpointInstance(Class<T> endpointClass) {
+				public <T> T getEndpointInstance(final Class<T> endpointClass) {
 					return endpointClass.cast(instance);
 				}
 			};
