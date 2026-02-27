@@ -122,7 +122,7 @@ public class ServletTracker extends AbstractElementTracker<Servlet, Servlet, Ser
 			Long maxRequestSize = Utils.getLongProperty(serviceReference, HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_MULTIPART_MAXREQUESTSIZE);
 			Integer fileSizeThreshold = Utils.getIntegerProperty(serviceReference, HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_MULTIPART_FILESIZETHRESHOLD);
 
-			multiPartConfig = new MultipartConfigElement(null,
+			multiPartConfig = new MultipartConfigElement(location,
 					maxFileSize == null ? -1L : maxFileSize,
 					maxRequestSize == null ? -1L : maxRequestSize,
 					fileSizeThreshold == null ? 0 : fileSizeThreshold);
