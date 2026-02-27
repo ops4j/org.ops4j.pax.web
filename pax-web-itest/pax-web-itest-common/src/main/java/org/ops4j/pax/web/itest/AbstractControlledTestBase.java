@@ -139,6 +139,10 @@ public abstract class AbstractControlledTestBase {
 				// set to "4" to see Felix wiring information
 				frameworkProperty("felix.log.level").value("0"),
 
+				// needed by pax-url-aether if something later needs to be resolved
+				mavenBundle("org.ops4j.pax.logging", "pax-logging-api")
+						.versionAsInProject().startLevel(START_LEVEL_SYSTEM_BUNDLES),
+
 				// added implicitly by pax-exam, if pax.exam.system=test
 				// these resources are provided inside org.ops4j.pax.exam:pax-exam-link-mvn jar
 				// for example, "link:classpath:META-INF/links/org.ops4j.base.link" = "mvn:org.ops4j.base/ops4j-base/1.5.0"
@@ -162,8 +166,6 @@ public abstract class AbstractControlledTestBase {
 //				mavenBundle("org.apache.felix", "org.apache.felix.configadmin")
 //						.versionAsInProject().startLevel(START_LEVEL_SYSTEM_BUNDLES),
 
-				mavenBundle("org.ops4j.pax.logging", "pax-logging-api")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle("org.ops4j.pax.logging", "pax-logging-log4j2")
 						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
 				mavenBundle("org.apache.felix", "org.apache.felix.metatype")
