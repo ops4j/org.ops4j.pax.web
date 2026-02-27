@@ -119,10 +119,6 @@
 						</Import-Package>
 						<Private-Package>
 							<!-- supporting libraries -->
-							org.apache.commons.io,
-							org.apache.commons.collections4,
-							org.apache.commons.collections4.iterators,
-							org.apache.commons.collections4.map,
 							org.apache.felix.utils.properties
 						</Private-Package>
 						<Export-Package>
@@ -213,19 +209,6 @@
 			<groupId>org.apache.tomcat</groupId>
 			<artifactId>tomcat</artifactId>
 			<type>zip</type>
-			<scope>provided</scope>
-		</dependency>
-
-		<!-- Other -->
-
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-collections4</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
 			<scope>provided</scope>
 		</dependency>
 
