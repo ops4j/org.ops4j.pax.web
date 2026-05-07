@@ -291,7 +291,7 @@
 		<dependency.org.ops4j.pax.exam>4.14.0</dependency.org.ops4j.pax.exam>
 		<dependency.org.ops4j.pax.logging>2.3.3</dependency.org.ops4j.pax.logging>
 		<dependency.org.ops4j.pax.swissbox>1.9.0</dependency.org.ops4j.pax.swissbox>
-		<dependency.org.ops4j.pax.url>2.6.17</dependency.org.ops4j.pax.url>
+		<dependency.org.ops4j.pax.url>2.7.1</dependency.org.ops4j.pax.url>
 
 		<dependency.org.osgi.annotation>8.1.0</dependency.org.osgi.annotation>
 		<dependency.org.osgi.core>8.0.0</dependency.org.osgi.core>
