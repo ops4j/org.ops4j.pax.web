@@ -70,7 +70,6 @@
 		<bundle start-level="30">mvn:org.eclipse.jetty/jetty-alpn-client/${dependency.org.eclipse.jetty}</bundle>
 		<bundle start-level="30">mvn:org.eclipse.jetty/jetty-util/${dependency.org.eclipse.jetty}</bundle>
 		<bundle start-level="30">mvn:org.eclipse.jetty/jetty-util-ajax/${dependency.org.eclipse.jetty}</bundle>
-		<bundle start-level="30">mvn:org.eclipse.jetty/jetty-ee/${dependency.org.eclipse.jetty}</bundle>
 		<bundle start-level="30">mvn:org.eclipse.jetty/jetty-io/${dependency.org.eclipse.jetty}</bundle>
 		<bundle start-level="30">mvn:org.eclipse.jetty/jetty-http/${dependency.org.eclipse.jetty}</bundle>
 		<bundle start-level="30">mvn:org.eclipse.jetty/jetty-xml/${dependency.org.eclipse.jetty}</bundle>
@@ -78,6 +77,7 @@
 		<bundle start-level="30">mvn:org.eclipse.jetty/jetty-session/${dependency.org.eclipse.jetty}</bundle>
 		<bundle start-level="30">mvn:org.eclipse.jetty/jetty-security/${dependency.org.eclipse.jetty}</bundle>
 		<bundle start-level="30">mvn:org.eclipse.jetty/jetty-jmx/${dependency.org.eclipse.jetty}</bundle>
+		<bundle start-level="30">mvn:org.eclipse.jetty.ee/jetty-ee-webapp/${dependency.org.eclipse.jetty}</bundle>
 <!--		<bundle start-level="30">mvn:org.eclipse.jetty.ee8/jetty-ee8-annotations/${dependency.org.eclipse.jetty}</bundle>-->
 		<bundle start-level="30">mvn:org.eclipse.jetty.ee8/jetty-ee8-nested/${dependency.org.eclipse.jetty}</bundle>
 		<bundle start-level="30">mvn:org.eclipse.jetty.ee8/jetty-ee8-security/${dependency.org.eclipse.jetty}</bundle>

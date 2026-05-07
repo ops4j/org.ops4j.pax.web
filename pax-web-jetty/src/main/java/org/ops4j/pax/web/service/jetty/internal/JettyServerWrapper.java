@@ -770,8 +770,6 @@ class JettyServerWrapper implements BatchVisitor {
 			sch.setAllowNullPathInfo(false);
 			// welcome files will be handled at default/resource servlet level and OsgiServletContext
 			sch.setWelcomeFiles(new String[0]);
-//			// decodeAmbiguousURIs
-//			sch.getServletHandler().setDecodeAmbiguousURIs(configuration.server().isDecodeAmbiguousURIs());
 
 			// error page handler will be configured later (optionally)
 			ErrorPageErrorHandler errorHandler = new ErrorPageErrorHandler();

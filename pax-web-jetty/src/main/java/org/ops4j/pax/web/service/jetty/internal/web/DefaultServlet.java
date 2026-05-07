@@ -96,9 +96,6 @@ import org.slf4j.LoggerFactory;
  *
  *  baseResource      Set to replace the context resource base
  *
- *  resourceCache     If set, this is a context attribute name, which the servlet
- *                    will use to look for a shared ResourceCache instance.
- *
  *  relativeBaseResource
  *                    Set with a pathname relative to the base of the
  *                    servlet context root. Useful for only serving static content out
@@ -128,10 +125,14 @@ import org.slf4j.LoggerFactory;
  *  maxCachedFileSize The maximum size of a file to cache
  *  maxCachedFiles    The maximum number of files to cache
  *
+ *  byteBufferSize
+ *                    The size of the buffers used to serve static content when using NIO connector.
+ *  useDirectByteBuffers
+ *                    Whether to use direct buffers to serve static content when using NIO connector.
  *  useFileMappedBuffer
  *                    If set to true, it will use mapped file buffer to serve static content
  *                    when using NIO connector. Setting this value to false means that
- *                    a direct buffer will be used instead of a mapped file buffer.
+ *                    buffers sized with the above parameters will be used instead of a mapped file buffer.
  *                    This is set to false by default by this class, but may be overridden
  *                    by eg webdefault-ee8.xml
  *
@@ -153,8 +154,6 @@ public class DefaultServlet extends HttpServlet implements WelcomeFactory {
     public static final String CONTEXT_INIT = "org.eclipse.jetty.servlet.Default.";
 
     private static final Logger LOG = LoggerFactory.getLogger(DefaultServlet.class);
-
-    private static final long serialVersionUID = 4930458713846881193L;
 
     protected final ResourceService _resourceService;
 
@@ -280,7 +279,8 @@ public class DefaultServlet extends HttpServlet implements WelcomeFactory {
             // Try to get factory from ServletContext attribute.
             HttpContent.Factory contentFactory = (HttpContent.Factory) getServletContext().getAttribute(HttpContent.Factory.class.getName());
             if (contentFactory == null) {
-                contentFactory = new ResourceHttpContentFactory(_baseResource, _mimeTypes) {
+                ByteBufferPool.Sized bufferPool = new ByteBufferPool.Sized(getByteBufferPool(_contextHandler), getInitBoolean("useDirectByteBuffers", true), getInitInt("byteBufferSize", 32768));
+                contentFactory = new ResourceHttpContentFactory(_baseResource, _mimeTypes, bufferPool) {
 
                     @Override
                     protected Resource resolve(String pathInContext) {
@@ -289,14 +289,14 @@ public class DefaultServlet extends HttpServlet implements WelcomeFactory {
                 };
                 if (_useFileMappedBuffer)
                     contentFactory = new FileMappingHttpContentFactory(contentFactory);
-                contentFactory = new VirtualHttpContentFactory(contentFactory, _styleSheet, "text/css");
-                contentFactory = new PreCompressedHttpContentFactory(contentFactory, _resourceService.getPrecompressedFormats());
+                contentFactory = new VirtualHttpContentFactory(contentFactory, _styleSheet, "text/css", bufferPool);
+                CompressedContentFormat[] precompressedFormats = _resourceService.getPrecompressedFormats();
+                contentFactory = new PreCompressedHttpContentFactory(contentFactory, precompressedFormats);
                 int maxCacheSize = getInitInt("maxCacheSize", -2);
                 int maxCachedFileSize = getInitInt("maxCachedFileSize", -2);
                 int maxCachedFiles = getInitInt("maxCachedFiles", -2);
                 long cacheValidationTime = getInitParameter("cacheValidationTime") != null ? Long.parseLong(getInitParameter("cacheValidationTime")) : -2;
                 if (maxCachedFiles != -2 || maxCacheSize != -2 || maxCachedFileSize != -2 || cacheValidationTime != -2) {
-                    ByteBufferPool bufferPool = getByteBufferPool(_contextHandler);
                     _cachingContentFactory = new ValidatingCachingHttpContentFactory(contentFactory, (cacheValidationTime > -2) ? cacheValidationTime : Duration.ofSeconds(1).toMillis(), bufferPool);
                     contentFactory = _cachingContentFactory;
                     if (maxCacheSize >= 0)
@@ -465,7 +465,8 @@ public class DefaultServlet extends HttpServlet implements WelcomeFactory {
             if (LOG.isDebugEnabled())
                 LOG.debug("Resource {}={}", subUriPath, r);
         } catch (IOException e) {
-            LOG.trace("IGNORED", e);
+            if (LOG.isTraceEnabled())
+                LOG.trace("IGNORED", e);
         }
         if (Resources.missing(r) && subUriPath.endsWith("/jetty-dir.css"))
             r = _styleSheet;
