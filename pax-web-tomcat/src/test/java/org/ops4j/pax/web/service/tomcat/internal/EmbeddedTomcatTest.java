@@ -716,6 +716,7 @@ public class EmbeddedTomcatTest {
 		// in web.xml
 
 		StandardServer server = (StandardServer) holder.getServer();
+		server.setCatalinaBase(new File("target"));
 		Service catalina = server.findService("Catalina");
 		Connector connector = catalina.findConnectors()[0];
 		assertThat(((StandardThreadExecutor) catalina.getExecutor("default")).getNamePrefix(), equalTo("tomcat-pool-"));
@@ -779,6 +780,7 @@ public class EmbeddedTomcatTest {
 		// in web.xml
 
 		StandardServer server = (StandardServer) holder.getServer();
+		server.setCatalinaBase(new File("target"));
 		Service catalina = server.findService("Catalina");
 		Connector connector = catalina.findConnectors()[0];
 		assertThat(((StandardThreadExecutor) catalina.getExecutor("default")).getNamePrefix(), equalTo("tomcat-pool-"));
@@ -815,7 +817,7 @@ public class EmbeddedTomcatTest {
 		StandardServer server = (StandardServer) holder.getServer();
 		// required by org.apache.catalina.core.StandardContext.postWorkDirectory() if
 		// org.apache.catalina.core.StandardContext.getWorkDir() returns null
-//		server.setCatalinaBase(tomcat);
+		server.setCatalinaBase(new File("target"));
 		Service catalina = server.findService("Catalina");
 		Connector connector = catalina.findConnectors()[0];
 
@@ -951,6 +953,7 @@ public class EmbeddedTomcatTest {
 		digester.parse(new File("target/test-classes/etc/tomcat-webapp2.xml"));
 
 		StandardServer server = (StandardServer) holder.getServer();
+		server.setCatalinaBase(new File("target"));
 		Service catalina = server.findService("Catalina");
 		Connector connector = catalina.findConnectors()[0];
 		server.start();
