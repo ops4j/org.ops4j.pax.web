@@ -15,20 +15,30 @@
  */
 package org.ops4j.pax.web.service.jetty.internal;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.function.Consumer;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jetty.ee8.nested.Request;
 import org.eclipse.jetty.ee8.nested.SessionHandler;
+import org.eclipse.jetty.ee8.servlet.ServletHandler;
 import org.eclipse.jetty.http.HttpCookie;
+import org.eclipse.jetty.http.pathmap.MatchedResource;
 import org.eclipse.jetty.session.AbstractSessionManager;
 import org.eclipse.jetty.session.ManagedSession;
+import org.eclipse.jetty.session.SessionIdManager;
 import org.eclipse.jetty.session.SessionManager;
 
 public class PaxWebSessionHandler extends SessionHandler implements InvocationHandler {
 
 	public static final ThreadLocal<Request> CURRENT_REQUEST = new ThreadLocal<>();
+	public static final ThreadLocal<PaxWebServletHolder> CURRENT_USER_IDENTITY_SCOPE = new ThreadLocal<>();
 
 	private final AbstractSessionManager original;
 	private final SessionManager wrapped;
@@ -39,8 +49,37 @@ public class PaxWebSessionHandler extends SessionHandler implements InvocationHa
 	}
 
 	@Override
+	public void setSessionIdManager(SessionIdManager sessionIdManager) {
+		super.setSessionIdManager(sessionIdManager);
+		if (sessionIdManager instanceof PaxWebSessionIdManager paxWebSessionIdManager) {
+			paxWebSessionIdManager.setSessionManager(this);
+		}
+	}
+
+	@Override
 	public SessionManager getSessionManager() {
 		return wrapped;
+	}
+
+	@Override
+	public void doScope(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+		CURRENT_REQUEST.set(baseRequest);
+		if (_nextScope instanceof PaxWebServletHandler pwsh) {
+			// special code to get access to mapped servlet before Jetty does it.
+			// it's an ugly trick to handle ugly Whiteboard session management
+			MatchedResource<ServletHandler.MappedServlet> matchedServlet = pwsh.getMatchedServlet(target);
+			if (matchedServlet != null && matchedServlet.getResource() != null) {
+				if (matchedServlet.getResource().getServletHolder() instanceof PaxWebServletHolder holder) {
+					CURRENT_USER_IDENTITY_SCOPE.set(holder);
+				}
+			}
+		}
+		try {
+			super.doScope(target, baseRequest, request, response);
+		} finally {
+			CURRENT_REQUEST.remove();
+			CURRENT_USER_IDENTITY_SCOPE.remove();
+		}
 	}
 
 	@Override
@@ -51,6 +90,14 @@ public class PaxWebSessionHandler extends SessionHandler implements InvocationHa
 		if (method.getName().equals("renewSessionId")) {
 			renewSessionId((String) args[0], (String) args[1], (String) args[2], (String) args[3]);
 			return null;
+		}
+		if (method.getName().equals("newSession") && (args != null) && (args.length == 3) && (args[2] instanceof Consumer<?>)) {
+			@SuppressWarnings("unchecked")
+			Consumer<ManagedSession> c = (Consumer<ManagedSession>) args[2];
+			return method.invoke(original, args[0], args[1], (Consumer<ManagedSession>) managedSession -> {
+				managedSession.setExtendedId(PaxWebSessionHandler.this.getExtendedId(managedSession.getExtendedId()));
+                c.accept(managedSession);
+            });
 		}
 		return method.invoke(original, args);
 	}

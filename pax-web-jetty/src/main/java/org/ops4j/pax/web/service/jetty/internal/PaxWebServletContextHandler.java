@@ -40,6 +40,7 @@ import org.eclipse.jetty.ee8.nested.SessionHandler;
 import org.eclipse.jetty.ee8.servlet.ServletContextHandler;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.handler.ContextHandler;
+import org.eclipse.jetty.session.AbstractSessionManager;
 import org.eclipse.jetty.session.ManagedSession;
 import org.eclipse.jetty.util.resource.PathResourceFactory;
 import org.eclipse.jetty.util.resource.Resource;
@@ -391,12 +392,17 @@ public class PaxWebServletContextHandler extends ServletContextHandler {
 			String sid = baseRequest.getRequestedSessionId();
 			if (sid != null && baseRequest.getSession(false) == null) {
 				String baseSid = sessionHandler.getSessionIdManager().getId(sid);
-				baseSid += PaxWebSessionIdManager.getSessionIdSuffix(baseRequest);
+				String suffix = PaxWebSessionIdManager.getSessionIdSuffix(baseRequest);
+				if (!baseSid.endsWith(suffix)) {
+					baseSid += suffix;
+				}
 				sid = sessionHandler.getSessionIdManager().getExtendedId(baseSid, baseRequest.getCoreRequest());
                 try {
                     ManagedSession session = sessionHandler.getSessionManager().getManagedSession(sid);
 					if (session != null && session.isValid()) {
 						baseRequest.getCoreRequest().setManagedSession(session);
+						baseRequest.getCoreRequest().setRequestedSession(
+								new AbstractSessionManager.RequestedSession(session, baseRequest.getRequestedSessionId(), baseRequest.getCoreRequest().getRequestedSession().sessionIdFrom()));
 					}
                 } catch (Exception ignored) {
                 }

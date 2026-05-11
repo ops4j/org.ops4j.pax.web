@@ -128,8 +128,8 @@ public class PaxWebOuterHandlerWrapper implements HandlerWrapper {
 				}
 
 				exchange.addExchangeCompleteListener((exchange1, nextListener) -> {
-					PaxWebSessionIdGenerator.sessionIdPrefix.set(null);
-					PaxWebSessionIdGenerator.cookieSessionId.set(null);
+					PaxWebSessionIdGenerator.sessionIdPrefix.remove();
+					PaxWebSessionIdGenerator.cookieSessionId.remove();
 					nextListener.proceed();
 				});
 				// just proceed

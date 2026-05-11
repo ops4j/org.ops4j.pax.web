@@ -22,19 +22,31 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.session.DefaultSessionIdManager;
 import org.eclipse.jetty.session.SessionManager;
 import org.ops4j.pax.web.service.spi.model.OsgiContextModel;
+import org.ops4j.pax.web.service.spi.servlet.OsgiHttpServletRequestWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.ops4j.pax.web.service.jetty.internal.PaxWebSessionHandler.CURRENT_USER_IDENTITY_SCOPE;
 
 public class PaxWebSessionIdManager extends DefaultSessionIdManager {
 
 	public static final Logger LOG = LoggerFactory.getLogger(PaxWebSessionIdManager.class);
 
+	private PaxWebSessionHandler paxWebSessionHandler;
+
 	public PaxWebSessionIdManager(Server server) {
 		super(server);
 	}
 
+	public void setSessionManager(PaxWebSessionHandler paxWebSessionHandler) {
+		this.paxWebSessionHandler = paxWebSessionHandler;
+	}
+
 	public static String getSessionIdSuffix(Request request) {
 		UserIdentityScope uis = request.getUserIdentityScope();
+		if (uis == null) {
+			uis = CURRENT_USER_IDENTITY_SCOPE.get();
+		}
 		if (uis instanceof PaxWebServletHolder) {
 			PaxWebServletHolder holder = (PaxWebServletHolder) uis;
 			OsgiContextModel ocm = holder.getOsgiContextModel();
@@ -48,6 +60,23 @@ public class PaxWebSessionIdManager extends DefaultSessionIdManager {
 		}
 
 		return "";
+	}
+
+	@Override
+	public String getId(String extendedId) {
+		Boolean checkingValidity = OsgiHttpServletRequestWrapper.CHECKING_SESSION_VALIDITY.get();
+		Request request = PaxWebSessionHandler.CURRENT_REQUEST.get();
+		if ((checkingValidity == null || !checkingValidity) && request == null) {
+			return super.getId(extendedId);
+		}
+		String id = super.getId(extendedId);
+		return request != null ? id + getSessionIdSuffix(request) : id;
+	}
+
+	@Override
+	public String getExtendedId(String clusterId, org.eclipse.jetty.server.Request request) {
+		String extendedId = super.getExtendedId(clusterId, request);
+		return paxWebSessionHandler.getExtendedId(extendedId);
 	}
 
 	@Override
@@ -90,7 +119,10 @@ public class PaxWebSessionIdManager extends DefaultSessionIdManager {
 				return super.newSessionId(request, requestedId, created) + suffix;
 			}
 			String sid = getId(requestedId);
-			return sid + suffix;
+			if (!sid.endsWith(suffix)) {
+				return sid + suffix;
+			}
+			return sid;
 		}
 		return super.newSessionId(request, requestedId, created);
 	}

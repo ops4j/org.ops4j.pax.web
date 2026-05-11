@@ -44,6 +44,10 @@ public class SessionServlet extends IntrospectionServlet {
 				resp.getWriter().println("Please log in first");
 				return;
 			}
+			if (!session.isNew() && !req.isRequestedSessionIdValid()) {
+				// undertow changes session id after reading from persistent storage
+				throw new ServletException("Session ID should be valid");
+			}
 			String user = (String) req.getSession().getAttribute("user");
 			Integer counter = (Integer) session.getAttribute("counter");
 			session.setAttribute("counter", ++counter);

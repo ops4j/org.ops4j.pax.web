@@ -56,6 +56,14 @@ public abstract class AbstractWarFormAuthIntegrationTest extends AbstractContain
 				.addParameter("j_username", "admin")
 				.addParameter("j_password", "admin")
 				.doPOST("http://127.0.0.1:8181/war-formauth/wc/example?action=j_security_check");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain '<title>Login Page for Examples</title>'",
+						resp -> resp.contains("<title>Login Page for Examples</title>"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/war-formauth/logout");
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain '<title>Login Page for Examples</title>'",
+						resp -> resp.contains("<title>Login Page for Examples</title>"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/war-formauth/wc/example");
 	}
 
 	@Test

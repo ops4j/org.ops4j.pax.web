@@ -48,6 +48,7 @@ import org.slf4j.LoggerFactory;
 public class OsgiHttpServletRequestWrapper extends HttpServletRequestWrapper {
 
 	public static final Logger LOG = LoggerFactory.getLogger(OsgiHttpServletRequestWrapper.class);
+	public static final ThreadLocal<Boolean> CHECKING_SESSION_VALIDITY = new ThreadLocal<>();
 
 	private String authType = null;
 	private String remoteUser = null;
@@ -170,6 +171,16 @@ public class OsgiHttpServletRequestWrapper extends HttpServletRequestWrapper {
 	@Override
 	public Principal getUserPrincipal() {
 		return super.getUserPrincipal();
+	}
+
+	@Override
+	public boolean isRequestedSessionIdValid() {
+		CHECKING_SESSION_VALIDITY.set(true);
+		try {
+			return super.isRequestedSessionIdValid();
+		} finally {
+			CHECKING_SESSION_VALIDITY.set(false);
+		}
 	}
 
 }
