@@ -624,6 +624,7 @@ public class Activator implements BundleActivator, PaxWebManagedService.Configur
 			httpServiceRuntimeDTO.id = (long) httpServiceRuntimeReg.getReference().getProperty(Constants.SERVICE_ID);
 			httpServiceRuntimeDTO.bundle = bundleContext.getBundle().getBundleId();
 			httpServiceRuntimeDTO.properties = new HashMap<>();
+			httpServiceRuntimeDTO.properties.put(Constants.SERVICE_ID, httpServiceRuntimeDTO.id);
 			// osgi.http.endpoint will be replaced with absolute URI when we have it from Jetty/Tomcat/Undertow
 			httpServiceRuntimeDTO.properties.put(HttpServiceRuntimeConstants.HTTP_SERVICE_ENDPOINT, "/");
 			httpServiceRuntimeDTO.properties.put(PaxWebConstants.HTTP_SERVICE_ID, Collections.singletonList(httpServiceId));
