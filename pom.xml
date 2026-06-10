@@ -309,7 +309,7 @@
 		<dependency.org.ops4j.pax.logging>2.2.11</dependency.org.ops4j.pax.logging>
 		<!-- 1.9.0 is JDK11+ and 1.8.4 should match the version used by Pax Exam -->
 		<dependency.org.ops4j.pax.swissbox>1.8.4</dependency.org.ops4j.pax.swissbox>
-		<dependency.org.ops4j.pax.url>2.7.0</dependency.org.ops4j.pax.url>
+		<dependency.org.ops4j.pax.url>2.7.1</dependency.org.ops4j.pax.url>
 
 		<dependency.org.osgi.annotation>8.1.0</dependency.org.osgi.annotation>
 		<dependency.org.osgi.core>7.0.0</dependency.org.osgi.core>
