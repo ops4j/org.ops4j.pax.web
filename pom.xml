@@ -305,7 +305,7 @@
 
 		<dependency.org.ow2.asm>9.10.1</dependency.org.ow2.asm>
 		<dependency.org.owasp.encoder>1.4.0</dependency.org.owasp.encoder>
-		<dependency.org.primefaces>14.0.15-LTS</dependency.org.primefaces>
+		<dependency.org.primefaces>14.0.16-LTS</dependency.org.primefaces>
 		<dependency.org.slf4j>2.0.18</dependency.org.slf4j>
 		<dependency.org.springframework>5.3.39</dependency.org.springframework>
 		<dependency.org.vaadin.artur>1.7.1</dependency.org.vaadin.artur>
