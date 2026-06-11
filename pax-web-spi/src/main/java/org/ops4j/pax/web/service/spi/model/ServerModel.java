@@ -2446,18 +2446,20 @@ public class ServerModel implements BatchVisitor, HttpServiceRuntime, ReportView
 		boolean register = true;
 		Set<WebSocketModel> newlyDisabled = new HashSet<>();
 
-		for (ServletContextModel sc : targetServletContexts) {
-			WebSocketModel existing = sc.getWebSocketUrlPathMapping().get(model.getMappedPath());
-			if (existing != null) {
-				// service.ranking/service.id checking
-				if (model.compareTo(existing) < 0) {
-					// we won
-					newlyDisabled.add(existing);
-				} else {
-					LOG.warn("{} can't be registered now in context {} under \"{}\" mapping. Conflict with {}.",
-							model, sc.getContextPath(), model.getMappedPath(), existing);
-					register = false;
-					break;
+		if (model.hasEndpoint()) {
+			for (ServletContextModel sc : targetServletContexts) {
+				WebSocketModel existing = sc.getWebSocketUrlPathMapping().get(model.getMappedPath());
+				if (existing != null && existing.hasEndpoint()) {
+					// service.ranking/service.id checking
+					if (model.compareTo(existing) < 0) {
+						// we won
+						newlyDisabled.add(existing);
+					} else {
+						LOG.warn("{} can't be registered now in context {} under \"{}\" mapping. Conflict with {}.",
+								model, sc.getContextPath(), model.getMappedPath(), existing);
+						register = false;
+						break;
+					}
 				}
 			}
 		}

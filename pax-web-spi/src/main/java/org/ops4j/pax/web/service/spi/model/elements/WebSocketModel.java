@@ -33,7 +33,7 @@ public class WebSocketModel extends ElementModel<Object, WebSocketEventData> {
     public static final Logger LOG = LoggerFactory.getLogger(WebSocketModel.class);
 
     private final Object webSocketEndpoint;
-    private Class<?> webSocketEndpointClass;
+    private final Class<?> webSocketEndpointClass;
 
     private Class<?> webSocketEndpointClassResolved;
 
@@ -165,9 +165,16 @@ public class WebSocketModel extends ElementModel<Object, WebSocketEventData> {
             }
         }
 
-        LOG.warn("Can't determine the Web Socket endpoint path - is @ServerEndpoint annotation present?");
+        // even if the registered service is not annotated with @javax.websocket.server.ServerEndpoint,
+        // we validate successfully - someone may want to get the WebSocket infrastructure without actually
+        // instally websockets
+        // see https://github.com/ops4j/org.ops4j.pax.web/issues/2135
 
-        return Boolean.FALSE;
+        return Boolean.TRUE;
+    }
+
+    public boolean hasEndpoint() {
+        return webSocketEndpointClassResolved != null && webSocketEndpointClassResolved.isAnnotationPresent(ServerEndpoint.class);
     }
 
     @Override

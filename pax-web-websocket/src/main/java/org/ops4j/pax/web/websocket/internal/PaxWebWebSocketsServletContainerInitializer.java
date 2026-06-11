@@ -113,10 +113,14 @@ public class PaxWebWebSocketsServletContainerInitializer implements ServletConta
 
 				ServerEndpointConfig config = new DynamicEndpointConfig(wsm, instance);
 
-				try {
-					wsContainer.addEndpoint(config);
-				} catch (DeploymentException ex) {
-					LOG.error("Problem deploying Web Socket endpoint {}: {}", model, ex.getMessage(), ex);
+				if (wsm.hasEndpoint()) {
+					try {
+						wsContainer.addEndpoint(config);
+					} catch (DeploymentException ex) {
+						LOG.error("Problem deploying Web Socket endpoint {}: {}", model, ex.getMessage(), ex);
+					}
+				} else {
+					LOG.debug("WebSocket endpoint {} has no @ServerEndpoint annotation, skipping.", model);
 				}
 			}
 		}
