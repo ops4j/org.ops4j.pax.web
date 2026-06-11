@@ -95,7 +95,7 @@ public abstract class AbstractWebSocketContainerWhiteBoardIntegrationTest extend
 
 		private final List<ServerContainer> containers;
 
-		public MyHttpServlet(List<ServerContainer> containers) {
+		MyHttpServlet(List<ServerContainer> containers) {
 			this.containers = containers;
 		}
 
