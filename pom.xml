@@ -173,7 +173,7 @@
 		<dependency.commons-fileupload>1.5</dependency.commons-fileupload>
 		<dependency.commons-io>2.22.0</dependency.commons-io>
 		<dependency.com.fasterxml.classmate>1.7.3</dependency.com.fasterxml.classmate>
-		<dependency.com.fasterxml.jackson.core>2.22.0</dependency.com.fasterxml.jackson.core>
+		<dependency.com.fasterxml.jackson.core>2.22.1</dependency.com.fasterxml.jackson.core>
 		<dependency.com.fasterxml.jackson.core.annotations>2.22</dependency.com.fasterxml.jackson.core.annotations>
 		<dependency.com.fasterxml.jackson.core.databind>2.22.0</dependency.com.fasterxml.jackson.core.databind>
 		<dependency.com.fasterxml.woodstox>6.7.0</dependency.com.fasterxml.woodstox>
