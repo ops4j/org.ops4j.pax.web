@@ -273,7 +273,7 @@
 		<dependency.org.jboss.xnio>3.8.17.Final</dependency.org.jboss.xnio>
 
 		<dependency.org.jline>3.21.1</dependency.org.jline>
-		<dependency.org.jsoup>1.22.2</dependency.org.jsoup>
+		<dependency.org.jsoup>1.23.1</dependency.org.jsoup>
 		<dependency.org.junit>5.14.4</dependency.org.junit>
 		<dependency.org.mockito>5.23.0</dependency.org.mockito>
 		<dependency.org.mortbay.jasper.apache-jsp>10.1.31</dependency.org.mortbay.jasper.apache-jsp>
