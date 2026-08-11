@@ -56,9 +56,7 @@ public class WarPostIntegrationTest extends AbstractWarPostIntegrationTest {
 
 	@Override
 	protected int getPostSizeExceededHttpResponseCode() {
-//		return HttpServletResponse.SC_BAD_REQUEST;
-		// see https://redhat.atlassian.net/browse/UNDERTOW-2761
-		return HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+		return HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE;
 	}
 
 }
