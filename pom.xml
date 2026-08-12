@@ -239,7 +239,7 @@
 		<dependency.org.apache.httpcomponents.client5>5.5.1</dependency.org.apache.httpcomponents.client5>
 		<dependency.org.apache.httpcomponents.core4>4.4.16</dependency.org.apache.httpcomponents.core4>
 		<!-- 5.4.x fails with Extended socket option not supported: TCP_KEEPIDLE -->
-		<dependency.org.apache.httpcomponents.core5>5.3.6</dependency.org.apache.httpcomponents.core5>
+		<dependency.org.apache.httpcomponents.core5>5.4.3</dependency.org.apache.httpcomponents.core5>
 		<dependency.org.apache.karaf>4.4.11</dependency.org.apache.karaf>
 		<dependency.org.apache.logging.log4j>2.26.1</dependency.org.apache.logging.log4j>
 		<dependency.org.apache.servicemix.bundles.aopalliance>1.0_6</dependency.org.apache.servicemix.bundles.aopalliance>
