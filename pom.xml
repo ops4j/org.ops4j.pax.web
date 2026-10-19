@@ -255,7 +255,7 @@
 		<dependency.org.codehaus.woodstox.stax2-api>4.3.2</dependency.org.codehaus.woodstox.stax2-api>
 		<dependency.org.eclipse.jdt.ecj>3.46.100</dependency.org.eclipse.jdt.ecj>
 
-		<dependency.org.eclipse.jetty>12.1.12</dependency.org.eclipse.jetty>
+		<dependency.org.eclipse.jetty>12.1.14</dependency.org.eclipse.jetty>
 
 		<dependency.org.eclipse.platform.osgi>3.24.300</dependency.org.eclipse.platform.osgi>
 
