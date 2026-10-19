@@ -85,6 +85,7 @@
 							<!-- packages required by Jasper/EL implementation and exported from pax-web-tomcat-common -->
 							org.apache.tomcat;version="${dependency.org.apache.tomcat}",
 							org.apache.tomcat.util;version=${dependency.org.apache.tomcat},
+							org.apache.tomcat.util.buf;version=${dependency.org.apache.tomcat},
 							org.apache.tomcat.util.digester;version=${dependency.org.apache.tomcat},
 							org.apache.tomcat.util.descriptor;version=${dependency.org.apache.tomcat},
 							org.apache.tomcat.util.descriptor.tagplugin;version=${dependency.org.apache.tomcat},
