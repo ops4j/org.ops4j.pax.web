@@ -1277,10 +1277,15 @@ class JettyServerWrapper implements BatchVisitor {
 					continue;
 				}
 
+				// a change may remove many servlets (e.g., when HttpService of a bundle is stopped), so
+				// "done" has to be tracked per servlet - otherwise only the first servlet would be removed
+				// from each context path
+				Set<String> doneForModel = new HashSet<>();
+
 				// proper order ensures that (assuming above scenario), for /c1, ocm2 will be chosen and ocm1 skipped
 				model.getContextModels().forEach(osgiContextModel -> {
 					String contextPath = osgiContextModel.getContextPath();
-					if (!done.add(contextPath)) {
+					if (!doneForModel.add(contextPath)) {
 						return;
 					}
 
@@ -1726,10 +1731,12 @@ class JettyServerWrapper implements BatchVisitor {
 		if (change.getKind() == OpCode.DELETE) {
 			List<EventListenerModel> eventListenerModels = change.getEventListenerModels();
 			for (EventListenerModel eventListenerModel : eventListenerModels) {
+				// "done" has to be tracked per listener, as a change may remove many listeners
+				Set<String> doneForModel = new HashSet<>();
 				List<OsgiContextModel> contextModels = eventListenerModel.getContextModels();
 				contextModels.forEach((context) -> {
 					String contextPath = context.getContextPath();
-					if (!done.add(contextPath)) {
+					if (!doneForModel.add(contextPath)) {
 						return;
 					}
 
