@@ -33,7 +33,8 @@ public class HttpServiceIntegrationTest extends AbstractHttpServiceIntegrationTe
 
 	@Configuration
 	public Option[] configure() {
-		return combine(baseConfigure(), paxWebUndertow());
+		Option[] serverOptions = combine(baseConfigure(), paxWebUndertow());
+		return combine(serverOptions, testBundle());
 	}
 
 	/**
