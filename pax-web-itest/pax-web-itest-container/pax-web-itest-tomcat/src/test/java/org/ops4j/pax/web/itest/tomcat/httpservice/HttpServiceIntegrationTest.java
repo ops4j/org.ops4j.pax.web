@@ -28,7 +28,8 @@ public class HttpServiceIntegrationTest extends AbstractHttpServiceIntegrationTe
 
 	@Configuration
 	public Option[] configure() {
-		return combine(baseConfigure(), paxWebTomcat());
+		Option[] serverOptions = combine(baseConfigure(), paxWebTomcat());
+		return combine(serverOptions, testBundle());
 	}
 
 }

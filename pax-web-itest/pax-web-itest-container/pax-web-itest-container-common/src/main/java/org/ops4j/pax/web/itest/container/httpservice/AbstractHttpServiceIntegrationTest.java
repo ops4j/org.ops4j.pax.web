@@ -15,6 +15,7 @@
  */
 package org.ops4j.pax.web.itest.container.httpservice;
 
+import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -22,6 +23,8 @@ import jakarta.servlet.Filter;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.junit.Test;
+import org.ops4j.pax.exam.options.UrlProvisionOption;
+import org.ops4j.pax.tinybundles.TinyBundles;
 import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
 import org.ops4j.pax.web.itest.utils.web.SimpleOnlyFilter;
@@ -33,6 +36,8 @@ import org.ops4j.pax.web.service.spi.model.events.WebElementEventListener;
 import org.ops4j.pax.web.service.spi.servlet.OsgiScopedServletContext;
 import org.ops4j.pax.web.service.http.HttpContext;
 import org.ops4j.pax.web.service.http.HttpService;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.Constants;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +45,8 @@ import org.slf4j.LoggerFactory;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.ops4j.pax.exam.CoreOptions.streamBundle;
 
 /**
  * @author Toni Menzel (tonit)
@@ -48,6 +55,13 @@ import static org.junit.Assert.assertTrue;
 public abstract class AbstractHttpServiceIntegrationTest extends AbstractContainerTestBase {
 
 	public static final Logger LOG = LoggerFactory.getLogger(AbstractHttpServiceIntegrationTest.class);
+
+	protected UrlProvisionOption testBundle() {
+		return streamBundle(TinyBundles.bundle()
+				.setHeader(Constants.BUNDLE_SYMBOLICNAME, "TestSubjectBundle")
+				.setHeader(Constants.DYNAMICIMPORT_PACKAGE, "*")
+				.build(TinyBundles.rawBuilder()));
+	}
 
 	@Test
 	public void testRegisterServlet() throws Exception {
@@ -94,6 +108,60 @@ public abstract class AbstractHttpServiceIntegrationTest extends AbstractContain
 
 		httpService.unregister("/test1");
 		httpService.unregister("/test2");
+	}
+
+	@Test
+	public void testRegisterMultipleServletsThenStopTheBundle() throws Exception {
+		Bundle testSubject = Arrays.stream(context.getBundles())
+				.filter(b -> b.getSymbolicName().equals("TestSubjectBundle")).findFirst().orElse(null);
+		if (testSubject == null) {
+			fail("Should've found test subject bundle");
+			return;
+		}
+		HttpService httpService0 = getHttpService(context);
+		HttpService httpService1 = getHttpService(testSubject.getBundleContext());
+
+		final TestServlet servlet0 = new TestServlet();
+		configureAndWaitForNamedServlet("t1-to-keep-context-running",
+				() -> httpService0.registerServlet("/test0", servlet0, legacyName("t1-to-keep-context-running"), null));
+
+		final TestServlet servlet1 = new TestServlet();
+		configureAndWaitForNamedServlet("t1",
+				() -> httpService1.registerServlet("/test1", servlet1, legacyName("t1"), null));
+
+		final TestServlet servlet2 = new TestServlet();
+		configureAndWaitForNamedServlet("t2",
+				() -> httpService1.registerServlet("/test2", servlet2, legacyName("t2"), null));
+
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'TEST OK'",
+						resp -> resp.contains("TEST OK"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/test1");
+
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'TEST OK'",
+						resp -> resp.contains("TEST OK"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/test2");
+
+		testSubject.stop();
+		testSubject.start();
+		HttpService httpService2 = getHttpService(testSubject.getBundleContext());
+
+		configureAndWaitForNamedServlet("t1",
+				() -> httpService2.registerServlet("/test1", servlet1, legacyName("t1"), null));
+
+		configureAndWaitForNamedServlet("t2",
+				() -> httpService2.registerServlet("/test2", servlet2, legacyName("t2"), null));
+
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'TEST OK'",
+						resp -> resp.contains("TEST OK"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/test1");
+
+		HttpTestClientFactory.createDefaultTestClient()
+				.withResponseAssertion("Response must contain 'TEST OK'",
+						resp -> resp.contains("TEST OK"))
+				.doGETandExecuteTest("http://127.0.0.1:8181/test2");
 	}
 
 	/**
