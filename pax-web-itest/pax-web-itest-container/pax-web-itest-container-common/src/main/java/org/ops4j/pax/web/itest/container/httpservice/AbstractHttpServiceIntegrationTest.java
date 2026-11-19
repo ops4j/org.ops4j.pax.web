@@ -162,6 +162,10 @@ public abstract class AbstractHttpServiceIntegrationTest extends AbstractContain
 				.withResponseAssertion("Response must contain 'TEST OK'",
 						resp -> resp.contains("TEST OK"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/test2");
+
+		httpService0.unregister("/test0");
+		httpService2.unregister("/test1");
+		httpService2.unregister("/test2");
 	}
 
 	/**
