@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Test;
 import org.ops4j.pax.exam.options.UrlProvisionOption;
-import org.ops4j.pax.tinybundles.TinyBundles;
+import org.ops4j.pax.tinybundles.core.TinyBundles;
 import org.ops4j.pax.web.itest.container.AbstractContainerTestBase;
 import org.ops4j.pax.web.itest.utils.client.HttpTestClientFactory;
 import org.ops4j.pax.web.itest.utils.web.SimpleOnlyFilter;
@@ -58,9 +58,9 @@ public abstract class AbstractHttpServiceIntegrationTest extends AbstractContain
 
 	protected UrlProvisionOption testBundle() {
 		return streamBundle(TinyBundles.bundle()
-				.setHeader(Constants.BUNDLE_SYMBOLICNAME, "TestSubjectBundle")
-				.setHeader(Constants.DYNAMICIMPORT_PACKAGE, "*")
-				.build(TinyBundles.rawBuilder()));
+				.set(Constants.BUNDLE_SYMBOLICNAME, "TestSubjectBundle")
+				.set(Constants.DYNAMICIMPORT_PACKAGE, "*")
+				.build(TinyBundles.withClassicBuilder()));
 	}
 
 	@Test
@@ -162,6 +162,10 @@ public abstract class AbstractHttpServiceIntegrationTest extends AbstractContain
 				.withResponseAssertion("Response must contain 'TEST OK'",
 						resp -> resp.contains("TEST OK"))
 				.doGETandExecuteTest("http://127.0.0.1:8181/test2");
+
+		httpService0.unregister("/test0");
+		httpService2.unregister("/test1");
+		httpService2.unregister("/test2");
 	}
 
 	/**
