@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -155,14 +156,32 @@ public class WebContainerManager implements BundleListener, ServiceTrackerCustom
 	/**
 	 * Cleans up internal trackers and thread pools.
 	 */
-	public void shutdown() {
+	public synchronized void shutdown() {
 		webContainerTracker.close();
 		context.removeBundleListener(this);
 
-		if (pool instanceof ExecutorService) {
-			((ExecutorService) pool).shutdown();
-		}
+		Executor executor = pool;
 		pool = null;
+		if (executor instanceof ExecutorService) {
+			((ExecutorService) executor).shutdown();
+		}
+	}
+
+	private void execute(Runnable task) {
+		synchronized (this) {
+			Executor executor = pool;
+			if (executor == null) {
+				return;
+			}
+			try {
+				executor.execute(task);
+			} catch (RejectedExecutionException e) {
+				if (executor instanceof ExecutorService && ((ExecutorService) executor).isShutdown()) {
+					return;
+				}
+				throw e;
+			}
+		}
 	}
 
 	/**
@@ -180,7 +199,7 @@ public class WebContainerManager implements BundleListener, ServiceTrackerCustom
 		// In Whiteboard scenario, there may exist threads that already try to register Whiteboard services. Such
 		// threads obtain the Whiteboard lock and try to access pax-web configuration thread and we may end up with
 		// a thread deadlock
-		pool.execute(() -> {
+		execute(() -> {
 			if (previous == newReference) {
 				// no need to do anything - a check just in case
 				return;
@@ -334,7 +353,7 @@ public class WebContainerManager implements BundleListener, ServiceTrackerCustom
 	@Override
 	public void bundleChanged(BundleEvent event) {
 		if (event.getType() == BundleEvent.STOPPED) {
-			pool.execute(() -> {
+			execute(() -> {
 				String name = Thread.currentThread().getName();
 				try {
 					Thread.currentThread().setName(name + " (stop " + event.getBundle().getSymbolicName() + ")");
